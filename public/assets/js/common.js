@@ -23,22 +23,38 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
     const sidebarContainer = document.getElementById("sidebar-container");
     const sidebarOverlay = document.getElementById("sidebar-overlay");
+    const headerStack = document.querySelector(".pd-header-stack");
+
+    if (headerStack) {
+        const setHeaderScrolledState = () => {
+            headerStack.classList.toggle("is-scrolled", window.scrollY > 8);
+        };
+
+        setHeaderScrolledState();
+        window.addEventListener("scroll", setHeaderScrolledState, { passive: true });
+    }
 
     // Open sidebar function (this works for both mobile and desktop)
     function openSidebar() {
+        if (!sidebar || !sidebarContainer || !sidebarOverlay) return;
         sidebar.classList.add("open"); // Show the sidebar
         sidebarContainer.classList.add("open"); // Show the sidebar container (including overlay)
         sidebarOverlay.classList.add("open"); // Show the overlay
-        pageContent.classList.add("dimmed"); // Dim the page content
+        if (pageContent) {
+            pageContent.classList.add("dimmed"); // Dim the page content
+        }
         body.classList.add("dimmed"); // Optional: Apply dimming to the body as well
     }
 
     // Close sidebar function
     function closeSidebarFunction() {
+        if (!sidebar || !sidebarContainer || !sidebarOverlay) return;
         sidebar.classList.remove("open"); // Hide the sidebar
         sidebarContainer.classList.remove("open"); // Hide the sidebar container (including overlay)
         sidebarOverlay.classList.remove("open"); // Hide the overlay
-        pageContent.classList.remove("dimmed"); // Remove dimming effect from the page content
+        if (pageContent) {
+            pageContent.classList.remove("dimmed"); // Remove dimming effect from the page content
+        }
         body.classList.remove("dimmed"); // Optional: Remove dimming effect from body
     }
 
@@ -77,6 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const categoryContent = document.getElementById("mobiles-content");
     const toggleIcon = document.getElementById("mobiles-toggle-icon");
 
+    if (!categoryHeading || !categoryContent || !toggleIcon) {
+        return;
+    }
+
     // Hide the subcategory list by default
     categoryContent.style.display = "none";
 
@@ -106,21 +126,25 @@ const mobileSearchInput = document.getElementById("mobile-search-input");
 const mobileSearchResults = document.getElementById("mobile-search-results");
 
 // Show mobile search box
-mobileSearchIcon.addEventListener("click", function (e) {
-    e.preventDefault();
-    mobileSearchContainer.style.display = "block";
-    mobileSearchInput.focus();
-    mobileSearchResults.innerHTML = ""; // Clear any old results
-    mobileSearchResults.style.display = "none"; // Hide search results initially
-});
+if (mobileSearchIcon && mobileSearchContainer && mobileSearchInput && mobileSearchResults) {
+    mobileSearchIcon.addEventListener("click", function (e) {
+        e.preventDefault();
+        mobileSearchContainer.style.display = "block";
+        mobileSearchInput.focus();
+        mobileSearchResults.innerHTML = ""; // Clear any old results
+        mobileSearchResults.style.display = "none"; // Hide search results initially
+    });
+}
 
 // Hide mobile search box
-mobileCloseButton.addEventListener("click", function () {
-    mobileSearchContainer.style.display = "none";
-    mobileSearchInput.value = "";
-    mobileSearchResults.innerHTML = ""; // Clear results when closing
-    mobileSearchResults.style.display = "none"; // Ensure results container is hidden
-});
+if (mobileCloseButton && mobileSearchContainer && mobileSearchInput && mobileSearchResults) {
+    mobileCloseButton.addEventListener("click", function () {
+        mobileSearchContainer.style.display = "none";
+        mobileSearchInput.value = "";
+        mobileSearchResults.innerHTML = ""; // Clear results when closing
+        mobileSearchResults.style.display = "none"; // Ensure results container is hidden
+    });
+}
 
 // Function to sanitize input by removing unwanted characters
 function sanitizeInput(input) {
@@ -128,6 +152,7 @@ function sanitizeInput(input) {
 }
 
 // Live search on mobile
+if (mobileSearchInput && mobileSearchResults) {
 mobileSearchInput.addEventListener("input", function () {
     let query = mobileSearchInput.value;
     let sanitizedQuery = sanitizeInput(query);
@@ -170,8 +195,10 @@ mobileSearchInput.addEventListener("input", function () {
         })
         .catch(error => console.error("Error fetching mobile search results:", error));
 });
+}
 
 // Redirect to search results page on Enter key press
+if (mobileSearchInput) {
 mobileSearchInput.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
         let query = sanitizeInput(mobileSearchInput.value.trim());
@@ -180,6 +207,7 @@ mobileSearchInput.addEventListener("keypress", function (event) {
         }
     }
 });
+}
 
 
     // Function to sanitize input by removing unwanted characters
@@ -187,6 +215,10 @@ mobileSearchInput.addEventListener("keypress", function (event) {
         return input.replace(/[^a-zA-Z0-9\s]/g, ''); // Allows letters, numbers, and spaces
     }
 
+
+    if (!searchInput || !searchResults || !closeButton) {
+        return;
+    }
 
     searchInput.addEventListener("input", function () {
         let query = searchInput.value; // Get the original input value
@@ -212,7 +244,7 @@ mobileSearchInput.addEventListener("keypress", function (event) {
             .then(data => {
                 searchResults.innerHTML = ""; // Clear previous results
                 if (data.length > 0) {
-                    closeButton.style.display = "block";
+                    closeButton.style.display = "flex";
                     data.forEach(product => {
                         const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
                         const li = document.createElement("li");

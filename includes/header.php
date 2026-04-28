@@ -79,7 +79,7 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
 
 <!-- Author & Theme -->
 <meta name="author" content="Phones Dukan">
-<meta name="theme-color" content="#004080">
+<meta name="theme-color" content="#F7D117">
 
 <?php if (isset($product) && is_array($product)): ?>
 <!-- Enhanced Open Graph -->
@@ -105,92 +105,123 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/style.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/header.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/footer.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 
 </head>
 <body>
     <!-- Sidebar -->
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
-<div class="site-wrapper">    
-    <!-- Primary Header -->
-    <header id="main-header">
-        <div class="container">
-            <div class="header-left">
-                <!-- Hamburger Icon -->
-                <div id="hamburger-icon" class="hamburger-icon">
-                    <img src="<?= url('public/assets/images/hamburger-icon.svg'); ?>" alt="Hamburger Icon">
+<div class="site-wrapper">
+    <div class="pd-header-stack">
+        <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
+            <div class="pd-announcement-track">
+                <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
+                <span>Free delivery across Pakistan on selected products</span>
+                <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+                <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
+                <span>Free delivery across Pakistan on selected products</span>
+                <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+            </div>
+        </div>
+
+        <!-- Primary Header -->
+        <header id="main-header" class="pd-main-header">
+            <div class="pd-header-container">
+                <div class="pd-header-left">
+                    <button id="hamburger-icon" class="hamburger-icon pd-icon-btn" type="button" aria-label="Open menu">
+                        <img src="<?= url('public/assets/images/hamburger-icon.svg'); ?>" alt="Open Menu">
+                    </button>
+                    <div class="logo">
+                        <a href="<?= url(); ?>" aria-label="Visit Phones Dukan - Your go-to store for mobile phones">
+                            <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="Phones Dukan Logo">
+                            <span class="sr-only">Visit Phones Dukan</span>
+                        </a>
+                    </div>
                 </div>
-                <div class="logo">
-                    <a href="<?= url(); ?>" aria-label="Visit Phones Dukan - Your go-to store for mobile phones">
-                        <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="Phones Dukan Logo">
-                        <span class="sr-only">Visit Phones Dukan</span>
-                    </a>
+
+                <div class="pd-header-center">
+                    <div class="live-search-container">
+                        <input type="text" id="search-input" placeholder="Search mobiles, accessories, earbuds..." autocomplete="off" aria-label="Search products">
+                        <button id="desktop-close-results" type="button" aria-label="Clear search">✕</button>
+                        <ul id="search-results" aria-live="polite"></ul>
+                    </div>
+                </div>
+
+                <div class="pd-header-right">
+                    <div class="icons">
+                        <a href="<?= url('my-account/'); ?>" class="icon pd-action-icon" aria-label="My Account">
+                            <img src="<?= url('public/assets/images/my-account.svg'); ?>" alt="My Account">
+                            <span class="pd-action-label">Account</span>
+                        </a>
+                        <a href="<?= url('cart'); ?>" class="icon pd-action-icon" aria-label="View Cart">
+                            <img src="<?= url('public/assets/images/cart_icon.svg'); ?>" alt="Cart">
+                            <span class="pd-action-label">Cart</span>
+                            <span class="cart-count"><?= $cartCount ?></span>
+                        </a>
+                        <a href="<?= url('contact-us/'); ?>" class="icon pd-action-icon" aria-label="Support">
+                            <img src="<?= url('public/assets/images/customer.svg'); ?>" alt="Support">
+                            <span class="pd-action-label">Support</span>
+                        </a>
+                    </div>
                 </div>
             </div>
+        </header>
 
-            <div class="header-center">
-                <!-- Live Search Container -->
-                <div class="live-search-container">
-                    <input type="text" id="search-input" placeholder="Search products..." autocomplete="off">
-                    <button id="desktop-close-results" style="display: none;">✖</button>
-                    <ul id="search-results"></ul>
+        <!-- Mobile Header -->
+        <header id="mobile-header" class="pd-mobile-header">
+            <div class="pd-mobile-container">
+                <div class="pd-mobile-left">
+                    <button id="mobile-menu-toggle" class="hamburger-icon pd-icon-btn" type="button" aria-label="Toggle mobile menu">
+                        <img src="<?= url('public/assets/images/menu_icon.svg'); ?>" alt="Menu">
+                    </button>
+
+                    <div class="m-logo">
+                        <a href="<?= url(); ?>" aria-label="Visit Phones Dukan - Your go-to store for mobile phones">
+                            <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="Phones Dukan Logo">
+                            <span class="sr-only">Visit Phones Dukan</span>
+                        </a>
+                    </div>
                 </div>
-            </div>
 
-            <div class="header-right">
-                <div class="icons">
-                    <a href="<?= url('my-account/'); ?>" class="icon">
-                        <img src="<?= url('public/assets/images/my-account.svg'); ?>" alt="My Account">
+                <div class="mobile-icons">
+                    <a href="#" class="icon mobile-icon" id="mobile-search-icon" aria-label="Search">
+                        <img src="<?= url('public/assets/images/search_icon.svg'); ?>" alt="Search">
                     </a>
-                    <a href="<?= url('cart'); ?>" class="icon">
+                    <a href="<?= url('cart'); ?>" class="mobile-icon icon" aria-label="View Cart">
                         <img src="<?= url('public/assets/images/cart_icon.svg'); ?>" alt="Cart">
                         <span class="cart-count"><?= $cartCount ?></span>
                     </a>
-                    <a href="<?= url('contact-us/'); ?>" class="icon">
-                        <img src="<?= url('public/assets/images/customer.svg'); ?>" alt="Support">
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Mobile Header -->
-    <header id="mobile-header">
-        <div class="mobile-container">
-            <!-- Left Side: Logo -->
-            <div class="mobile-logo">
-            <div id="hamburger-icon" class="hamburger-icon">
-            <button id="mobile-menu-toggle" class="hamburger-icon" aria-label="Toggle mobile menu">
-                    <img src="<?= url('public/assets/images/menu_icon.svg'); ?>" alt="Menu">
-                </button>                </div>
-                <div class="m-logo">
-                    <a href="<?= url(); ?>" aria-label="Visit Phones Dukan - Your go-to store for mobile phones">
-                        <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="Phones Dukan Logo">
-                        <span class="sr-only">Visit Phones Dukan</span>
+                    <a href="<?= url('my-account/'); ?>" class="mobile-icon icon" aria-label="My Account">
+                        <img src="<?= url('public/assets/images/my-account-mobile.svg'); ?>" alt="My Account">
                     </a>
                 </div>
             </div>
 
-            <!-- Right Side: Icons -->
-            <div class="mobile-icons">
-                <a href="#" class="icon mobile-icon" id="mobile-search-icon" aria-label="Search">
-                    <img src="<?= url('public/assets/images/search_icon.svg'); ?>" alt="Search">
-                </a>
-                <a href="<?= url('cart'); ?>" class="mobile-icon" aria-label="View Cart">
-                    <img src="<?= url('public/assets/images/cart_icon.svg'); ?>" alt="Cart">
-                    <span class="cart-count"><?= $cartCount ?></span>
-                </a>
-                <a href="<?= url('my-account'); ?>" class="mobile-icon" aria-label="My Account">
-                    <img src="<?= url('public/assets/images/my-account-mobile.svg'); ?>" alt="my_account">
-                </a>
+            <div class="mobile-live-search-container" style="display: none;">
+                <button id="mobile-close-search" class="mobile-close-search" aria-label="Close search">✕</button>
+                <input type="text" id="mobile-search-input" placeholder="Search products..." autocomplete="off">
+                <div id="mobile-search-results" class="search-results"></div>
+            </div>
+        </header>
+
+        <div class="pd-trust-strip" role="region" aria-label="Store trust highlights">
+            <div class="pd-trust-container">
+                <div class="pd-trust-item">
+                    <span class="pd-trust-dot" aria-hidden="true">●</span>
+                    <p>Fast &amp; Free Delivery Over Order <strong>Rs. 3000/-</strong> Only.</p>
+                </div>
+                <div class="pd-trust-item">
+                    <span class="pd-trust-dot" aria-hidden="true">●</span>
+                    <p><strong>30M+</strong> Happy Customers</p>
+                </div>
+                <div class="pd-trust-item">
+                    <span class="pd-trust-dot" aria-hidden="true">●</span>
+                    <p><strong>7 Days</strong> Replacement &amp; <strong>1 Year</strong> Warranty</p>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Mobile Live Search -->
-        <div class="mobile-live-search-container" style="display: none;">
-            <button id="mobile-close-search" class="mobile-close-search">X</button>
-            <input type="text" id="mobile-search-input" placeholder="Search products..." />
-            <div id="mobile-search-results" class="search-results"></div>
-        </div>
-    </header>
-    
     <main class="content">
