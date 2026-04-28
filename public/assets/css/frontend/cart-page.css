@@ -1,0 +1,363 @@
+/* Custom Cart Page */ 
+.custom-cart-page {
+    padding: 0px;
+    background-color: #f9f9f9;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Cart Content */
+.cart-content {
+    margin: 0 auto;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 30px;
+}
+
+/* Table Styles */
+.shop_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.shop_table th, .shop_table td {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.shop_table th {
+    background-color: #f0f0f0;
+    font-weight: 600;
+}
+
+.shop_table td {
+    font-size: 16px;
+}
+
+.shop_table .product-thumbnail img {
+    max-width: 100px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.shop_table .product-remove a {
+    color: #ff4d4d;
+    font-size: 20px;
+    transition: color 0.3s;
+}
+
+.shop_table .product-remove a:hover {
+    color: #cc0000;
+}
+
+.product-name a {
+    color: #333;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.product-name a:hover {
+    text-decoration: underline;
+}
+
+.product-price, .product-subtotal {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Quantity Input */
+.product-quantity input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* Cart Actions (Update & Coupon) */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.coupon input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.coupon button, .actions .button {
+    padding: 10px 20px;
+    background-color: var(--button-sec-bg-color);
+    color: var(--button-hover-text-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.coupon button:hover, .actions .button:hover {
+    background-color: var(--button-sec-hover-bg-color);
+}
+
+/* Cart Totals */
+.cart_totals {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+}
+
+.cart_totals h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.cart_totals table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cart_totals th, .cart_totals td {
+    padding: 15px;
+    border-bottom: 1px solid #e6e6e6;
+    text-align: left;
+    font-size: 16px;
+}
+
+.cart_totals .woocommerce-Price-amount {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Style for the checkout button */
+.wc-proceed-to-checkout .checkout-button.button.alt.wc-forward {
+    background-color: var(--button-sec-bg-color); /* Primary background color */
+    color: var(--button-hover-text-color); /* Text color */
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 5px;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover effect for the checkout button */
+.wc-proceed-to-checkout .checkout-button.button.alt.wc-forward:hover {
+    background-color: var(--button-sec-hover-bg-color);
+    transform: translateY(-3px);
+}
+
+.woocommerce .cart .button, .woocommerce .cart input.button:disabled[disabled] {
+    background-color: var(--button-sec-bg-color);
+    color: var(--button-hover-text-color) !important;
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: capitalize;
+    border-radius: 5px;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+/* Style for the update cart button */
+.woocommerce .cart .button, .woocommerce .cart input.button {
+    background-color: var(--button-sec-bg-color); /* Primary background color */
+    color: var(--button-hover-text-color); /* Text color */
+    border: none;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: capitalize;
+    border-radius: 5px;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+/* Hover effect for the update cart button */
+.woocommerce .cart .button:hover, .woocommerce .cart input.button:hover {
+    background-color: var(--button-sec-hover-bg-color);
+    transform: translateY(-3px);
+}
+
+ul#shipping_method {
+    list-style-type: none;
+    padding: 0px;
+}
+
+/* Style for the coupon code input */
+input[name="coupon_code"].input-text {
+    padding: 10px;
+    margin-right: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Style for the "Return to Shop" button */
+.return-to-shop {
+    text-align: left;
+    margin-top: 20px;
+}
+
+a.button.wc-backward{
+    background-color: var(--button-sec-bg-color);
+    color: var(--button-hover-text-color);
+    border: none;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    border-radius: 5px;
+    display: inline-block;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+a.button.wc-backward:hover, a.button.wc-backward:focus {
+    color: var(--button-hover-text-color);
+    background-color: var(--button-sec-hover-bg-color);
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+a.button.wc-backward:active {
+    background-color: #004080;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .shop_table th, .shop_table td {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .shop_table,
+    .shop_table thead,
+    .shop_table tbody,
+    .shop_table th,
+    .shop_table td,
+    .shop_table tr {
+        display: block;
+    }
+
+    /* Hide the table headers on mobile */
+    .shop_table thead {
+        display: none;
+    }
+
+    /* Style each table row on mobile */
+    .shop_table tr {
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Style each cell on mobile */
+    .shop_table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: none;
+        text-align: left;
+    }
+
+    /* Show labels for each product detail */
+    .shop_table td:before {
+        content: attr(data-title);
+        font-weight: bold;
+        margin-right: 10px;
+        text-transform: uppercase;
+    }
+
+    /* Adjust the size of the thumbnail image */
+    .shop_table .product-thumbnail img {
+        max-width: 60px;
+        height: auto;
+    }
+
+    /* Remove the quantity label to make it cleaner */
+    .quantity label {
+        display: none;
+    }
+
+    .cart-content {
+        padding: 15px;
+        border-radius: 0px;
+    }
+
+    .wc-proceed-to-checkout .checkout-button.button.alt.wc-forward {
+        font-size: 15px;
+        margin-top: 10px;
+        text-transform: capitalize; 
+    }
+
+    .woocommerce table.shop_table {
+        margin: 0px auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart_totals {
+        padding: 15px;
+    }
+
+    .cart_totals h2 {
+        font-size: 20px;
+    }
+
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .coupon, .actions .button {
+        margin-bottom: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .cart_totals .checkout-button {
+        font-size: 16px;
+    }
+    .woocommerce .cart .button, .woocommerce .cart input.button {
+        padding: 12px;
+        font-size: 14px;
+        margin-bottom: 0px;
+        transform: scaleY(1);
+    }
+
+    .wc-proceed-to-checkout .checkout-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .woocommerce-shipping-destination {
+        font-size: 14px;
+    }
+}

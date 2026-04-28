@@ -1,0 +1,220 @@
+/* mange products */
+.content-wrapper {
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0px;
+}
+
+/* Button Styling */
+.btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.3s ease-in-out;
+}
+
+.custom-btn {
+    display: inline-block;
+    padding: 0px 10px;
+    font-size: 12px;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-right: 5px;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.custom-btn-success {
+    background-color: #28a745;
+    color: #fff;
+    border: 1px solid #28a745;
+}
+.custom-btn-success:hover {
+    background-color: #218838;
+}
+.custom-btn-warning {
+    background-color: #ffc107;
+    color: #333;
+    border: 1px solid #ffc107;
+}
+.custom-btn-warning:hover {
+    background-color: #e0a800;
+}
+.custom-btn-danger {
+    background-color: #dc3545;
+    color: #fff;
+    border: 1px solid #dc3545;
+}
+.custom-btn-danger:hover {
+    background-color: #c82333;
+}
+.custom-btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+}
+.custom-btn-primary:hover {
+    background-color: #0056b3;
+}
+.custom-btn:active {
+    transform: scale(0.98);
+}
+
+.filter-search-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+.filter-section {
+    display: flex;
+    align-items: center;
+}
+.filter-section label {
+    margin-right: 10px;
+    font-size: 16px;
+    color: #333;
+}
+.filter-section select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+.filter-section select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+.search-section {
+    display: flex;
+    align-items: center;
+}
+.search-section input[type="text"] {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    width: 200px;
+    transition: border-color 0.3s ease;
+}
+.search-section input[type="text"]:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+.search-section button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: 1px solid #007bff;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+.search-section button:hover {
+    background-color: #0056b3;
+}
+.search-section button:active {
+    transform: scale(0.98);
+}
+form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+}
+
+form label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+form select {
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+form select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.table-responsive p {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Table Styling */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #007bff;
+    color: white;
+}
+
+.table th, .table td {
+    text-align: left;
+    border-bottom: 1px solid #dddddd78;
+    font-size: 14px;
+    letter-spacing: 0.1px;
+    padding: 0 5px;
+}
+
+.table th {
+    padding: 5px;
+    font-weight: bold;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Image Styling */
+.table img {
+    width: 50px;
+    height: auto;
+    border-radius: 5px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.table img:hover {
+    transform: scale(1.2);
+}
+
+.action-buttons {
+    display: flex;
+}
+
+.btn-edit,
+.btn-view,
+.btn-delete {
+    margin-right: 5px;
+}

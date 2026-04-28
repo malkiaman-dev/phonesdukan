@@ -1,0 +1,16 @@
+.write-for-us-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #fff;
+    color: #333;
+}
+
+
+@media (max-width: 768px) {
+    .write-for-us-content {
+        padding: 1rem 0.5rem;
+    }
+}

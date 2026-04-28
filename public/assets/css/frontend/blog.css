@@ -1,0 +1,275 @@
+/* Navigation Path */
+.nav-path {
+    background: #fff;
+    padding: calc(20px/3) 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.nav-path a {
+    font-size: 13px;
+    color: #2b6cb0;
+    text-decoration: none;
+}
+
+.nav-path span > * {
+    margin-right: 5px;
+}
+
+.nav-path a:hover {
+    text-decoration: underline;
+}
+
+.nav-path span {
+    margin: 0 auto;
+    max-width: 124rem;
+    padding: 0 2rem;
+    position: relative;
+    font-size: 13px;
+}
+
+/* Posts Page Wrapper */
+.posts-page-wrapper {
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Category Navigation */
+.category-nav {
+    margin-bottom: 30px;
+}
+
+.category-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.category-nav li {
+    display: inline-block;
+}
+
+.category-nav a {
+    display: block;
+    padding: 12px 20px;
+    background-color: #0073e6;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.category-nav a:hover {
+    background-color: #005bb5;
+}
+
+/* Category Section */
+.category-section {
+    margin-bottom: 40px;
+}
+
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+/* Posts Grid */
+.posts-grid-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.posts-grid-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+/* Post Card */
+.post-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.post-img-wrapper {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.post-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-title {
+    font-size: 1.4rem;
+    margin: 15px;
+    color: #333;
+}
+
+.post-title a {
+    font-weight: bold;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.post-title a:hover {
+    color: #0073e6;
+}
+
+.post-excerpt {
+    margin: 0 15px 15px;
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.post-date {
+    margin: 0 15px 15px;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* View All Button */
+.view-all {
+    text-align: center;
+}
+
+.view-all a {
+    display: inline-block;
+    font-size: 13px;
+    color: #fff;
+    background-color: #004080;
+    padding: 8px 15px;
+    margin: 0px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.view-all a:hover {
+    text-decoration: underline;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.pagination a {
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #0073e6;
+    text-decoration: none;
+    border: 1px solid #0073e6;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination a:hover,
+.pagination a.active {
+    background-color: #004080;
+    color: #fff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .category-section {
+        margin-bottom: 0px;
+    }
+
+    .post-img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .posts-grid-wrapper {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .post-img-wrapper {
+        height: 180px;
+    }
+
+    .post-title {
+        font-size: 1.3rem;
+    }
+
+    .posts-page-wrapper {
+        padding: 10px;
+    }
+
+    .category-nav a {
+        font-size: 14px;
+    }
+
+    .pagination a {
+        padding: 8px 16px;
+    }
+    .content-container {
+        padding: 15px;
+        margin: 10px;
+        border: 3px solid #c9d6e3;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .nav-path span {
+        padding: 0 10px;
+    }
+
+    .category-header {
+        margin-bottom: 10px;
+    }
+
+    .cateogory-price-info {
+        padding: 15px;
+    }
+
+    .posts-grid-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .post-img-wrapper {
+        height: 160px;
+    }
+
+    .post-title {
+        font-size: 1.2rem;
+    }
+
+    .view-all a {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+
+.pagination {
+    margin-top: 10px;
+}
+    .pagination a {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .content-container {
+        margin: 10px;
+    }
+}

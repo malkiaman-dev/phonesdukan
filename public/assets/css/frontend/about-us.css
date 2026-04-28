@@ -1,0 +1,19 @@
+/* About Us Page Styles */
+.about-us-content {
+    margin: 15px;
+    background-color: #fff;
+    padding: 30px;
+}
+
+.about-us-content p {
+    letter-spacing: 0.2px;
+    line-height: 29px;
+}
+
+@media (max-width: 760px){
+    .about-us-content {
+        padding: 20px;
+    }
+}
+
+

@@ -1,0 +1,219 @@
+.success-message {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+    padding: 10px;
+    border-radius: 4px;
+    width: 70%;
+    max-width: 1100px;
+    margin: 10px auto;
+}
+
+.error-message {
+    background-color: #f2dede;
+    color: #a94442;
+    border: 1px solid #ebccd1;
+    padding: 10px;
+    border-radius: 4px;
+    border-radius: 4px;
+    width: 70%;
+    max-width: 1100px;
+    margin: 10px auto;
+}
+form {
+    background-color: #fff;
+    width: 70%;
+    max-width: 1100px;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+h3 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #4A90E2;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e6e6e6;
+}
+
+h4 {
+    font-size: 1.4rem;
+    color: #4A90E2;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #666;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="number"],
+input[type="file"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #5b9bd5;
+    outline: none;
+    background-color: #ffffff;
+}
+
+/* Textareas (Long & Short Descriptions) */
+textarea {
+    height: 160px; /* For long description */
+    resize: vertical;
+}
+
+textarea[name="product_description"],
+textarea[name="short_description"] {
+    width: 100%;
+}
+
+/* Buttons */
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+button[type="button"] {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 5px;
+}
+
+button[type="button"]:hover {
+    background-color: #e53935;
+}
+
+button.add-attribute {
+    background-color: green;
+    font-size: 14px;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    box-sizing: border-box;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f9;
+    font-weight: 600;
+}
+
+td input[type="text"],
+td textarea {
+    font-size: 1rem;
+}
+
+td input[type="radio"] {
+    margin-left: 10px;
+}
+
+td img {
+    max-width: 100px;
+    height: auto;
+    margin-bottom: 5px;
+}
+
+/* Image Upload */
+input[type="file"] {
+    padding: 6px;
+    font-size: 1rem;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+}
+
+input[type="file"]:hover {
+    background-color: #f1f1f1;
+}
+
+/* SEO Section */
+h3 {
+    font-size: 1.8rem;
+    color: #4A90E2;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+textarea {
+    margin-bottom: 20px;
+}
+
+/* Responsive Styling */
+@media screen and (max-width: 768px) {
+    form {
+        width: 90%;
+        padding: 20px;
+    }
+
+    label,
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea,
+    select {
+        font-size: 0.9rem;
+    }
+
+    button[type="submit"],
+    button[type="button"] {
+        font-size: 1rem;
+    }
+    
+    textarea {
+        height: 120px;
+    }
+    
+    table {
+        font-size: 0.9rem;
+    }
+}

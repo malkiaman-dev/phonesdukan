@@ -1,0 +1,40 @@
+Array
+(
+    [HTTP_HOST] => custom.local
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_DNT] => 1
+    [HTTP_UPGRADE_INSECURE_REQUESTS] => 1
+    [HTTP_USER_AGENT] => Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+    [HTTP_ACCEPT] => text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+    [HTTP_REFERER] => http://custom.local/admin/media-library.php
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate
+    [HTTP_ACCEPT_LANGUAGE] => en-GB,en-US;q=0.9,en;q=0.8
+    [HTTP_COOKIE] => PHPSESSID=lpqcugvilrncdmp742ikdcspmh
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+    [SERVER_SIGNATURE] => <address>Apache/2.4.62 (Debian) Server at custom.local Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.62 (Debian)
+    [SERVER_NAME] => custom.local
+    [SERVER_ADDR] => 127.0.0.1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => 127.0.0.1
+    [DOCUMENT_ROOT] => /var/www/html/custom.local
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => /var/www/html/custom.local
+    [SERVER_ADMIN] => [no address given]
+    [SCRIPT_FILENAME] => /var/www/html/custom.local/admin/upload_image.php
+    [REMOTE_PORT] => 57286
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => 
+    [REQUEST_URI] => /admin/upload_image.php
+    [SCRIPT_NAME] => /admin/upload_image.php
+    [PHP_SELF] => /admin/upload_image.php
+    [REQUEST_TIME_FLOAT] => 1741373565.4006
+    [REQUEST_TIME] => 1741373565
+)
+Array
+(
+)

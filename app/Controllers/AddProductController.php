@@ -1,0 +1,227 @@
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/app/Models/AddProductModel.php';
+
+class ProductController
+{
+    private $db;
+    private $productModel;
+
+    public function __construct()
+    {
+        $database = new Database();
+        $this->db = $database->getConnection();
+        if (!$this->db) {
+            die('Database connection failed. Please check your database credentials.');
+        }
+        $this->productModel = new AddProductModel($this->db);  // Instantiate the model
+    }
+
+    public function addProduct()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Start a database transaction to ensure data integrity
+            $this->db->beginTransaction();
+
+            try {
+                // Collect POST data (product data)
+                $productData = [
+                    'product_name' => $_POST['product_name'],
+                    'product_slug' => $_POST['product_slug'],
+                    'category_id' => $_POST['category_id'],
+                    'brand_id' => $_POST['brand_id'],
+                    'product_description' => $_POST['product_description'],
+                    'short_description' => $_POST['short_description'],
+                    'product_status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                    'stock_quantity' => $_POST['stock_quantity'],
+                    'regular_price' => $_POST['regular_price'],
+                    'sale_price' => $_POST['sale_price'],
+                    'product_sku' => !empty($_POST['product_sku']) ? $_POST['product_sku'] : NULL, // Set to NULL if SKU is empty
+                    'weight_kg' => !empty($_POST['weight_kg']) ? $_POST['weight_kg'] : NULL,
+                    'length_cm' => !empty($_POST['length_cm']) ? $_POST['length_cm'] : NULL,
+                    'width_cm' => !empty($_POST['width_cm']) ? $_POST['width_cm'] : NULL,
+                    'height_cm' => !empty($_POST['height_cm']) ? $_POST['height_cm'] : NULL,
+                    'tax_class' => isset($_POST['tax_class']) && is_numeric($_POST['tax_class']) ? $_POST['tax_class'] : NULL,
+                    'product_tag' => $_POST['product_tag']
+                ];
+
+                // Insert the product into the database
+                $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description, 
+                                                short_description, product_status, stock_quantity, regular_price, sale_price, 
+                                                product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag)
+                          VALUES (:product_name, :product_slug, :category_id, :brand_id, :product_description, 
+                                  :short_description, :product_status, :stock_quantity, :regular_price, :sale_price, 
+                                  :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag)';
+                $stmt = $this->db->prepare($query);
+                $stmt->execute($productData);
+                $productId = $this->db->lastInsertId();  // Get the last inserted product ID
+
+                // Insert SEO data
+                $seoData = [
+                    'product_id' => $productId,
+                    'seo_title' => $_POST['seo_title'],
+                    'seo_description' => $_POST['seo_description'],
+                    'focus_keyword' => $_POST['focus_keyword'],
+                ];
+
+                $seoQuery = 'INSERT INTO product_seo (product_id, seo_title, seo_description, focus_keyword)
+                             VALUES (:product_id, :seo_title, :seo_description, :focus_keyword)';
+                $seoStmt = $this->db->prepare($seoQuery);
+                $seoStmt->execute($seoData);
+
+                // Handle Primary Image Upload
+                // Handle Primary Image Upload
+                if (isset($_FILES['primary_image']) && $_FILES['primary_image']['error'] == 0) {
+                    $primaryImageName = $_FILES['primary_image']['name'];
+                    $primaryImageTmpName = $_FILES['primary_image']['tmp_name'];
+                    $targetDir = dirname(__DIR__, 2) . '/public/uploads/';
+
+                    // Get the original file name and extension
+                    $fileExtension = pathinfo($primaryImageName, PATHINFO_EXTENSION);
+                    $fileNameWithoutExtension = pathinfo($primaryImageName, PATHINFO_FILENAME);
+
+                    // Sanitize the original file name (remove special characters, replace spaces with dashes)
+                    $sanitizedFileName = preg_replace('/[^a-z0-9]+/i', '-', strtolower(trim($fileNameWithoutExtension)));
+
+                    // Check if the file already exists in the target directory
+                    $newFileName = $sanitizedFileName . '.' . $fileExtension;
+                    $targetFile = $targetDir . $newFileName;
+
+                    // If file already exists, append a unique suffix
+                    $counter = 1;
+                    while (file_exists($targetFile)) {
+                        $newFileName = $sanitizedFileName . '-' . $counter . '.' . $fileExtension;
+                        $targetFile = $targetDir . $newFileName;
+                        $counter++;
+                    }
+
+                    // Move the uploaded file to the target directory
+                    if (move_uploaded_file($primaryImageTmpName, $targetFile)) {
+                        // Insert primary image into product_images table
+                        $imageData = [
+                            'image_url' => '/public/uploads/' . $newFileName,
+                            'is_primary' => 1,  // Set primary flag to 1 for primary image
+                            'status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                            'product_id' => $productId
+                        ];
+
+                        $imageQuery = 'INSERT INTO product_images (image_url, is_primary, status, product_id) 
+                       VALUES (:image_url, :is_primary, :status, :product_id)';
+                        $imageStmt = $this->db->prepare($imageQuery);
+                        $imageStmt->execute($imageData);
+
+                        // Get the image ID for the primary image
+                        $primaryImageId = $this->db->lastInsertId();
+
+                        // Insert metadata for the primary image
+                        $metaQuery = 'INSERT INTO image_metadata (image_id, alt_text, meta_id, title, caption, description) 
+                      VALUES (:image_id, :alt_text, :meta_id, :title, :caption, :description)';
+                        $primaryImageMetaData = [
+                            'image_id' => $primaryImageId,
+                            'alt_text' => $_POST['primary_alt_text'],  // Alt text for primary image
+                            'meta_id' => null,  // Auto-incremented by MySQL
+                            'title' => $_POST['primary_image_title'],
+                            'caption' => $_POST['primary_image_caption'],
+                            'description' => $_POST['primary_image_description']
+                        ];
+                        $metaStmt = $this->db->prepare($metaQuery);
+                        $metaStmt->execute($primaryImageMetaData);
+                    } else {
+                        $_SESSION['message'] = 'There was an error uploading the primary image.';
+                        $_SESSION['message_type'] = 'error';
+                        $this->db->rollBack();
+                        return false;
+                    }
+                }
+
+                // Handle Gallery Images Upload
+                if (isset($_FILES['gallery_images']) && !empty(array_filter($_FILES['gallery_images']['name']))) {
+                    foreach ($_FILES['gallery_images']['name'] as $index => $name) {
+                        if (empty($name)) {
+                            continue; // Skip if no file selected
+                        }
+                        $galleryImageTmpName = $_FILES['gallery_images']['tmp_name'][$index];
+                        $targetDir = dirname(__DIR__, 2) . '/public/uploads/';
+
+                        // Get the original file name and extension
+                        $fileExtension = pathinfo($name, PATHINFO_EXTENSION);
+                        $fileNameWithoutExtension = pathinfo($name, PATHINFO_FILENAME);
+
+                        // Sanitize the original file name (remove special characters, replace spaces with dashes)
+                        $sanitizedFileName = preg_replace('/[^a-z0-9]+/i', '-', strtolower(trim($fileNameWithoutExtension)));
+
+                        // Check if the file already exists in the target directory
+                        $newFileName = $sanitizedFileName . '.' . $fileExtension;
+                        $targetFile = $targetDir . $newFileName;
+
+                        // If file already exists, append a unique suffix
+                        $counter = 1;
+                        while (file_exists($targetFile)) {
+                            $newFileName = $sanitizedFileName . '-' . $counter . '.' . $fileExtension;
+                            $targetFile = $targetDir . $newFileName;
+                            $counter++;
+                        }
+
+                        if (move_uploaded_file($galleryImageTmpName, $targetFile)) {
+                            // Insert gallery image into product_images table
+                            $imageData = [
+                                'image_url' => '/public/uploads/' . $newFileName,
+                                'is_primary' => 0,  // Set primary flag to 0 for gallery images
+                                'status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                                'product_id' => $productId
+                            ];
+
+                            $imageQuery = 'INSERT INTO product_images (image_url, is_primary, status, product_id) 
+                           VALUES (:image_url, :is_primary, :status, :product_id)';
+                            $imageStmt = $this->db->prepare($imageQuery);
+                            $imageStmt->execute($imageData);
+
+                            $galleryImageId = $this->db->lastInsertId();  // Get the last inserted gallery image ID
+
+                            // Insert metadata for the gallery image
+                            $metaQuery = 'INSERT INTO image_metadata (image_id, alt_text, meta_id, title, caption, description) 
+                          VALUES (:image_id, :alt_text, :meta_id, :title, :caption, :description)';
+                            $galleryImageMetaData = [
+                                'image_id' => $galleryImageId,
+                                'alt_text' => $_POST['alt_text_gallery'][$index],  // Alt text from form input
+                                'meta_id' => null,  // Auto-incremented by MySQL
+                                'title' => $_POST['image_title_gallery'][$index],
+                                'caption' => $_POST['image_caption_gallery'][$index],
+                                'description' => $_POST['image_description_gallery'][$index]
+                            ];
+                            $metaStmt = $this->db->prepare($metaQuery);
+                            $metaStmt->execute($galleryImageMetaData);
+                        } else {
+                            $_SESSION['message'] = 'There was an error uploading a gallery image.';
+                            $_SESSION['message_type'] = 'error';
+                            $this->db->rollBack();
+                            return false;
+                        }
+                    }
+                }
+
+                // Commit the transaction
+                $this->db->commit();
+
+                // Redirect after successful addition
+                $_SESSION['message'] = 'Product added successfully!';
+                $_SESSION['message_type'] = 'success';
+                header('Location: /admin/manage-products.php');
+                exit();
+            } catch (Exception $e) {
+                // Rollback transaction if any exception occurs
+                $this->db->rollBack();
+                $_SESSION['message'] = 'There was an error: ' . $e->getMessage();
+                $_SESSION['message_type'] = 'error';
+                header('Location: /admin/manage-products.php');
+                exit();
+            }
+        }
+
+        // Load the view for adding a product
+        require_once 'add-product.php';
+    }
+}

@@ -1,0 +1,102 @@
+/* Category Container */
+.category-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background-color: #f9f9f9; /* Light background for contrast */
+}
+
+/* Category Header */
+.category-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.category-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.category-description {
+    font-size: 1.25rem;
+    color: #777;
+}
+
+/* Grid Layout for Posts */
+.category-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px; /* Spacing between posts */
+    align-items: stretch;
+}
+
+/* Individual Post Item */
+.category-post-item {
+    background-color: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.category-post-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Thumbnail */
+.category-post-thumbnail a img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-bottom: 1px solid #eaeaea;
+}
+
+/* Post Info */
+.category-post-info {
+    padding: 20px;
+}
+
+.category-post-date {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 10px;
+}
+.category-post-title a {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #333;
+    transition: color 0.2s ease-in-out;
+}
+
+.category-post-title a:hover {
+    color: #0056b3;
+}
+
+.category-post-excerpt {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .category-title {
+        font-size: 2.5rem;
+    }
+
+    .category-posts-grid {
+        grid-template-columns: 1fr; /* Stack posts in single column on mobile */
+    }
+
+    .category-post-title {
+        font-size: 1.25rem;
+    }
+}

@@ -1,0 +1,97 @@
+.verify-form-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.verify-container {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    border-radius: 8px;
+}
+.verify-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+.verify-container p {
+    font-size: 14px;
+    text-align: center;
+}
+.error-message {
+    color: red;
+    text-align: center;
+}
+.success-message {
+    color: green;
+    text-align: center;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+}
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.form-group button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.form-group button:disabled {
+    background-color: #b0c4de;
+}
+#timer {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #555;
+    text-align: center;
+}
+.resend-otp {
+    margin-top: 20px;
+    text-align: center;
+}
+.resend-otp button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.resend-otp button:disabled {
+    background-color: #dcdcdc;
+}
+
+@media (max-width: 768px) {
+    .verify-form-wrapper {
+        margin: 0px;
+
+    }
+}

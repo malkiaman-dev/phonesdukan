@@ -1,0 +1,134 @@
+.sidebar-content * {
+    box-sizing: border-box;
+}
+.sidebar-content .recent-post-item {
+display: flex;
+align-items: center;
+margin-bottom: 15px;
+border-bottom: 1px solid #dee2e6!important;
+padding-bottom: 15px;
+}
+.sidebar-content .post-image-section {
+    width: 100px; /* Fixed to match image size */
+    flex-shrink: 0;
+}
+.sidebar-content .post-image-section img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+}
+.sidebar-content .recent-post-title {
+    flex: 1;
+    margin-left: 15px;
+    min-width: 0;
+}
+.sidebar-content .recent-post-title a {
+    text-decoration: none;
+    color: #333;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    margin: 0px;
+}
+.sidebar-content .recent-post-title a:hover {
+    text-decoration: underline;
+}
+
+.post-content {
+width: 70%;
+}
+
+.post-sidebar {
+    flex: 1;
+    min-width: 250px;
+    border-radius: 8px;
+}
+
+.sidebar-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,.1);
+}
+
+.sidebar-section {
+    margin-bottom: 20px;
+}
+
+.sidebar-section h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.sidebar-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-section ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar-section ul li a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.sidebar-section ul li a:hover {
+    text-decoration: underline;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.search-button {
+    padding: 8px 16px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background: #0056b3;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .post-content-container {
+        flex-direction: column;
+    }
+
+    aside.sidebar-content {
+        border: none;
+        padding: 15px;
+    }
+
+    .post-sidebar {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .sidebar-content .post-image-section {
+width: 100px;
+margin-right: 10px;
+}
+    .sidebar-content .recent-post-item {
+        align-items: flex-start;
+    }
+    .sidebar-content .recent-post-title {
+        margin-left: 0;
+        width: 100%;
+    }
+}

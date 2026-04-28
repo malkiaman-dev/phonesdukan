@@ -1,0 +1,125 @@
+.product-section {
+    padding: 20px;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.product-grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.product-grid-wrapper {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.product-card {
+    position: relative;
+    background-color: #00408030;
+    border-radius: 25px;
+    width: calc(24% - 10px);
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.product-img img {
+    border-radius: 25px;
+    width: 100%;
+    height: auto;
+  }
+
+  .product-badge span {
+    display: inline-block;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #FFA500;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin: 0px;
+}
+
+.bg-blue {
+    background: #007bff;
+    padding: 10px;
+    border-radius: 10px;
+    color: white;
+  }
+  
+  .bg-blue .product-price {
+    font-weight: bold;
+  }
+  
+  .product-price {
+    text-align: center;
+  }
+
+  .product-title a {
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 20px;
+    color: #333;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: normal;
+    display: block;
+    max-width: 100%;
+  }
+  
+  .prodline {
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: #007bff;
+    margin: 0 auto 10px;
+  }
+
+  .prodprice {
+    margin: 10px;
+  }
+  
+  .product-price span {
+    font-size: 20px;
+    font-weight: 600;
+    color: #27ae60;
+  }
+
+  @media (max-width: 768px) {
+    .product-section {
+        padding: 10px;
+    }
+
+    .category-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .product-grid-wrapper {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .product-card {
+        width: 100%;
+        padding: 6px;
+    }
+
+    .product-title a {
+        font-size: 15px;
+    }
+  }

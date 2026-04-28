@@ -1,0 +1,455 @@
+/* Custom Post Wrapper */
+.custom-post-wrapper {
+    display: flex;
+    /* Use flexbox for layout */
+    flex-direction: row;
+    justify-content: space-between;
+    /* Space between the content and sidebar */
+    max-width: 1140px;
+    /* Adjust the width as needed */
+    margin: 0 auto;
+    /* Center the wrapper */
+    padding: 20px;
+}
+
+/* Main Post Content Area */
+.custom-post-content-area {
+    flex: 1;
+    /* Takes remaining space */
+    margin-right: 20px;
+    /* Space between content and sidebar */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+}
+
+/* Featured Image */
+.custom-post-featured-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Post Title */
+.custom-post-title {
+    font-size: 2.5rem;
+    font-family: 'Times New Roman', serif;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Post Meta Information */
+.custom-post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.custom-post-meta span {
+    margin-right: 15px;
+}
+
+.post-author,
+.post-date,
+.post-categories {
+    font-weight: bold;
+}
+
+/* Post Content */
+.custom-post-content {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 40px;
+}
+
+.custom-post-content p {
+    margin-bottom: 1.5rem;
+}
+
+.custom-post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+/* Post Tags */
+.custom-post-tags {
+    margin-top: 30px;
+    font-size: 1rem;
+    color: #555;
+    font-style: italic;
+}
+
+.custom-post-tags a {
+    color: #0073aa;
+}
+
+.custom-post-tags a:hover {
+    text-decoration: underline;
+}
+
+/* Author Bio */
+.custom-post-author-bio {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.custom-post-author-bio h3 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+}
+
+.author-info img {
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.author-info p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Sidebar Styling */
+.custom-sidebar {
+    flex: 0 0 300px;
+    /* Fixed width for sidebar */
+    background-color: #fff;
+    /* Background color */
+    height: fit-content;
+    padding: 20px;
+    /* Padding inside the sidebar */
+    border-radius: 8px;
+    /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Shadow effect */
+}
+
+/* Search Bar Styles */
+.custom-search-form {
+    width: 100%;
+    /* Full width */
+    margin-top: 20px;
+    /* Space above the search bar */
+}
+
+.search-wrapper {
+    display: flex;
+    /* Flexbox for input and button alignment */
+    align-items: center;
+    /* Center vertically */
+    border: 2px solid #004080;
+    /* Border color */
+    border-radius: 5px;
+    /* Rounded corners */
+    overflow: hidden;
+    /* Prevent overflow of the button */
+    transition: border-color 0.3s ease;
+    /* Transition for border color */
+}
+
+.custom-search-input {
+    flex: 1;
+    /* Takes up available space */
+    padding: 10px 15px;
+    /* Padding for input */
+    border: none;
+    /* Remove default border */
+    outline: none;
+    /* Remove outline */
+    font-size: 16px;
+    /* Font size */
+    color: #333;
+    /* Text color */
+}
+
+.custom-search-input::placeholder {
+    color: #aaa;
+    /* Placeholder text color */
+    opacity: 1;
+    /* Fully opaque */
+}
+
+.custom-search-submit {
+    background-color: #004080;
+    /* Button background color */
+    color: white;
+    /* Button text color */
+    border: none;
+    /* No border */
+    padding: 10px 15px;
+    /* Padding for button */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    transition: background-color 0.3s ease;
+    /* Transition for background color */
+}
+
+.custom-search-submit i {
+    font-size: 18px;
+    /* Icon size */
+}
+
+/* Hover Effects */
+.search-wrapper:hover {
+    border-color: #0056b3;
+    /* Darker border on hover */
+}
+
+.custom-search-submit:hover {
+    background-color: #0056b3;
+    /* Darker background on hover */
+}
+
+
+.custom-post-content-area {
+    flex: 1;
+    /* This will take remaining space */
+    margin-right: 20px;
+    /* Space between content area and sidebar */
+}
+
+.related-posts-section {
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    margin: 20px 20px 20px 0px;
+}
+
+.related-posts-section h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.related-posts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0;
+}
+
+.related-post-item {
+    flex: 1 1 45%; /* Show two items per row */
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.related-post-thumbnail img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.related-post-info {
+    padding: 15px;
+}
+
+.related-post-category {
+    display: block;
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 5px;
+}
+
+
+.related-post-title a {
+    font-size: 18px;
+    margin-bottom: 5px;
+    color: #333;
+    text-decoration: none;
+}
+
+.related-post-title a:hover {
+    text-decoration: underline;
+}
+
+.related-post-author {
+    font-size: 12px;
+    color: #666;
+}
+
+
+
+.custom-comments-section {
+    margin: 20px 20px 20px 0px;
+    padding: 20px; /* Inner padding */
+    background-color: #fff; /* Background color */
+    border: 1px solid #eaeaea; /* Border around the comments section */
+    border-radius: 8px; /* Rounded corners */
+}
+
+.custom-comments-section h2 {
+    margin-bottom: 15px; /* Space below the section title */
+    font-size: 1.5rem; /* Font size for the title */
+    color: #333; /* Title color */
+}
+
+.custom-comments-section form {
+    display: flex; /* Flex layout for form */
+    flex-direction: column; /* Stack elements vertically */
+}
+
+.custom-comments-section label {
+    margin-bottom: 5px; /* Space below labels */
+    font-weight: bold; /* Bold labels */
+}
+
+.custom-comments-section input[type="text"],
+.custom-comments-section input[type="email"],
+.custom-comments-section textarea {
+    padding: 10px; /* Inner padding for inputs and textarea */
+    margin-bottom: 15px; /* Space below each input */
+    border: 1px solid #ccc; /* Border for inputs */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 1rem; /* Font size for inputs */
+    width: 100%; /* Full width */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.custom-comments-section textarea {
+    min-height: 100px; /* Minimum height for textarea */
+    resize: vertical; /* Allow vertical resizing */
+}
+
+.custom-comments-section button[type="submit"] {
+    background-color: #007bff; /* Button background color */
+    color: #fff; /* Button text color */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 12px 20px; /* Padding for button */
+    font-size: 1rem; /* Font size for button */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s; /* Transition for hover effect */
+}
+
+.custom-comments-section button[type="submit"]:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+}
+
+.custom-comments-section button[type="submit"]:active {
+    transform: translateY(0); /* Reset lift effect on click */
+}
+
+.comment-list {
+    list-style: none; /* Remove default list styling */
+    padding: 0; /* Remove padding */
+}
+
+.comment-content {
+    padding: 15px;
+    border: 1px solid rgba(0,0,0,.05);
+}
+
+.comment-content p {
+    margin-top: 0px;
+}
+
+.comment-list li {
+    margin-bottom: 20px; /* Space between comments */
+    padding: 15px; /* Inner padding for each comment */
+    background-color: #fff; /* Background color */
+    border: 1px solid #eaeaea; /* Border around comment */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.comment-list .comment-author {
+    font-weight: bold; /* Bold author name */
+    color: #333; /* Author name color */
+}
+
+.comment-list .comment-meta {
+    font-size: 0.9rem; /* Smaller font for date and time */
+    color: #666; /* Meta color */
+}
+
+textarea#comment {
+    margin: 0px;
+}
+
+.comment .children {
+    padding-left: 30px;
+    margin-top: -30px;
+    border: none;
+}
+
+.depth-1.parent>.children {
+    border: none;
+}
+
+h2.comments-title {
+    margin-top: 30px;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .custom-post-wrapper {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    .custom-sidebar {
+        display: none;
+    }
+
+    .custom-post-content-area {
+        margin-right: 0;
+        /* Remove margin on smaller screens */
+    }
+
+    .custom-post-title {
+        font-size: 2rem;
+    }
+
+    .custom-post-content {
+        font-size: 1rem;
+    }
+
+    .custom-post-meta {
+        font-size: 0.85rem;
+    }
+
+    li.related-post-item {
+        width: calc(50% - 10px);
+    }
+
+    .related-posts {
+        padding: 15px;
+        margin: 10px 0px;
+    }
+
+    .related-posts-section {
+        margin: 0px;
+    }
+
+    .custom-comments-section {
+        margin: 0px;
+        padding: 15px;
+    }
+
+    .wp-block-gallery {
+        margin: 0px;
+    }
+}

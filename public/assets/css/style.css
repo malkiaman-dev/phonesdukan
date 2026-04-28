@@ -1,0 +1,477 @@
+:root {
+  /* Primary and Secondary Colors */
+  --primary-color: #004080;
+  /* Dark blue - conveys reliability and professionalism */
+  --primary-light-color: #34495e;
+  /* Slightly lighter shade of primary color */
+  --primary-dark-color: #1a252f;
+  /* Darker shade of primary color */
+  --secondary-color: #fd8311;
+  /* Orange - often associated with construction and safety */
+  --secondary-light-color: #f39c12;
+  /* Lighter shade of secondary color */
+  --secondary-dark-color: #e68a00;
+  /* Darker shade of secondary color */
+
+  /* Accent Colors */
+  --accent-color: #f1c40f;
+  /* Yellow - highlights and calls to action */
+  --accent-light-color: #f7dc6f;
+  /* Lighter shade of accent color */
+  --accent-dark-color: #f39c12;
+  /* Darker shade of accent color */
+
+  /* Background Colors */
+  --background-color: #ffffff;
+  /* Main background color - white for clean look */
+  --background-light-color: #ecf0f1;
+  /* Light grey for sections */
+  --background-dark-color: #bdc3c7;
+  /* Dark grey for contrast sections */
+
+  /* Text Colors */
+  --text-color: #333333;
+  /* Main text color - dark grey for readability */
+  --text-light-color: #555555;
+  /* Lighter text color for less emphasis */
+  --text-dark-color: #111111;
+  /* Darker text color for headings */
+
+  /* Border Colors */
+  --border-color: #dddddd;
+  /* Default border color - light grey */
+  --border-light-color: #eeeeee;
+  /* Lighter border color */
+  --border-dark-color: #cccccc;
+  /* Darker border color */
+
+  /* Header and Footer Colors */
+  --header-bg-color: var(--primary-color);
+  /* Header background color */
+  --header-text-color: #ffffff;
+  /* Header text color */
+  --footer-bg-color: var(--primary-dark-color);
+  /* Footer background color */
+  --footer-text-color: #ffffff;
+  /* Footer text color */
+
+  /* Button Colors */
+  --button-bg-color: var(--secondary-color);
+
+  /* Button second background color */
+  --button-sec-bg-color: #007bff;
+  --button-sec-hover-bg-color: #005f86;
+  --button-sec-hover-text-color: #fff;
+
+  /* Button text color */
+  --button-hover-bg-color: var(--secondary-dark-color);
+  /* Button hover background color */
+  --button-hover-text-color: #ffffff;
+  /* Button hover text color */
+}
+
+/* Times New Roman Regular */
+@font-face {
+  font-family: "Times New Roman";
+  src: url("fonts/times new roman.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Times New Roman Bold */
+@font-face {
+  font-family: "Times New Roman";
+  src: url("fonts/times new roman bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Times New Roman Italic */
+@font-face {
+  font-family: "Times New Roman";
+  src: url("fonts/times new roman italic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Times New Roman Bold Italic */
+@font-face {
+  font-family: "Times New Roman";
+  src: url("fonts/times new roman bold italic.ttf") format("truetype");
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* --- Global Resets & Box-Sizing for better layout control --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Ensures padding and border are included in element's total width/height */
+}
+
+html,
+body {
+  height: 100%;
+  font-family: Arial, sans-serif;
+  background-color: #f8f8f8;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  padding-top: 32px;
+}
+
+
+/* --- Base Text Styles --- */
+p,
+a,
+li,
+span {
+  font-size: 16px;
+  color: #333; /* Dark gray for text - kept */
+  line-height: 1.6; /* Slightly increased line-height for better readability */
+  font-weight: 400;
+  margin: 1em 0; /* Use em for vertical margins for better responsiveness relative to font size */
+  text-decoration: none; /* Kept */
+}
+
+a {
+  color: #007bff; /* Kept */
+  transition: color 0.3s ease-in-out; 
+  margin: 0px;
+}
+
+a:hover,
+a:focus {
+  color: #0056b3; /* Slightly darker blue on hover for better interaction feedback */
+  text-decoration: underline; /* Standard underline on hover for links */
+  outline: none; /* Remove default focus outline for better aesthetics, but ensure custom focus styling if needed for accessibility */
+}
+
+/* --- Emphasized Text within Paragraphs and List Items --- */
+p span,
+li span {
+  color: #27ae60; /* Kept */
+  font-style: italic; /* Kept */
+  font-weight: bold; /* Kept */
+}
+
+strong {
+  font-weight: bold; /* Ensures text is bold - kept */
+  color: #000; /* Set the color of the text to black (or any color you prefer) - kept */
+}
+
+/* --- List Styles --- */
+ul,
+ol {
+  font-size: 16px; /* Kept */
+  color: #333; /* Kept */
+  line-height: 1.6; /* Consistent line-height with paragraphs */
+  margin: 1em 0; /* Consistent vertical margins */
+  padding-left: 1.5em; /* Adjusted padding for better visual spacing of list markers */
+}
+
+li {
+  margin-bottom: 0.5em; /* Spacing between list items */
+}
+
+/* --- Global Heading Styles --- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Times New Roman", Times, serif; /* Kept */
+  margin: 0; /* Reset default margins */
+  padding: 0; /* Reset default padding */
+  font-weight: bold; /* Kept */
+  line-height: 1.2; /* Kept */
+  color: var(--text-dark-color, #2c3e50); /* Used fallback color if var is not defined, for robustness */
+  text-rendering: optimizeLegibility; /* Improves text rendering for headings */
+}
+
+/* --- Specific Heading Sizes and Spans --- */
+h1 {
+  font-size: 2.5em; /* Increased size for prominence, more responsive than px */
+  margin-bottom: 0em; /* Adjusted spacing below heading */
+}
+
+h1 span {
+  font-size: 1em; /* Span within H1 takes on H1's font-size, then specific color/weight */
+  font-weight: 800; /* Kept */
+  color: #ff6900; /* Brand color - kept */
+}
+
+h2 {
+  font-size: 2em; /* Adjusted size */
+  margin: 1.2em 0 0.8em; /* Top margin, no left/right, bottom margin */
+}
+
+h2 span {
+  font-size: 1em; /* Span within H2 takes on H2's font-size, then specific color/weight */
+  font-weight: 800; /* Kept */
+  color: #ff6900; /* Brand color - kept */
+}
+
+h3 {
+  font-size: 1.5em; /* Adjusted size */
+  margin: 1em 0 0.6em; /* Top margin, no left/right, bottom margin */
+}
+
+h4 {
+  font-size: 1.3em; /* Adjusted size */
+  margin: 1em 0 0.5em;
+}
+
+h5 {
+  font-size: 1.1em; /* Adjusted size */
+  margin: 0.8em 0 0.4em;
+}
+
+h6 {
+  font-size: 1em; /* Adjusted size (same as base text, but bold) */
+  margin-bottom: 0.5em;
+}
+
+/* --- Accessibility Enhancements (Optional but Recommended for Professionalism) --- */
+/* Focus styles for keyboard navigation - crucial for accessibility */
+:focus-visible {
+  outline: 2px solid #007bff; /* Consistent focus indicator */
+  outline-offset: 2px; /* Small gap between element and outline */
+  border-radius: 3px; /* Slightly rounded corners for aesthetics */
+}
+
+
+/* Out of Stock Badge */
+.out-of-stock-badge {
+  background-color: #555; /* Dark grey for the out of stock badge */
+  color: white !important;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  border-radius: 0px 20px 20px 0px;
+  z-index: 10;
+  margin: 0px;
+}
+
+    /* Main container for sidebar and content */
+    .user_container {
+      display: flex;
+      flex-wrap: nowrap;
+  }
+
+  /* Sidebar Styling */
+  .user_sidebar {
+      width: 220px;
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      height: 100vh;
+  }
+
+  /* Sidebar Links Styling */
+  .user_sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin: 10px 0;
+      padding: 10px;
+      background: #34495e;
+      border-radius: 5px;
+  }
+
+  .user_sidebar a:hover {
+      background: #1abc9c;
+  }
+
+  /* Content Area Styling */
+  .user_content {
+      margin-left: 20px;
+      padding: 30px;
+      background-color: #f9f9f9;
+      flex-grow: 1;
+      min-height: 100vh;
+  }
+
+  /* Dashboard Stats Section */
+  .dashboard-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+  }
+
+  /* Stat Cards Styling */
+  .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px #ccc;
+      flex: 1;
+  }
+
+  .stat-card h4 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #333;
+  }
+
+  .username {
+      color: #fff;
+  }
+  
+  .pro-tags span {
+    display: inline-block;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #FF0000;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin: 0px;
+  }
+  
+  .sold-out span {
+    background: #BDBDBD;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    display: inline-block;
+    margin: 0px;
+  }
+  
+  .p-note {
+    font-style: italic;
+    color: #000;
+    background-color: #f0f9ff;
+    border-left: 4px solid var(--primary-color);
+    padding: 15px 20px;
+    margin: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+/* Responsive Adjustments */
+/* --- Media Query for Smaller Screens (max-width: 768px) --- */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 20px; /* Specific size for small screens */
+  }
+
+  h1 span {
+    font-size: 20px; /* Span within H1 should match H1's size */
+  }
+
+  h2 {
+    font-size: 20px; /* Specific size for small screens */
+  }
+
+  h2 span {
+    font-size: 20px; /* Span within H2 should match H2's size */
+  }
+
+  h3 {
+    font-size: 18px; /* Specific size for small screens */
+  }
+
+  h4 {
+    font-size: 16px; /* Specific size for small screens */
+  }
+
+  h5 {
+    font-size: 17px; /* Specific size for small screens */
+  }
+
+  h6 {
+    font-size: 16px; /* Specific size for small screens */
+  }
+
+  p,
+  a,
+  li,
+  span {
+    font-size: 15px; /* Specific size for small screens */
+    letter-spacing: 0.1px; /* Added letter-spacing */
+    margin: 10px 0px; /* Adjusted margin for smaller screens */
+  }
+
+  /* Optional: Adjust list padding for smaller screens if needed */
+  ul, ol {
+    padding-left: 1em; /* Slightly less padding for lists on smaller screens */
+  }
+
+  html, body {
+    padding-top: 20px;
+}
+.ad-container {
+  padding: 10px;
+}
+
+.pro-tags span {
+  right: 10px;
+  top: 10px;
+}
+.sold-out span {
+  right: 10px;
+  top: 10px;
+}
+
+.faq-item {
+  padding: 5px 0px;
+  margin: 5px 0px;
+}
+
+h3.faq-question {
+  font-size: 15px;
+}
+}
+
+.faq-item {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+  margin: 10px 0px;
+}
+
+.faq-question {
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #004080;
+}
+
+.faq-answer {
+  display: none;
+  font-size: 16px;
+  padding: 10px 0;
+  color: #444;
+}
+
+.faq-question::after {
+  content: "+";
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.faq-question.active::after {
+  content: "-";
+}
+
+.ad-container {
+  text-align: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+}

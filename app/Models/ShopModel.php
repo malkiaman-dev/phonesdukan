@@ -1,0 +1,222 @@
+<?php
+require_once __DIR__ . '/../../database/db.php'; // Ensure correct database connection
+
+class ProductModel {
+    private $db;
+
+    public function __construct() {
+        $database = new Database();
+        $this->db = $database->getConnection();
+    }
+    
+    private function addActiveProductCondition(&$whereClauses) {
+        $whereClauses[] = "p.product_status != '0' AND LOWER(p.product_status) != 'out of stock'";
+    }
+    
+    public function getAllCategories() {
+        // Fetch categories with status 1
+        $query = "SELECT category_id, category_name, slug FROM categories WHERE status = 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Return active categories
+    }
+    
+    public function getAllBrands() {
+        $query = "SELECT brand_id, brand_name, slug FROM brands";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);  // Returns all active brands
+    }
+    
+    public function applyPriceRangeFilter($filters, &$whereClauses, &$params) {
+        if (!empty($filters['price_range'])) {
+            $priceConditions = [];
+            foreach ($filters['price_range'] as $index => $range) {
+                if ($range === '150000-above') {
+                    $priceConditions[] = "p.sale_price >= :price_above_$index";
+                    $params[":price_above_$index"] = 150000;
+                } elseif (preg_match('/^(\d+)-(\d+)$/', $range, $matches)) {
+                    $priceConditions[] = "(p.sale_price BETWEEN :min_$index AND :max_$index)";
+                    $params[":min_$index"] = (int)$matches[1];
+                    $params[":max_$index"] = (int)$matches[2];
+                }
+            }
+            if (!empty($priceConditions)) {
+                $whereClauses[] = '(' . implode(' OR ', $priceConditions) . ')';
+            }
+        }
+    }
+
+    public function applyBrandFilter($filters, &$whereClauses, &$params) {
+        if (!empty($filters['brand'])) {
+            $brandConditions = [];
+            $index = 0;
+    
+            // Loop through each selected brand and bind a parameter for each
+            foreach ($filters['brand'] as $brandId) {
+                // Dynamically create placeholders for each selected brand
+                $brandConditions[] = "p.brand_id = :brand_id_$index";
+                $params[":brand_id_$index"] = $brandId; // Bind the brand_id
+    
+                $index++;
+            }
+    
+            // If we have brand conditions, add them to the WHERE clause
+            if (!empty($brandConditions)) {
+                $whereClauses[] = '(' . implode(' OR ', $brandConditions) . ')';
+            }
+        }
+    }
+    
+    public function applyCategoryFilter($filters, &$whereClauses, &$params) {
+        if (!empty($filters['category'])) {
+            $categoryConditions = [];
+            $index = 0;
+    
+            // Loop through each selected category_id and bind a parameter for each
+            foreach ($filters['category'] as $categoryId) {
+                // Dynamically create placeholders for each selected category_id
+                $categoryConditions[] = "p.category_id = :category_id_$index";
+                $params[":category_id_$index"] = $categoryId; // Bind the category_id
+    
+                $index++;
+            }
+    
+            // If we have category conditions, add them to the WHERE clause
+            if (!empty($categoryConditions)) {
+                $whereClauses[] = '(' . implode(' OR ', $categoryConditions) . ')';
+            }
+        }
+    }
+    
+    public function getPaginatedProducts($limit, $offset, $filters = []) {
+        $whereClauses = [];
+        $params = [];
+    
+        $this->addActiveProductCondition($whereClauses);
+
+        // Apply price range filter
+        $this->applyPriceRangeFilter($filters, $whereClauses, $params);
+    
+        // Apply category filter
+        $this->applyCategoryFilter($filters, $whereClauses, $params);
+    
+        // Apply brand filter
+        $this->applyBrandFilter($filters, $whereClauses, $params);
+    
+        // Base query
+        $query = "
+            SELECT p.product_id, p.product_name, p.product_slug, 
+                   p.regular_price, p.sale_price, p.stock_quantity, 
+                   pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
+            FROM products p
+            JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN brands b ON p.brand_id = b.brand_id
+            LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1 
+        ";
+    
+        // Add WHERE clause if filters are applied
+        if (!empty($whereClauses)) {
+            $query .= ' WHERE ' . implode(' AND ', $whereClauses);
+        }
+    
+        // Sorting by price
+        if (!empty($filters['sort_by'])) {
+            switch ($filters['sort_by']) {
+                case 'price_asc':
+                    $query .= ' ORDER BY 
+                                CASE 
+                                    WHEN p.sale_price IS NOT NULL THEN p.sale_price
+                                    ELSE p.regular_price 
+                                END ASC'; // Low to High
+                    break;
+                case 'price_desc':
+                    $query .= ' ORDER BY 
+                                CASE 
+                                    WHEN p.sale_price IS NOT NULL THEN p.sale_price
+                                    ELSE p.regular_price 
+                                END DESC'; // High to Low
+                    break;
+                default:
+                    $query .= ' ORDER BY p.product_id DESC'; // Default sorting by product ID
+            }
+        } else {
+            $query .= ' ORDER BY p.product_id DESC'; // Default sorting by product ID
+        }
+    
+        // Limit & offset for pagination
+        $query .= ' LIMIT :limit OFFSET :offset';
+        $params[':limit'] = (int)$limit;
+        $params[':offset'] = (int)$offset;
+    
+        // Prepare and execute the query
+        $stmt = $this->db->prepare($query);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+    
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    // Get total product count (with filters applied)
+    public function getTotalFilteredProductCount($filters = []) {
+        $whereClauses = [];
+        $params = [];
+
+        $this->addActiveProductCondition($whereClauses);
+
+        // Price range filters
+        if (!empty($filters['price_range'])) {
+            $priceConditions = [];
+            foreach ($filters['price_range'] as $index => $range) {
+                if ($range === '150000-above') {
+                    $priceConditions[] = "p.sale_price >= :price_above_$index";
+                    $params[":price_above_$index"] = 150000;
+                } elseif (preg_match('/^(\d+)-(\d+)$/', $range, $matches)) {
+                    $priceConditions[] = "(p.sale_price BETWEEN :min_$index AND :max_$index)";
+                    $params[":min_$index"] = (int)$matches[1];
+                    $params[":max_$index"] = (int)$matches[2];
+                }
+            }
+            if (!empty($priceConditions)) {
+                $whereClauses[] = '(' . implode(' OR ', $priceConditions) . ')';
+            }
+        }
+
+        // Category filter
+        if (!empty($filters['category'])) {
+            $categoryConditions = [];
+            foreach ($filters['category'] as $slug) {
+                $categoryConditions[] = "c.slug = :category_slug_$slug";
+                $params[":category_slug_$slug"] = $slug;
+            }
+            if (!empty($categoryConditions)) {
+                $whereClauses[] = '(' . implode(' OR ', $categoryConditions) . ')';
+            }
+        }
+
+        // Base query for counting products
+        $query = "
+            SELECT COUNT(p.product_id) 
+            FROM products p
+            JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN brands b ON p.brand_id = b.brand_id
+            LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+        ";
+
+        // Add WHERE if needed
+        if (!empty($whereClauses)) {
+            $query .= ' WHERE ' . implode(' AND ', $whereClauses);
+        }
+
+        $stmt = $this->db->prepare($query);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchColumn(); // Returns the total count of filtered products
+    }
+    
+}

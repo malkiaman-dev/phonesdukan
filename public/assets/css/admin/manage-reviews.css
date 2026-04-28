@@ -1,0 +1,101 @@
+/* General Admin Content Styling */
+.admin-content {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Table Styling */
+.reviews-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.reviews-table th, .reviews-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.reviews-table th {
+    background: #007bff;
+    color: white;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.reviews-table tr:hover {
+    background: #f1f1f1;
+}
+
+/* Star Rating */
+.star-rating {
+    position: relative;
+    font-size: 16px;
+    display: inline-block;
+    color: #ddd;
+    unicode-bidi: bidi-override;
+}
+
+.star-rating::before {
+    content: "★★★★★"; /* 5 empty stars */
+}
+
+.filled-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.filled-stars::before {
+    content: "★★★★★"; /* 5 filled stars */
+    color: gold;
+}
+
+/* Status Dropdown */
+.review-status {
+    padding: 6px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    background: white;
+    transition: 0.3s;
+}
+
+.review-status:hover {
+    border-color: #007bff;
+}
+
+/* Update Button */
+.update-btn {
+    background: #28a745;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.update-btn:hover {
+    background: #218838;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .reviews-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

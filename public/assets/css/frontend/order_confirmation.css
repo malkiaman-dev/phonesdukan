@@ -1,0 +1,408 @@
+.order_container {
+    max-width: 800px; /* Set a max width to keep the content readable */
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    font-size: 16px;
+    width: 100%; /* Make it responsive */
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+
+/* Card Styling */
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+
+.card-header {
+    background: linear-gradient(to right, #004080, #4681bb);
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.card-header i {
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+.card-body {
+    padding: 20px;
+    font-size: 1rem;
+}
+
+.card-body p {
+    margin-bottom: 10px;
+}
+
+/* Order Details Styling */
+.order-details h2, .customer-info h2, .shipping-info h2, .card-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.status-processing {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+/* Icons and Section Header */
+.card-header i {
+    font-size: 1.6rem;
+}
+h1 {
+    font-size: 2rem;
+    color: #004080;
+    margin-bottom: 20px;
+    text-align: center; /* Center the heading */
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+h2 i {
+    margin-right: 10px;
+    color: #004080;
+}
+
+h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    text-align: center;
+    margin: 5px 0;
+}
+
+strong {
+    font-weight: bold;
+    color: #3f7bb5;
+}
+
+.order-details {
+    margin: 20px 0px;
+}
+
+.customer-info {
+    margin: 20px 0px;
+}
+
+.order-items {
+    margin: 20px 0px;
+}
+
+/* General Styles for Thank You Section */
+.thank-you-message {
+    background: linear-gradient(to right, #004080, #4681bb);
+    color: #fff;
+    text-align: center;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.thank-you-icon {
+    font-size: 3rem; /* Large icon size */
+    margin-bottom: 20px;
+}
+
+.thank-you-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    color: #fff;
+}
+
+.thank-you-text {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #fefefe;
+}
+
+.highlighted {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ffde00;
+    text-transform: capitalize;
+    font-style: normal;
+}
+
+.thank-you-subtext {
+    font-size: 1rem;
+    font-weight: normal;
+    opacity: 0.9;
+    margin-top: 10px;
+    color: #fefefe;
+}
+
+.card-header h2 {
+    margin: 0px;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+thead {
+    background: linear-gradient(to right, #004080, #4681bb);
+    color: #fff;
+}
+
+table td img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    margin-right: 10px;
+}
+
+.table-price {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.summary {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.summary .total-price {
+    font-size: 1.5rem;
+    color: #27ae60;
+}
+
+/* Button Styling */
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    margin-top: 20px;
+    background-color: #004080;
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    display: block;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+/* Status Styling */
+.status-processing {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+/* Copy button style */
+.copy-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #004080;
+    font-size: 1.2rem;
+    margin-left: 10px;
+    transition: color 0.3s ease;
+}
+
+/* Hover effect on the copy button */
+.copy-btn:hover {
+    color: #218838; /* Change to a green color when hovered */
+}
+
+/* Copy icon style */
+.copy-btn i {
+    font-size: 1.2rem;
+}
+
+/* Order number style */
+#orderNumber {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+span.delivery-price {
+    color: #000;
+}
+
+/* Mobile Styling */
+@media (max-width: 768px) {
+    h1{
+        font-size: 27px;
+    }
+    /* Order Container */
+    .order_container {
+        padding: 20px; /* Reduced padding for mobile */
+        font-size: 14px;
+        margin: 0px;
+    }
+
+    /* Card Styling */
+    .card {
+        padding: 15px;
+    }
+
+    /* Card Header */
+    .card-header {
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+
+    .card-header i {
+        font-size: 1.3rem;
+    }
+
+    /* Card Body */
+    .card-body {
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    /* Table Styling */
+    table th, table td {
+        font-size: 0.9rem; /* Reduce font size in table */
+        padding: 8px;
+    }
+
+    table td img {
+        width: 50px;
+        height: 50px;
+    }
+
+    /* Thank You Section */
+    .thank-you-message {
+        padding: 20px;
+        font-size: 1rem;
+    }
+
+    .thank-you-title {
+        font-size: 1.8rem;
+    }
+
+    .thank-you-text {
+        font-size: 1rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    /* Text Styling */
+    .thank-you-title, .thank-you-text, .thank-you-subtext, .thank-you-message {
+        text-align: center; /* Center the text on smaller screens */
+    }
+
+    .thank-you-title {
+    font-size: 25px;
+}
+
+.order-details h2, .customer-info h2, .shipping-info h2{
+    font-size: 20px;
+}
+
+h2{
+    font-size: 20px;
+}
+    .highlighted {
+        font-size: 1.2rem;
+    }
+
+    .summary .total-price {
+        font-size: 1.2rem;
+    }
+
+    /* Responsive Table */
+    table {
+        font-size: 0.9rem; /* Smaller font for mobile */
+    }
+
+    /* Align Text to Center */
+    .order-details, .customer-info, .shipping-info {
+        text-align: center; /* Center text in these sections */
+    }
+
+    .card-body p {
+        text-align: center; /* Center the paragraphs */
+    }
+
+    .status-processing {
+        font-size: 1rem; /* Adjust font size */
+    }
+       /* Convert table to flex for mobile */
+       table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    /* Style for table header */
+    table th {
+        text-align: left; /* Header stays aligned to left */
+        font-size: 1.1rem;
+    }
+
+    /* Style for table data */
+    table td {
+        text-align: center; /* Data cells aligned to the right on mobile */
+        padding-left: 20px; /* Padding for a little space between text and right edge */
+        padding-right: 20px; /* Ensure data is centered properly */
+    }
+
+    /* Make each row look like a "card" on mobile */
+    table tr {
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #fff;
+    }
+
+    /* For a better mobile view, show data as label-style */
+    table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        color: #004080;
+    }
+
+    /* Header row style */
+    table thead {
+        display: none; /* Hide table header on mobile */
+    }
+}

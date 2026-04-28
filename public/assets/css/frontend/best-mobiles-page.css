@@ -1,0 +1,581 @@
+/* Main container */
+.best-mobiles-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+/* Sidebar */
+.shop-sidebar {
+    width: 310px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.best-mobiles-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+.product-description p {
+    font-size: 14px;
+    letter-spacing: 0.2px;
+}
+.sidebar-image {
+    width: 40px; /* Adjust the width as needed */
+    height: auto;
+    margin-right: 10px; /* Space between the image and the text */
+}
+.best-mobiles-option {
+    margin-bottom: 10px; /* Space between each option */
+}
+/* Right side content (products) */
+.shop-content-right {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+}
+
+/* Product container */
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+/* Each product item */
+.product-item {
+    display: flex;
+    align-items: flex-start;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    justify-content: center;
+}
+
+/* Product image */
+.product-image {
+    width: 160px;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+/* Ensure the product image container is positioned */
+.product-image {
+    position: relative; /* Required to position elements inside */
+    display: inline-block; /* Ensures it wraps around the image */
+}
+
+/* Style the like-number span */
+.like-number {
+    position: absolute;
+    top: 0px;
+    right: 150px;
+    background-color: red;
+    color: white;
+    font-size: 14px;
+    padding: 2px 10px;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+
+.product-thumbnail {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.product-top {
+    display: flex;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-details {
+    margin-left: 20px;
+}
+
+.product-title a {
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.product-title a:hover {
+    text-decoration: underline;
+}
+
+.product-price {
+    font-size: 14px;
+    color: #888;
+}
+
+.mkt-price {
+    font-size: 1.1rem;
+    color: #888;
+    text-decoration: line-through;
+    margin-right: 10px;
+}
+
+.discounted-price {
+    font-size: 1.2rem;
+    color: #27ae60;
+}
+/* Styling for the specifications section */
+#specs-bullet {
+    display: flex;
+    margin: 0px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    justify-content: space-between;
+}
+
+.specification {
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.specification img {
+    width: 35px; /* Image size */
+    height: 35px;
+}
+
+.spec-desc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.spec-desc strong {
+    font-size: 14px;
+    color: #333;
+}
+
+.spec-desc span {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0px;
+}
+
+.buy-button {
+    padding: 10px 15px;
+    background-color: #f39c12;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.buy-button:hover {
+    background-color: #e67e22;
+}
+
+.p-table {
+    padding: 20px;
+    background-color: #fff;
+    margin: 15px;
+    border-radius: 8px;
+}
+.p-table table {
+    width: 100%;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .p-table h2 {
+    text-align: center;
+}
+
+#use-cases, #pricing, #reviews, #faq, #buyers-guide{
+    text-align: center;
+}
+
+/* Section Styling */
+#buyers-guide {
+    padding: 20px;
+    background-color: #fff;
+    margin: 15px;
+    border-radius: 8px;
+}
+
+.buy-container {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    gap: 70px;
+}
+/* List Styling */
+#buyers-guide ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: inline-block; /* Align the list to the left */
+    text-align: left; /* Align text in the list to the left */
+}
+
+#buyers-guide ul li {
+    margin-bottom: 10px;
+    padding-left: 25px; /* Space for icon */
+    position: relative;
+}
+
+#buyers-guide ul li::before {
+    content: "✔"; /* Checkmark icon */
+    color: var(--primary-color);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 1.2rem;
+}
+
+/* Best Mobiles Under 30000 for Specific Needs Section */
+#use-cases {
+    background-color: #fff;
+    padding: 20px;
+    margin: 15px;
+    border-radius: 8px;
+}
+
+
+.case-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.use-case {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    width: 30%;
+}
+
+.use-case h3 {
+    font-size: 1.6rem;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+    text-align: center;
+}
+
+
+#use-cases a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+#use-cases a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+
+/* Pricing and Availability Section */
+#pricing {
+    background-color: #fff;
+    padding: 20px;
+    margin: 15px;
+    border-radius: 8px;
+}
+
+
+#pricing ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#pricing ul li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+}
+
+#pricing ul li strong {
+    font-weight: 600;
+    color: #333;
+}
+
+#pricing a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+#pricing a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Reviews Section */
+#reviews {
+    background-color: #fff;
+    padding: 20px;
+    margin: 15px;
+    border-radius: 8px;
+}
+
+
+/* Review Item Styling */
+#reviews p {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding-left: 20px;
+    border-left: 5px solid var(--primary-color);
+    background-color: #f8f8f8;
+    padding: 15px;
+}
+
+#reviews p strong {
+    font-weight: 600;
+    color: #333;
+}
+
+/* FAQ Section */
+#faq {
+    background-color: #fff;
+    padding: 20px;
+    margin: 15px;
+}
+
+
+/* Individual FAQ Item */
+.faq-item {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+
+/* Question Style */
+.faq-item h3 {
+    font-weight: 500;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+
+/* Answer Style */
+.faq-item p {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Note Styling */
+.p-note {
+    font-style: italic;
+    color: #666;
+    background-color: #f0f9ff;
+    border-left: 4px solid var(--primary-color);
+    padding: 15px 20px;
+    margin: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.p-note em {
+    font-style: italic;
+    font-weight: 400;
+}
+
+.p-note::before {
+    content: '⚡ ';
+    color: #007bff;
+    font-size: 1.5rem;
+    vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+    .best-mobiles-container {
+        padding: 10px;
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    .shop-content-right {
+        gap: 10px;
+    }
+    .product-item {
+        flex-direction: column;
+        padding: 5px;
+    }
+    .product-image {
+        width: 130px;
+        margin: 0px;
+    }
+    span.like-number {
+        right: 200px;
+        top: -12px;
+    }
+    .product-description p {
+        text-align: center;
+    }
+    .product-top {
+        flex-direction: column;
+    }
+    .buy-now {
+        margin: 14px 0px;
+    }
+    .product-details {
+        margin: 0px;
+        padding: 10px;
+    }
+    #specs-bullet {
+        padding: 10px;
+        margin: 10px 0px;
+    }
+    .spec-desc strong {
+        font-size: 11px;
+    }
+    
+    .spec-desc span {
+        font-size: 11px;
+    }
+    span.discounted-price {
+        font-size: 14px;
+    }
+    
+    span.mkt-price {
+        font-size: 14px;
+    }
+
+    .buy-now {
+        width: 100%; /* Make the container full width */
+    }
+    .buy-now .buy-button {
+        display: block; /* Ensure the button takes the full width */
+        width: 100%; /* Full-width button */
+        text-align: center; /* Center-align text */
+        padding: 10px; /* Add padding for better appearance */
+        box-sizing: border-box; /* Ensure padding doesn't affect width */
+    }
+    .shop-sidebar {
+        width: 100%;
+        border: 1px solid #ddd;
+    }
+    a.best-mobiles-link {
+        margin: 0px;
+    }
+    .p-table {
+        padding: 10px;
+    }
+    
+    #buyers-guide {
+        padding: 10px;
+    }
+    
+    .buy-container {
+        flex-direction: column;
+        gap: 0px;
+    }
+    
+    #use-cases {
+        padding: 10px;
+    }
+    
+    .case-container {
+        gap: 10px;
+    }
+    
+    .use-case {
+        width: 100%;
+    }
+    
+    #pricing {
+        padding: 10px;
+    }
+    
+    #reviews {
+        padding: 10px;
+    }
+    
+    #reviews p {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    
+    #faq {
+        padding: 10px;
+    }
+    
+    .faq-item {
+        margin-bottom: 10px;
+    }
+    
+    .p-note::before {
+        font-size: 14px;
+    }
+    
+    p.p-note {
+        padding: 10px;
+    }
+    .faq-item p {
+        font-size: 14px;
+    }
+}

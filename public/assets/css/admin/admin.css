@@ -1,0 +1,327 @@
+/* Global Styling */
+html, body {
+    overflow-x: hidden;
+    height: 100%;
+    margin-left: 64px;
+    padding: 20px 5px 0 20px;
+    background: #f8f9fa;
+}
+
+/* Navbar Styling */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 32px;
+    background: #212529;
+    color: white;
+    display: flex;
+    align-items: center;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+/* Navbar Container */
+.container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* Navbar Brand (Left Aligned) */
+.navbar-brand {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    margin: 0px;
+}
+
+/* Admin Dropdown (Right Aligned) */
+.admin-dropdown {
+    position: relative;
+}
+
+.admin-name {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.admin-name:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background: #343a40;
+    border-radius: 5px;
+    min-width: 180px;
+    display: none;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.admin-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+.dropdown-item i {
+    margin-right: 8px;
+}
+
+.dropdown-item:hover {
+    background: #495057;
+}
+
+/* Logout Item */
+.logout {
+    color: red;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 10px;
+    }
+
+    .admin-name {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .dropdown-menu {
+        top: 35px;
+        right: -10px;
+    }
+}
+
+/* Sidebar Styling */
+#sidebar {
+    position: fixed;
+    overflow: visible;
+    top: 32px;
+    left: 0;
+    width: 160px;
+    height: calc(100vh - 32px);
+    background: #212529;
+    padding-top: 20px;
+    box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+/* Sidebar Navigation */
+#sidebar .nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#sidebar .nav-item {
+    width: 100%;
+    margin: 3px 0;
+}
+
+#sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 400;
+    transition: background 0.3s;
+    margin: 0px;
+}
+
+#sidebar .nav-link i {
+    font-size: 14px;
+    margin-right: 8px;
+}
+
+#sidebar ul.nav li .nav-link:hover,
+#sidebar ul.nav li .nav-link.active {
+    background: #495057 ;
+    border-left: 4px solid #ffcc00 ; /* Gold highlight */
+    color: #fff ;
+}
+
+#sidebar {
+    overflow: visible;
+}
+/* Sidebar Submenu Hover Effect */
+.nav-item.has-submenu {
+    position: relative;
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: #212529;
+    border: 1px solid #ddd;
+    min-width: 200px;
+    z-index: 2000;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nav-item.has-submenu:hover .submenu {
+    display: block !important; /* Ensure hover works */
+}
+
+.submenu .nav-link {
+    padding: 10px 15px;
+    color: #333;
+    display: block; /* Ensure full link is clickable */
+}
+
+.submenu .nav-link:hover {
+    background: #e9ecef;
+}
+
+.submenu .nav-link.active {
+    background: #007bff;
+    color: white;
+}
+
+/* Logout Button */
+#sidebar .logout {
+    color: red;
+}
+
+span{
+    background-color: red; color: white !important; padding: 0px 9px; border-radius: 25px; font-size: 12px; margin: 0 5px;
+}
+/* Responsive Design */
+@media (max-width: 992px) {
+    #sidebar {
+        width: 200px;
+    }
+
+    #sidebar .nav-link {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        left: -250px; /* Hide sidebar on small screens */
+    }
+
+    #sidebar.active {
+        left: 0;
+    }
+}
+
+/* Main Content */
+.content {
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background: #f4f7fc;
+    min-height: 100vh;
+}
+
+/* Dashboard Title */
+.dashboard-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    background: linear-gradient(to right, #007bff, #0056b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Highlighted Admin Name */
+.dashboard-title .admin-name {
+    color: #ffcc00; /* Gold color to highlight */
+    font-weight: bold;
+    background: linear-gradient(to right, #ffcc00, #ff9900);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+span.admin-name {
+    font-size: 28px;
+}
+
+/* Dashboard Stats Container */
+.dashboard-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Stat Card */
+.stat-card {
+    flex: 1;
+    min-width: 250px;
+    max-width: 350px;
+    border-radius: 12px;
+    padding: 15px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Background Colors */
+.bg-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+}
+
+/* Card Header */
+.stat-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Card Body */
+.stat-body h4 {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 0;
+}

@@ -1,0 +1,260 @@
+/* manage orders */
+/* Order Management Styles */
+.ord-wrap {
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ord-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.ord-table-wrap {
+    overflow-x: auto;
+}
+
+.ord-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f9f9f9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ord-table th, .ord-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.ord-table th {
+    background: #007bff;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ord-table tbody tr:hover {
+    background: #f1f1f1;
+}
+
+.ord-select {
+    padding: 6px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background: #fff;
+}
+
+.ord-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.ord-btn.upd {
+    background: #28a745;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.ord-btn.upd:hover {
+    background: #218838;
+}
+
+.ord-btn.view {
+    background: #007bff;
+    color: #fff;
+}
+
+.ord-btn.view:hover {
+    background: #0056b3;
+}
+
+
+.modal-content {
+    background: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+/* Pop UP */
+.custom-order-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+    padding: 20px;
+}
+
+.custom-order-popup {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+
+    /* Scrollable Content */
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.custom-order-popup h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #007BFF;
+    text-align: center;
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 10px;
+}
+
+.custom-order-popup h3 {
+    font-size: 18px;
+    margin-top: 20px;
+    color: #444;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.custom-order-popup p {
+    font-size: 15px;
+    margin: 5px 0;
+    line-height: 1.6;
+}
+
+.custom-order-popup strong {
+    color: #222;
+}
+
+.custom-close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #777;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.custom-close-modal:hover {
+    color: #000;
+}
+
+.custom-order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.custom-order-table th, .custom-order-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.custom-order-table th {
+    background: #f8f8f8;
+    font-weight: bold;
+}
+
+.custom-order-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Add smooth scrollbar */
+.custom-order-popup::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-order-popup::-webkit-scrollbar-thumb {
+    background: #007BFF;
+    border-radius: 4px;
+}
+
+.custom-order-popup::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+@media (max-width: 480px) {
+    .custom-order-popup {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .custom-order-popup h2 {
+        font-size: 20px;
+    }
+
+    .custom-order-popup h3 {
+        font-size: 16px;
+    }
+
+    .custom-order-popup p {
+        font-size: 14px;
+    }
+
+    .custom-order-table th, .custom-order-table td {
+        font-size: 14px;
+    }
+}
+
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .order-popup {
+        width: 95%;
+    }
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,542 @@
+.nav-path {
+    background: #fff;
+    padding: calc(20px/3) 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.nav-path span {
+    margin: 0 auto;
+    max-width: 124rem;
+    padding: 0 2rem;
+    position: relative;
+    font-size: 13px;
+}
+
+.nav-path a {
+    font-size: 13px;
+    color: #2b6cb0;
+    text-decoration: none;
+}
+    .nav-path a:hover {
+        text-decoration: underline;
+    }
+    .nav-path span > * {
+        margin-right: 5px;
+    }
+
+.post-page-wrapper {
+    margin: 0 auto;
+    padding: 0px;
+    background-color: #fff;
+}
+
+.post-content-container {
+    display: flex;
+    gap: 20px;
+    margin: 0 20px;
+}
+
+/* Post Content */
+.post-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0,0,0,.1);
+}
+
+/* Post Meta */
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: var(--text-light-color);
+    font-family: Arial, sans-serif;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-light-color);
+}
+
+.post-meta .post-date {
+    color: var(--text-color);
+}
+
+.post-meta .category-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.post-meta .category-link:hover {
+    color: var(--primary-dark-color);
+}
+
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0px;
+    font-size: 0.9rem;
+    color: var(--text-light-color);
+    font-family: Arial, sans-serif;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light-color);
+}
+
+.post-meta .post-date {
+    color: var(--text-color);
+}
+
+.post-meta span {
+    margin: 0px;
+}
+
+.post-meta .category-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.post-meta .category-link:hover {
+    color: var(--primary-dark-color);
+}
+
+.post-meta .social-share {
+    display: flex;
+    gap: 10px;
+}
+
+.post-meta .social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.post-meta .social-share img {
+    width: 35px;
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.post-meta .social-icon:hover img {
+    background-color: var(--secondary-color); /* #fd8311 for hover background */
+    border-color: var(--secondary-dark-color); /* #e68a00 for hover border */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+}
+
+.post-meta .social-icon:hover {
+    transform: scale(1.15);
+}
+/* Post Image Wrapper */
+.post-img-wrapper {
+    position: relative;
+    margin: 0px;
+    overflow: hidden;
+    border-radius: 8px;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+/* Post Image */
+.post-img-wrapper img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+
+/* Post Caption */
+.post-caption {
+    font-size: 0.875rem;
+    color: #4a5568;
+    margin-top: 0.75rem;
+    font-style: italic;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+/* Post Body */
+.post-body {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #2d3748;
+    margin-top: 1.5rem;
+}
+
+/* General table styling */
+.tax-table {
+    width: 100%;
+    max-width: 600px; /* Limits width for readability */
+    margin: 10px auto; /* Minimal margin */
+    border-collapse: collapse;
+    border: 2px solid #eeeeee;
+    font-family: Arial, sans-serif;
+    background-color: #fff; /* Pure white background */
+}
+
+/* Table header */
+.tax-table thead {
+    background-color: #f0f0f0;
+    border-bottom: 2px solid #eee; /* Light gray border */
+}
+
+.tax-table th {
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #000; /* Black text */
+    text-align: left;
+}
+
+/* Table body */
+.tax-table tbody tr {
+    border-bottom: 1px solid #eee; /* Light gray separator */
+}
+
+table tr:nth-child(even) {
+    background-color: #f0f0f0;
+}
+
+
+.tax-table td {
+    padding: 10px;
+    font-size: 14px;
+    color: #333; /* Dark gray text for readability */
+}
+
+/* Remove hover effects for simplicity */
+.tax-table tbody tr:hover {
+    background-color: #fff; /* No hover color change */
+}
+
+
+/* Ensure tables stack cleanly */
+.tax-tables {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Minimal spacing between tables */
+}
+
+.table-container {
+    width: 100%;
+}
+
+/* Highlight for calculator interaction */
+.tax-table tbody tr.highlight {
+    background-color: #f5f5f5; /* Very light gray for highlight */
+}
+
+.pta-calculator {
+    background-color: var(--background-light-color); /* Light grey for a clean, distinct section */
+    border: 2px solid var(--primary-color); /* Dark blue border for professionalism and emphasis */
+    border-radius: 12px; /* Rounded corners for a modern look */
+    padding: 24px; /* Ample padding for spacious, user-friendly layout */
+    margin: 20px auto; /* Centered with balanced spacing */
+    max-width: 600px; /* Fixed width for readability on all devices */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth and focus */
+    text-align: center; /* Center-align content for symmetry */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+  }
+  
+  .pta-calculator:hover {
+    transform: translateY(-5px); /* Slight lift on hover to draw attention */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover for interactivity */
+  }
+  
+  
+  .pta-calculator .exchange-rate-info {
+    color: var(--text-color); /* Standard text color for readability */
+    font-size: 1rem; /* Slightly smaller for balance */
+    margin-bottom: 20px; /* Space before form */
+  }
+  
+  .pta-calculator .calculator-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Consistent spacing between form elements */
+  }
+  
+  .pta-calculator select,
+  .pta-calculator input[type="number"] {
+    width: 50%;
+    border: 1px solid var(--border-color); /* Light grey border for inputs */
+    border-radius: 8px; /* Rounded input fields */
+    padding: 12px; /* Comfortable padding for usability */
+    font-size: 1rem; /* Readable text size */
+    background-color: var(--background-color); /* White background for inputs */
+    color: var(--text-color); /* Dark text for contrast */
+    transition: border-color 0.3s ease; /* Smooth border transition */
+  }
+  
+  .pta-calculator select:focus,
+  .pta-calculator input[type="number"]:focus {
+    border-color: var(--secondary-color); /* Orange border on focus for visibility */
+    outline: none; /* Remove default outline */
+  }
+  
+  .pta-calculator .error-message {
+    color: #d32f2f; /* Red for error visibility */
+    font-size: 0.9rem; /* Slightly smaller for errors */
+    margin-top: 8px;
+  }
+  .passport-tax, .cnic-tax {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+  .pta-calculator .results {
+    background-color: var(--background-color); /* White background for results */
+    border: 1px solid var(--border-light-color); /* Light border for results */
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+  }
+  
+  .pta-calculator .results p {
+    color: var(--text-dark-color); /* Dark text for result emphasis */
+    font-size: 15px; /* Slightly larger for clarity */
+    margin: 8px 0; /* Balanced spacing */
+  }
+  
+  .pta-calculator .results span {
+    margin: 0px;
+    color: var(--secondary-color); /* Orange for tax amounts to stand out */
+    font-weight: bold; /* Bold for emphasis */
+  }
+  
+
+.pta-calculator .custom-price-wrapper.hidden {
+    display: none;
+}
+
+.pta-calculator .error-message {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 8px;
+}
+
+.cnic-check .content-area {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cnic-check .cnic-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.cnic-check label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.cnic-check input[type="text"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.cnic-check input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.cnic-check button {
+    padding: 12px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.cnic-check button:hover {
+    background: #0056b3;
+}
+
+.cnic-check .error-message {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #d32f2f;
+    text-align: center;
+}
+
+.cnic-check p {
+    font-size: 14px;
+    color: #555;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.cnic-check p strong {
+    color: #333;
+}
+
+.gallery-post-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+img.gallery-image {
+    overflow: hidden;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+    .post-page-wrapper {
+        padding: 0px;
+    }
+
+    .post-content {
+        padding: 5px 15px;
+        width: 100% !important;
+        border: none;
+         margin: 0px;
+    }
+
+    .post-content-container {
+        gap: 5px;
+        margin: 0px;
+    }
+
+    .post-body {
+        font-size: 1rem;
+    }
+
+    .nav-path span {
+        padding: 4px 10px;
+        margin: 0px;
+    }
+    
+    .nav-path {
+        display: flex;
+        padding: 0px;
+    }
+    
+    .nav-path span > * {
+        margin: 0px;
+    }
+    .tax-table {
+        margin: 5px 0; /* Minimal margin */
+    }
+
+    .tax-table thead {
+        display: none; /* Hide header on mobile */
+    }
+
+    .tax-table tbody,
+    .tax-table tr,
+    .tax-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .tax-table tr {
+        margin-bottom: 8px;
+        border-bottom: 1px solid #eee; /* Thin gray separator */
+        background-color: #fff;
+    }
+
+    .tax-table td {
+        padding: 6px 10px; /* Minimal padding */
+        font-size: 13px; /* Slightly smaller font */
+        text-align: left;
+        position: relative;
+    }
+
+    /* Simple labels */
+    .tax-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #333; /* Dark gray labels */
+        display: inline-block;
+        width: 35%; /* Narrow labels */
+        font-size: 12px; /* Small label font */
+    }
+
+    .tax-table td:nth-child(1):before {
+        content: "Value (USD): ";
+    }
+
+    .tax-table td:nth-child(2):before {
+        content: "Tax (PKR): ";
+    }
+    .pta-calculator {
+        max-width: 100%; /* Responsive width for smaller screens */
+        padding: 16px; /* Slightly less padding on mobile */
+      }
+    
+      .pta-calculator .exchange-rate-info {
+        font-size: 0.9rem; /* Slightly smaller text on mobile */
+      }
+}
+
+@media (max-width: 480px) {
+    .post-content h1 {
+        margin: 10px 0;
+    }
+    .post-meta .separator {
+        display: none; /* Hide pipe separators */
+    }
+    .post-meta {
+        font-size: 0.85rem;
+        gap: 0.5rem;
+        flex-direction: column;
+        margin: 5px 0px;
+    }
+
+    .post-img-wrapper {
+        margin: 0px;
+    }
+
+    .post-caption {
+        font-size: 0.8rem;
+    }
+
+    .pta-calculator {
+        padding: 16px;
+    }
+
+    .pta-calculator select,
+    .pta-calculator input[type="number"] {
+        width: 100%;
+        font-size: 0.75rem;
+        padding: 6px;
+    }
+
+    .results {
+        margin: 0px !important;
+        padding: 15px;
+    }
+
+    .results strong {
+        font-size: 13px;
+    }
+}
+
+/* SEO Meta Tags Styling (Optional for Visual Debugging) */
+head {
+    display: none; /* Ensure head content is not visible */
+}

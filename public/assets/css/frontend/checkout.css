@@ -1,0 +1,476 @@
+/* Wrapper to center the form */
+.checkout-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  background: #f8f9fa;
+}
+
+/* Form Container */
+.checkout-container {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 1440px;
+  margin: 20px;
+  padding: 20px;
+}
+
+.checkout-content {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.form-section {
+  flex: 1;
+  max-width: 50%;
+}
+
+.order-section {
+  flex: 1;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h1,
+h2,
+h3 {
+  text-align: left;
+  color: #333;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+/* Form Fields */
+.form-group {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+input#cod {
+  width: auto;
+}
+input,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #28a745;
+  outline: none;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s, border 0.3s;
+  margin-top: 10px;
+}
+
+.btn-primary {
+  background: #28a745;
+  color: white;
+  border: 2px solid #28a745;
+}
+
+.btn-primary:hover {
+  background: #218838;
+  border-color: #218838;
+}
+
+/* Modal Popup Styling */
+#validationModal,
+#phoneModal,
+#locationModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  white-space: pre-line;
+}
+
+#validationModal p,
+#phoneModal p,
+#locationModal p {
+  font-size: 16px;
+  color: #333;
+}
+
+#validationModal button,
+#phoneModal button,
+#locationModal button {
+  background: #004080;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+#validationModal button:hover,
+#phoneModal button:hover,
+#locationModal button:hover {
+  background: #e04e2a;
+}
+
+/* Input Focus Border Effect */
+input:focus,
+textarea:focus {
+  border: 2px solid #007bff !important;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+select[name="shipping_country"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  appearance: none; /* Removes default browser styling */
+  cursor: pointer;
+  transition: border-color 0.3s ease-in-out;
+}
+
+select[name="shipping_country"]:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+#locationModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 25px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+#locationModal h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+#locationModal p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+#locationModal button {
+  background-color: #004080;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+#locationModal button:hover {
+  background-color: #0056b3;
+}
+
+/* Smooth fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -55%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+#checkoutForm {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 100%;
+}
+
+.payment-container h2 {
+  text-align: left;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.copy-wrapper {
+  position: relative; /* For absolute tooltip positioning */
+  display: inline-block; /* Keeps it tight */
+}
+
+.copied-tooltip {
+  position: absolute;
+  top: -35px; /* Above the wrapper */
+  left: 100%;
+  transform: translateX(-50%);
+  background: #28a745; /* Green bg */
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+  pointer-events: none; /* No click interference */
+}
+
+.copied-tooltip.show {
+  opacity: 1;
+}
+
+.copy-icon.copied {
+  filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(130deg)
+    brightness(95%) contrast(80%); /* Turns to green */
+  transition: filter 0.3s ease;
+}
+
+.payment-method {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff;
+  padding: 10px 0;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  flex-direction: column;
+  align-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.order-notes {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.order-notes label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.order-notes textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  background: #004080;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.3s ease-in-out;
+}
+
+.order-summary {
+  margin: 0 0 20px 0;
+}
+h3 {
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.summary-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+  font-weight: bold;
+  font-size: 18px;
+  color: #004080;
+}
+
+.summary-item-label {
+  font-size: 14px;
+  font-weight: bold;
+  flex: 1;
+}
+
+.summary-item-value {
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+  flex: 1;
+}
+
+/* Style for product image in summary */
+.summary-item img {
+  border-radius: 5px;
+  margin-bottom: 5px;
+  max-width: 60px;
+  height: auto;
+}
+
+.submit-button:hover {
+  background: #0056b3;
+}
+
+.submit-button {
+  background: #004080;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.submit-button:hover {
+  background-color: #0056b3; /* Darker blue */
+  transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+  .checkout-wrapper {
+    margin: 0 !important; /* Full-width: No side margins */
+    padding: 0 !important;
+    width: 100vw; /* Viewport width for edge-to-edge */
+  }
+
+  .checkout-container {
+    margin: 0 !important; /* Ditch the 10px—full bleed */
+    padding: 10px; /* Light padding inside for breathing room */
+    width: 100%; /* Force full container width */
+    border-radius: 0; /* No rounded corners on mobile */
+    box-shadow: none; /* Flatten for native feel */
+  }
+
+  .checkout-content {
+    flex-direction: column;
+    gap: 15px; /* Tighter gap on small screens */
+  }
+
+  .form-section,
+  .order-section {
+    max-width: 100%;
+    width: 100%; /* Ensure sections span full */
+  }
+
+  .checkout-container h1 {
+    font-size: 25px;
+  }
+
+  #prepaid-details ol {
+    margin: 5px 0px 20px 0px;
+  }
+
+  #prepaid-details strong {
+    font-size: 14px;
+  }
+
+  .summary-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .summary-item {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .summary-item-value {
+    text-align: left;
+  }
+
+  .summary-item:last-child,
+  .summary-item:nth-last-child(2) {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Bonus: Ensure copy tooltip doesn't overflow on mobile */
+  .copy-wrapper {
+    position: relative;
+    display: block; /* Block for better mobile flow */
+    width: 100%;
+  }
+
+  .copied-tooltip {
+    top: -35px; /* Slight nudge up for smaller screens */
+    left: 62%; /* Center-ish on mobile */
+    transform: none; /* No translateX—let left handle it */
+    font-size: 11px; /* Smaller text */
+  }
+}

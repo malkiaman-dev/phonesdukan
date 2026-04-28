@@ -1,0 +1,184 @@
+/* Footer Styling for Phones Dukan Blog */
+/* Footer stays at bottom */
+footer {
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Remove any inherited container margins */
+footer .container {
+    margin-bottom: 0;
+}
+
+/* Ensure no extra space after copyright */
+footer .border-t {
+    margin-bottom: 0;
+    padding-bottom: 1rem; /* Matches Tailwind pt-4 */
+}
+footer {
+    line-height: 1.6;
+}
+
+footer .container {
+    padding: 1rem;
+}
+/* Grid layout for responsiveness */
+footer .grid {
+    display: grid;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    footer .grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    footer .grid {
+        grid-template-columns: 1fr;
+        text-align: left;
+    }
+    .social-icons {
+        justify-content: center; /* Center on mobile */
+    }
+}
+
+
+footer p.text-gray-400 {
+    font-size: 0.9rem;
+    color: #9ca3af; /* Tailwind's gray-400 */
+}
+
+/* Branding Section */
+.branding .logo-img {
+    max-width: 150px;
+    height: auto;
+    display: block;
+}
+
+.branding .contact-email {
+    font-size: 0.9rem;
+    color: #d1d5db; /* Tailwind gray-300 */
+    margin-top: 0.5rem;
+}
+
+.branding .contact-email a {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-email a {
+    color: #d1d5db;
+}
+
+/* Section headings */
+footer h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+/* Links */
+footer ul {
+    list-style: none;
+    padding: 0;
+}
+
+footer ul li a {
+    font-size: 0.95rem;
+    color: #d1d5db; /* Tailwind's gray-300 for better contrast */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer ul li a:hover {
+    color: #60a5fa; /* Matches Tailwind's hover:text-blue-400 */
+}
+
+/* Newsletter form */
+footer input[type="email"] {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 5px;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    background-color: #fff; /* Tailwind's gray-800 */
+    color: #ffffff;
+    transition: background-color 0.3s ease;
+}
+
+footer input[type="email"]::placeholder {
+    color: #9ca3af; /* Tailwind's gray-400 */
+}
+
+footer input[type="email"]:focus {
+    outline: none;
+    background-color: #374151; /* Tailwind's gray-700 */
+    box-shadow: 0 0 0 2px #60a5fa; /* Matches hover:text-blue-400 */
+}
+
+footer button {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: #2563eb; /* Tailwind's blue-600 */
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+footer button:hover {
+    background-color: #1d4ed8; /* Tailwind's blue-700 */
+}
+
+.social-icons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 1rem; /* Matches Tailwind space-x-4 */
+}
+
+.social-icons .footer-social-icon img {
+    width: 1.5rem; /* Matches previous SVG size (w-6) */
+    height: 1.5rem;
+    transition: opacity 0.3s ease;
+}
+
+.social-icons .footer-social-icon:hover img {
+    opacity: 0.8; /* Subtle hover effect */
+}
+
+/* Copyright section */
+footer .border-t {
+    border-color: #374151; /* Tailwind's gray-700 */
+}
+
+footer .text-gray-400 {
+    font-size: 0.85rem;
+    color: #9ca3af; /* Tailwind's gray-400 */
+}
+
+/* Animation for subtle interactivity */
+footer a,
+footer button {
+    transition-property: color, background-color;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+}
+
+/* High contrast for accessibility */
+footer {
+    background-color: #004080;
+    color: #ffffff;
+}
+/* Ensure sufficient contrast for text */
+footer p,
+footer li {
+    color: #d1d5db; /* Tailwind's gray-300 for better readability */
+}
