@@ -36,14 +36,73 @@ $products = $unique_products;
 
 ?>
 
-<div class="slideshow-container">
-    <div class="mySlides fade">
-        <img src="/public/assets/images/banner1.png" alt="mobile_accessories_category" style="width:100%">
-    </div>
+<section class="pd-hero" aria-label="Featured offers">
+    <div class="pd-hero-slider" data-pd-hero-slider tabindex="0">
+        <article class="pd-hero-slide is-active" data-pd-slide aria-hidden="false">
+            <div class="pd-hero-media">
+                <img src="/public/assets/images/hero/hero-slide-1.png" alt="Latest smartphones and accessories at Mobile Island" loading="eager" fetchpriority="high">
+            </div>
+            <div class="pd-hero-overlay">
+                <div class="pd-hero-content">
+                    <span class="pd-hero-eyebrow">Mobile Island Official</span>
+                    <h1>Premium Mobile Experience<br><span>Built for Pakistan</span></h1>
+                    <p>Explore genuine smartphones, accessories, and wearables with trusted after-sales support.</p>
+                    <div class="pd-hero-cta-wrap">
+                        <a href="/shop" class="pd-hero-btn pd-hero-btn-primary">Shop Now</a>
+                        <a href="/mobiles" class="pd-hero-btn pd-hero-btn-secondary">View Mobiles</a>
+                    </div>
+                </div>
+            </div>
+        </article>
 
-    <a class="prev" onclick="plusSlides(-1)">❮</a>
-    <a class="next" onclick="plusSlides(1)">❯</a>
-</div>
+        <article class="pd-hero-slide" data-pd-slide aria-hidden="true">
+            <div class="pd-hero-media">
+                <img src="/public/assets/images/hero/hero-slide-2.png" alt="Hot discounts on wireless earbuds and smart gadgets" loading="lazy">
+            </div>
+            <div class="pd-hero-overlay">
+                <div class="pd-hero-content">
+                    <span class="pd-hero-eyebrow">Limited Time Deals</span>
+                    <h2>Exclusive Offers<br><span>Up to 40% OFF</span></h2>
+                    <p>Catch this week’s best deals on smart watches, earbuds, and top mobile accessories.</p>
+                    <div class="pd-hero-cta-wrap">
+                        <a href="/smart-watches" class="pd-hero-btn pd-hero-btn-primary">Shop Watches</a>
+                        <a href="/wireless-earbuds" class="pd-hero-btn pd-hero-btn-secondary">Shop Earbuds</a>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="pd-hero-slide" data-pd-slide aria-hidden="true">
+            <div class="pd-hero-media">
+                <img src="/public/assets/images/hero/hero-slide-3.webp" alt="Fast delivery and warranty by Mobile Island" loading="lazy">
+            </div>
+            <div class="pd-hero-overlay">
+                <div class="pd-hero-content">
+                    <span class="pd-hero-eyebrow">Trusted Since Day One</span>
+                    <h2>Fast Delivery +<br><span>Warranty Promise</span></h2>
+                    <p>Enjoy fast shipping, 7-day replacement, and reliable nationwide support on every order.</p>
+                    <div class="pd-hero-cta-wrap">
+                        <a href="/contact-us/" class="pd-hero-btn pd-hero-btn-primary">Contact Us</a>
+                        <a href="/return-policy/" class="pd-hero-btn pd-hero-btn-secondary">Return Policy</a>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <button class="pd-hero-nav pd-hero-prev" type="button" aria-label="Previous slide" data-pd-hero-prev>
+            <span aria-hidden="true">❮</span>
+        </button>
+        <button class="pd-hero-nav pd-hero-next" type="button" aria-label="Next slide" data-pd-hero-next>
+            <span aria-hidden="true">❯</span>
+        </button>
+
+        <div class="pd-hero-dots" role="tablist" aria-label="Hero slide navigation">
+            <button class="pd-hero-dot is-active" type="button" role="tab" aria-label="Slide 1" aria-selected="true" data-pd-hero-dot="0"></button>
+            <button class="pd-hero-dot" type="button" role="tab" aria-label="Slide 2" aria-selected="false" data-pd-hero-dot="1"></button>
+            <button class="pd-hero-dot" type="button" role="tab" aria-label="Slide 3" aria-selected="false" data-pd-hero-dot="2"></button>
+        </div>
+    </div>
+</section>
 <?php include_once __DIR__ . '/ad/feed1.php'; ?>
 
 <div class="advantages-section">

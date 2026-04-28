@@ -1,27 +1,115 @@
-let slideIndex = 1;
-showSlides(slideIndex);
-
-function plusSlides(n) {
-  showSlides(slideIndex += n);
-}
-
-function currentSlide(n) {
-  showSlides(slideIndex = n);
-}
-
-function showSlides(n) {
-  let i;
-  let slides = document.getElementsByClassName("mySlides");
-  if (n > slides.length) { slideIndex = 1 }    
-  if (n < 1) { slideIndex = slides.length }
-  for (i = 0; i < slides.length; i++) {
-    slides[i].style.display = "none";  
-  }
-  slides[slideIndex - 1].style.display = "block";  
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("Scroller script loaded!");
+    const heroSlider = document.querySelector("[data-pd-hero-slider]");
+
+    if (heroSlider) {
+        const slides = Array.from(heroSlider.querySelectorAll("[data-pd-slide]"));
+        const dots = Array.from(heroSlider.querySelectorAll("[data-pd-hero-dot]"));
+        const prevBtn = heroSlider.querySelector("[data-pd-hero-prev]");
+        const nextBtn = heroSlider.querySelector("[data-pd-hero-next]");
+
+        let currentIndex = slides.findIndex((slide) => slide.classList.contains("is-active"));
+        if (currentIndex < 0) currentIndex = 0;
+
+        let autoplayTimer = null;
+        const autoplayDelay = 5000;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        const setActiveSlide = (index) => {
+            if (!slides.length) return;
+
+            const safeIndex = (index + slides.length) % slides.length;
+            currentIndex = safeIndex;
+
+            slides.forEach((slide, i) => {
+                const isActive = i === safeIndex;
+                slide.classList.toggle("is-active", isActive);
+                slide.setAttribute("aria-hidden", isActive ? "false" : "true");
+            });
+
+            dots.forEach((dot, i) => {
+                const isActive = i === safeIndex;
+                dot.classList.toggle("is-active", isActive);
+                dot.setAttribute("aria-selected", isActive ? "true" : "false");
+            });
+        };
+
+        const goNext = () => setActiveSlide(currentIndex + 1);
+        const goPrev = () => setActiveSlide(currentIndex - 1);
+
+        const stopAutoplay = () => {
+            if (autoplayTimer) {
+                clearInterval(autoplayTimer);
+                autoplayTimer = null;
+            }
+        };
+
+        const startAutoplay = () => {
+            if (slides.length < 2) return;
+            stopAutoplay();
+            autoplayTimer = setInterval(goNext, autoplayDelay);
+        };
+
+        if (prevBtn) {
+            prevBtn.addEventListener("click", () => {
+                goPrev();
+                startAutoplay();
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener("click", () => {
+                goNext();
+                startAutoplay();
+            });
+        }
+
+        dots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+                const index = Number(dot.getAttribute("data-pd-hero-dot"));
+                if (!Number.isNaN(index)) {
+                    setActiveSlide(index);
+                    startAutoplay();
+                }
+            });
+        });
+
+        heroSlider.addEventListener("mouseenter", stopAutoplay);
+        heroSlider.addEventListener("mouseleave", startAutoplay);
+        heroSlider.addEventListener("focusin", stopAutoplay);
+        heroSlider.addEventListener("focusout", startAutoplay);
+
+        heroSlider.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowRight") {
+                goNext();
+                startAutoplay();
+            } else if (event.key === "ArrowLeft") {
+                goPrev();
+                startAutoplay();
+            }
+        });
+
+        heroSlider.addEventListener("touchstart", (event) => {
+            touchStartX = event.changedTouches[0].screenX;
+        }, { passive: true });
+
+        heroSlider.addEventListener("touchend", (event) => {
+            touchEndX = event.changedTouches[0].screenX;
+            const swipeDistance = touchEndX - touchStartX;
+
+            if (Math.abs(swipeDistance) > 45) {
+                if (swipeDistance < 0) {
+                    goNext();
+                } else {
+                    goPrev();
+                }
+                startAutoplay();
+            }
+        }, { passive: true });
+
+        setActiveSlide(currentIndex);
+        startAutoplay();
+    }
 
     document.querySelectorAll(".product-grid-wrapper").forEach((wrapper) => {
         const container = wrapper.querySelector(".product-grid-container");
