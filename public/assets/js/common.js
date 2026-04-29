@@ -286,4 +286,17 @@ mobileSearchInput.addEventListener("keypress", function (event) {
         searchInput.value = "";
         closeButton.style.display = "none";
     });
+
+    // Yellow search button click — redirect to search results
+    const searchBtn = document.getElementById("desktop-search-btn");
+    if (searchBtn) {
+        searchBtn.addEventListener("click", function () {
+            let query = sanitizeInput(searchInput.value.trim());
+            if (query.length >= 2) {
+                window.location.href = window.pdWithBase(`/search/?query=${encodeURIComponent(query)}`);
+            } else {
+                searchInput.focus();
+            }
+        });
+    }
 });

@@ -128,7 +128,9 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
             </div>
         </div>
 
-        <div class="pd-trust-strip" role="region" aria-label="Store trust highlights">
+        <!-- stripe Section  -->
+
+        <!-- <div class="pd-trust-strip" role="region" aria-label="Store trust highlights">
             <div class="pd-trust-container">
                 <div class="pd-trust-item">
                     <span class="pd-trust-dot" aria-hidden="true">●</span>
@@ -143,7 +145,7 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
                     <p><strong>7 Days</strong> Replacement &amp; <strong>1 Year</strong> Warranty</p>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Sticky navbar only -->
@@ -167,6 +169,11 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
                     <div class="live-search-container">
                         <input type="text" id="search-input" placeholder="Search mobiles, accessories, earbuds..." autocomplete="off" aria-label="Search products">
                         <button id="desktop-close-results" type="button" aria-label="Clear search">✕</button>
+                        <button id="desktop-search-btn" class="pd-search-btn" type="button" aria-label="Search">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                        </button>
                         <ul id="search-results" aria-live="polite"></ul>
                     </div>
                 </div>
