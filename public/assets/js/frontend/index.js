@@ -243,5 +243,53 @@ document.addEventListener("DOMContentLoaded", function () {
             requestAnimationFrame(() => moveTo(currentIdx, false));
         }, { passive: true });
     }
+
+    // ── New Arrivals: Add to Cart ────────────────
+    document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".na-btn--cart");
+        if (!btn) return;
+
+        const productId = btn.getAttribute("data-product-id");
+        const unitPrice = parseFloat(btn.getAttribute("data-unit-price") || 0);
+        if (!productId) return;
+
+        const originalText = btn.textContent.trim();
+        btn.disabled = true;
+
+        fetch(window.pdWithBase("/app/Controllers/CartController.php"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: productId, quantity: 1, unit_price: unitPrice })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                btn.textContent = "Added ✓";
+
+                // Use the actual server total — never guess with +1
+                const items = Array.isArray(data.cart_items) ? data.cart_items : [];
+                const realTotal = items.reduce(
+                    (sum, item) => sum + (parseInt(item.total_quantity, 10) || 0), 0
+                );
+                if (realTotal > 0) {
+                    document.querySelectorAll(".cart-count").forEach(el => {
+                        el.textContent = realTotal;
+                    });
+                }
+
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }, 2000);
+            } else {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        });
+    });
 });
 

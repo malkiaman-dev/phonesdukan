@@ -475,3 +475,39 @@ h3.faq-question {
   padding: 20px;
   background-color: #f8f9fa;
 }
+
+/* ── PhonesDukan Branded Scrollbar ── */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #f7d117 #111111;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ffe65a 0%, #f7d117 60%, #d4af00 100%);
+  border-radius: 999px;
+  border: 2px solid #111111;
+  min-height: 40px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffe87a 0%, #f9d93a 60%, #c9a800 100%);
+}
+
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-width: 1px;
+  }
+}
