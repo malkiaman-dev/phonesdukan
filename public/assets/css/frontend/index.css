@@ -1747,50 +1747,9 @@ a.brandItem {
   box-sizing: border-box;
 }
 
-/* Add to Cart = black, Buy Now = white with black border */
-.mob-actions .na-btn--cart {
-  background: #111111;
-  color: #ffffff;
-  border-color: #111111;
-}
-
-.mob-actions .na-btn--cart:hover {
-  background: #2c2c2c;
-  border-color: #2c2c2c;
-  color: #f7d117;
-  transform: translateY(-1px);
-}
-
-.mob-actions .na-btn--buy {
-  background: #ffffff;
-  color: #111111;
-  border: 1.5px solid #111111;
-}
-
-.mob-actions .na-btn--buy:hover {
-  background: #f5f5f5;
-  color: #111111;
-  transform: translateY(-1px);
-}
-
-/* Sold out: full-width black */
-.mob-btn--soldout {
-  font-family: "Inter", Arial, sans-serif;
-  flex: 1;
-  height: 38px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #111111;
-  color: #ffffff;
-  border: 1.5px solid #111111;
-  cursor: not-allowed;
-  margin: 0;
-  width: 100%;
-}
+/* Mobile/Accessories/Powerbanks/Speakers now use the same shared
+   .na-btn / .na-btn--cart / .na-btn--buy / .na-btn--soldout styles
+   as Earbuds for a consistent homepage button appearance. */
 
 /* ═══════════════════════════════════════════════
    HEADPHONE PROMO STRIP (below mobiles section)
@@ -2007,11 +1966,7 @@ a.brandItem {
     padding: 4px 6px;
   }
 
-  /* Sold out button */
-  .mob-btn--soldout {
-    font-size: 11px;
-    height: 32px;
-  }
+  /* Sold out button uses the shared .na-btn--soldout sizing from .na-btn */
 }
 
 /* ═══════════════════════════════════════════════

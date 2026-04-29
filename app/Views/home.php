@@ -671,7 +671,7 @@ $products = $unique_products;
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions mob-actions">
+                            <div class="na-actions">
                                 <?php if (!$is_sold_out): ?>
                                     <button class="na-btn na-btn--cart"
                                         data-product-id="<?= (int)$product['product_id'] ?>"
@@ -683,7 +683,7 @@ $products = $unique_products;
                                         Buy Now
                                     </button>
                                 <?php else: ?>
-                                    <span class="na-btn mob-btn--soldout">Sold Out</span>
+                                    <span class="na-btn na-btn--soldout">Sold Out</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -779,7 +779,7 @@ $products = $unique_products;
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions mob-actions">
+                            <div class="na-actions">
                                 <?php if (!$is_sold_out): ?>
                                     <button class="na-btn na-btn--cart"
                                         data-product-id="<?= (int)$product['product_id'] ?>"
@@ -791,7 +791,7 @@ $products = $unique_products;
                                         Buy Now
                                     </button>
                                 <?php else: ?>
-                                    <span class="na-btn mob-btn--soldout">Sold Out</span>
+                                    <span class="na-btn na-btn--soldout">Sold Out</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -871,7 +871,7 @@ $products = $unique_products;
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions mob-actions">
+                            <div class="na-actions">
                                 <?php if (!$is_sold_out): ?>
                                     <button class="na-btn na-btn--cart"
                                         data-product-id="<?= (int)$product['product_id'] ?>"
@@ -883,7 +883,7 @@ $products = $unique_products;
                                         Buy Now
                                     </button>
                                 <?php else: ?>
-                                    <span class="na-btn mob-btn--soldout">Sold Out</span>
+                                    <span class="na-btn na-btn--soldout">Sold Out</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -962,7 +962,7 @@ $products = $unique_products;
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions mob-actions">
+                            <div class="na-actions">
                                 <?php if (!$is_sold_out): ?>
                                     <button class="na-btn na-btn--cart"
                                         data-product-id="<?= (int)$product['product_id'] ?>"
@@ -974,7 +974,7 @@ $products = $unique_products;
                                         Buy Now
                                     </button>
                                 <?php else: ?>
-                                    <span class="na-btn mob-btn--soldout">Sold Out</span>
+                                    <span class="na-btn na-btn--soldout">Sold Out</span>
                                 <?php endif; ?>
                             </div>
                         </div>
