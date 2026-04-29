@@ -859,7 +859,8 @@ h3.product-title {
 
 .na-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  padding-inline: 12px;
   margin-top: auto;
   padding-top: 4px;
 }
@@ -1806,7 +1807,7 @@ a.brandItem {
 .mob-promo-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
+  gap: 24px;
 }
 
 .mob-promo-item {
@@ -1828,14 +1829,20 @@ a.brandItem {
   transform: scale(1.02);
 }
 
+@media (max-width: 767px) {
+  .mob-promo-strip {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .mob-promo-strip .na-inner {
-    padding: 0;
+    padding: 0 16px;
   }
 
   .mob-promo-grid {
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: 16px;
   }
 }
 
@@ -1848,7 +1855,7 @@ a.brandItem {
 /* Desktop: titles centered by default — already set on .na-header */
 
 @media (max-width: 991px) {
-  /* na-section titles */
+  /* na-section titles: left-align on tablet/mobile */
   .na-header {
     justify-content: flex-start;
   }
@@ -1869,5 +1876,131 @@ a.brandItem {
   /* category-header used by old product-section blocks */
   .category-header {
     text-align: left;
+  }
+
+  /* Explore All button: smaller on tablet/mobile */
+  .na-view-all {
+    font-size: 12px;
+    padding: 6px 14px;
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .na-view-all {
+    font-size: 11px;
+    padding: 5px 11px;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   SMALL PHONE — 375px / 390px / 414px
+═══════════════════════════════════════════════ */
+@media (max-width: 430px) {
+
+  /* Section wrapper */
+  .na-section {
+    padding: 24px 0 20px;
+  }
+
+  .na-inner {
+    padding: 0 10px;
+  }
+
+  /* Header: give title room so it never overlaps the button */
+  .na-header {
+    margin-bottom: 14px;
+    align-items: center;
+  }
+
+  .na-title {
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    padding-right: 84px; /* reserves space for the Explore All pill */
+  }
+
+  /* Explore All: minimal footprint */
+  .na-view-all {
+    font-size: 10px;
+    padding: 5px 10px;
+    white-space: nowrap;
+  }
+
+  /* 2-column grid, tighter gap */
+  .na-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Image area: less padding so image isn't tiny */
+  .na-img-box {
+    padding: 10px;
+  }
+
+  /* Card body: tighter vertical rhythm */
+  .na-body {
+    padding: 8px 10px 10px;
+    gap: 5px;
+  }
+
+  /* Product name */
+  .na-name,
+  .na-name a {
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  /* Price */
+  .na-price--old {
+    font-size: 11px;
+  }
+
+  .na-price--new {
+    font-size: 13px;
+  }
+
+  /* Action row: let na-body padding handle the sides */
+  .na-actions {
+    gap: 6px;
+    padding-inline: 0;
+  }
+
+  /* Buttons */
+  .na-btn {
+    font-size: 11px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  /* Earbuds feature strip */
+  .eb-feature-strip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  /* Earbuds color row */
+  .eb-colors {
+    gap: 4px;
+  }
+
+  .eb-color-label {
+    font-size: 11px;
+  }
+
+  .eb-color-circle {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Mobiles feature strip */
+  .mob-feature-strip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  /* Sold out button */
+  .mob-btn--soldout {
+    font-size: 11px;
+    height: 32px;
   }
 }
