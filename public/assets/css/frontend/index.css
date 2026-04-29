@@ -2013,3 +2013,120 @@ a.brandItem {
     height: 32px;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   BRAND MARQUEE SLIDER
+═══════════════════════════════════════════════ */
+
+/* Override the old grid-based section layout */
+#shopByUniqueBrands {
+  background-color: #f8f8f8;
+  padding: 44px 0 36px;
+  overflow: hidden;
+}
+
+.shopByUniqueBrandsSection .na-inner {
+  margin-bottom: 28px;
+}
+
+/* Marquee viewport — clips the scrolling track */
+.brand-marquee-outer {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 6px 0;
+}
+
+/* Scrolling track — width determined by its children */
+.brand-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: max-content;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.brand-marquee-track:active {
+  cursor: grabbing;
+}
+
+/* Individual brand link */
+.brandItem {
+  flex-shrink: 0;
+  display: block;
+  text-decoration: none;
+}
+
+/* Brand logo card */
+.brandLogo {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 12px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 70px;
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.brandItem:hover .brandLogo {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.13);
+  transform: translateY(-3px);
+}
+
+.brandLogo img {
+  max-width: 110px;
+  max-height: 48px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  #shopByUniqueBrands {
+    padding: 32px 0 24px;
+  }
+
+  .shopByUniqueBrandsSection .na-inner {
+    margin-bottom: 20px;
+  }
+
+  .brand-marquee-track {
+    gap: 12px;
+  }
+
+  /* ~4 logos visible at 375px: 4×80 + 3×12 = 356px ✓ */
+  .brandLogo {
+    width: 80px;
+    height: 54px;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+
+  .brandLogo img {
+    max-width: 62px;
+    max-height: 34px;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-marquee-track { gap: 10px; }
+
+  .brandLogo {
+    width: 72px;
+    height: 50px;
+    padding: 7px 8px;
+  }
+
+  .brandLogo img {
+    max-width: 56px;
+    max-height: 30px;
+  }
+}
