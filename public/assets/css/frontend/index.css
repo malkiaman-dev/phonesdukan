@@ -248,7 +248,8 @@ img {vertical-align: middle;}
 /* ─── Category Section ─────────────────────────── */
 .cat-section {
   background: #ffffff;
-  padding: 52px 0 44px;
+  margin-top: 50px;
+  padding: 52px 0px 44px;
 }
 
 .pd-hero + .cat-section {

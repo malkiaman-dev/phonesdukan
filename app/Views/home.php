@@ -97,7 +97,7 @@ $products = $unique_products;
     </div>
 </section>
 
-<div class="advantages-section">
+<!-- <div class="advantages-section">
     <div class="advantages-container">
         <div class="advantage-item">
             <img src="/public/assets/images/customer-service.webp" alt="Customer Service">
@@ -120,7 +120,7 @@ $products = $unique_products;
             <p>7 Day Easy Return</p>
         </div>
     </div>
-</div>
+</div> -->
 
 <section class="cat-section">
     <div class="cat-inner">
