@@ -1098,19 +1098,20 @@ h3.product-title {
 
   .pd-hero-media img {
     object-fit: cover;
-    object-position: center center;
+    object-position: 68% center;
   }
 
   .pd-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.60) 45%, rgba(0, 0, 0, 0.25) 75%, rgba(0, 0, 0, 0.08) 100%);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.90) 0%, rgba(0, 0, 0, 0.75) 38%, rgba(0, 0, 0, 0.32) 62%, rgba(0, 0, 0, 0.04) 100%);
     align-items: center;
   }
 
   .pd-hero-content {
-    max-width: 100%;
-    padding: 16px 16px 40px;
+    max-width: 60%;
+    min-width: 200px;
+    padding: 16px 0 40px 16px;
   }
 
   .pd-hero-content h1,
@@ -1126,14 +1127,16 @@ h3.product-title {
   }
 
   .pd-hero-cta-wrap {
-    margin-top: 16px;
-    gap: 8px;
+    margin-top: 14px;
+    gap: 7px;
+    flex-wrap: nowrap;
   }
 
   .pd-hero-btn {
-    height: 40px;
-    padding: 0 14px;
-    font-size: 12px;
+    height: 38px;
+    padding: 0 11px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .pd-hero-nav {
@@ -1345,7 +1348,8 @@ a.brandItem {
 
 @media (max-width: 480px) {
   .pd-hero-content {
-    padding: 14px 12px 36px;
+    max-width: 65%;
+    padding: 14px 0 36px 12px;
   }
 
   .pd-hero-eyebrow {
