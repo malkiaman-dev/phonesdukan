@@ -44,7 +44,6 @@ $products = $unique_products;
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <span class="pd-hero-eyebrow">Mobile Island Official</span>
                     <h1>Premium Mobile Experience<br><span>Built for Pakistan</span></h1>
                     <p>Explore genuine smartphones, accessories, and wearables with trusted after-sales support.</p>
                     <div class="pd-hero-cta-wrap">
@@ -61,7 +60,6 @@ $products = $unique_products;
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <span class="pd-hero-eyebrow">Limited Time Deals</span>
                     <h2>Exclusive Offers<br><span>Up to 40% OFF</span></h2>
                     <p>Catch this week’s best deals on smart watches, earbuds, and top mobile accessories.</p>
                     <div class="pd-hero-cta-wrap">
@@ -78,7 +76,6 @@ $products = $unique_products;
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <span class="pd-hero-eyebrow">Trusted Since Day One</span>
                     <h2>Fast Delivery +<br><span>Warranty Promise</span></h2>
                     <p>Enjoy fast shipping, 7-day replacement, and reliable nationwide support on every order.</p>
                     <div class="pd-hero-cta-wrap">
@@ -354,7 +351,7 @@ $products = $unique_products;
 
 <div class="s-banner">
 <a href="/smart-watches" target="_blank">
-         <img src="/public/assets/images/smart-watch-banner.webp" alt="smart-watches_banner" class="banner-image">
+         <img src="/public/assets/images/smart-watch-banner.png" alt="smart-watches_banner" class="banner-image">
 </a>
 </div>
 
@@ -444,7 +441,7 @@ $products = $unique_products;
 
 <div class="s-banner">
 <a href="/wireless-earbuds" target="_blank">
-         <img src="/public/assets/images/wireless_earbuds_banner.webp" alt="wireless_earbuds_banner" class="banner-image">
+         <img src="/public/assets/images/wireless_earbuds_banner.png" alt="wireless_earbuds_banner" class="banner-image">
 </a>
 </div>
 
