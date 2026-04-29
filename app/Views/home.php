@@ -809,7 +809,7 @@ $products = $unique_products;
 
 <div class="s-banner s-banner--full">
 <a href="/power-banks" target="_blank">
-    <img src="/public/assets/images/powerbanks_banner.webp" alt="power_banks_banner" class="banner-image">
+    <img src="/public/assets/images/powerbanks_banner.png" alt="power_banks_banner" class="banner-image">
 </a>
 </div>
 
@@ -900,7 +900,7 @@ $products = $unique_products;
 
 <div class="s-banner s-banner--full">
 <a href="/bluetooth-speakers" target="_blank">
-    <img src="/public/assets/images/bluetooth_speakers_banner.webp" alt="bluetooth-speakers_banner" class="banner-image">
+    <img src="/public/assets/images/bluetooth_speakers_banner.png" alt="bluetooth-speakers_banner" class="banner-image">
 </a>
 </div>
 

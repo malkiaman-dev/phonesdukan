@@ -1794,8 +1794,9 @@ a.brandItem {
 ═══════════════════════════════════════════════ */
 
 .mob-promo-strip {
-  background: #000000;
+  background: #ffffff;
   padding: 0;
+  margin-bottom: 48px;
 }
 
 .mob-promo-strip .na-inner {
