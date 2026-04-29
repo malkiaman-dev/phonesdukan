@@ -385,11 +385,12 @@ img {vertical-align: middle;}
 /* ─── Responsive ────────────────────────────────── */
 @media (max-width: 768px) {
   .cat-section {
-    padding: 36px 0 30px;
+    margin-top: 0;
+    padding: 28px 0 24px;
   }
 
   .pd-hero + .cat-section {
-    padding-top: 28px;
+    padding-top: 24px;
   }
 
   .cat-inner {
