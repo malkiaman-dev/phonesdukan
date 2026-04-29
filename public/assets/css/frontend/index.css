@@ -1724,3 +1724,150 @@ a.brandItem {
     font-size: 11px;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   MOBILES SECTION — specific styles
+═══════════════════════════════════════════════ */
+
+.mob-feature-strip {
+  background: #f7d117;
+  color: #111111;
+  font-family: "Inter", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 8px;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Add to Cart = black, Buy Now = white with black border */
+.mob-actions .na-btn--cart {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.mob-actions .na-btn--cart:hover {
+  background: #2c2c2c;
+  border-color: #2c2c2c;
+  color: #f7d117;
+  transform: translateY(-1px);
+}
+
+.mob-actions .na-btn--buy {
+  background: #ffffff;
+  color: #111111;
+  border: 1.5px solid #111111;
+}
+
+.mob-actions .na-btn--buy:hover {
+  background: #f5f5f5;
+  color: #111111;
+  transform: translateY(-1px);
+}
+
+/* Sold out: full-width black */
+.mob-btn--soldout {
+  font-family: "Inter", Arial, sans-serif;
+  flex: 1;
+  height: 38px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111111;
+  color: #ffffff;
+  border: 1.5px solid #111111;
+  cursor: not-allowed;
+  margin: 0;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════
+   HEADPHONE PROMO STRIP (below mobiles section)
+═══════════════════════════════════════════════ */
+
+.mob-promo-strip {
+  background: #000000;
+  padding: 0;
+}
+
+.mob-promo-strip .na-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.mob-promo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.mob-promo-item {
+  display: block;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.mob-promo-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mob-promo-item:hover img {
+  transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+  .mob-promo-strip .na-inner {
+    padding: 0;
+  }
+
+  .mob-promo-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   GLOBAL SECTION TITLE ALIGNMENT
+   Desktop ≥992px: centered
+   Mobile  <992px: left-aligned
+═══════════════════════════════════════════════ */
+
+/* Desktop: titles centered by default — already set on .na-header */
+
+@media (max-width: 991px) {
+  /* na-section titles */
+  .na-header {
+    justify-content: flex-start;
+  }
+
+  .na-title {
+    text-align: left;
+  }
+
+  /* Shop by Categories title */
+  .cat-header {
+    text-align: left;
+  }
+
+  .cat-title {
+    text-align: left;
+  }
+
+  /* category-header used by old product-section blocks */
+  .category-header {
+    text-align: left;
+  }
+}

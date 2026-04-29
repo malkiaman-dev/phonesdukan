@@ -353,7 +353,7 @@ $products = $unique_products;
 
 <section class="na-section sw-na-section">
     <div class="na-inner">
-        <div class="na-header na-header--split">
+        <div class="na-header">
             <h2 class="na-title">Latest <span>Smart Watches</span></h2>
             <a href="/smart-watches" class="na-view-all">Explore All</a>
         </div>
@@ -605,92 +605,113 @@ $products = $unique_products;
     </div>
 </section>
 
-<div class="s-banner">
-    <a href="/mobiles" target="_blank">
+<div class="s-banner s-banner--full">
+<a href="/mobiles" target="_blank">
     <img src="/public/assets/images/mobiles_banner.webp" alt="mobiles" class="banner-image">
-    </a>
+</a>
 </div>
 
-<div class="product-section">
-    <div class="category-header">
-        <h2>Latest <span>Mobiles</span></h2>
-        <a href="/mobiles" class="view-all-btn">Explore All</a>
-    </div>
+<section class="na-section mob-na-section">
+    <div class="na-inner">
+        <div class="na-header">
+            <h2 class="na-title">Latest <span>Mobiles</span></h2>
+            <a href="/mobiles" class="na-view-all">Explore All</a>
+        </div>
 
-    <div class="product-grid-wrapper">
-        <button class="scroll-btn prev-btn" disabled>&lt;</button>
-        <div class="product-grid-container">
-        <div class="product-grid">
-    <?php
-    // Fetch products from category 2
-    $products = $productModel->getCategory2Products(12);
+        <div class="na-grid">
+            <?php
+            $products = $productModel->getCategory2Products(4);
 
-    if (!empty($products)):
-        foreach ($products as $product):
-            // Updated URL structure
-            $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                . htmlspecialchars($product['brand_slug']) . '/'
-                . htmlspecialchars($product['product_slug']);
+            if (!empty($products)):
+                foreach ($products as $product):
+                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
+                        . htmlspecialchars($product['brand_slug']) . '/'
+                        . htmlspecialchars($product['product_slug']);
 
-            $product_price = '';
+                    $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
+                    $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
+                    $discount_pct = ($has_sale && (float)$product['regular_price'] > 0)
+                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
+                        : 0;
+                    $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
+                    $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
+                    $product_image = !empty($product['image_url'])
+                        ? htmlspecialchars($product['image_url'])
+                        : '/public/assets/images/Phones_dukan_favicon.png';
+                    ?>
 
-            if (!empty($product['sale_price']) && !empty($product['regular_price'])) {
-                $product_price = '<span class="regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> '
-                    . '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-            } elseif (!empty($product['regular_price'])) {
-                $product_price = '<span class="regular-price new-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-            } elseif (!empty($product['sale_price'])) {
-                $product_price = '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-            } else {
-                $product_price = '<span class="no-price">Price Not Available</span>';
-            }
+                    <div class="na-card mob-card">
+                        <?php if ($is_sold_out): ?>
+                            <span class="na-badge na-badge--sold">Sold Out</span>
+                        <?php elseif ($discount_pct > 0): ?>
+                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
+                        <?php endif; ?>
 
-            ?>
+                        <a href="<?= $product_url ?>" class="na-img-link">
+                            <div class="na-img-box">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                            </div>
+                        </a>
 
-            <div class="product-card">
-                <div class="tagwrap">
-                    <?php if ($product['stock_quantity'] == 0): ?>
-                        <div class="sold-out">
-                            <span>Sold Out</span>
-                        </div>
-                    <?php elseif (!empty($product['sale_price'])): ?>
-                        <div class="pro-tags">
-                            <span>Sale</span>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                        <div class="mob-feature-strip">Premium Specs | Best Value</div>
 
-                <a href="<?php echo $product_url; ?>">
-                    <div class="product-img-wrapper">
-                        <div class="product-img">
-                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
+                        <div class="na-body">
+                            <h3 class="na-name">
+                                <a href="<?= $product_url ?>"><?= $product_name ?></a>
+                            </h3>
+
+                            <div class="na-price">
+                                <?php if ($has_sale): ?>
+                                    <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                                    <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                                <?php elseif (!empty($product['regular_price'])): ?>
+                                    <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
+                                <?php else: ?>
+                                    <span class="na-price--na">Price N/A</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="na-actions mob-actions">
+                                <?php if (!$is_sold_out): ?>
+                                    <button class="na-btn na-btn--cart"
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
+                                        Add to Cart
+                                    </button>
+                                    <button class="na-btn na-btn--buy buy-button"
+                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        Buy Now
+                                    </button>
+                                <?php else: ?>
+                                    <span class="na-btn mob-btn--soldout">Sold Out</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
-                </a>
-
-                <h3 class="product-title">
-                    <a href="<?php echo $product_url; ?>">
-                        <?php echo htmlspecialchars($product['product_name']); ?>
-                    </a>
-                </h3>
-
-                <span class="prodline"></span>
-
-                <div class="prodprice price-line">
-    <?php echo $product_price; ?>
-</div>
-
-            </div>
-        <?php
-        endforeach;
-    else:
-        echo '<p>No products found in this category.</p>';
-    endif;
-    ?>
-</div>
-
+                <?php
+                endforeach;
+            else:
+                echo '<p style="grid-column:1/-1;text-align:center;color:#888;">No mobiles found.</p>';
+            endif;
+            ?>
         </div>
-        <button class="scroll-btn next-btn">&gt;</button>
+    </div>
+</section>
+
+<!-- HEADPHONE PROMO STRIP -->
+<div class="mob-promo-strip">
+    <div class="na-inner">
+        <div class="mob-promo-grid">
+            <a href="/bluetooth-headphones" class="mob-promo-item">
+                <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
+            </a>
+            <a href="/bluetooth-headphones" class="mob-promo-item">
+                <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
+            </a>
+            <a href="/bluetooth-headphones" class="mob-promo-item">
+                <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
+            </a>
+        </div>
     </div>
 </div>
 
