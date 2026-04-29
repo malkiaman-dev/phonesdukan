@@ -607,7 +607,7 @@ $products = $unique_products;
 
 <div class="s-banner s-banner--full">
 <a href="/mobiles" target="_blank">
-    <img src="/public/assets/images/mobiles_banner.webp" alt="mobiles" class="banner-image">
+    <img src="/public/assets/images/mobiles_banner.png" alt="mobiles" class="banner-image">
 </a>
 </div>
 
@@ -717,7 +717,7 @@ $products = $unique_products;
 
 <div class="s-banner s-banner--full">
 <a href="/mobile-accessories" target="_blank">
-    <img src="/public/assets/images/mobiles_accessories_banner.webp" alt="mobiles_accessories_banner" class="banner-image">
+    <img src="/public/assets/images/mobiles_accessories_banner.png" alt="mobiles_accessories_banner" class="banner-image">
 </a>
 </div>
 
