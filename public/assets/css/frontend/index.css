@@ -843,6 +843,13 @@ h3.product-title {
   margin: 0;
 }
 
+.na-btn--cart.na-btn--added {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #86efac;
+  cursor: not-allowed;
+}
+
 /* Trust strip */
 .na-trust {
   background: #ffffff;
@@ -873,10 +880,14 @@ h3.product-title {
 }
 
 .na-trust-icon {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   color: #111111;
+  padding: 9px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 50%;
+  box-sizing: border-box;
 }
 
 .na-trust-text {

@@ -96,24 +96,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 let subtotalTd = tr.querySelector('td:nth-child(4)');
                 if (subtotalTd) subtotalTd.textContent = `PKR ${Number(updated.subtotal).toFixed(2)}`;
 
-                let discountTd = tr.querySelector('.discount-cell');
                 let attrP = tr.querySelector('.attribute');
                 if (attrP) attrP.textContent = updated.attribute_value || 'No attribute available';
+
                 if (data.cart_summary) {
                     document.querySelector('#total-price').textContent = `PKR ${data.cart_summary.total}`;
                     let discountText = data.cart_summary.discount_rate === 7 ? '7% OFF' : data.cart_summary.discount_rate === 5 ? '5% OFF' : '0% OFF';
-                    
                     document.querySelectorAll('.discount-cell').forEach(cell => {
-                        // Create a <p> tag to wrap the discount text
                         let pTag = document.createElement('p');
                         pTag.textContent = discountText;
-                        
-                        // Clear the existing content and append the new <p> tag
                         cell.innerHTML = '';
                         cell.appendChild(pTag);
                     });
-                
                 }
+
+                // Sync header cart badge from live DOM
+                syncCartBadge();
 
                 Swal.fire({
                     title: "Updated!",

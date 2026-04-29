@@ -264,9 +264,12 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
+                // Permanently mark as added — no reset
                 btn.textContent = "Added ✓";
+                btn.disabled = true;
+                btn.classList.add("na-btn--added");
 
-                // Use the actual server total — never guess with +1
+                // Sync header badge from server total
                 const items = Array.isArray(data.cart_items) ? data.cart_items : [];
                 const realTotal = items.reduce(
                     (sum, item) => sum + (parseInt(item.total_quantity, 10) || 0), 0
@@ -276,11 +279,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         el.textContent = realTotal;
                     });
                 }
-
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.textContent = originalText;
-                }, 2000);
             } else {
                 btn.disabled = false;
                 btn.textContent = originalText;

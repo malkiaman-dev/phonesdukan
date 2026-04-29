@@ -184,7 +184,7 @@ $products = $unique_products;
 
         <div class="na-grid">
             <?php if (!empty($products)): ?>
-                <?php foreach ($products as $product): ?>
+                <?php foreach (array_slice($products, 0, 4) as $product): ?>
                 <?php
                 $product_name   = !empty($product['product_name'])   ? htmlspecialchars($product['product_name'])   : 'Unnamed Product';
                 $category_slug  = !empty($product['category_slug'])  ? htmlspecialchars($product['category_slug'])  : 'unknown-category';
