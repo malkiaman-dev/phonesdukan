@@ -648,13 +648,13 @@ h3.product-title {
   }
 
   .pd-hero-overlay {
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.62) 42%, rgba(0, 0, 0, 0.22) 78%, rgba(0, 0, 0, 0) 100%);
-    align-items: flex-end;
+    background: linear-gradient(160deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.2) 100%);
+    align-items: center;
   }
 
   .pd-hero-content {
     max-width: 100%;
-    padding: 18px 16px 60px;
+    padding: 24px 16px;
   }
 
   .pd-hero-content h1,

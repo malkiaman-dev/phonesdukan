@@ -89,13 +89,6 @@ $products = $unique_products;
             </div>
         </article>
 
-        <button class="pd-hero-nav pd-hero-prev" type="button" aria-label="Previous slide" data-pd-hero-prev>
-            <span aria-hidden="true">❮</span>
-        </button>
-        <button class="pd-hero-nav pd-hero-next" type="button" aria-label="Next slide" data-pd-hero-next>
-            <span aria-hidden="true">❯</span>
-        </button>
-
         <div class="pd-hero-dots" role="tablist" aria-label="Hero slide navigation">
             <button class="pd-hero-dot is-active" type="button" role="tab" aria-label="Slide 1" aria-selected="true" data-pd-hero-dot="0"></button>
             <button class="pd-hero-dot" type="button" role="tab" aria-label="Slide 2" aria-selected="false" data-pd-hero-dot="1"></button>
