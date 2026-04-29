@@ -2,19 +2,15 @@ img {vertical-align: middle;}
 
 /* ---------------- Premium Hero Slider ---------------- */
 .pd-hero {
-  padding: 16px 20px 10px;
-  background: #f8f8f8;
+  padding: 0;
+  margin: 0;
+  background: #0e0e0e;
 }
 
 .pd-hero-slider {
-  max-width: 1320px;
-  margin: 0 auto;
   position: relative;
-  border-radius: 26px;
   overflow: hidden;
   background: #0e0e0e;
-  border: 1px solid rgba(247, 209, 23, 0.28);
-  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
 }
 
 .pd-hero-slide {
@@ -642,14 +638,6 @@ h3.product-title {
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-  .pd-hero {
-    padding: 12px 10px 8px;
-  }
-
-  .pd-hero-slider {
-    border-radius: 18px;
-  }
-
   .pd-hero-media {
     min-height: 300px;
   }
