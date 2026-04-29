@@ -1297,29 +1297,31 @@ a.view-all-btn {
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
-  /* Hero: explicit height forces img height:100% to resolve, filling the container */
+  /* Hero mobile: full-width cover banner, content pinned top-left */
   .pd-hero-media {
     aspect-ratio: unset;
     min-height: unset;
-    height: 420px;
+    height: 300px;
   }
 
   .pd-hero-media img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    object-position: 68% center;
+    object-position: 60% center;
   }
 
   .pd-hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.90) 0%, rgba(0, 0, 0, 0.75) 38%, rgba(0, 0, 0, 0.32) 62%, rgba(0, 0, 0, 0.04) 100%);
-    align-items: center;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.72) 40%, rgba(0, 0, 0, 0.28) 65%, rgba(0, 0, 0, 0) 80%);
+    align-items: flex-start;
   }
 
   .pd-hero-content {
-    max-width: 60%;
-    min-width: 200px;
-    padding: 16px 0 40px 16px;
+    max-width: 62%;
+    min-width: 180px;
+    padding: 24px 0 0 16px;
   }
 
   .pd-hero-content h1,
@@ -1898,6 +1900,11 @@ a.brandItem {
    SMALL PHONE — 375px / 390px / 414px
 ═══════════════════════════════════════════════ */
 @media (max-width: 430px) {
+
+  /* Hero: slightly shorter for small phones, still full-width cover */
+  .pd-hero-media {
+    height: 260px;
+  }
 
   /* Section wrapper */
   .na-section {
