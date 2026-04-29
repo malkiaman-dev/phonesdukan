@@ -2029,6 +2029,15 @@ a.brandItem {
   margin-bottom: 28px;
 }
 
+/* Keep brand title centered on all screen sizes */
+.shopByUniqueBrandsSection .na-header {
+  justify-content: center;
+}
+
+.shopByUniqueBrandsSection .na-title {
+  text-align: center;
+}
+
 /* Marquee viewport — clips the scrolling track */
 .brand-marquee-outer {
   width: 100%;
