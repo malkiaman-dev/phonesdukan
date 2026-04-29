@@ -883,14 +883,15 @@ h3.product-title {
 }
 
 .na-btn--cart {
-  background: #ffffff;
-  color: #111111;
-  border: 1.5px solid #d0d0d0;
+  background: #111111;
+  color: #ffffff;
+  border: 1.5px solid #111111;
 }
 
 .na-btn--cart:hover {
-  border-color: #f7d117;
-  background: #fffbe6;
+  background: #2c2c2c;
+  border-color: #2c2c2c;
+  color: #f7d117;
   transform: translateY(-1px);
 }
 
@@ -901,15 +902,15 @@ h3.product-title {
 }
 
 .na-btn--buy {
-  background: #111111;
-  color: #ffffff;
-  border: 1.5px solid #111111;
+  background: #ffffff;
+  color: #111111;
+  border: 1.5px solid #d0d0d0;
 }
 
 .na-btn--buy:hover {
-  background: #2c2c2c;
-  border-color: #2c2c2c;
-  color: #f7d117;
+  border-color: #f7d117;
+  background: #fffbe6;
+  color: #111111;
   transform: translateY(-1px);
 }
 
@@ -1625,31 +1626,7 @@ a.brandItem {
   flex-shrink: 0;
 }
 
-/* Earbuds buttons: Add to Cart = black, Buy Now = white with black border */
-.eb-actions .na-btn--cart {
-  background: #111111;
-  color: #ffffff;
-  border-color: #111111;
-}
-
-.eb-actions .na-btn--cart:hover {
-  background: #2c2c2c;
-  border-color: #2c2c2c;
-  color: #f7d117;
-  transform: translateY(-1px);
-}
-
-.eb-actions .na-btn--buy {
-  background: #ffffff;
-  color: #111111;
-  border: 1.5px solid #111111;
-}
-
-.eb-actions .na-btn--buy:hover {
-  background: #f5f5f5;
-  color: #111111;
-  transform: translateY(-1px);
-}
+/* Earbuds section intentionally uses the same .na-btn styles as other sections */
 
 /* ═══════════════════════════════════════════════
    CATEGORY IMAGE STRIP (below earbuds section)
