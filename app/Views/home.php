@@ -123,51 +123,55 @@ $products = $unique_products;
     </div>
 </div>
 
-<div class="category-section">
-    <div class="category-container">
-        <div class="category-header">
-            <h2>EXPLORE BY <span>CATEGORIES</span></h2>
+<section class="cat-section">
+    <div class="cat-inner">
+        <div class="cat-header">
+            <h2 class="cat-title">Shop by <span>Categories</span></h2>
         </div>
-        <div class="category-grid">
-            <div class="h-category-item">
-                <a href="/mobiles">
-                    <img src="/public/assets/images/mobile_category.webp" alt="mobile_category">
-                    <p>Mobiles</p>
+        <div class="cat-track-wrap">
+            <button class="cat-arrow cat-prev" aria-label="Previous categories">&#8249;</button>
+            <div class="cat-track" id="cat-track">
+                <a href="/mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
+                    <div class="cat-img-box">
+                        <img src="/public/assets/images/mobile_category.webp" alt="Mobiles">
+                    </div>
+                    <p class="cat-label">Mobiles</p>
+                </a>
+                <a href="/smart-watches" class="cat-card" style="--cat-bg:#d1fae5;">
+                    <div class="cat-img-box">
+                        <img src="/public/assets/images/smartwatches_category.webp" alt="Smartwatches">
+                    </div>
+                    <p class="cat-label">Smartwatches</p>
+                </a>
+                <a href="/wireless-earbuds" class="cat-card" style="--cat-bg:#ede9fe;">
+                    <div class="cat-img-box">
+                        <img src="/public/assets/images/wireless_earbuds.webp" alt="Wireless Earbuds">
+                    </div>
+                    <p class="cat-label">Wireless Earbuds</p>
+                </a>
+                <a href="/mobile-accessories" class="cat-card" style="--cat-bg:#fde8d8;">
+                    <div class="cat-img-box">
+                        <img src="/public/assets/images/mobile_accessories.webp" alt="Accessories">
+                    </div>
+                    <p class="cat-label">Accessories</p>
+                </a>
+                <a href="/power-banks" class="cat-card" style="--cat-bg:#fef9c3;">
+                    <div class="cat-img-box">
+                        <img src="/public/assets/images/power-banks.webp" alt="Power Banks">
+                    </div>
+                    <p class="cat-label">Power Banks</p>
+                </a>
+                <a href="/bluetooth-speakers" class="cat-card" style="--cat-bg:#fce7f3;">
+                    <div class="cat-img-box">
+                        <img src="/public/assets/images/bluetooth-speakers.webp" alt="Bluetooth Speakers">
+                    </div>
+                    <p class="cat-label">Bluetooth Speakers</p>
                 </a>
             </div>
-            <div class="h-category-item">
-                <a href="/smart-watches">
-                    <img src="/public/assets/images/smartwatches_category.webp" alt="smartwatches_category">
-                    <p>Smartwatches</p>
-                </a>
-            </div>
-            <div class="h-category-item">
-                <a href="/wireless-earbuds">
-                    <img src="/public/assets/images/wireless_earbuds.webp" alt="wireless_earbuds">
-                    <p>Wireless Earbuds</p>
-                </a>
-            </div>
-            <div class="h-category-item">
-                <a href="/mobile-accessories">
-                    <img src="/public/assets/images/mobile_accessories.webp" alt="mobile_accessories_category">
-                    <p>Accessories</p>
-                </a>
-            </div>
-            <div class="h-category-item">
-                <a href="/power-banks">
-                    <img src="/public/assets/images/power-banks.webp" alt="power-banks_category">
-                    <p>Power Banks</p>
-                </a>
-            </div>
-            <div class="h-category-item">
-                <a href="/bluetooth-speakers">
-                    <img src="/public/assets/images/bluetooth-speakers.webp" alt="bluetooth_speakers">
-                    <p>Bluetooth Speakers</p>
-                </a>
-            </div>
+            <button class="cat-arrow cat-next" aria-label="Next categories">&#8250;</button>
         </div>
     </div>
-</div>
+</section>
 
 <div class="product-section">
     <div class="category-header">

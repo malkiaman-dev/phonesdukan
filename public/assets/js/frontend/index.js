@@ -159,5 +159,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
         updateButtonState(container, prevBtn, nextBtn, grid); // Initial check
     });
+
+    // ── Category carousel ───────────────────────────
+    const catTrack = document.getElementById("cat-track");
+    const catPrev  = document.querySelector(".cat-prev");
+    const catNext  = document.querySelector(".cat-next");
+
+    if (catTrack && catPrev && catNext) {
+        const getScrollAmount = () => catTrack.offsetWidth * 0.55;
+
+        catNext.addEventListener("click", () => {
+            catTrack.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
+        });
+
+        catPrev.addEventListener("click", () => {
+            catTrack.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
+        });
+    }
 });
 
