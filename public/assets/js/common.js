@@ -26,12 +26,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const headerStack = document.querySelector(".pd-header-stack");
 
     if (headerStack) {
-        const setHeaderScrolledState = () => {
-            headerStack.classList.toggle("is-scrolled", window.scrollY > 8);
+        const syncBodyPadding = () => {
+            document.body.style.paddingTop = headerStack.offsetHeight + "px";
         };
 
+        const setHeaderScrolledState = () => {
+            headerStack.classList.toggle("is-scrolled", window.scrollY > 10);
+            syncBodyPadding();
+            // Re-sync after trust-strip collapse transition (0.35s)
+            setTimeout(syncBodyPadding, 380);
+        };
+
+        syncBodyPadding();
         setHeaderScrolledState();
         window.addEventListener("scroll", setHeaderScrolledState, { passive: true });
+        window.addEventListener("resize", syncBodyPadding, { passive: true });
+        // Re-sync after fonts load (Google Fonts swap can shift trust strip height)
+        window.addEventListener("load", syncBodyPadding, { once: true });
     }
 
     // Open sidebar function (this works for both mobile and desktop)

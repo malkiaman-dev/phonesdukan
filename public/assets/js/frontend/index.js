@@ -19,19 +19,37 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!slides.length) return;
 
             const safeIndex = (index + slides.length) % slides.length;
-            currentIndex = safeIndex;
+            if (safeIndex === currentIndex) return;
 
-            slides.forEach((slide, i) => {
-                const isActive = i === safeIndex;
-                slide.classList.toggle("is-active", isActive);
-                slide.setAttribute("aria-hidden", isActive ? "false" : "true");
-            });
+            const outgoing = slides[currentIndex];
+            const incoming = slides[safeIndex];
+
+            // Exit current slide to the left
+            outgoing.classList.remove("is-active");
+            outgoing.classList.add("is-exiting");
+            outgoing.setAttribute("aria-hidden", "true");
+
+            // Bring new slide in from the right
+            incoming.classList.remove("is-exiting");
+            incoming.classList.add("is-active");
+            incoming.setAttribute("aria-hidden", "false");
+
+            currentIndex = safeIndex;
 
             dots.forEach((dot, i) => {
                 const isActive = i === safeIndex;
                 dot.classList.toggle("is-active", isActive);
                 dot.setAttribute("aria-selected", isActive ? "true" : "false");
             });
+
+            // After transition, snap outgoing back off-screen (no animation)
+            const done = outgoing;
+            setTimeout(() => {
+                done.style.transition = "none";
+                done.classList.remove("is-exiting");
+                void done.offsetWidth;
+                done.style.transition = "";
+            }, 700);
         };
 
         const goNext = () => setActiveSlide(currentIndex + 1);

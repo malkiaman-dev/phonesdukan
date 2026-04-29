@@ -16,18 +16,23 @@ img {vertical-align: middle;}
 .pd-hero-slide {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: scale(1.03);
-  transition: opacity 0.65s ease, transform 0.75s ease, visibility 0.65s ease;
+  transform: translateX(100%);
+  transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 .pd-hero-slide.is-active {
   position: relative;
-  opacity: 1;
-  visibility: visible;
-  transform: scale(1);
+  transform: translateX(0);
   z-index: 2;
+}
+
+.pd-hero-slide.is-exiting {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  z-index: 1;
+  transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .pd-hero-media {
@@ -639,7 +644,7 @@ h3.product-title {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .pd-hero-media {
-    min-height: 300px;
+    min-height: 400px;
   }
 
   .pd-hero-overlay {
@@ -649,7 +654,7 @@ h3.product-title {
 
   .pd-hero-content {
     max-width: 100%;
-    padding: 18px 16px 56px;
+    padding: 18px 16px 60px;
   }
 
   .pd-hero-content h1,
@@ -884,11 +889,11 @@ a.brandItem {
 
 @media (max-width: 480px) {
   .pd-hero-media {
-    min-height: 270px;
+    min-height: 420px;
   }
 
   .pd-hero-content {
-    padding: 16px 12px 52px;
+    padding: 16px 12px 56px;
   }
 
   .pd-hero-eyebrow {
