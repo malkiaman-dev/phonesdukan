@@ -175,7 +175,7 @@ $products = $unique_products;
     <div class="na-inner">
         <div class="na-header">
             <h2 class="na-title">New <span>Arrivals</span></h2>
-            <a href="/shop" class="na-view-all">View All</a>
+            <a href="/shop" class="na-view-all">Explore All</a>
         </div>
 
         <div class="na-grid">
@@ -284,16 +284,10 @@ $products = $unique_products;
     </div>
 </div>
 
-<div class="home-feed-ad">
-    <?php include_once __DIR__ . '/ad/feed1.php'; ?>
-</div>
-
-
-
 <!-- <div class="product-section">
     <div class="category-header">
         <h2>Latest <span>Coming Soon Products</span></h2>
-        <a href="/coming-soon-products" class="view-all-btn">View All</a>
+        <a href="/coming-soon-products" class="view-all-btn">Explore All</a>
     </div>
 
     <div class="product-grid-wrapper">
@@ -361,7 +355,7 @@ $products = $unique_products;
     <div class="na-inner">
         <div class="na-header na-header--split">
             <h2 class="na-title">Latest <span>Smart Watches</span></h2>
-            <a href="/smart-watches" class="na-view-all">View All</a>
+            <a href="/smart-watches" class="na-view-all">Explore All</a>
         </div>
 
         <div class="na-grid">
@@ -468,7 +462,7 @@ $products = $unique_products;
 <div class="product-section home-earbuds-section">
     <div class="category-header category-header--split">
         <h2>Latest <span>Wireless Earbuds</span></h2>
-        <a href="/wireless-earbuds" class="view-all-btn">View All</a>
+        <a href="/wireless-earbuds" class="view-all-btn">Explore All</a>
     </div>
 
     <div class="product-grid-wrapper">
@@ -558,7 +552,7 @@ $products = $unique_products;
 <div class="product-section">
     <div class="category-header">
         <h2>Latest <span>Mobiles</span></h2>
-        <a href="/mobiles" class="view-all-btn">View All</a>
+        <a href="/mobiles" class="view-all-btn">Explore All</a>
     </div>
 
     <div class="product-grid-wrapper">
@@ -647,7 +641,7 @@ $products = $unique_products;
 <div class="product-section">
     <div class="category-header">
         <h2>Latest <span>Mobiles Accessories</span></h2>
-        <a href="/mobile-accessories" class="view-all-btn">View All</a>
+        <a href="/mobile-accessories" class="view-all-btn">Explore All</a>
     </div>
 
     <div class="product-grid-wrapper">
@@ -736,7 +730,7 @@ $products = $unique_products;
 <div class="product-section">
     <div class="category-header">
         <h2>Latest <span>Power Banks</span></h2>
-        <a href="/power-banks" class="view-all-btn">View All</a>
+        <a href="/power-banks" class="view-all-btn">Explore All</a>
     </div>
 
     <div class="product-grid-wrapper">
@@ -825,7 +819,7 @@ $products = $unique_products;
 <div class="product-section">
     <div class="category-header">
         <h2>Latest <span>Bluetooth Speakers</span></h2>
-        <a href="/bluetooth-speakers" class="view-all-btn">View All</a>
+        <a href="/bluetooth-speakers" class="view-all-btn">Explore All</a>
     </div>
 
     <div class="product-grid-wrapper">
