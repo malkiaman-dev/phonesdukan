@@ -114,7 +114,9 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
     <!-- Sidebar -->
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 <div class="site-wrapper">
-    <div class="pd-header-stack">
+
+    <!-- Scrollable bars — NOT sticky, scroll away naturally -->
+    <div class="pd-top-bars">
         <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
             <div class="pd-announcement-track">
                 <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
@@ -126,6 +128,26 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
             </div>
         </div>
 
+        <div class="pd-trust-strip" role="region" aria-label="Store trust highlights">
+            <div class="pd-trust-container">
+                <div class="pd-trust-item">
+                    <span class="pd-trust-dot" aria-hidden="true">●</span>
+                    <p>Fast &amp; Free Delivery Over Order <strong>Rs. 3000/-</strong> Only.</p>
+                </div>
+                <div class="pd-trust-item">
+                    <span class="pd-trust-dot" aria-hidden="true">●</span>
+                    <p><strong>30M+</strong> Happy Customers</p>
+                </div>
+                <div class="pd-trust-item">
+                    <span class="pd-trust-dot" aria-hidden="true">●</span>
+                    <p><strong>7 Days</strong> Replacement &amp; <strong>1 Year</strong> Warranty</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticky navbar only -->
+    <div class="pd-header-stack">
         <!-- Primary Header -->
         <header id="main-header" class="pd-main-header">
             <div class="pd-header-container">
@@ -206,22 +228,6 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
             </div>
         </header>
 
-        <div class="pd-trust-strip" role="region" aria-label="Store trust highlights">
-            <div class="pd-trust-container">
-                <div class="pd-trust-item">
-                    <span class="pd-trust-dot" aria-hidden="true">●</span>
-                    <p>Fast &amp; Free Delivery Over Order <strong>Rs. 3000/-</strong> Only.</p>
-                </div>
-                <div class="pd-trust-item">
-                    <span class="pd-trust-dot" aria-hidden="true">●</span>
-                    <p><strong>30M+</strong> Happy Customers</p>
-                </div>
-                <div class="pd-trust-item">
-                    <span class="pd-trust-dot" aria-hidden="true">●</span>
-                    <p><strong>7 Days</strong> Replacement &amp; <strong>1 Year</strong> Warranty</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <main class="content">
