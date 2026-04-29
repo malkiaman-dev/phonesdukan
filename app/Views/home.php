@@ -96,7 +96,6 @@ $products = $unique_products;
         </div>
     </div>
 </section>
-<?php include_once __DIR__ . '/ad/feed1.php'; ?>
 
 <div class="advantages-section">
     <div class="advantages-container">
@@ -287,6 +286,8 @@ $products = $unique_products;
         </div>
     </div>
 </div>
+
+<?php include_once __DIR__ . '/ad/feed1.php'; ?>
 
 
 
