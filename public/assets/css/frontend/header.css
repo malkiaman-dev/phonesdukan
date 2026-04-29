@@ -24,6 +24,21 @@ body {
   margin: 0;
 }
 
+.pd-header-stack,
+.pd-main-header,
+.pd-mobile-header,
+#sidebar,
+#search-input,
+#mobile-search-input,
+.pd-search-btn,
+.pd-action-label,
+#sidebar .category-link,
+#sidebar .subcategory-link,
+.sb-login-box a,
+.best-mobile-button {
+  font-family: "Inter", Arial, sans-serif;
+}
+
 body.dimmed {
   overflow: hidden;
 }
@@ -74,9 +89,10 @@ body.dimmed {
 .pd-announcement-track span {
   margin: 0;
   white-space: nowrap;
+  font-family: "Inter", Arial, sans-serif;
   font-size: 13px;
   letter-spacing: 0.2px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--mi-soft-black);
 }
 
@@ -366,6 +382,7 @@ body.dimmed {
 }
 
 .search-text {
+  font-family: "Inter", Arial, sans-serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.45;
