@@ -130,6 +130,7 @@ $products = $unique_products;
         </div>
         <div class="cat-track-wrap">
             <button class="cat-arrow cat-prev" aria-label="Previous categories">&#8249;</button>
+            <div class="cat-viewport">
             <div class="cat-track" id="cat-track">
                 <a href="/mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
                     <div class="cat-img-box">
@@ -168,6 +169,7 @@ $products = $unique_products;
                     <p class="cat-label">Bluetooth Speakers</p>
                 </a>
             </div>
+            </div><!-- /cat-viewport -->
             <button class="cat-arrow cat-next" aria-label="Next categories">&#8250;</button>
         </div>
     </div>

@@ -306,25 +306,22 @@ img {vertical-align: middle;}
   box-shadow: 0 4px 12px rgba(247, 209, 23, 0.35);
 }
 
-.cat-track {
+/* Viewport clips the track — only the visible cards show */
+.cat-viewport {
   flex: 1;
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-bottom: 4px;
+  overflow: hidden;
 }
 
-.cat-track::-webkit-scrollbar {
-  display: none;
+.cat-track {
+  display: flex;
+  gap: 18px;
+  will-change: transform;
+  /* width/transform managed by JS */
 }
 
 .cat-card {
-  flex: 0 0 calc(16.66% - 16px);
-  min-width: 130px;
-  max-width: 180px;
+  flex: 0 0 var(--cat-card-w, 160px);
+  width: var(--cat-card-w, 160px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -395,18 +392,9 @@ img {vertical-align: middle;}
     font-size: 20px;
   }
 
-  .cat-card {
-    flex: 0 0 calc(40% - 10px);
-    min-width: 110px;
-  }
 }
 
 @media (max-width: 480px) {
-  .cat-card {
-    flex: 0 0 calc(42% - 8px);
-    min-width: 100px;
-  }
-
   .cat-label {
     font-size: 12px;
   }

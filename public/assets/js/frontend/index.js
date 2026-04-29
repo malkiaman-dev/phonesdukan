@@ -160,21 +160,88 @@ document.addEventListener("DOMContentLoaded", function () {
         updateButtonState(container, prevBtn, nextBtn, grid); // Initial check
     });
 
-    // ── Category carousel ───────────────────────────
-    const catTrack = document.getElementById("cat-track");
-    const catPrev  = document.querySelector(".cat-prev");
-    const catNext  = document.querySelector(".cat-next");
+    // ── Category infinite carousel ──────────────────
+    const catViewport = document.querySelector(".cat-viewport");
+    const catTrack    = document.getElementById("cat-track");
+    const catPrevBtn  = document.querySelector(".cat-prev");
+    const catNextBtn  = document.querySelector(".cat-next");
 
-    if (catTrack && catPrev && catNext) {
-        const getScrollAmount = () => catTrack.offsetWidth * 0.55;
+    if (catViewport && catTrack && catPrevBtn && catNextBtn) {
+        const GAP = 18;
+        const origCards = Array.from(catTrack.children);
+        const total = origCards.length;
+        let currentIdx = total; // start at first original card (after prepended clones)
+        let isAnimating = false;
 
-        catNext.addEventListener("click", () => {
-            catTrack.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
+        // Build [clones-of-all][originals][clones-of-all] for seamless loop
+        origCards.forEach(card => catTrack.appendChild(card.cloneNode(true)));
+        [...origCards].reverse().forEach(card =>
+            catTrack.insertBefore(card.cloneNode(true), catTrack.firstChild)
+        );
+
+        // How many cards are visible based on viewport width
+        const getVisibleCount = () => {
+            const w = window.innerWidth;
+            if (w >= 1200) return 5;
+            if (w >= 992)  return 4;
+            if (w >= 576)  return 3;
+            return 2;
+        };
+
+        // Set card width via CSS variable so CSS uses it
+        const setCardWidths = () => {
+            const vw = catViewport.offsetWidth;
+            const n  = getVisibleCount();
+            const w  = Math.floor((vw - (n - 1) * GAP) / n);
+            catViewport.style.setProperty("--cat-card-w", w + "px");
+        };
+
+        const getCardStep = () => {
+            const card = catTrack.children[0];
+            return card ? card.offsetWidth + GAP : 160 + GAP;
+        };
+
+        const moveTo = (idx, animate) => {
+            catTrack.style.transition = animate
+                ? "transform 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                : "none";
+            catTrack.style.transform = `translateX(${-(idx * getCardStep())}px)`;
+            currentIdx = idx;
+        };
+
+        // Init
+        setCardWidths();
+        // Let CSS variable apply before measuring
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => moveTo(total, false));
         });
 
-        catPrev.addEventListener("click", () => {
-            catTrack.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
+        catTrack.addEventListener("transitionend", (e) => {
+            if (e.target !== catTrack) return;
+            if (currentIdx >= total * 2) {
+                moveTo(currentIdx - total, false);
+            } else if (currentIdx < total) {
+                moveTo(currentIdx + total, false);
+            }
+            isAnimating = false;
         });
+
+        catNextBtn.addEventListener("click", () => {
+            if (isAnimating) return;
+            isAnimating = true;
+            moveTo(currentIdx + 1, true);
+        });
+
+        catPrevBtn.addEventListener("click", () => {
+            if (isAnimating) return;
+            isAnimating = true;
+            moveTo(currentIdx - 1, true);
+        });
+
+        window.addEventListener("resize", () => {
+            setCardWidths();
+            requestAnimationFrame(() => moveTo(currentIdx, false));
+        }, { passive: true });
     }
 });
 
