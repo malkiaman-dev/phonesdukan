@@ -284,7 +284,9 @@ $products = $unique_products;
     </div>
 </div>
 
-<?php include_once __DIR__ . '/ad/feed1.php'; ?>
+<div class="home-feed-ad">
+    <?php include_once __DIR__ . '/ad/feed1.php'; ?>
+</div>
 
 
 
@@ -349,104 +351,122 @@ $products = $unique_products;
     </div>
 </div> -->
 
-<div class="s-banner">
+<div class="s-banner s-banner--full sw-home-banner">
 <a href="/smart-watches" target="_blank">
          <img src="/public/assets/images/smart-watch-banner.png" alt="smart-watches_banner" class="banner-image">
 </a>
 </div>
 
-<div class="product-section">
-    <div class="category-header">
-        <h2>Latest <span>Smart Watches</span></h2>
-        <a href="/smart-watches" class="view-all-btn">View All</a>
-    </div>
+<section class="na-section sw-na-section">
+    <div class="na-inner">
+        <div class="na-header na-header--split">
+            <h2 class="na-title">Latest <span>Smart Watches</span></h2>
+            <a href="/smart-watches" class="na-view-all">View All</a>
+        </div>
 
-    <div class="product-grid-wrapper">
-        <button class="scroll-btn prev-btn" disabled>&lt;</button>
-        <div class="product-grid-container">
-        <div class="product-grid">
-    <?php
-    // Fetch Smart Watches products (only category_id = 11)
-    $products = $productModel->getSmartWatches(12);
+        <div class="na-grid">
+            <?php
+            // Fetch Smart Watches products (only category_id = 11)
+            $products = $productModel->getSmartWatches(4);
 
-    if (!empty($products)):
-        foreach ($products as $product):
-            // Construct product URL
-            $product_url = '/smart-watches/'
-                . htmlspecialchars($product['brand_slug']) . '/'
-                . htmlspecialchars($product['product_slug']);
+            if (!empty($products)):
+                foreach ($products as $product):
+                    $product_name = !empty($product['product_name'])
+                        ? htmlspecialchars($product['product_name'])
+                        : 'Unnamed Product';
 
-            // Format product price
-            $product_price = '';
+                    $brand_slug = !empty($product['brand_slug'])
+                        ? htmlspecialchars($product['brand_slug'])
+                        : 'unknown-brand';
 
-            if (!empty($product['sale_price']) && !empty($product['regular_price'])) {
-                $product_price = '<span class="regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> '
-                    . '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-            } elseif (!empty($product['regular_price'])) {
-                $product_price = '<span class="regular-price new-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-            } elseif (!empty($product['sale_price'])) {
-                $product_price = '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-            } else {
-                $product_price = '<span class="no-price">Price Not Available</span>';
-            }
-            ?>
+                    $product_slug = !empty($product['product_slug'])
+                        ? htmlspecialchars($product['product_slug'])
+                        : 'unknown-product';
 
-            <div class="product-card">
-                <div class="tagwrap">
-                    <?php if ($product['stock_quantity'] == 0): ?>
-                        <div class="sold-out">
-                            <span>Sold Out</span>
-                        </div>
-                    <?php elseif (!empty($product['sale_price'])): ?>
-                        <div class="pro-tags">
-                            <span>Sale</span>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                    $product_image = !empty($product['image_url'])
+                        ? htmlspecialchars($product['image_url'])
+                        : '/public/assets/images/Phones_dukan_favicon.png';
 
-                <a href="<?php echo $product_url; ?>">
-                    <div class="product-img-wrapper">
-                        <div class="product-img">
-                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
+                    $product_url = '/smart-watches/' . $brand_slug . '/' . $product_slug;
+
+                    $has_sale = !empty($product['sale_price']) && !empty($product['regular_price']);
+
+                    $unit_price = $has_sale
+                        ? (float)$product['sale_price']
+                        : (float)($product['regular_price'] ?? 0);
+
+                    $discount_pct = ($has_sale && !empty($product['regular_price']) && (float)$product['regular_price'] > 0)
+                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
+                        : 0;
+
+                    $is_sold_out = (isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0)
+                        || (!empty($product['is_sold_out']));
+                    ?>
+
+                    <div class="na-card">
+                        <?php if ($is_sold_out): ?>
+                            <span class="na-badge na-badge--sold">Sold Out</span>
+                        <?php elseif ($discount_pct > 0): ?>
+                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
+                        <?php endif; ?>
+
+                        <a href="<?= $product_url ?>" class="na-img-link">
+                            <div class="na-img-box">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                            </div>
+                        </a>
+
+                        <div class="na-body">
+                            <h3 class="na-name">
+                                <a href="<?= $product_url ?>"><?= $product_name ?></a>
+                            </h3>
+
+                            <div class="na-price">
+                                <?php if ($has_sale): ?>
+                                    <span class="na-price--old">Rs.<?= number_format($product['regular_price']) ?></span>
+                                    <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                                <?php elseif (!empty($product['regular_price'])): ?>
+                                    <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
+                                <?php else: ?>
+                                    <span class="na-price--na">Price N/A</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="na-actions">
+                                <?php if (!$is_sold_out): ?>
+                                    <button class="na-btn na-btn--cart"
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
+                                        Add to Cart
+                                    </button>
+                                    <button class="na-btn na-btn--buy buy-button"
+                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        Buy Now
+                                    </button>
+                                <?php else: ?>
+                                    <span class="na-btn na-btn--soldout">Sold Out</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
-                </a>
-
-                <h3 class="product-title">
-                    <a href="<?php echo $product_url; ?>">
-                        <?php echo htmlspecialchars($product['product_name']); ?>
-                    </a>
-                </h3>
-
-                <span class="prodline"></span>
-
-                <div class="prodprice price-line">
-    <?php echo $product_price; ?>
-</div>
-
-            </div>
-        <?php
-        endforeach;
-    else:
-        echo '<p>No smartwatches found.</p>';
-    endif;
-    ?>
-</div>
-
-
+                <?php
+                endforeach;
+            else:
+                echo '<p style="grid-column:1/-1;text-align:center;color:#888;">No smartwatches found.</p>';
+            endif;
+            ?>
         </div>
-        <button class="scroll-btn next-btn">&gt;</button>
     </div>
-</div>
+</section>
 
-<div class="s-banner">
+<div class="s-banner s-banner--full earbuds-home-banner">
 <a href="/wireless-earbuds" target="_blank">
          <img src="/public/assets/images/wireless_earbuds_banner.png" alt="wireless_earbuds_banner" class="banner-image">
 </a>
 </div>
 
-<div class="product-section">
-    <div class="category-header">
+<div class="product-section home-earbuds-section">
+    <div class="category-header category-header--split">
         <h2>Latest <span>Wireless Earbuds</span></h2>
         <a href="/wireless-earbuds" class="view-all-btn">View All</a>
     </div>
