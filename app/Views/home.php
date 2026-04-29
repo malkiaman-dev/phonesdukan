@@ -74,7 +74,7 @@ $products = $unique_products;
 
         <article class="pd-hero-slide" data-pd-slide aria-hidden="true">
             <div class="pd-hero-media">
-                <img src="/public/assets/images/hero/hero-slide-3.webp" alt="Fast delivery and warranty by Mobile Island" loading="lazy">
+                <img src="/public/assets/images/hero/hero-slide-3.png" alt="Fast delivery and warranty by Mobile Island" loading="lazy">
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
@@ -175,82 +175,116 @@ $products = $unique_products;
     </div>
 </section>
 
-<div class="product-section">
-    <div class="category-header">
-        <h2>New <span>Arrivals</span></h2>
-        <a href="/shop" class="view-all-btn">View All</a>
-    </div>
-    <div class="product-grid-wrapper">
-        <button class="scroll-btn prev-btn" disabled>&lt;</button>
-        <div class="product-grid-container">
-            <div class="product-grid">
-                <?php if (!empty($products)): ?>
-                    <?php foreach ($products as $product): ?>
-                        <?php
-                        // Ensure all values exist before using them
-                        $product_name = !empty($product['product_name']) ? htmlspecialchars($product['product_name']) : 'Unnamed Product';
-                        $category_slug = !empty($product['category_slug']) ? htmlspecialchars($product['category_slug']) : 'unknown-category';
-                        $brand_slug = !empty($product['brand_slug']) ? htmlspecialchars($product['brand_slug']) : 'unknown-brand';
-                        $product_slug = !empty($product['product_slug']) ? htmlspecialchars($product['product_slug']) : 'unknown-product';
-                        $product_status = isset($product['product_status']) ? strtolower($product['product_status']) : '';
-                        $product_image = !empty($product['image_url']) ? htmlspecialchars($product['image_url']) : '/path-to-default-image.jpg';
+<section class="na-section">
+    <div class="na-inner">
+        <div class="na-header">
+            <h2 class="na-title">New <span>Arrivals</span></h2>
+            <a href="/shop" class="na-view-all">View All</a>
+        </div>
 
-                        // Construct the product URL
-                        $product_url = '/' . $category_slug . '/' . $brand_slug . '/' . $product_slug;
+        <div class="na-grid">
+            <?php if (!empty($products)): ?>
+                <?php foreach ($products as $product): ?>
+                <?php
+                $product_name   = !empty($product['product_name'])   ? htmlspecialchars($product['product_name'])   : 'Unnamed Product';
+                $category_slug  = !empty($product['category_slug'])  ? htmlspecialchars($product['category_slug'])  : 'unknown-category';
+                $brand_slug     = !empty($product['brand_slug'])     ? htmlspecialchars($product['brand_slug'])     : 'unknown-brand';
+                $product_slug   = !empty($product['product_slug'])   ? htmlspecialchars($product['product_slug'])   : 'unknown-product';
+                $product_image  = !empty($product['image_url'])      ? htmlspecialchars($product['image_url'])      : '/public/assets/images/Phones_dukan_favicon.png';
+                $product_url    = '/' . $category_slug . '/' . $brand_slug . '/' . $product_slug;
 
-                        // Handle price
-                        $product_price = '';
+                $has_sale  = !empty($product['sale_price']) && !empty($product['regular_price']);
+                $unit_price = $has_sale ? $product['sale_price'] : ($product['regular_price'] ?? 0);
+                $discount_pct = $has_sale
+                    ? max(1, round((($product['regular_price'] - $product['sale_price']) / $product['regular_price']) * 100))
+                    : 0;
+                ?>
 
-                        if (!empty($product['sale_price']) && !empty($product['regular_price'])) {
-                            $product_price = '<span class="regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> '
-                                . '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                        } elseif (!empty($product['regular_price'])) {
-                            $product_price = '<span class="regular-price new-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-                        } elseif (!empty($product['sale_price'])) {
-                            $product_price = '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                        } else {
-                            $product_price = '<span class="no-price">Price Not Available</span>';
-                        }
-                        ?>
+                <div class="na-card">
+                    <?php if ($product['is_sold_out']): ?>
+                        <span class="na-badge na-badge--sold">Sold Out</span>
+                    <?php elseif ($discount_pct > 0): ?>
+                        <span class="na-badge"><?= $discount_pct ?>% OFF</span>
+                    <?php endif; ?>
 
-                        <div class="product-card">
-                            <div class="tagwrap">
-                                <?php if ($product['is_sold_out']): ?>
-                                    <div class="sold-out">
-                                        <span>Sold Out</span>
-                                    </div>
-                                <?php elseif ($product['is_on_sale']): ?>
-                                    <div class="pro-tags">
-                                        <span>Sale</span>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <a href="<?php echo $product_url; ?>">
-                                <div class="product-img-wrapper">
-                                    <div class="product-img">
-                                        <img src="<?php echo $product_image; ?>" alt="<?php echo $product_name; ?>">
-                                    </div>
-                                </div>
-                            </a>
-                            <h3 class="product-title">
-                                <a href="<?php echo $product_url; ?>">
-                                    <?php echo $product_name; ?>
-                                </a>
-                            </h3>
-                            <span class="prodline"></span>
-                            <div class="prodprice price-line">
-                            <?php echo $product_price; ?>
-                           </div>
-
+                    <a href="<?= $product_url ?>" class="na-img-link">
+                        <div class="na-img-box">
+                            <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No products found.</p>
-                <?php endif; ?>
+                    </a>
+
+                    <div class="na-body">
+                        <h3 class="na-name">
+                            <a href="<?= $product_url ?>"><?= $product_name ?></a>
+                        </h3>
+
+                        <div class="na-price">
+                            <?php if ($has_sale): ?>
+                                <span class="na-price--old">Rs.<?= number_format($product['regular_price']) ?></span>
+                                <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                            <?php elseif (!empty($product['regular_price'])): ?>
+                                <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
+                            <?php else: ?>
+                                <span class="na-price--na">Price N/A</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="na-actions">
+                            <?php if (!$product['is_sold_out']): ?>
+                                <button class="na-btn na-btn--cart"
+                                    data-product-id="<?= (int)$product['product_id'] ?>"
+                                    data-unit-price="<?= (float)$unit_price ?>">
+                                    Add to Cart
+                                </button>
+                                <button class="na-btn na-btn--buy buy-button"
+                                    data-product-id="<?= (int)$product['product_id'] ?>">
+                                    Buy Now
+                                </button>
+                            <?php else: ?>
+                                <span class="na-btn na-btn--soldout">Sold Out</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="grid-column:1/-1;text-align:center;color:#888;">No products found.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
+
+<!-- Trust strip -->
+<div class="na-trust">
+    <div class="na-trust-inner">
+        <div class="na-trust-item">
+            <svg class="na-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <div class="na-trust-text">
+                <strong>FASTEST DELIVERY</strong>
+                <span>Delivery in 24/H</span>
             </div>
         </div>
-        <button class="scroll-btn next-btn">&gt;</button>
+        <div class="na-trust-item">
+            <svg class="na-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+            <div class="na-trust-text">
+                <strong>24 HOURS RETURN</strong>
+                <span>100% money-back guarantee</span>
+            </div>
+        </div>
+        <div class="na-trust-item">
+            <svg class="na-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <div class="na-trust-text">
+                <strong>SECURE PAYMENT</strong>
+                <span>Your money is safe</span>
+            </div>
+        </div>
+        <div class="na-trust-item">
+            <svg class="na-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.8 19.8 0 0 1 1.61 3.37 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.86-.86a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <div class="na-trust-text">
+                <strong>SUPPORT 24/7</strong>
+                <span>Live contact/message</span>
+            </div>
+        </div>
     </div>
 </div>
 
