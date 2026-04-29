@@ -459,89 +459,151 @@ $products = $unique_products;
 </a>
 </div>
 
-<div class="product-section home-earbuds-section">
-    <div class="category-header category-header--split">
-        <h2>Latest <span>Wireless Earbuds</span></h2>
-        <a href="/wireless-earbuds" class="view-all-btn">Explore All</a>
-    </div>
+<section class="na-section earbuds-na-section">
+    <div class="na-inner">
+        <div class="na-header">
+            <h2 class="na-title">Latest <span>wireless Earbuds</span></h2>
+            <a href="/wireless-earbuds" class="na-view-all">Explore All</a>
+        </div>
 
-    <div class="product-grid-wrapper">
-        <button class="scroll-btn prev-btn" disabled>&lt;</button>
-        <div class="product-grid-container">
-        <div class="product-grid">
-    <?php
-    // Fetch products from category 13
-    $products = $productModel->getCategory13Products(12);
+        <div class="na-grid">
+            <?php
+            // Fetch products from category 13 (limit to 4)
+            $products = $productModel->getCategory13Products(4);
 
-    if (!empty($products)):
-        foreach ($products as $product):
-            // Updated URL structure
-            $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                . htmlspecialchars($product['brand_slug']) . '/'
-                . htmlspecialchars($product['product_slug']);
+            if (!empty($products)):
+                foreach ($products as $product):
+                    $product_name = !empty($product['product_name'])
+                        ? htmlspecialchars($product['product_name'])
+                        : 'Unnamed Product';
 
-            // Format product price
-            // Format product price
-            $product_price = '';
+                    $category_slug = !empty($product['category_slug'])
+                        ? htmlspecialchars($product['category_slug'])
+                        : 'unknown-category';
 
-            if (!empty($product['sale_price']) && !empty($product['regular_price'])) {
-                $product_price = '<span class="regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> '
-                    . '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-            } elseif (!empty($product['regular_price'])) {
-                $product_price = '<span class="regular-price new-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-            } elseif (!empty($product['sale_price'])) {
-                $product_price = '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-            } else {
-                $product_price = '<span class="no-price">Price Not Available</span>';
-            }
-            ?>
+                    $brand_slug = !empty($product['brand_slug'])
+                        ? htmlspecialchars($product['brand_slug'])
+                        : 'unknown-brand';
 
-            <div class="product-card">
-                <div class="tagwrap">
-                    <?php if ($product['stock_quantity'] == 0): ?>
-                        <div class="sold-out">
-                            <span>Sold Out</span>
-                        </div>
-                    <?php elseif (!empty($product['sale_price'])): ?>
-                        <div class="pro-tags">
-                            <span>Sale</span>
-                        </div>
-                    <?php endif; ?>
-                </div>
+                    $product_slug = !empty($product['product_slug'])
+                        ? htmlspecialchars($product['product_slug'])
+                        : 'unknown-product';
 
-                <a href="<?php echo $product_url; ?>">
-                    <div class="product-img-wrapper">
-                        <div class="product-img">
-                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
+                    $product_image = !empty($product['image_url'])
+                        ? htmlspecialchars($product['image_url'])
+                        : '/public/assets/images/Phones_dukan_favicon.png';
+
+                    $product_url = '/' . $category_slug . '/' . $brand_slug . '/' . $product_slug;
+
+                    $has_sale = !empty($product['sale_price']) && !empty($product['regular_price']);
+
+                    $unit_price = $has_sale
+                        ? (float)$product['sale_price']
+                        : (float)($product['regular_price'] ?? 0);
+
+                    $discount_pct = ($has_sale && !empty($product['regular_price']) && (float)$product['regular_price'] > 0)
+                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
+                        : 0;
+
+                    $is_sold_out = (isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0)
+                        || (!empty($product['is_sold_out']));
+                    ?>
+
+                    <div class="na-card eb-card">
+                        <?php if ($is_sold_out): ?>
+                            <span class="na-badge na-badge--sold">Sold Out</span>
+                        <?php elseif ($discount_pct > 0): ?>
+                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
+                        <?php endif; ?>
+
+                        <a href="<?= $product_url ?>" class="na-img-link">
+                            <div class="na-img-box">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                            </div>
+                        </a>
+                        
+                        <div class="eb-feature-strip">Upto 6 Hrs | High Gloss Finish</div>
+
+                        <div class="na-body">
+                            <h3 class="na-name">
+                                <a href="<?= $product_url ?>"><?= $product_name ?></a>
+                            </h3>
+                            
+                            <div class="eb-colors">
+                                <span class="eb-color-label">Colors:</span>
+                                <span class="eb-color-circle" style="background: url('/public/assets/images/eb-white.png') center/cover, #f0f0f0;"></span>
+                                <span class="eb-color-circle" style="background: url('/public/assets/images/eb-black.png') center/cover, #222;"></span>
+                            </div>
+
+                            <div class="na-price">
+                                <?php if ($has_sale): ?>
+                                    <span class="na-price--old">Rs.<?= number_format($product['regular_price']) ?></span>
+                                    <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                                <?php elseif (!empty($product['regular_price'])): ?>
+                                    <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
+                                <?php else: ?>
+                                    <span class="na-price--na">Price N/A</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="na-actions eb-actions">
+                                <?php if (!$is_sold_out): ?>
+                                    <button class="na-btn na-btn--cart"
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
+                                        Add to Cart
+                                    </button>
+                                    <button class="na-btn na-btn--buy buy-button"
+                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        Buy Now
+                                    </button>
+                                <?php else: ?>
+                                    <span class="na-btn na-btn--soldout">Sold Out</span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
-                </a>
-
-                <h3 class="product-title">
-                    <a href="<?php echo $product_url; ?>">
-                        <?php echo htmlspecialchars($product['product_name']); ?>
-                    </a>
-                </h3>
-
-                <span class="prodline"></span>
-
-                <div class="prodprice price-line">
-    <?php echo $product_price; ?>
-</div>
-
-            </div>
-        <?php
-        endforeach;
-    else:
-        echo '<p>No products found in this category.</p>';
-    endif;
-    ?>
-</div>
-
+                <?php
+                endforeach;
+            else:
+                echo '<p style="grid-column:1/-1;text-align:center;color:#888;">No earbuds found.</p>';
+            endif;
+            ?>
         </div>
-        <button class="scroll-btn next-btn">&gt;</button>
     </div>
-</div>
+</section>
+
+<!-- CATEGORY IMAGE STRIP -->
+<section class="eb-category-strip">
+    <div class="na-inner">
+        <div class="eb-cat-grid">
+            <a href="/bluetooth-headphones" class="eb-cat-item">
+                <img src="/public/assets/images/Headphones.png" alt="Headphones">
+                <span class="eb-cat-label">Headphones</span>
+            </a>
+            <a href="/smart-watches" class="eb-cat-item">
+                <img src="/public/assets/images/Smartwatch.png" alt="Smartwatch">
+                <span class="eb-cat-label">Smartwatch</span>
+            </a>
+            <a href="/wireless-earbuds" class="eb-cat-item">
+                <img src="/public/assets/images/Earbuds.png" alt="Earbuds">
+                <span class="eb-cat-label">Earbuds</span>
+            </a>
+            <a href="/power-banks" class="eb-cat-item">
+                <img src="/public/assets/images/Powerbanks.png" alt="Powerbanks">
+                <span class="eb-cat-label">Powerbanks</span>
+            </a>
+            <a href="/mobiles" class="eb-cat-item">
+                <img src="/public/assets/images/Mobiles.png" alt="Mobiles">
+                <span class="eb-cat-label">Mobiles</span>
+            </a>
+            <a href="/bluetooth-speakers" class="eb-cat-item">
+                <img src="/public/assets/images/speakers.png" alt="speakers">
+                <span class="eb-cat-label">speakers</span>
+            </a>
+        </div>
+    </div>
+</section>
 
 <div class="s-banner">
     <a href="/mobiles" target="_blank">
