@@ -5,6 +5,7 @@ $metaRobots = 'index, follow';  // Optional; default is good
 $metaKeywords = 'Online Shopping in Pakistan, Buy Mobile in Pakistan, Smartwatch Price in Pakistan, Mobile Accessories, Wireless Earbuds, Tablet Price in Pakistan, Mobiles in Pakistan, Best Mobile Price, Phones Dukan';
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 require_once __DIR__ . '/../Models/ProductCategoryModel.php';  // Correct path
+require_once __DIR__ . '/../Models/PostModel.php';
 
 $productModel = new ProductModel();
 
@@ -33,6 +34,30 @@ foreach ($products as $product) {
 }
 
 $products = $unique_products;
+
+// Latest blog posts for homepage section (after Shop By Brand)
+$postModel = new PostModel();
+$latest_posts_raw = $postModel->getPaginatedPosts(6, 0, null);
+$latest_posts = [];
+$latest_post_ids = [];
+
+foreach ($latest_posts_raw as $post) {
+    $post_id = (int)($post['id'] ?? 0);
+
+    if ($post_id > 0 && in_array($post_id, $latest_post_ids, true)) {
+        continue;
+    }
+
+    if ($post_id > 0) {
+        $latest_post_ids[] = $post_id;
+    }
+
+    $latest_posts[] = $post;
+
+    if (count($latest_posts) >= 3) {
+        break;
+    }
+}
 
 ?>
 
@@ -1073,6 +1098,77 @@ $products = $unique_products;
     track.addEventListener('touchend', function () { dragging = false; });
 })();
 </script>
+
+<section class="na-section home-latest-blogs">
+    <div class="na-inner">
+        <div class="na-header">
+            <h2 class="na-title">Latest <span>Blogs</span></h2>
+            <a href="/blog" class="na-view-all">Explore All</a>
+        </div>
+
+        <div class="home-blog-grid">
+            <?php if (!empty($latest_posts)): ?>
+                <?php foreach ($latest_posts as $post): ?>
+                    <?php
+                    $post_title = htmlspecialchars($post['title'] ?? 'Untitled Blog');
+                    $post_slug = htmlspecialchars($post['slug'] ?? '');
+                    $post_category_slug = htmlspecialchars($post['category_slug'] ?? '');
+                    $post_category_name = htmlspecialchars($post['category_name'] ?? 'General');
+                    $post_image = !empty($post['image_url'])
+                        ? htmlspecialchars($post['image_url'])
+                        : '/public/assets/images/Phones_dukan_favicon.png';
+
+                    $post_url = ($post_category_slug !== '' && $post_slug !== '')
+                        ? '/blog/' . $post_category_slug . '/' . $post_slug
+                        : '/blog';
+
+                    $post_excerpt_raw = trim((string)($post['excerpt'] ?? ''));
+                    if ($post_excerpt_raw === '') {
+                        $post_excerpt_raw = trim((string)($post['content'] ?? ''));
+                    }
+
+                    $post_excerpt_text = trim(preg_replace('/\s+/', ' ', strip_tags($post_excerpt_raw)));
+                    if (strlen($post_excerpt_text) > 140) {
+                        $post_excerpt_text = substr($post_excerpt_text, 0, 137) . '...';
+                    }
+
+                    $published_ts = !empty($post['published_at']) ? strtotime($post['published_at']) : false;
+                    $published_date = $published_ts ? date('M d, Y', $published_ts) : '';
+                    ?>
+
+                    <article class="home-blog-card">
+                        <a href="<?= $post_url ?>" class="home-blog-image-link">
+                            <div class="home-blog-image-wrap">
+                                <img src="<?= $post_image ?>" alt="<?= $post_title ?>" loading="lazy">
+                            </div>
+                        </a>
+
+                        <div class="home-blog-body">
+                            <div class="home-blog-meta">
+                                <span class="home-blog-category"><?= $post_category_name ?></span>
+                                <?php if (!empty($published_date)): ?>
+                                    <span class="home-blog-date"><?= htmlspecialchars($published_date) ?></span>
+                                <?php endif; ?>
+                            </div>
+
+                            <h3 class="home-blog-title">
+                                <a href="<?= $post_url ?>"><?= $post_title ?></a>
+                            </h3>
+
+                            <p class="home-blog-excerpt">
+                                <?= htmlspecialchars($post_excerpt_text !== '' ? $post_excerpt_text : 'Read this post to learn more insights and updates from Phones Dukan.') ?>
+                            </p>
+
+                            <a href="<?= $post_url ?>" class="home-blog-readmore">Read More</a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="home-blog-empty">No latest blogs found right now.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
 
 <div class="testimonials">
 <div class="category-header">
