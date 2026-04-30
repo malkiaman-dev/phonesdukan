@@ -21,9 +21,9 @@ $selectedCategories = array_map('strval', $selectedCategories);
 $selectedBrands = array_map('strval', $selectedBrands);
 
 $sortOptions = [
-    'price_asc' => 'Price Low to High',
+    'latest'     => 'Latest',
+    'price_asc'  => 'Price Low to High',
     'price_desc' => 'Price High to Low',
-    'latest' => 'Latest',
 ];
 
 $priceOptions = [
@@ -96,15 +96,31 @@ if ($requestedMax < $requestedMin) {
 ?>
 
 <form id="shopFilterForm" class="shop-filter-form" method="GET" action="<?= htmlspecialchars(url('shop'), ENT_QUOTES, 'UTF-8') ?>">
-    <div class="filter-group">
-        <label for="shopSidebarSort" class="filter-label">Sort By</label>
-        <select name="sort_by" id="shopSidebarSort" class="shop-sort-select" aria-label="Sort products in sidebar">
-            <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
-                <option value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>" <?= $selectedSort === $sortValue ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+    <div class="filter-group" id="shopSidebarSortGroup">
+        <label class="filter-label">Sort By</label>
+        <div class="shop-sidebar-custom-sort">
+            <button type="button" class="shop-sidebar-sort-btn" id="shopSidebarSortBtn" aria-haspopup="listbox" aria-expanded="false">
+                <span class="shop-sidebar-sort-current" id="shopSidebarSortCurrent"><?= htmlspecialchars($sortOptions[$selectedSort] ?? 'Latest', ENT_QUOTES, 'UTF-8') ?></span>
+                <svg class="shop-sidebar-sort-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <ul class="shop-sidebar-sort-menu" id="shopSidebarSortMenu" role="listbox" aria-label="Sort options">
+                <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
+                    <li class="shop-sidebar-sort-option<?= $selectedSort === $sortValue ? ' is-active' : '' ?>"
+                        data-value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>"
+                        role="option"
+                        aria-selected="<?= $selectedSort === $sortValue ? 'true' : 'false' ?>">
+                        <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <select name="sort_by" id="shopSidebarSort" class="shop-sidebar-sort-hidden" aria-hidden="true" tabindex="-1">
+                <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
+                    <option value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>" <?= $selectedSort === $sortValue ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
     </div>
 
     <div class="filter-group">

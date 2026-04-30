@@ -10,6 +10,21 @@ document.addEventListener("DOMContentLoaded", function () {
     var brandSearchInput = document.getElementById("shopBrandSearch");
     var brandEmptyState = document.getElementById("shopBrandEmptyState");
 
+    var customSortWrap = document.getElementById("shopMobileSortWrap");
+    var customSortBtn = document.getElementById("shopCustomSortBtn");
+    var customSortMenu = document.getElementById("shopCustomSortMenu");
+    var customSortLabel = document.getElementById("shopCustomSortLabel");
+
+    var topSortWrap = document.getElementById("shopTopSortWrap");
+    var topSortBtn = document.getElementById("shopTopSortBtn");
+    var topSortMenu = document.getElementById("shopTopSortMenu");
+    var topSortCurrent = document.getElementById("shopTopSortCurrent");
+
+    var sidebarSortGroup = document.getElementById("shopSidebarSortGroup");
+    var sidebarSortBtn = document.getElementById("shopSidebarSortBtn");
+    var sidebarSortMenu = document.getElementById("shopSidebarSortMenu");
+    var sidebarSortCurrent = document.getElementById("shopSidebarSortCurrent");
+
     var priceSlider = form.querySelector("[data-price-slider]");
     var minInput = form.querySelector("[data-range-min]");
     var maxInput = form.querySelector("[data-range-max]");
@@ -41,6 +56,41 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
+    function updateCustomSortDisplay(value) {
+        if (!customSortMenu || !customSortLabel) return;
+        var options = customSortMenu.querySelectorAll(".shop-custom-sort-option");
+        Array.prototype.forEach.call(options, function (opt) {
+            var match = opt.getAttribute("data-value") === value;
+            opt.classList.toggle("is-active", match);
+            opt.setAttribute("aria-selected", match ? "true" : "false");
+            if (match) customSortLabel.textContent = opt.textContent.trim();
+        });
+    }
+
+    function updateTopSortDisplay(value) {
+        var liveMenu = document.getElementById("shopTopSortMenu");
+        var liveCurrent = document.getElementById("shopTopSortCurrent");
+        if (!liveMenu || !liveCurrent) return;
+        var options = liveMenu.querySelectorAll(".shop-top-sort-option");
+        Array.prototype.forEach.call(options, function (opt) {
+            var match = opt.getAttribute("data-value") === value;
+            opt.classList.toggle("is-active", match);
+            opt.setAttribute("aria-selected", match ? "true" : "false");
+            if (match) liveCurrent.textContent = opt.textContent.trim();
+        });
+    }
+
+    function updateSidebarSortDisplay(value) {
+        if (!sidebarSortMenu || !sidebarSortCurrent) return;
+        var options = sidebarSortMenu.querySelectorAll(".shop-sidebar-sort-option");
+        Array.prototype.forEach.call(options, function (opt) {
+            var match = opt.getAttribute("data-value") === value;
+            opt.classList.toggle("is-active", match);
+            opt.setAttribute("aria-selected", match ? "true" : "false");
+            if (match) sidebarSortCurrent.textContent = opt.textContent.trim();
+        });
+    }
+
     function syncSortControls(value) {
         var controls = getSortControls();
         [controls.sidebar, controls.top, controls.mobile].forEach(function (el) {
@@ -48,6 +98,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 el.value = value;
             }
         });
+        updateCustomSortDisplay(value);
+        updateTopSortDisplay(value);
+        updateSidebarSortDisplay(value);
     }
 
     function openDrawer() {
@@ -154,6 +207,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         currentSection.innerHTML = incomingSection.innerHTML;
 
+        // Re-bind the top sort dropdown — its DOM nodes live inside .product-section
+        // and were just replaced, so any previously attached listeners are gone.
+        bindTopSortDropdown();
+
         var urlObj = new URL(requestUrl, window.location.origin);
         var sortValue = urlObj.searchParams.get("sort_by") || "latest";
         syncSortControls(sortValue);
@@ -219,7 +276,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (backdrop) backdrop.addEventListener("click", closeDrawer);
 
     document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") closeDrawer();
+        if (event.key === "Escape") {
+            closeDrawer();
+            closeAllSortMenus();
+        }
     });
 
     if (brandSearchInput) {
@@ -378,6 +438,112 @@ document.addEventListener("DOMContentLoaded", function () {
                 showNotice("Something went wrong. Please try again.");
             });
     });
+
+    function closeAllSortMenus() {
+        // mobile (stable — outside .product-section)
+        if (customSortMenu) customSortMenu.classList.remove("is-open");
+        if (customSortBtn) customSortBtn.setAttribute("aria-expanded", "false");
+        if (customSortWrap) customSortWrap.classList.remove("is-open");
+        // top sort — always query live DOM; these nodes are replaced by every AJAX render
+        var liveTopMenu = document.getElementById("shopTopSortMenu");
+        var liveTopBtn  = document.getElementById("shopTopSortBtn");
+        if (liveTopMenu) liveTopMenu.classList.remove("is-open");
+        if (liveTopBtn)  liveTopBtn.setAttribute("aria-expanded", "false");
+        // sidebar (stable — outside .product-section)
+        if (sidebarSortMenu) sidebarSortMenu.classList.remove("is-open");
+        if (sidebarSortBtn)  sidebarSortBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function bindTopSortDropdown() {
+        var btn  = document.getElementById("shopTopSortBtn");
+        var menu = document.getElementById("shopTopSortMenu");
+        if (!btn || !menu) return;
+
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var isOpen = menu.classList.contains("is-open");
+            closeAllSortMenus();
+            if (!isOpen) {
+                menu.classList.add("is-open");
+                btn.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        var options = menu.querySelectorAll(".shop-top-sort-option");
+        Array.prototype.forEach.call(options, function (option) {
+            option.addEventListener("click", function () {
+                var value = option.getAttribute("data-value") || "latest";
+                var topSortSel = document.getElementById("shopTopSort");
+                if (topSortSel) {
+                    topSortSel.value = value;
+                    topSortSel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                closeAllSortMenus();
+            });
+        });
+    }
+
+    if (customSortBtn && customSortMenu) {
+        customSortBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var isOpen = customSortMenu.classList.contains("is-open");
+            closeAllSortMenus();
+            if (!isOpen) {
+                customSortMenu.classList.add("is-open");
+                customSortBtn.setAttribute("aria-expanded", "true");
+                if (customSortWrap) customSortWrap.classList.add("is-open");
+            }
+        });
+
+        var customSortOptions = customSortMenu.querySelectorAll(".shop-custom-sort-option");
+        Array.prototype.forEach.call(customSortOptions, function (option) {
+            option.addEventListener("click", function () {
+                var value = option.getAttribute("data-value") || "latest";
+                var mobileSortSel = document.getElementById("shopMobileSort");
+                if (mobileSortSel) {
+                    mobileSortSel.value = value;
+                    mobileSortSel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                closeAllSortMenus();
+            });
+        });
+    }
+
+    bindTopSortDropdown();
+
+    if (sidebarSortBtn && sidebarSortMenu) {
+        sidebarSortBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var isOpen = sidebarSortMenu.classList.contains("is-open");
+            closeAllSortMenus();
+            if (!isOpen) {
+                sidebarSortMenu.classList.add("is-open");
+                sidebarSortBtn.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        var sidebarSortOptions = sidebarSortMenu.querySelectorAll(".shop-sidebar-sort-option");
+        Array.prototype.forEach.call(sidebarSortOptions, function (option) {
+            option.addEventListener("click", function () {
+                var value = option.getAttribute("data-value") || "latest";
+                var sidebarSortSel = document.getElementById("shopSidebarSort");
+                if (sidebarSortSel) {
+                    sidebarSortSel.value = value;
+                    sidebarSortSel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                closeAllSortMenus();
+            });
+        });
+    }
+
+    document.addEventListener("click", function (e) {
+        var inMobile   = customSortWrap && customSortWrap.contains(e.target);
+        var liveTopWrap = document.getElementById("shopTopSortWrap");
+        var inTop      = liveTopWrap && liveTopWrap.contains(e.target);
+        var inSidebar  = sidebarSortGroup && sidebarSortGroup.contains(e.target);
+        if (!inMobile && !inTop && !inSidebar) closeAllSortMenus();
+    });
+
 
     hydrateLazyImages();
 });

@@ -21,6 +21,7 @@ if (count($selectedCategoryIds) === 1 && !empty($categories)) {
     }
 }
 
+$titleBase   = $sectionTitle === 'All Products' ? 'All' : $sectionTitle;
 $titleAccent = $sectionTitle === 'All Products' ? 'Products' : 'Collection';
 
 $productCountOnPage = is_array($products) ? count($products) : 0;
@@ -28,9 +29,9 @@ $showingFrom = $total_rows > 0 ? (($paged - 1) * $limit) + 1 : 0;
 $showingTo = $total_rows > 0 ? ($showingFrom + $productCountOnPage - 1) : 0;
 
 $sortOptions = [
-    'price_asc' => 'Price Low to High',
+    'latest'     => 'Latest',
+    'price_asc'  => 'Price Low to High',
     'price_desc' => 'Price High to Low',
-    'latest' => 'Latest',
 ];
 
 $queryParams = $_GET;
@@ -45,9 +46,22 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
 <section class="shop-page-shell">
     <div class="shop-mobile-toolbar">
         <button type="button" class="shop-mobile-filter-btn" id="shopFilterToggle">Filter</button>
-        <div class="shop-mobile-sort-wrap">
-            <label for="shopMobileSort">Sort</label>
-            <select id="shopMobileSort" class="shop-mobile-sort-select" aria-label="Sort products on mobile">
+        <div class="shop-mobile-sort-wrap" id="shopMobileSortWrap">
+            <button type="button" class="shop-custom-sort-btn" id="shopCustomSortBtn" aria-haspopup="listbox" aria-expanded="false">
+                <span class="shop-custom-sort-label" id="shopCustomSortLabel"><?= htmlspecialchars($sortOptions[$selectedSort] ?? 'Latest', ENT_QUOTES, 'UTF-8') ?></span>
+                <svg class="shop-sort-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <ul class="shop-custom-sort-menu" id="shopCustomSortMenu" role="listbox" aria-label="Sort options">
+                <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
+                    <li class="shop-custom-sort-option<?= $selectedSort === $sortValue ? ' is-active' : '' ?>"
+                        data-value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>"
+                        role="option"
+                        aria-selected="<?= $selectedSort === $sortValue ? 'true' : 'false' ?>">
+                        <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <select id="shopMobileSort" class="shop-mobile-sort-hidden" aria-hidden="true" tabindex="-1">
                 <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
                     <option value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>" <?= $selectedSort === $sortValue ? 'selected' : '' ?>>
                         <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
@@ -72,7 +86,7 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
             <header class="shop-results-head">
                 <div class="shop-results-meta">
                     <h1 class="shop-section-title">
-                        <?= htmlspecialchars($sectionTitle, ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars($titleBase, ENT_QUOTES, 'UTF-8') ?>
                         <span><?= htmlspecialchars($titleAccent, ENT_QUOTES, 'UTF-8') ?></span>
                     </h1>
                     <p class="shop-results-count">
@@ -80,15 +94,31 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
                     </p>
                 </div>
 
-                <div class="shop-results-sort">
-                    <label for="shopTopSort">Sort By</label>
-                    <select id="shopTopSort" class="shop-top-sort-select" aria-label="Sort products">
-                        <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
-                            <option value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>" <?= $selectedSort === $sortValue ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="shop-results-sort" id="shopTopSortWrap">
+                    <span class="shop-top-sort-label">Sort By</span>
+                    <div class="shop-top-custom-sort">
+                        <button type="button" class="shop-top-sort-btn" id="shopTopSortBtn" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="shop-top-sort-current" id="shopTopSortCurrent"><?= htmlspecialchars($sortOptions[$selectedSort] ?? 'Latest', ENT_QUOTES, 'UTF-8') ?></span>
+                            <svg class="shop-top-sort-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <ul class="shop-top-sort-menu" id="shopTopSortMenu" role="listbox" aria-label="Sort options">
+                            <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
+                                <li class="shop-top-sort-option<?= $selectedSort === $sortValue ? ' is-active' : '' ?>"
+                                    data-value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>"
+                                    role="option"
+                                    aria-selected="<?= $selectedSort === $sortValue ? 'true' : 'false' ?>">
+                                    <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <select id="shopTopSort" class="shop-top-sort-hidden" aria-hidden="true" tabindex="-1">
+                            <?php foreach ($sortOptions as $sortValue => $sortLabel): ?>
+                                <option value="<?= htmlspecialchars($sortValue, ENT_QUOTES, 'UTF-8') ?>" <?= $selectedSort === $sortValue ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($sortLabel, ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
             </header>
 
