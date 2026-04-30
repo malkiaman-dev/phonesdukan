@@ -2147,6 +2147,11 @@ a.brandItem {
   display: block;
   overflow: hidden;
   line-height: 0;
+  cursor: pointer;
+}
+
+.mob-promo-item--no-action {
+  cursor: pointer;
 }
 
 .mob-promo-item img {

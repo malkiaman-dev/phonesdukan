@@ -727,13 +727,13 @@ foreach ($latest_posts_raw as $post) {
 <div class="mob-promo-strip">
     <div class="na-inner">
         <div class="mob-promo-grid">
-            <a href="/bluetooth-headphones" class="mob-promo-item">
+            <a href="/bluetooth-headphones" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
                 <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
             </a>
-            <a href="/bluetooth-headphones" class="mob-promo-item">
+            <a href="/bluetooth-headphones" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
                 <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
             </a>
-            <a href="/bluetooth-headphones" class="mob-promo-item">
+            <a href="/bluetooth-headphones" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
                 <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
             </a>
         </div>
