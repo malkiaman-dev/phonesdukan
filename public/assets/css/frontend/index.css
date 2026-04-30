@@ -1622,7 +1622,7 @@ a.brandItem {
 }
 
 .testimonials-header {
-  text-align: left !important;
+  text-align: center !important;
 }
 
 .testimonial-box {
@@ -1838,21 +1838,17 @@ a.brandItem {
   padding: 48px 0 44px;
 }
 
-/* Refined header alignment for Latest Blogs */
+.home-latest-blogs .na-view-all {
+  display: none;
+}
+
+/* Keep Latest Blogs title centered on all screen sizes — same as Shop By Brand */
 .home-latest-blogs .na-header {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
 }
 
 .home-latest-blogs .na-title {
-  margin: 0;
   text-align: center;
-}
-
-.home-latest-blogs .na-view-all {
-  display: none;
 }
 
 .home-blog-grid {
@@ -2018,13 +2014,11 @@ a.brandItem {
 
 @media (max-width: 991px) {
   .home-latest-blogs .na-header {
-    justify-content: flex-start;
-    margin-bottom: 18px;
+    justify-content: center;
   }
 
   .home-latest-blogs .na-title {
-    text-align: left;
-    margin: 0;
+    text-align: center;
   }
 }
 
@@ -2042,23 +2036,39 @@ a.brandItem {
     height: 180px;
   }
 
+  .home-blog-body {
+    text-align: center;
+    align-items: center;
+  }
+
+  .home-blog-meta {
+    justify-content: center;
+  }
+
   .home-blog-title {
     font-size: 15px;
+    text-align: center;
   }
 
   .home-blog-excerpt {
     font-size: 12px;
     line-height: 1.55;
+    text-align: center;
+  }
+
+  .home-blog-readmore {
+    align-self: center;
   }
 }
 
 @media (max-width: 430px) {
   .home-latest-blogs .na-header {
-    margin-bottom: 14px;
+    justify-content: center;
   }
 
   .home-latest-blogs .na-title {
-    font-size: 17px;
+    text-align: center;
+    padding-right: 0; /* cancel global 84px reserved for Explore All pill */
   }
 }
 

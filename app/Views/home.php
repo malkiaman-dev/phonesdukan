@@ -1233,10 +1233,73 @@ foreach ($latest_posts_raw as $post) {
     var carousel = document.querySelector('.testimonials-carousel');
     if (!carousel) return;
 
-    var dragging = false;
-    var startX   = 0;
+    /* ── 1. Clone cards so the loop appears infinite ───────────────────
+       We append duplicates of every card. The scroll track now holds
+       [orig1, orig2, orig3, orig4, clone1, clone2, clone3, clone4].
+       When we reach the clone zone we instantly teleport back to the
+       identical-looking original zone — the user never sees a jump.   */
+    var originals = Array.from(carousel.querySelectorAll('.testimonial-box'));
+    originals.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        carousel.appendChild(clone);
+    });
+
+    /* ── 2. Step width = one card width + gap ───────────────────────── */
+    function getStepWidth() {
+        var box = carousel.querySelector('.testimonial-box');
+        if (!box) return 300;
+        var gap = parseInt(getComputedStyle(carousel).columnGap) || 24;
+        return box.offsetWidth + gap;
+    }
+
+    /* ── 3. Seamless reset when scrolled into the clone zone ────────── */
+    var resetting = false;
+    carousel.addEventListener('scroll', function () {
+        if (resetting) return;
+        var origWidth = getStepWidth() * originals.length;
+        if (carousel.scrollLeft >= origWidth) {
+            resetting = true;
+            carousel.style.scrollBehavior = 'auto';  /* instant jump */
+            carousel.scrollLeft -= origWidth;         /* same visual  */
+            requestAnimationFrame(function () {
+                carousel.style.scrollBehavior = '';   /* restore smooth */
+                resetting = false;
+            });
+        }
+    }, { passive: true });
+
+    /* ── 4. Autoplay ────────────────────────────────────────────────── */
+    var autoTimer  = null;
+    var pauseTimer = null;
+
+    function advance() {
+        /* CSS scroll-behavior:smooth does the animation for us */
+        carousel.scrollLeft += getStepWidth();
+    }
+
+    function startAutoplay() {
+        clearInterval(autoTimer);
+        autoTimer = setInterval(advance, 3500);
+    }
+
+    function stopAutoplay() {
+        clearInterval(autoTimer);
+        autoTimer = null;
+    }
+
+    /* Pause when user interacts, then resume after 5 s */
+    function pauseThenResume() {
+        stopAutoplay();
+        clearTimeout(pauseTimer);
+        pauseTimer = setTimeout(startAutoplay, 5000);
+    }
+
+    /* ── 5. Mouse drag ──────────────────────────────────────────────── */
+    var dragging  = false;
+    var startX    = 0;
     var startLeft = 0;
-    var moved    = false;
+    var moved     = false;
 
     carousel.addEventListener('mousedown', function (e) {
         if (e.button !== 0) return;
@@ -1245,6 +1308,7 @@ foreach ($latest_posts_raw as $post) {
         startX    = e.clientX;
         startLeft = carousel.scrollLeft;
         carousel.classList.add('is-dragging');
+        pauseThenResume();
         e.preventDefault();
     });
 
@@ -1261,7 +1325,7 @@ foreach ($latest_posts_raw as $post) {
         carousel.classList.remove('is-dragging');
     });
 
-    /* Block link-clicks that were actually drags */
+    /* Prevent a drag-release from firing a card link */
     carousel.addEventListener('click', function (e) {
         if (moved) {
             e.preventDefault();
@@ -1269,6 +1333,12 @@ foreach ($latest_posts_raw as $post) {
             moved = false;
         }
     }, true);
+
+    /* ── 6. Touch swipe — CSS handles the scroll; we just pause ─────── */
+    carousel.addEventListener('touchstart', pauseThenResume, { passive: true });
+
+    /* ── 7. Go ──────────────────────────────────────────────────────── */
+    startAutoplay();
 })();
 </script>
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>
