@@ -51,7 +51,7 @@
             <div class="footer-block">
                 <img src="<?= url('public/assets/images/second_phone.svg'); ?>" alt="Phone Icon" class="footer-icon">
                 <div class="footer-block-content">
-                    <a href="tel:+923170003777" class="footer-block-caption">(+92) 3170003777</a>
+                    <a href="tel:05-2756587" class="footer-block-caption">05-2756587</a>
                 </div>
             </div>
             <!-- <div class="footer-block">
