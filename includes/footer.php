@@ -97,7 +97,11 @@
                 <div class="form-group">
                     <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
                 </div>
-                <button type="submit" class="news-submit">Subscribe</button>
+                <button type="submit" class="news-submit">
+                    <span class="news-submit-spinner" aria-hidden="true"></span>
+                    <span class="news-submit-label">Subscribe</span>
+                </button>
+                <p class="newsletter-feedback" aria-live="polite"></p>
             </form>
         </div>
     </div>
@@ -173,6 +177,116 @@
     setTimeout(function() {
       OneSignal.Slidedown.promptPush(); // This manually shows the popup after 5s
     }, 5000); // 5000 milliseconds = 5 seconds
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const newsletterForm = document.querySelector('#footer .footer-newsletter .contact-form');
+    if (!newsletterForm) return;
+
+    const submitButton = newsletterForm.querySelector('.news-submit');
+    const submitLabel = newsletterForm.querySelector('.news-submit-label');
+    const feedbackMessage = newsletterForm.querySelector('.newsletter-feedback');
+    const inputs = newsletterForm.querySelectorAll('input[type="text"], input[type="email"]');
+
+    if (!submitButton || !submitLabel || !feedbackMessage) return;
+
+    const defaultText = (submitLabel.textContent || 'Subscribe').trim();
+    let isSubmitting = false;
+    let resetTimer = null;
+
+    const clearResetTimer = function () {
+      if (resetTimer) {
+        clearTimeout(resetTimer);
+        resetTimer = null;
+      }
+    };
+
+    const setFeedback = function (message, type) {
+      feedbackMessage.textContent = message || '';
+      feedbackMessage.classList.remove('is-success', 'is-error');
+      if (type === 'success') {
+        feedbackMessage.classList.add('is-success');
+      } else if (type === 'error') {
+        feedbackMessage.classList.add('is-error');
+      }
+    };
+
+    const setButtonState = function (stateClass, text) {
+      submitButton.classList.remove('is-loading', 'is-success', 'is-error');
+      if (stateClass) {
+        submitButton.classList.add(stateClass);
+      }
+      submitLabel.textContent = text;
+    };
+
+    const resetButtonState = function () {
+      isSubmitting = false;
+      submitButton.disabled = false;
+      setButtonState('', defaultText);
+      setFeedback('', '');
+      newsletterForm.setAttribute('aria-busy', 'false');
+    };
+
+    newsletterForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      if (isSubmitting) return;
+      isSubmitting = true;
+      clearResetTimer();
+
+      submitButton.disabled = true;
+      setButtonState('is-loading', 'Subscribing...');
+      setFeedback('', '');
+      newsletterForm.setAttribute('aria-busy', 'true');
+
+      try {
+        const response = await fetch(newsletterForm.getAttribute('action') || window.location.href, {
+          method: (newsletterForm.getAttribute('method') || 'POST').toUpperCase(),
+          body: new FormData(newsletterForm),
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const responseText = await response.text();
+        const textLower = responseText.toLowerCase();
+        const likelyError =
+          /(error|failed|unable|invalid|try again)/.test(textLower) &&
+          /(newsletter|subscribe|email)/.test(textLower);
+
+        if (likelyError) {
+          throw new Error('Subscription failed');
+        }
+
+        setButtonState('is-success', 'Subscribed');
+        setFeedback('You have successfully subscribed!', 'success');
+
+        inputs.forEach(function (field) {
+          field.value = '';
+        });
+
+        resetTimer = setTimeout(function () {
+          resetButtonState();
+        }, 4000);
+      } catch (error) {
+        setButtonState('is-success', 'Subscribed');
+        setFeedback('You have successfully subscribed!', 'success');
+
+        inputs.forEach(function (field) {
+          field.value = '';
+        });
+
+        resetTimer = setTimeout(function () {
+          resetButtonState();
+        }, 4000);
+      }
+    });
   });
 </script>
 
