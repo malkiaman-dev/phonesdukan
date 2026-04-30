@@ -1123,13 +1123,21 @@ a.view-all-btn {
   .na-btn {
     width: 100%;
     min-width: 0;
+    box-sizing: border-box;
     height: 34px;
     font-size: 11px;
-    padding: 0;
+    padding: 0 3px;
+  }
+
+  /* "Add to Cart" is longer — drop one font-size step so it breathes */
+  .na-btn--cart,
+  .na-actions .add-to-cart {
+    font-size: 10px;
+    letter-spacing: -0.1px;
   }
 
   .na-btn--soldout {
-    grid-column: 1 / -1;  /* span both columns when alone */
+    grid-column: 1 / -1;
   }
 }
 
