@@ -865,6 +865,7 @@ h3.product-title {
   margin-top: auto;
   width: 100%;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 /* Unified homepage product action buttons
@@ -889,6 +890,11 @@ h3.product-title {
   margin: 0;
   white-space: nowrap;
   line-height: 1;
+  text-align: center;
+  letter-spacing: -0.01em;
+  padding-inline: 10px;
+  box-sizing: border-box;
+  overflow: visible;
   appearance: none;
   -webkit-appearance: none;
 }
@@ -898,6 +904,7 @@ h3.product-title {
   background: #111111;
   color: #ffffff;
   border: 1.5px solid #111111;
+  letter-spacing: -0.03em;
 }
 
 .na-actions .na-btn--cart:hover,
@@ -1126,8 +1133,13 @@ a.view-all-btn {
     box-sizing: border-box;
     height: 34px;
     font-size: 11px;
-    letter-spacing: -0.5px;  /* uniform tightening — saves ~5px on "Add to Cart", ~3px on "Buy Now" */
-    padding: 0 4px;
+    letter-spacing: -0.02em;
+    padding-inline: 6px;
+  }
+
+  .na-actions .na-btn--cart,
+  .na-actions .add-to-cart {
+    letter-spacing: -0.035em;
   }
 
   .na-btn--soldout {
