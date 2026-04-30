@@ -307,14 +307,33 @@
   }
 
   .footer-widgets {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: flex-start;
     padding: 8px 0;
-    gap: 16px;
+    row-gap: 18px;
+    column-gap: 14px;
   }
 
   .footer-widget {
     max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Row 1: Locations full width */
+  .footer-widget:nth-child(1) {
+    flex: 0 0 100%;
+  }
+
+  /* Row 2: Categories + Quick Links two equal columns */
+  .footer-widget:nth-child(2),
+  .footer-widget:nth-child(3) {
+    flex: 0 0 calc(50% - 7px);
+  }
+
+  /* Row 3: Newsletter full width */
+  .footer-widget:nth-child(4) {
+    flex: 0 0 100%;
   }
 
   .contact-form,
@@ -340,18 +359,35 @@
     margin: 4px 0 12px;
   }
 
-  .footer-info {
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: flex-start;
+  .footer-widget:nth-child(2) h4,
+  .footer-widget:nth-child(3) h4 {
+    margin-top: 0;
   }
 
-  .site-info-text {
-    margin-bottom: 1rem;
+  .footer-widget:nth-child(2) ul,
+  .footer-widget:nth-child(3) ul {
+    margin-top: 2px;
+  }
+
+  .footer-info {
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .footer-info > div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .payment-image {
-    width: 268px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .payment-image img {
