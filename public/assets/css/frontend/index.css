@@ -1141,12 +1141,15 @@ a.view-all-btn {
     box-sizing: border-box;
   }
 
-  .na-btn {
+  .na-actions .na-btn,
+  .na-actions .buy-button,
+  .na-actions .add-to-cart,
+  .na-actions .buy-now {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
     height: 34px;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: -0.02em;
     padding-inline: 6px;
   }
@@ -1156,7 +1159,7 @@ a.view-all-btn {
     letter-spacing: -0.035em;
   }
 
-  .na-btn--soldout {
+  .na-actions .na-btn--soldout {
     grid-column: 1 / -1;
     letter-spacing: normal;
   }
@@ -1177,7 +1180,7 @@ a.view-all-btn {
     padding: 5px 10px;
   }
 
-  .na-btn { height: 32px; }  /* font already 11px from 768px rule */
+  .na-btn { height: 32px; }  /* font already 10px from 768px rule */
 
   .cat-title,
   .na-title,
