@@ -32,7 +32,7 @@
                 <img src="<?= url('public/assets/images/map_icon.svg'); ?>" alt="Location Icon" class="footer-icon">
                 <div class="footer-block-content">
                     <a href="https://www.google.com/maps/dir//Al-ghaffar+shoping+mall,+G-11+Markaz+G+11+Markaz+G-11,+Islamabad,+Islamabad+Capital+Territory+44000/@33.6682651,72.9160123,12z/data=!4m8!4m7!1m0!1m5!1m1!1s0x38df957d29581291:0xe598ee9ef0015b3d!2m2!1d72.9984135!2d33.6682924?entry=ttu&g_ep=EgoyMDI0MDkwNC4wIKXMDSoASAFQAw%3D%3D" class="footer-block-caption">
-                        Al-Ghaffar Shoping Mall G-11 Markaz, Islamabad
+                        Al-Ghaffar Shoping Mall shop 13B, G-11 Markaz Islamabad, Pakistan
                     </a>
                 </div>
             </div>
@@ -51,7 +51,7 @@
             <div class="footer-block">
                 <img src="<?= url('public/assets/images/second_phone.svg'); ?>" alt="Phone Icon" class="footer-icon">
                 <div class="footer-block-content">
-                    <a href="tel:05-2756587" class="footer-block-caption">05-2756587</a>
+                    <a href="tel:051-2756587" class="footer-block-caption">051-2756587</a>
                 </div>
             </div>
             <!-- <div class="footer-block">
