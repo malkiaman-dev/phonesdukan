@@ -982,10 +982,32 @@ h3.product-title {
 }
 
 .na-actions .na-btn--cart.na-btn--added {
-  background: #f0fdf4;
+  background: #ffffff;
   color: #16a34a;
-  border-color: #86efac;
+  border-color: #16a34a;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);
+  opacity: 1;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
   cursor: not-allowed;
+}
+
+.na-actions .na-btn--cart.na-btn--added:disabled {
+  opacity: 1;
+  background: #ffffff;
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+.na-actions .na-btn--cart.na-btn--added:hover {
+  background: rgba(22, 163, 74, 0.08);
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+.na-actions .na-btn--cart.na-btn--added:active {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+  border-color: #15803d;
 }
 
 /* Trust strip */

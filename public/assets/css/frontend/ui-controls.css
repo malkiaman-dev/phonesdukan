@@ -1,0 +1,76 @@
+/* =========================================================
+   PhonesDukan UI Controls Theme
+   Applies premium brand styling to frontend select controls.
+   ========================================================= */
+
+:root {
+  --pd-select-bg: #ffffff;
+  --pd-select-text: #111111;
+  --pd-select-border: #d9d9d9;
+  --pd-select-focus: #f7d117;
+  --pd-select-shadow: 0 0 0 2px rgba(247, 209, 23, 0.22);
+  --pd-select-radius: 10px;
+  --pd-select-height: 42px;
+}
+
+select,
+.pd-themed-select,
+.shop-sort-select,
+.shop-top-sort-select,
+.shop-mobile-sort-select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--pd-select-bg);
+  color: var(--pd-select-text);
+  border: 1px solid var(--pd-select-border);
+  border-radius: var(--pd-select-radius);
+  min-height: var(--pd-select-height);
+  line-height: 1.2;
+  font-family: "Inter", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 40px 10px 12px;
+  box-sizing: border-box;
+  outline: none;
+  background-image: linear-gradient(45deg, transparent 50%, #111111 50%),
+                    linear-gradient(135deg, #111111 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 2px),
+                       calc(100% - 12px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+select:hover,
+.pd-themed-select:hover,
+.shop-sort-select:hover,
+.shop-top-sort-select:hover,
+.shop-mobile-sort-select:hover {
+  border-color: #c7c7c7;
+  background-color: #fffef8;
+}
+
+select:focus,
+select:focus-visible,
+.pd-themed-select:focus,
+.pd-themed-select:focus-visible,
+.shop-sort-select:focus,
+.shop-sort-select:focus-visible,
+.shop-top-sort-select:focus,
+.shop-top-sort-select:focus-visible,
+.shop-mobile-sort-select:focus,
+.shop-mobile-sort-select:focus-visible {
+  border-color: var(--pd-select-focus);
+  box-shadow: var(--pd-select-shadow);
+  outline: none;
+}
+
+select:disabled,
+.pd-themed-select:disabled,
+.shop-sort-select:disabled,
+.shop-top-sort-select:disabled,
+.shop-mobile-sort-select:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  background-color: #f8f8f8;
+}

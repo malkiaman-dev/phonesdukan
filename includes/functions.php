@@ -151,6 +151,8 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/index.css');
         }
 
+        emitCss('public/assets/css/frontend/ui-controls.css');
+
         $cssMap = [
             '/admin/' => 'public/assets/css/admin/admin.css',
             '/mobiles' => 'public/assets/css/frontend/mobiles.css',

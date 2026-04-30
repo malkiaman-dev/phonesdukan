@@ -627,10 +627,31 @@
 }
 
 .na-actions .na-btn--cart.na-btn--added {
-  background: #fffbe6;
-  color: #111111;
-  border-color: #f7d117;
+  background: #ffffff;
+  color: #16a34a;
+  border-color: #16a34a;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.12);
+  opacity: 1;
   cursor: not-allowed;
+}
+
+.na-actions .na-btn--cart.na-btn--added:disabled {
+  opacity: 1;
+  background: #ffffff;
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+.na-actions .na-btn--cart.na-btn--added:hover {
+  background: rgba(22, 163, 74, 0.08);
+  color: #16a34a;
+  border-color: #16a34a;
+}
+
+.na-actions .na-btn--cart.na-btn--added:active {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+  border-color: #15803d;
 }
 
 .pagination {
