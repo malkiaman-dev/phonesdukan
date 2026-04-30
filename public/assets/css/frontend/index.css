@@ -1126,18 +1126,13 @@ a.view-all-btn {
     box-sizing: border-box;
     height: 34px;
     font-size: 11px;
-    padding: 0 3px;
-  }
-
-  /* "Add to Cart" is longer — drop one font-size step so it breathes */
-  .na-btn--cart,
-  .na-actions .add-to-cart {
-    font-size: 10px;
-    letter-spacing: -0.1px;
+    letter-spacing: -0.5px;  /* uniform tightening — saves ~5px on "Add to Cart", ~3px on "Buy Now" */
+    padding: 0 4px;
   }
 
   .na-btn--soldout {
     grid-column: 1 / -1;
+    letter-spacing: normal;
   }
 }
 
