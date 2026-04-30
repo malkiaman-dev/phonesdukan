@@ -170,22 +170,6 @@ $totalBrands   = count($brandList);
                 <?php endforeach; ?>
             </div>
 
-            <!-- Per-brand view-all links (shown contextually by JS) -->
-            <div class="mob-brand-links" id="mobBrandLinks">
-                <?php foreach ($brandList as $slug => $name): ?>
-                    <a href="/mobiles/<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>"
-                       class="mob-brand-link"
-                       data-brand-link="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>"
-                       hidden>
-                        View all <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?> mobiles
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                <?php endforeach; ?>
-                <a href="/shop?category[]=2" class="mob-brand-link" id="mobViewAllLink">
-                    Browse all mobiles in shop
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-            </div>
         <?php else: ?>
             <p class="mob-empty">No products found. Please check back soon.</p>
         <?php endif; ?>
@@ -193,6 +177,32 @@ $totalBrands   = count($brandList);
 </div>
 
 <?php include_once __DIR__ . '/ad/feed2.php'; ?>
+
+<!-- SHOP BY BRAND CAROUSEL -->
+<section class="mob-brands-section">
+    <div class="mob-brands-inner">
+        <h2 class="mob-brands-title">Shop by <span>Brand</span></h2>
+        <div class="mob-brands-carousel-wrap" id="mobBrandsCarousel">
+            <div class="mob-brands-track" id="mobBrandsTrack">
+                <?php
+                $brandInitials = [
+                    'samsung' => 'S', 'infinix' => 'I', 'oppo' => 'O',
+                    'vivo'    => 'V', 'xiaomi'  => 'X', 'tecno' => 'T', 'realme' => 'R',
+                ];
+                foreach ($brandList as $slug => $name):
+                    $initial = $brandInitials[$slug] ?? strtoupper($slug[0]);
+                ?>
+                    <a href="/mobiles/<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>"
+                       class="mob-brand-card">
+                        <div class="mob-brand-card-icon"><?= htmlspecialchars($initial, ENT_QUOTES, 'UTF-8') ?></div>
+                        <span class="mob-brand-card-name"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="mob-brand-card-sub">View all models</span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</section>
 
 <!-- WHY CHOOSE US -->
 <section class="mob-why">

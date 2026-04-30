@@ -10,33 +10,21 @@
 
     /* ── Brand filter tabs ─────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', function () {
-        var tabs       = document.querySelectorAll('.mob-brand-tab');
-        var cards      = document.querySelectorAll('.mob-na-card');
-        var brandLinks = document.querySelectorAll('[data-brand-link]');
-        var viewAllEl  = document.getElementById('mobViewAllLink');
+        var tabs  = document.querySelectorAll('.mob-brand-tab');
+        var cards = document.querySelectorAll('.mob-na-card');
 
         if (!tabs.length) return;
 
         function filterByBrand(brand) {
-            /* Update tab states */
             tabs.forEach(function (t) {
                 var active = t.getAttribute('data-brand') === brand;
                 t.classList.toggle('is-active', active);
                 t.setAttribute('aria-pressed', active ? 'true' : 'false');
             });
-
-            /* Show / hide product cards */
             cards.forEach(function (card) {
                 var show = brand === 'all' || card.getAttribute('data-brand') === brand;
-                card.hidden = !show;
                 card.style.display = show ? '' : 'none';
             });
-
-            /* Update view-all link */
-            brandLinks.forEach(function (link) {
-                link.hidden = link.getAttribute('data-brand-link') !== brand;
-            });
-            if (viewAllEl) viewAllEl.hidden = brand !== 'all';
         }
 
         tabs.forEach(function (tab) {
@@ -45,8 +33,58 @@
             });
         });
 
-        /* Initialise: show "All" */
         filterByBrand('all');
+
+        /* ── Brand carousel drag-scroll ────────────────────── */
+        var carousel = document.getElementById('mobBrandsCarousel');
+        if (!carousel) return;
+
+        var isDragging  = false;
+        var startX      = 0;
+        var scrollStart = 0;
+        var moved       = false;
+
+        carousel.addEventListener('mousedown', function (e) {
+            isDragging  = true;
+            moved       = false;
+            startX      = e.pageX - carousel.offsetLeft;
+            scrollStart = carousel.scrollLeft;
+            carousel.classList.add('is-dragging');
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (!isDragging) return;
+            isDragging = false;
+            carousel.classList.remove('is-dragging');
+        });
+
+        carousel.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            moved = true;
+            var x    = e.pageX - carousel.offsetLeft;
+            var walk = (x - startX) * 1.4;
+            carousel.scrollLeft = scrollStart - walk;
+        });
+
+        /* Prevent click-through on drag */
+        carousel.addEventListener('click', function (e) {
+            if (moved) e.preventDefault();
+        }, true);
+
+        /* Touch */
+        var touchStartX   = 0;
+        var touchScrollLeft = 0;
+
+        carousel.addEventListener('touchstart', function (e) {
+            touchStartX    = e.touches[0].pageX;
+            touchScrollLeft = carousel.scrollLeft;
+        }, { passive: true });
+
+        carousel.addEventListener('touchmove', function (e) {
+            var walk = touchStartX - e.touches[0].pageX;
+            carousel.scrollLeft = touchScrollLeft + walk;
+        }, { passive: true });
     });
 
     /* ── Add to Cart ───────────────────────────────────────── */
