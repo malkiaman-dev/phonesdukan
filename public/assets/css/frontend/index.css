@@ -718,14 +718,30 @@ h3.product-title {
   text-decoration: none;
 }
 
+/* ── Carousel track (product sections) ── */
 .na-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x;
+  cursor: grab;
+  padding-bottom: 8px;
+}
+.na-grid::-webkit-scrollbar { display: none; }
+.na-grid.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  user-select: none;
 }
 
 /* Card */
 .na-card {
+  flex: 0 0 calc((100% - 60px) / 4);
+  scroll-snap-align: start;
   position: relative;
   background: #ffffff;
   border: 1px solid #ebebeb;
@@ -1067,9 +1083,8 @@ a.view-all-btn {
     font-size: clamp(22px, 3.3vw, 28px);
   }
 
-  .na-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .na-grid { gap: 16px; }
+  .na-card { flex: 0 0 calc((100% - 32px) / 3); }
 }
 
 @media (max-width: 768px) {
@@ -1094,10 +1109,8 @@ a.view-all-btn {
     font-size: clamp(21px, 5.5vw, 24px);
   }
 
-  .na-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
+  .na-grid { gap: 12px; }
+  .na-card { flex: 0 0 calc((100% - 12px) / 2); }
 
   .na-trust-inner {
     grid-template-columns: repeat(2, 1fr);
@@ -1150,6 +1163,7 @@ a.view-all-btn {
 
 @media (max-width: 480px) {
   .na-grid { gap: 10px; }
+  .na-card { flex: 0 0 calc((100% - 10px) / 2); }
 
   .sw-na-section .na-header--split,
   .home-earbuds-section .category-header--split {
@@ -1888,7 +1902,7 @@ a.brandItem {
 }
 
 .home-latest-blogs .na-view-all {
-  display: none;
+  display: inline-flex;
 }
 
 /* Keep Latest Blogs title centered on all screen sizes — same as Shop By Brand */
@@ -1900,14 +1914,29 @@ a.brandItem {
   text-align: center;
 }
 
+/* ── Blog carousel track ── */
 .home-blog-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
   gap: 20px;
-  align-items: stretch;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x;
+  cursor: grab;
+  padding-bottom: 8px;
+}
+.home-blog-grid::-webkit-scrollbar { display: none; }
+.home-blog-grid.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  user-select: none;
 }
 
 .home-blog-card {
+  flex: 0 0 calc((100% - 40px) / 3);
+  scroll-snap-align: start;
   background: #ffffff;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
@@ -2056,9 +2085,8 @@ a.brandItem {
 }
 
 @media (max-width: 1024px) {
-  .home-blog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .home-blog-grid { gap: 16px; }
+  .home-blog-card { flex: 0 0 calc((100% - 16px) / 2); }
 }
 
 @media (max-width: 991px) {
@@ -2076,10 +2104,8 @@ a.brandItem {
     padding: 30px 0 26px;
   }
 
-  .home-blog-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
+  .home-blog-grid { gap: 12px; }
+  .home-blog-card { flex: 0 0 100%; }
 
   .home-blog-image-wrap {
     height: 180px;
@@ -2269,11 +2295,9 @@ a.brandItem {
     white-space: nowrap;
   }
 
-  /* 2-column grid, tighter gap */
-  .na-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
+  /* Carousel: 2 cards visible on small phones */
+  .na-grid { gap: 8px; }
+  .na-card { flex: 0 0 calc((100% - 8px) / 2); }
 
   /* Image area: less padding so image isn't tiny */
   .na-img-box {

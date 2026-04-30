@@ -203,7 +203,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/shop" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php if (!empty($products)): ?>
                 <?php foreach (array_slice($products, 0, 4) as $product): ?>
                 <?php
@@ -383,7 +383,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/smart-watches" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php
             // Fetch Smart Watches products (only category_id = 11)
             $products = $productModel->getSmartWatches(4);
@@ -491,7 +491,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/wireless-earbuds" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php
             // Fetch products from category 13 (limit to 4)
             $products = $productModel->getCategory13Products(4);
@@ -643,7 +643,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/mobiles" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php
             $products = $productModel->getCategory2Products(4);
 
@@ -753,7 +753,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/mobile-accessories" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php
             $products = $productModel->getCategory9Products(4);
 
@@ -845,7 +845,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/power-banks" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php
             $products = $productModel->getCategory10Products(4);
 
@@ -936,7 +936,7 @@ foreach ($latest_posts_raw as $post) {
             <a href="/bluetooth-speakers" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="na-grid">
+        <div class="na-grid" data-carousel>
             <?php
             $products = $productModel->getCategory4Products(4);
 
@@ -1103,9 +1103,10 @@ foreach ($latest_posts_raw as $post) {
     <div class="na-inner">
         <div class="na-header">
             <h2 class="na-title">Latest <span>Blogs</span></h2>
+            <a href="/blog" class="na-view-all">Explore All</a>
         </div>
 
-        <div class="home-blog-grid">
+        <div class="home-blog-grid" data-carousel>
             <?php if (!empty($latest_posts)): ?>
                 <?php foreach ($latest_posts as $post): ?>
                     <?php
@@ -1341,4 +1342,5 @@ foreach ($latest_posts_raw as $post) {
     startAutoplay();
 })();
 </script>
+<script src="/public/assets/js/pd-carousel.js"></script>
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>
