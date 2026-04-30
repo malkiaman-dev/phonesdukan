@@ -861,9 +861,10 @@ h3.product-title {
 .na-actions {
   display: flex;
   gap: 10px;
-  padding-inline: 12px;
+  padding: 4px 12px 12px;
   margin-top: auto;
-  padding-top: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Unified homepage product action buttons
@@ -874,6 +875,7 @@ h3.product-title {
 .na-actions .buy-now {
   font-family: "Inter", Arial, sans-serif;
   flex: 1;
+  min-width: 0;
   height: 38px;
   border-radius: 8px;
   font-size: 13px;
@@ -1097,6 +1099,38 @@ a.view-all-btn {
 
   .na-trust-item:nth-child(2) { border-right: none; }
   .na-trust-item:nth-child(3) { border-right: 1px solid #ebebeb; }
+
+  /* ── 2-column card layout: tighten body + switch buttons to grid ── */
+  .na-body {
+    padding: 10px 12px 12px;
+    gap: 6px;
+  }
+
+  .na-name,
+  .na-name a {
+    font-size: 13px;
+  }
+
+  .na-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 0;          /* na-body padding handles the sides */
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .na-btn {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    font-size: 11px;
+    padding: 0;
+  }
+
+  .na-btn--soldout {
+    grid-column: 1 / -1;  /* span both columns when alone */
+  }
 }
 
 @media (max-width: 480px) {
@@ -1113,7 +1147,7 @@ a.view-all-btn {
     padding: 5px 10px;
   }
 
-  .na-btn { font-size: 11px; height: 34px; }
+  .na-btn { height: 32px; }  /* font already 11px from 768px rule */
 
   .cat-title,
   .na-title,
@@ -2248,16 +2282,14 @@ a.brandItem {
     font-size: 13px;
   }
 
-  /* Action row: let na-body padding handle the sides */
+  /* Action row */
   .na-actions {
-    gap: 6px;
-    padding-inline: 0;
+    gap: 5px;
   }
 
   /* Buttons */
   .na-btn {
-    font-size: 11px;
-    height: 32px;
+    height: 30px;
     border-radius: 6px;
   }
 
