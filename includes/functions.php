@@ -238,6 +238,7 @@ if (!function_exists('loadJS')) {
 
         if (strpos($uri, '/shop') !== false) {
             emitJs('public/assets/js/frontend/shop-filter.js');
+            emitJs('public/assets/js/frontend/buy-now.js');
         }
 
         if (strpos($uri, '/checkout') !== false) {

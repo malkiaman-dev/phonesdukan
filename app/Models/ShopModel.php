@@ -29,14 +29,42 @@ class ProductModel {
     }
     
     public function applyPriceRangeFilter($filters, &$whereClauses, &$params) {
+        $priceExpr = "(CASE WHEN p.sale_price IS NOT NULL AND p.sale_price > 0 THEN p.sale_price ELSE p.regular_price END)";
+
+        $hasMin = isset($filters['min_price']) && $filters['min_price'] !== '';
+        $hasMax = isset($filters['max_price']) && $filters['max_price'] !== '';
+
+        if ($hasMin || $hasMax) {
+            $minPrice = $hasMin ? max(0, (int) $filters['min_price']) : null;
+            $maxPrice = $hasMax ? max(0, (int) $filters['max_price']) : null;
+
+            if ($minPrice !== null && $maxPrice !== null && $maxPrice < $minPrice) {
+                $temp = $minPrice;
+                $minPrice = $maxPrice;
+                $maxPrice = $temp;
+            }
+
+            if ($minPrice !== null) {
+                $whereClauses[] = "$priceExpr >= :min_price";
+                $params[':min_price'] = $minPrice;
+            }
+
+            if ($maxPrice !== null) {
+                $whereClauses[] = "$priceExpr <= :max_price";
+                $params[':max_price'] = $maxPrice;
+            }
+
+            return;
+        }
+
         if (!empty($filters['price_range'])) {
             $priceConditions = [];
             foreach ($filters['price_range'] as $index => $range) {
                 if ($range === '150000-above') {
-                    $priceConditions[] = "p.sale_price >= :price_above_$index";
+                    $priceConditions[] = "$priceExpr >= :price_above_$index";
                     $params[":price_above_$index"] = 150000;
                 } elseif (preg_match('/^(\d+)-(\d+)$/', $range, $matches)) {
-                    $priceConditions[] = "(p.sale_price BETWEEN :min_$index AND :max_$index)";
+                    $priceConditions[] = "($priceExpr BETWEEN :min_$index AND :max_$index)";
                     $params[":min_$index"] = (int)$matches[1];
                     $params[":max_$index"] = (int)$matches[2];
                 }
@@ -108,6 +136,7 @@ class ProductModel {
         $query = "
             SELECT p.product_id, p.product_name, p.product_slug, 
                    p.regular_price, p.sale_price, p.stock_quantity, 
+                   p.short_description, p.product_tag, p.product_status,
                    pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
             FROM products p
             JOIN categories c ON p.category_id = c.category_id
@@ -126,14 +155,14 @@ class ProductModel {
                 case 'price_asc':
                     $query .= ' ORDER BY 
                                 CASE 
-                                    WHEN p.sale_price IS NOT NULL THEN p.sale_price
+                                    WHEN p.sale_price IS NOT NULL AND p.sale_price > 0 THEN p.sale_price
                                     ELSE p.regular_price 
                                 END ASC'; // Low to High
                     break;
                 case 'price_desc':
                     $query .= ' ORDER BY 
                                 CASE 
-                                    WHEN p.sale_price IS NOT NULL THEN p.sale_price
+                                    WHEN p.sale_price IS NOT NULL AND p.sale_price > 0 THEN p.sale_price
                                     ELSE p.regular_price 
                                 END DESC'; // High to Low
                     break;
@@ -166,39 +195,14 @@ class ProductModel {
 
         $this->addActiveProductCondition($whereClauses);
 
-        // Price range filters
-        if (!empty($filters['price_range'])) {
-            $priceConditions = [];
-            foreach ($filters['price_range'] as $index => $range) {
-                if ($range === '150000-above') {
-                    $priceConditions[] = "p.sale_price >= :price_above_$index";
-                    $params[":price_above_$index"] = 150000;
-                } elseif (preg_match('/^(\d+)-(\d+)$/', $range, $matches)) {
-                    $priceConditions[] = "(p.sale_price BETWEEN :min_$index AND :max_$index)";
-                    $params[":min_$index"] = (int)$matches[1];
-                    $params[":max_$index"] = (int)$matches[2];
-                }
-            }
-            if (!empty($priceConditions)) {
-                $whereClauses[] = '(' . implode(' OR ', $priceConditions) . ')';
-            }
-        }
-
-        // Category filter
-        if (!empty($filters['category'])) {
-            $categoryConditions = [];
-            foreach ($filters['category'] as $slug) {
-                $categoryConditions[] = "c.slug = :category_slug_$slug";
-                $params[":category_slug_$slug"] = $slug;
-            }
-            if (!empty($categoryConditions)) {
-                $whereClauses[] = '(' . implode(' OR ', $categoryConditions) . ')';
-            }
-        }
+        // Keep total count filtering exactly aligned with paginated query filters
+        $this->applyPriceRangeFilter($filters, $whereClauses, $params);
+        $this->applyCategoryFilter($filters, $whereClauses, $params);
+        $this->applyBrandFilter($filters, $whereClauses, $params);
 
         // Base query for counting products
         $query = "
-            SELECT COUNT(p.product_id) 
+            SELECT COUNT(DISTINCT p.product_id)
             FROM products p
             JOIN categories c ON p.category_id = c.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id

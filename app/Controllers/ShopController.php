@@ -11,6 +11,8 @@ $offset = ($paged - 1) * $limit;
 $filters = [
     'sort_by' => $_GET['sort_by'] ?? null,         // Sorting options (low to high, high to low)
     'price_range' => $_GET['price_range'] ?? [],   // Price range filter
+    'min_price' => $_GET['min_price'] ?? null,     // Min price (slider)
+    'max_price' => $_GET['max_price'] ?? null,     // Max price (slider)
     'category' => $_GET['category'] ?? [],         // Selected categories
     'brand' => $_GET['brand'] ?? []                // Selected brands
 ];
