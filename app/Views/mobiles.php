@@ -188,6 +188,7 @@ $totalBrands   = count($brandList);
                 <?php endforeach; ?>
             </div>
         </div>
+        <div class="mob-brands-dots" id="mobBrandsDots" role="tablist" aria-label="Brand navigation"></div>
     </div>
 </section>
 

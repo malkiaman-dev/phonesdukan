@@ -35,57 +35,199 @@
 
         filterByBrand('all');
 
-        /* ── Brand carousel drag-scroll ────────────────────── */
-        var carousel = document.getElementById('mobBrandsCarousel');
-        if (!carousel) return;
+        /* ── Brand carousel (transform, auto-scroll, dots) ─── */
+        initBrandsCarousel();
+    });
 
-        var isDragging  = false;
-        var startX      = 0;
-        var scrollStart = 0;
-        var moved       = false;
+    function initBrandsCarousel() {
+        var wrap   = document.getElementById('mobBrandsCarousel');
+        var track  = document.getElementById('mobBrandsTrack');
+        var dotsEl = document.getElementById('mobBrandsDots');
+        if (!wrap || !track) return;
 
-        carousel.addEventListener('mousedown', function (e) {
-            isDragging  = true;
-            moved       = false;
-            startX      = e.pageX - carousel.offsetLeft;
-            scrollStart = carousel.scrollLeft;
-            carousel.classList.add('is-dragging');
+        var origCards = Array.from(track.children);
+        var total     = origCards.length; // 7 brands
+
+        /* Build infinite clone set: [end-clones][originals][start-clones] */
+        origCards.forEach(function (c) { track.appendChild(c.cloneNode(true)); });
+        origCards.slice().reverse().forEach(function (c) {
+            track.insertBefore(c.cloneNode(true), track.firstChild);
+        });
+        var allCards = Array.from(track.children); // 21 total
+
+        var gap      = 14;
+        var perView  = 5;
+        var cardW    = 0;
+        var curIdx   = total; // points to first original card
+        var autoTimer  = null;
+        var pauseTimer = null;
+        var isDragging = false;
+        var moved      = false;
+        var dragStartX = 0;
+        var dragOff    = 0;
+        var touchStartX = 0;
+        var touchOff    = 0;
+
+        function calcPerView() {
+            var w = wrap.offsetWidth;
+            if (w < 480) return 2;
+            if (w < 640) return 3;
+            if (w < 900) return 4;
+            return 5;
+        }
+
+        function setCardWidths() {
+            perView = calcPerView();
+            cardW   = Math.floor((wrap.offsetWidth - gap * (perView - 1)) / perView);
+            allCards.forEach(function (c) {
+                c.style.width    = cardW + 'px';
+                c.style.minWidth = cardW + 'px';
+                c.style.maxWidth = cardW + 'px';
+            });
+        }
+
+        function offsetOf(idx) { return idx * (cardW + gap); }
+
+        function setTransform(offset, animated) {
+            track.classList.toggle('no-transition', !animated);
+            track.style.transform = 'translateX(-' + offset + 'px)';
+        }
+
+        function goTo(idx, animated) {
+            curIdx = idx;
+            setTransform(offsetOf(curIdx), animated !== false);
+        }
+
+        /* Seamless loop: after animation settles, silently jump within clone set */
+        track.addEventListener('transitionend', function () {
+            if (curIdx >= total * 2) { goTo(curIdx - total, false); }
+            else if (curIdx < total)  { goTo(curIdx + total, false); }
+            updateDots();
         });
 
-        document.addEventListener('mouseup', function () {
+        /* ── Dots ──────────────────────────────────────────── */
+        function dotIndex() { return ((curIdx - total) % total + total) % total; }
+
+        function buildDots() {
+            if (!dotsEl) return;
+            dotsEl.innerHTML = '';
+            for (var i = 0; i < total; i++) {
+                (function (i) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'mob-brands-dot';
+                    btn.setAttribute('aria-label', 'Show brand ' + (i + 1));
+                    btn.setAttribute('role', 'tab');
+                    btn.addEventListener('click', function () {
+                        pauseAuto();
+                        goTo(total + i, true);
+                        updateDots(i);
+                    });
+                    dotsEl.appendChild(btn);
+                }(i));
+            }
+        }
+
+        function updateDots(forced) {
+            if (!dotsEl) return;
+            var active = (typeof forced !== 'undefined') ? forced : dotIndex();
+            dotsEl.querySelectorAll('.mob-brands-dot').forEach(function (d, i) {
+                d.classList.toggle('is-active', i === active);
+                d.setAttribute('aria-selected', i === active ? 'true' : 'false');
+            });
+        }
+
+        /* ── Auto-scroll ───────────────────────────────────── */
+        function startAuto() {
+            if (autoTimer) return;
+            autoTimer = setInterval(function () {
+                goTo(curIdx + 1, true);
+            }, 3500);
+        }
+
+        function stopAuto() {
+            clearInterval(autoTimer);
+            autoTimer = null;
+        }
+
+        function pauseAuto() {
+            stopAuto();
+            clearTimeout(pauseTimer);
+            pauseTimer = setTimeout(startAuto, 4000);
+        }
+
+        /* ── Mouse drag ────────────────────────────────────── */
+        wrap.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            moved      = false;
+            dragStartX = e.clientX;
+            dragOff    = offsetOf(curIdx);
+            track.classList.add('no-transition');
+            wrap.classList.add('is-dragging');
+            pauseAuto();
+            e.preventDefault();
+        });
+
+        document.addEventListener('mouseup', function (e) {
             if (!isDragging) return;
             isDragging = false;
-            carousel.classList.remove('is-dragging');
+            wrap.classList.remove('is-dragging');
+            if (moved) {
+                var diff = dragStartX - e.clientX;
+                if (Math.abs(diff) > 50) {
+                    goTo(curIdx + (diff > 0 ? 1 : -1), true);
+                } else {
+                    goTo(curIdx, true);
+                }
+                updateDots();
+            }
+            moved = false;
         });
 
-        carousel.addEventListener('mousemove', function (e) {
+        document.addEventListener('mousemove', function (e) {
             if (!isDragging) return;
-            e.preventDefault();
             moved = true;
-            var x    = e.pageX - carousel.offsetLeft;
-            var walk = (x - startX) * 1.4;
-            carousel.scrollLeft = scrollStart - walk;
+            setTransform(dragOff + (dragStartX - e.clientX), false);
         });
 
-        /* Prevent click-through on drag */
-        carousel.addEventListener('click', function (e) {
-            if (moved) e.preventDefault();
+        wrap.addEventListener('click', function (e) {
+            if (moved) { e.preventDefault(); e.stopPropagation(); }
         }, true);
 
-        /* Touch */
-        var touchStartX   = 0;
-        var touchScrollLeft = 0;
-
-        carousel.addEventListener('touchstart', function (e) {
-            touchStartX    = e.touches[0].pageX;
-            touchScrollLeft = carousel.scrollLeft;
+        /* ── Touch drag ────────────────────────────────────── */
+        wrap.addEventListener('touchstart', function (e) {
+            touchStartX = e.touches[0].clientX;
+            touchOff    = offsetOf(curIdx);
+            track.classList.add('no-transition');
+            pauseAuto();
         }, { passive: true });
 
-        carousel.addEventListener('touchmove', function (e) {
-            var walk = touchStartX - e.touches[0].pageX;
-            carousel.scrollLeft = touchScrollLeft + walk;
+        wrap.addEventListener('touchmove', function (e) {
+            setTransform(touchOff + (touchStartX - e.touches[0].clientX), false);
         }, { passive: true });
-    });
+
+        wrap.addEventListener('touchend', function (e) {
+            var diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                goTo(curIdx + (diff > 0 ? 1 : -1), true);
+            } else {
+                goTo(curIdx, true);
+            }
+            updateDots();
+        }, { passive: true });
+
+        /* ── Init ──────────────────────────────────────────── */
+        setCardWidths();
+        goTo(total, false);  // land on first original, no animation
+        buildDots();
+        updateDots(0);
+        startAuto();
+
+        window.addEventListener('resize', function () {
+            setCardWidths();
+            goTo(curIdx, false);
+        }, { passive: true });
+    }
 
     /* ── Add to Cart ───────────────────────────────────────── */
     document.addEventListener('click', function (e) {

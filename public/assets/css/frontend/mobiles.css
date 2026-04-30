@@ -332,28 +332,26 @@
 }
 .mob-brands-title span { color: #f7d117; }
 .mob-brands-carousel-wrap {
-  /* overflow-y intentionally not set to 'hidden' — lets hover shadow/transform show */
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  /* overflow: hidden clips the transform-scrolling track horizontally.
+     The 20px vertical padding lets hover shadow/translateY show without clipping. */
+  overflow: hidden;
+  padding: 20px 0;
+  margin: -20px 0;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
 }
-.mob-brands-carousel-wrap:active,
 .mob-brands-carousel-wrap.is-dragging { cursor: grabbing; }
-.mob-brands-carousel-wrap::-webkit-scrollbar { display: none; }
 .mob-brands-track {
   display: flex;
   gap: 14px;
-  /* Vertical padding gives room for hover translateY + box-shadow without clipping */
-  padding: 20px 0;
+  will-change: transform;
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+.mob-brands-track.no-transition { transition: none; }
 .mob-brand-card {
-  flex: 0 0 calc((100% - 84px) / 7);
-  min-width: 148px;
-  scroll-snap-align: start;
+  /* width set dynamically by JS; visual styles only below */
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -373,6 +371,31 @@
   transform: translateY(-3px);
   box-shadow: 0 8px 22px rgba(0,0,0,0.08);
   text-decoration: none;
+}
+
+/* Dots */
+.mob-brands-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.mob-brands-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d0d0d0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.25s ease, width 0.25s ease, border-radius 0.25s ease;
+  flex-shrink: 0;
+}
+.mob-brands-dot.is-active {
+  background: #f7d117;
+  width: 24px;
+  border-radius: 4px;
 }
 .mob-brand-card-icon {
   width: 44px;
