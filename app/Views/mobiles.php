@@ -75,22 +75,9 @@ $totalBrands   = count($brandList);
 <!-- HERO -->
 <section class="mob-hero">
     <div class="mob-hero-inner">
-        <div class="mob-hero-text">
-            <p class="mob-hero-eyebrow">Pakistan's Trusted Mobile Store</p>
-            <h1 class="mob-hero-title"><span>Mobiles</span> in Pakistan</h1>
-            <p class="mob-hero-sub">Latest smartphones from top brands — competitive prices, verified specs, updated <?= date('F Y') ?>.</p>
-        </div>
-        <div class="mob-hero-stats">
-            <div class="mob-hero-stat">
-                <strong><?= $totalProducts ?>+</strong>
-                <span>Products</span>
-            </div>
-            <div class="mob-hero-stat-divider"></div>
-            <div class="mob-hero-stat">
-                <strong><?= $totalBrands ?></strong>
-                <span>Brands</span>
-            </div>
-        </div>
+        <p class="mob-hero-eyebrow">Pakistan's Trusted Mobile Store</p>
+        <h1 class="mob-hero-title"><span>Mobiles</span> in Pakistan</h1>
+        <p class="mob-hero-sub">Latest smartphones from top brands — competitive prices, verified specs, updated <?= date('F Y') ?>.</p>
     </div>
 </section>
 
