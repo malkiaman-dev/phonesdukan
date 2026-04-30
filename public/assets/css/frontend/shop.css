@@ -457,19 +457,6 @@
   transform: scale(1.05);
 }
 
-.shop-feature-strip {
-  background: #f7d117;
-  color: #111111;
-  font-family: "Inter", Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.3;
-  padding: 7px 10px;
-  border-top: 1px solid #efd36a;
-  border-bottom: 1px solid #efd36a;
-}
-
 .na-body {
   padding: 14px 16px 16px;
   display: flex;
@@ -536,13 +523,13 @@
 }
 
 .na-actions {
-  display: flex;
-  gap: 10px;
-  padding: 4px 12px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0;
   margin-top: auto;
   width: 100%;
   box-sizing: border-box;
-  overflow: visible;
 }
 
 .na-actions .na-btn,
@@ -552,9 +539,9 @@
   font-family: "Inter", Arial, sans-serif;
   flex: 1;
   min-width: 0;
-  height: 38px;
+  height: 34px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
@@ -566,8 +553,8 @@
   white-space: nowrap;
   line-height: 1;
   text-align: center;
-  letter-spacing: -0.01em;
-  padding-inline: 10px;
+  letter-spacing: -0.02em;
+  padding-inline: 6px;
   box-sizing: border-box;
   overflow: visible;
   appearance: none;
@@ -576,10 +563,10 @@
 
 .na-actions .na-btn--cart,
 .na-actions .add-to-cart {
+  letter-spacing: -0.035em;
   background: #111111;
   color: #ffffff;
   border: 1.5px solid #111111;
-  letter-spacing: -0.03em;
 }
 
 .na-actions .na-btn--cart:hover,
@@ -625,9 +612,9 @@
 .na-actions .na-btn--soldout {
   font-family: "Inter", Arial, sans-serif;
   flex: 1;
-  height: 38px;
+  height: 34px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -820,10 +807,7 @@
   }
 
   .na-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 6px;
-    padding: 0;
     width: 100%;
     box-sizing: border-box;
   }

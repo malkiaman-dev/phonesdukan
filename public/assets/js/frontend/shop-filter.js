@@ -7,12 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var filterToggleBtn = document.getElementById("shopFilterToggle");
     var filterCloseBtn = document.getElementById("shopFilterClose");
 
-    var sidebarSort = document.getElementById("shopSidebarSort");
-    var topSort = document.getElementById("shopTopSort");
-    var mobileSort = document.getElementById("shopMobileSort");
-
     var brandSearchInput = document.getElementById("shopBrandSearch");
-    var brandItems = document.querySelectorAll("[data-brand-item]");
     var brandEmptyState = document.getElementById("shopBrandEmptyState");
 
     var priceSlider = form.querySelector("[data-price-slider]");
@@ -23,19 +18,36 @@ document.addEventListener("DOMContentLoaded", function () {
     var hiddenMinInput = form.querySelector("[data-hidden-min-price]");
     var hiddenMaxInput = form.querySelector("[data-hidden-max-price]");
 
-    var desktopBreakpoint = window.matchMedia("(min-width: 992px)");
+    var ABS_MIN = priceSlider ? (parseInt(priceSlider.getAttribute("data-min"), 10) || 0) : 0;
+    var ABS_MAX = priceSlider ? (parseInt(priceSlider.getAttribute("data-max"), 10) || 200000) : 200000;
+    var STEP_GAP = 500;
+
+    var debounceTimer = null;
+    var requestController = null;
 
     function showNotice(message) {
         if (typeof Swal !== "undefined") {
-            Swal.fire({
-                title: "Oops!",
-                text: message,
-                icon: "error",
-                confirmButtonText: "OK",
-            });
+            Swal.fire({ title: "Oops!", text: message, icon: "error", confirmButtonText: "OK" });
         } else {
             alert(message);
         }
+    }
+
+    function getSortControls() {
+        return {
+            sidebar: document.getElementById("shopSidebarSort"),
+            top: document.getElementById("shopTopSort"),
+            mobile: document.getElementById("shopMobileSort"),
+        };
+    }
+
+    function syncSortControls(value) {
+        var controls = getSortControls();
+        [controls.sidebar, controls.top, controls.mobile].forEach(function (el) {
+            if (el && el.value !== value) {
+                el.value = value;
+            }
+        });
     }
 
     function openDrawer() {
@@ -52,54 +64,168 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.classList.remove("shop-drawer-open");
     }
 
-    if (filterToggleBtn) {
-        filterToggleBtn.addEventListener("click", openDrawer);
+    function formatPrice(value) {
+        return "Rs. " + Number(value).toLocaleString("en-PK");
     }
 
-    if (filterCloseBtn) {
-        filterCloseBtn.addEventListener("click", closeDrawer);
+    function syncHiddenPriceInputs(minVal, maxVal) {
+        if (hiddenMinInput) hiddenMinInput.value = String(minVal);
+        if (hiddenMaxInput) hiddenMaxInput.value = String(maxVal);
     }
 
-    if (backdrop) {
-        backdrop.addEventListener("click", closeDrawer);
+    function clampSliderValues(changedInput) {
+        if (!minInput || !maxInput) return { min: ABS_MIN, max: ABS_MAX };
+
+        var minVal = parseInt(minInput.value, 10);
+        var maxVal = parseInt(maxInput.value, 10);
+
+        if (isNaN(minVal)) minVal = ABS_MIN;
+        if (isNaN(maxVal)) maxVal = ABS_MAX;
+
+        if (maxVal - minVal < STEP_GAP) {
+            if (changedInput === "min") {
+                minVal = maxVal - STEP_GAP;
+            } else {
+                maxVal = minVal + STEP_GAP;
+            }
+        }
+
+        minVal = Math.max(ABS_MIN, Math.min(minVal, ABS_MAX - STEP_GAP));
+        maxVal = Math.min(ABS_MAX, Math.max(maxVal, ABS_MIN + STEP_GAP));
+
+        minInput.value = String(minVal);
+        maxInput.value = String(maxVal);
+
+        return { min: minVal, max: maxVal };
     }
+
+    function updateSliderUI(minVal, maxVal) {
+        if (rangeProgress) {
+            var left = ((minVal - ABS_MIN) / (ABS_MAX - ABS_MIN)) * 100;
+            var right = ((ABS_MAX - maxVal) / (ABS_MAX - ABS_MIN)) * 100;
+            rangeProgress.style.left = left + "%";
+            rangeProgress.style.right = right + "%";
+        }
+
+        if (selectedPriceLabel) {
+            selectedPriceLabel.textContent = formatPrice(minVal) + " — " + formatPrice(maxVal);
+        }
+
+        syncHiddenPriceInputs(minVal, maxVal);
+    }
+
+    function hydrateLazyImages() {
+        var lazyImages = document.querySelectorAll(".na-img-box img, .product-img img");
+        Array.prototype.forEach.call(lazyImages, function (img) {
+            var wrapper = img.closest(".product-img-wrapper");
+            if (!wrapper) return;
+
+            if (!img.complete) {
+                wrapper.classList.add("is-loading");
+                img.addEventListener("load", function () {
+                    wrapper.classList.remove("is-loading");
+                }, { once: true });
+                img.addEventListener("error", function () {
+                    wrapper.classList.remove("is-loading");
+                }, { once: true });
+            }
+        });
+    }
+
+    function serializeFilters(resetPaged) {
+        var formData = new FormData(form);
+        var params = new URLSearchParams(formData);
+
+        if (resetPaged) params.delete("paged");
+        if (!params.get("sort_by")) params.set("sort_by", "latest");
+
+        return params;
+    }
+
+    function renderFromHtml(html, requestUrl) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
+        var incomingSection = doc.querySelector(".product-section");
+        var currentSection = document.querySelector(".product-section");
+
+        if (!incomingSection || !currentSection) {
+            throw new Error("Could not parse updated product section.");
+        }
+
+        currentSection.innerHTML = incomingSection.innerHTML;
+
+        var urlObj = new URL(requestUrl, window.location.origin);
+        var sortValue = urlObj.searchParams.get("sort_by") || "latest";
+        syncSortControls(sortValue);
+
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, "", urlObj.pathname + urlObj.search);
+        }
+
+        hydrateLazyImages();
+    }
+
+    function fetchAndRender(params, options) {
+        var opts = options || {};
+        var url = form.action + (params.toString() ? "?" + params.toString() : "");
+
+        if (requestController) {
+            requestController.abort();
+        }
+
+        requestController = new AbortController();
+
+        if (opts.closeDrawer) {
+            closeDrawer();
+        }
+
+        return fetch(url, {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            signal: requestController.signal,
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error("Failed to fetch products.");
+                return response.text();
+            })
+            .then(function (html) {
+                renderFromHtml(html, url);
+            })
+            .catch(function (error) {
+                if (error && error.name === "AbortError") return;
+                showNotice("Could not refresh products. Please try again.");
+            })
+            .finally(function () {
+                requestController = null;
+            });
+    }
+
+    function runRealtimeUpdate(options) {
+        var params = serializeFilters(true);
+        fetchAndRender(params, options || {});
+    }
+
+    function debouncedRealtimeUpdate() {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(function () {
+            runRealtimeUpdate({ closeDrawer: false });
+        }, 140);
+    }
+
+    if (filterToggleBtn) filterToggleBtn.addEventListener("click", openDrawer);
+    if (filterCloseBtn) filterCloseBtn.addEventListener("click", closeDrawer);
+    if (backdrop) backdrop.addEventListener("click", closeDrawer);
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") closeDrawer();
     });
 
-    function syncSortControls(value, source) {
-        if (sidebarSort && source !== "sidebar") sidebarSort.value = value;
-        if (topSort && source !== "top") topSort.value = value;
-        if (mobileSort && source !== "mobile") mobileSort.value = value;
-    }
-
-    function submitWithSort(value, source) {
-        syncSortControls(value, source);
-        form.submit();
-    }
-
-    if (sidebarSort) {
-        sidebarSort.addEventListener("change", function () {
-            submitWithSort(sidebarSort.value, "sidebar");
-        });
-    }
-
-    if (topSort) {
-        topSort.addEventListener("change", function () {
-            submitWithSort(topSort.value, "top");
-        });
-    }
-
-    if (mobileSort) {
-        mobileSort.addEventListener("change", function () {
-            submitWithSort(mobileSort.value, "mobile");
-        });
-    }
-
-    if (brandSearchInput && brandItems.length) {
+    if (brandSearchInput) {
         brandSearchInput.addEventListener("input", function () {
             var query = brandSearchInput.value.trim().toLowerCase();
+            var brandItems = document.querySelectorAll("[data-brand-item]");
             var visibleCount = 0;
 
             Array.prototype.forEach.call(brandItems, function (item) {
@@ -116,114 +242,99 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (priceSlider && minInput && maxInput) {
-        var ABS_MIN = parseInt(priceSlider.getAttribute("data-min"), 10) || 0;
-        var ABS_MAX = parseInt(priceSlider.getAttribute("data-max"), 10) || 200000;
-        var STEP_GAP = 500;
-
-        function formatPrice(value) {
-            return "Rs. " + Number(value).toLocaleString("en-PK");
-        }
-
-        function syncHiddenInputs(minVal, maxVal) {
-            if (hiddenMinInput) hiddenMinInput.value = String(minVal);
-            if (hiddenMaxInput) hiddenMaxInput.value = String(maxVal);
-        }
-
-        function clampRangeInputs(changedInput) {
-            var minVal = parseInt(minInput.value, 10);
-            var maxVal = parseInt(maxInput.value, 10);
-
-            if (isNaN(minVal)) minVal = ABS_MIN;
-            if (isNaN(maxVal)) maxVal = ABS_MAX;
-
-            if (maxVal - minVal < STEP_GAP) {
-                if (changedInput === "min") {
-                    minVal = maxVal - STEP_GAP;
-                } else {
-                    maxVal = minVal + STEP_GAP;
-                }
-            }
-
-            minVal = Math.max(ABS_MIN, Math.min(minVal, ABS_MAX - STEP_GAP));
-            maxVal = Math.min(ABS_MAX, Math.max(maxVal, ABS_MIN + STEP_GAP));
-
-            minInput.value = String(minVal);
-            maxInput.value = String(maxVal);
-
-            return { min: minVal, max: maxVal };
-        }
-
-        function updateSliderUI(minVal, maxVal) {
-            var left = ((minVal - ABS_MIN) / (ABS_MAX - ABS_MIN)) * 100;
-            var right = ((ABS_MAX - maxVal) / (ABS_MAX - ABS_MIN)) * 100;
-
-            if (rangeProgress) {
-                rangeProgress.style.left = left + "%";
-                rangeProgress.style.right = right + "%";
-            }
-
-            if (selectedPriceLabel) {
-                selectedPriceLabel.textContent = formatPrice(minVal) + " — " + formatPrice(maxVal);
-            }
-
-            syncHiddenInputs(minVal, maxVal);
-        }
-
-        function onSliderInput(changedInput) {
-            var clamped = clampRangeInputs(changedInput);
-            updateSliderUI(clamped.min, clamped.max);
-        }
+        var initialClamped = clampSliderValues("max");
+        updateSliderUI(initialClamped.min, initialClamped.max);
 
         minInput.addEventListener("input", function () {
-            onSliderInput("min");
+            var clamped = clampSliderValues("min");
+            updateSliderUI(clamped.min, clamped.max);
+            debouncedRealtimeUpdate();
         });
 
         maxInput.addEventListener("input", function () {
-            onSliderInput("max");
+            var clamped = clampSliderValues("max");
+            updateSliderUI(clamped.min, clamped.max);
+            debouncedRealtimeUpdate();
         });
 
-        var initialClamped = clampRangeInputs("max");
-        updateSliderUI(initialClamped.min, initialClamped.max);
+        minInput.addEventListener("change", function () {
+            runRealtimeUpdate({ closeDrawer: false });
+        });
+        maxInput.addEventListener("change", function () {
+            runRealtimeUpdate({ closeDrawer: false });
+        });
     }
 
-    var quickDesktopInputs = form.querySelectorAll('input[name="category[]"], input[name="brand[]"]');
-    Array.prototype.forEach.call(quickDesktopInputs, function (input) {
-        input.addEventListener("change", function () {
-            if (desktopBreakpoint.matches) {
-                form.submit();
-            }
-        });
-    });
-
-    var resetLinks = document.querySelectorAll(".shop-btn-reset");
-    Array.prototype.forEach.call(resetLinks, function (link) {
-        link.addEventListener("click", closeDrawer);
-    });
-
-    form.addEventListener("submit", function () {
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
         if (priceSlider && minInput && maxInput) {
-            var minVal = parseInt(minInput.value, 10);
-            var maxVal = parseInt(maxInput.value, 10);
-            if (!isNaN(minVal) && !isNaN(maxVal)) {
-                if (hiddenMinInput) hiddenMinInput.value = String(minVal);
-                if (hiddenMaxInput) hiddenMaxInput.value = String(maxVal);
-            }
+            var clamped = clampSliderValues("max");
+            updateSliderUI(clamped.min, clamped.max);
+        }
+        runRealtimeUpdate({ closeDrawer: true });
+    });
+
+    document.addEventListener("change", function (event) {
+        var target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        if (target.id === "shopSidebarSort" || target.id === "shopTopSort" || target.id === "shopMobileSort") {
+            syncSortControls(target.value || "latest");
+            runRealtimeUpdate({ closeDrawer: false });
+            return;
         }
 
-        closeDrawer();
+        if (target.matches('input[name="category[]"], input[name="brand[]"]')) {
+            runRealtimeUpdate({ closeDrawer: false });
+        }
     });
 
-    document.addEventListener("click", function (e) {
-        var btn = e.target.closest(".na-btn--cart");
-        if (!btn || btn.disabled) return;
+    document.addEventListener("click", function (event) {
+        var target = event.target;
+        if (!(target instanceof HTMLElement)) return;
 
-        var productId = btn.getAttribute("data-product-id");
-        var unitPrice = parseFloat(btn.getAttribute("data-unit-price") || 0);
+        var paginationLink = target.closest(".pagination a");
+        if (paginationLink) {
+            event.preventDefault();
+            var href = paginationLink.getAttribute("href");
+            if (!href) return;
+            var urlObj = new URL(href, window.location.origin);
+            fetchAndRender(urlObj.searchParams, { closeDrawer: false });
+            return;
+        }
+
+        var resetLink = target.closest(".shop-btn-reset");
+        if (resetLink) {
+            event.preventDefault();
+
+            form.reset();
+            syncSortControls("latest");
+
+            if (priceSlider && minInput && maxInput) {
+                minInput.value = String(ABS_MIN);
+                maxInput.value = String(ABS_MAX);
+                updateSliderUI(ABS_MIN, ABS_MAX);
+            }
+
+            if (brandSearchInput) {
+                brandSearchInput.value = "";
+                brandSearchInput.dispatchEvent(new Event("input"));
+            }
+
+            fetchAndRender(new URLSearchParams(), { closeDrawer: true });
+            return;
+        }
+
+        var cartBtn = target.closest(".na-btn--cart");
+        if (!cartBtn || cartBtn.disabled) return;
+
+        var productId = cartBtn.getAttribute("data-product-id");
+        var unitPrice = parseFloat(cartBtn.getAttribute("data-unit-price") || 0);
         if (!productId) return;
 
-        var originalText = btn.textContent.trim();
-        btn.disabled = true;
-        btn.textContent = "Adding...";
+        var originalText = cartBtn.textContent.trim();
+        cartBtn.disabled = true;
+        cartBtn.textContent = "Adding...";
 
         fetch(window.pdWithBase("/app/Controllers/CartController.php"), {
             method: "POST",
@@ -239,8 +350,8 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(function (data) {
                 if (data.status === "success") {
-                    btn.textContent = "Added ✓";
-                    btn.classList.add("na-btn--added");
+                    cartBtn.textContent = "Added ✓";
+                    cartBtn.classList.add("na-btn--added");
 
                     var totalQty = 0;
                     if (data.cart_summary && typeof data.cart_summary.total_quantity !== "undefined") {
@@ -257,38 +368,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     return;
                 }
 
-                btn.disabled = false;
-                btn.textContent = originalText;
+                cartBtn.disabled = false;
+                cartBtn.textContent = originalText;
                 showNotice(data.message || "Could not add to cart.");
             })
             .catch(function () {
-                btn.disabled = false;
-                btn.textContent = originalText;
+                cartBtn.disabled = false;
+                cartBtn.textContent = originalText;
                 showNotice("Something went wrong. Please try again.");
             });
     });
 
-    var lazyImages = document.querySelectorAll(".na-img-box img, .product-img img");
-    Array.prototype.forEach.call(lazyImages, function (img) {
-        var wrapper = img.closest(".product-img-wrapper");
-        if (!wrapper) return;
-
-        if (!img.complete) {
-            wrapper.classList.add("is-loading");
-            img.addEventListener(
-                "load",
-                function () {
-                    wrapper.classList.remove("is-loading");
-                },
-                { once: true }
-            );
-            img.addEventListener(
-                "error",
-                function () {
-                    wrapper.classList.remove("is-loading");
-                },
-                { once: true }
-            );
-        }
-    });
+    hydrateLazyImages();
 });

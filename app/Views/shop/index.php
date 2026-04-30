@@ -116,15 +116,6 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
                                     ? max(1, (int) round((($regularPrice - $salePrice) / $regularPrice) * 100))
                                     : 0;
 
-                                $featureText = '';
-                                if (!empty($product['product_tag'])) {
-                                    $featureText = trim((string) $product['product_tag']);
-                                } elseif (!empty($product['short_description'])) {
-                                    $featureText = trim(preg_replace('/\s+/', ' ', strip_tags((string) $product['short_description'])));
-                                }
-                                if ($featureText !== '' && strlen($featureText) > 56) {
-                                    $featureText = substr($featureText, 0, 56) . '…';
-                                }
                             ?>
 
                             <article class="na-card shop-na-card">
@@ -144,10 +135,6 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
                                         >
                                     </div>
                                 </a>
-
-                                <?php if ($featureText !== ''): ?>
-                                    <div class="shop-feature-strip"><?= htmlspecialchars($featureText, ENT_QUOTES, 'UTF-8') ?></div>
-                                <?php endif; ?>
 
                                 <div class="na-body">
                                     <h3 class="na-name">
