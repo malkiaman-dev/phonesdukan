@@ -1103,7 +1103,6 @@ foreach ($latest_posts_raw as $post) {
     <div class="na-inner">
         <div class="na-header">
             <h2 class="na-title">Latest <span>Blogs</span></h2>
-            <a href="/blog" class="na-view-all">Explore All</a>
         </div>
 
         <div class="home-blog-grid">
@@ -1145,9 +1144,15 @@ foreach ($latest_posts_raw as $post) {
 
                         <div class="home-blog-body">
                             <div class="home-blog-meta">
-                                <span class="home-blog-category"><?= $post_category_name ?></span>
+                                <span class="home-blog-meta-item">
+                                    <svg class="home-blog-meta-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" stroke="#f7d117" stroke-width="2.2"/><path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="#f7d117" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                    <?= $post_category_name ?>
+                                </span>
                                 <?php if (!empty($published_date)): ?>
-                                    <span class="home-blog-date"><?= htmlspecialchars($published_date) ?></span>
+                                <span class="home-blog-meta-item">
+                                    <svg class="home-blog-meta-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#f7d117" stroke-width="2.2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#f7d117" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                    <?= htmlspecialchars($published_date) ?>
+                                </span>
                                 <?php endif; ?>
                             </div>
 
@@ -1159,7 +1164,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?= htmlspecialchars($post_excerpt_text !== '' ? $post_excerpt_text : 'Read this post to learn more insights and updates from Phones Dukan.') ?>
                             </p>
 
-                            <a href="<?= $post_url ?>" class="home-blog-readmore">Read More</a>
+                            <a href="<?= $post_url ?>" class="home-blog-readmore">READ MORE <span class="home-blog-readmore-arrow">&rarr;</span></a>
                         </div>
                     </article>
                 <?php endforeach; ?>
@@ -1170,55 +1175,100 @@ foreach ($latest_posts_raw as $post) {
     </div>
 </section>
 
-<div class="testimonials">
-<div class="category-header">
-<h2>Customer <span>Testimonials</span></h2>
-</div>
-    <div class="testimonials-carousel">
-        <div class="testimonial-box">
-            <div class="testimonial-rating">
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-            </div>
-            <p>Very responsive and professional. I recommend this place! The prices are great. Fast delivery. Thank you Phones Dukan</p>
-            <h3 class="testimonial-name">Muniza Saleh</h3>
+<section class="testimonials">
+    <div class="testimonials-inner">
+        <div class="category-header testimonials-header">
+            <h2>Customer <span>Testimonials</span></h2>
         </div>
-        <div class="testimonial-box">
-            <div class="testimonial-rating">
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9734;</span> <!-- Empty Star -->
+        <div class="testimonials-carousel">
+            <div class="testimonial-box">
+                <div class="testimonial-rating">
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                </div>
+                <p>Very responsive and professional. I recommend this place! The prices are great. Fast delivery. Thank you Phones Dukan</p>
+                <h3 class="testimonial-name">Muniza Saleh</h3>
             </div>
-            <p>Great place! I managed a remote purchase for a local. Very responsive and professional. I recommend this place! The prices are great. Fast delivery.</p>
-            <h3 class="testimonial-name">Vanessa</h3>
-        </div>
-        <div class="testimonial-box">
-            <div class="testimonial-rating">
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Empty Star -->
-                <span class="star">&#9733;</span> <!-- Empty Star -->
+            <div class="testimonial-box">
+                <div class="testimonial-rating">
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star star--empty">&#9734;</span>
+                </div>
+                <p>Great place! I managed a remote purchase for a local. Very responsive and professional. I recommend this place! The prices are great. Fast delivery.</p>
+                <h3 class="testimonial-name">Vanessa</h3>
             </div>
-            <p>Their prices are low compared to the market. Additionally, they offer the best after-sale customer support. Recommended.</p>
-            <h3 class="testimonial-name">Furqan Haider</h3>
-        </div>
-        <div class="testimonial-box">
-            <div class="testimonial-rating">
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9733;</span> <!-- Filled Star -->
-                <span class="star">&#9734;</span> <!-- Empty Star -->
+            <div class="testimonial-box">
+                <div class="testimonial-rating">
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                </div>
+                <p>Their prices are low compared to the market. Additionally, they offer the best after-sale customer support. Recommended.</p>
+                <h3 class="testimonial-name">Furqan Haider</h3>
             </div>
-            <p>I like this place. It's not only a walk-in customer shop, but also an online store. That's why I give them 5 stars!</p>
-            <h3 class="testimonial-name">Shadab Hussain</h3>
+            <div class="testimonial-box">
+                <div class="testimonial-rating">
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star">&#9733;</span>
+                    <span class="star star--empty">&#9734;</span>
+                </div>
+                <p>I like this place. It's not only a walk-in customer shop, but also an online store. That's why I give them 5 stars!</p>
+                <h3 class="testimonial-name">Shadab Hussain</h3>
+            </div>
         </div>
     </div>
-</div>
+</section>
+<script>
+(function () {
+    var carousel = document.querySelector('.testimonials-carousel');
+    if (!carousel) return;
+
+    var dragging = false;
+    var startX   = 0;
+    var startLeft = 0;
+    var moved    = false;
+
+    carousel.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        dragging  = true;
+        moved     = false;
+        startX    = e.clientX;
+        startLeft = carousel.scrollLeft;
+        carousel.classList.add('is-dragging');
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        var dx = e.clientX - startX;
+        if (Math.abs(dx) > 4) moved = true;
+        carousel.scrollLeft = startLeft - dx;
+    });
+
+    document.addEventListener('mouseup', function () {
+        if (!dragging) return;
+        dragging = false;
+        carousel.classList.remove('is-dragging');
+    });
+
+    /* Block link-clicks that were actually drags */
+    carousel.addEventListener('click', function (e) {
+        if (moved) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            moved = false;
+        }
+    }, true);
+})();
+</script>
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>
