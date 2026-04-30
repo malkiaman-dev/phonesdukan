@@ -372,7 +372,7 @@ foreach ($latest_posts_raw as $post) {
 </div> -->
 
 <div class="s-banner s-banner--full sw-home-banner">
-<a href="/smart-watches" target="_blank">
+<a href="/smart-watches">
          <img src="/public/assets/images/smart-watch-banner.png" alt="smart-watches_banner" class="banner-image">
 </a>
 </div>
@@ -480,7 +480,7 @@ foreach ($latest_posts_raw as $post) {
 </section>
 
 <div class="s-banner s-banner--full earbuds-home-banner">
-<a href="/wireless-earbuds" target="_blank">
+<a href="/wireless-earbuds">
          <img src="/public/assets/images/wireless_earbuds_banner.png" alt="wireless_earbuds_banner" class="banner-image">
 </a>
 </div>
@@ -632,7 +632,7 @@ foreach ($latest_posts_raw as $post) {
 </section>
 
 <div class="s-banner s-banner--full">
-<a href="/mobiles" target="_blank">
+<a href="/mobiles">
     <img src="/public/assets/images/mobiles_banner.png" alt="mobiles" class="banner-image">
 </a>
 </div>
@@ -742,7 +742,7 @@ foreach ($latest_posts_raw as $post) {
 </div>
 
 <div class="s-banner s-banner--full">
-<a href="/mobile-accessories" target="_blank">
+<a href="/mobile-accessories">
     <img src="/public/assets/images/mobiles_accessories_banner.png" alt="mobiles_accessories_banner" class="banner-image">
 </a>
 </div>
@@ -834,7 +834,7 @@ foreach ($latest_posts_raw as $post) {
 <?php include_once __DIR__ . '/ad/feed2.php'; ?>
 
 <div class="s-banner s-banner--full">
-<a href="/power-banks" target="_blank">
+<a href="/power-banks">
     <img src="/public/assets/images/powerbanks_banner.png" alt="power_banks_banner" class="banner-image">
 </a>
 </div>
@@ -925,7 +925,7 @@ foreach ($latest_posts_raw as $post) {
 </section>
 
 <div class="s-banner s-banner--full">
-<a href="/bluetooth-speakers" target="_blank">
+<a href="/bluetooth-speakers">
     <img src="/public/assets/images/bluetooth_speakers_banner.png" alt="bluetooth-speakers_banner" class="banner-image">
 </a>
 </div>
@@ -1025,23 +1025,23 @@ foreach ($latest_posts_raw as $post) {
     <div class="brand-marquee-outer">
         <div class="brand-marquee-track" id="brandMarqueeTrack">
             <!-- Set 1 — real items -->
-            <a href="/mobiles/samsung" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="Samsung" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/infinix/" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="Infinix" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/oppo" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="Oppo" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/xiaomi" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="Xiaomi" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/vivo" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="Vivo" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/tecno" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="Tecno" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/realme" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="Realme" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/apple" target="_blank" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="Apple" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/samsung" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="Samsung" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/infinix/" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="Infinix" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/oppo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="Oppo" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/xiaomi" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="Xiaomi" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/vivo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="Vivo" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/tecno" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="Tecno" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/realme" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="Realme" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/apple" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="Apple" draggable="false" loading="lazy"></div></a>
             <!-- Set 2 — duplicate for seamless loop, hidden from assistive tech -->
-            <a href="/mobiles/samsung" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/infinix/" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/oppo" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/xiaomi" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/vivo" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/tecno" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/realme" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/apple" target="_blank" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/samsung" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/infinix/" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/oppo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/xiaomi" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/vivo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/tecno" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/realme" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/apple" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
         </div>
     </div>
 </section>
