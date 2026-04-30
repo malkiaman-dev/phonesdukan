@@ -824,7 +824,7 @@ h3.product-title {
   font-weight: 700;
   line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* -webkit-line-clamp: 2; */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -2034,7 +2034,7 @@ a.brandItem {
   font-weight: 700;
   line-height: 1.35;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* -webkit-line-clamp: 2; */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -2056,7 +2056,7 @@ a.brandItem {
   color: #555555;
   line-height: 1.6;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  /* -webkit-line-clamp: 3; */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
