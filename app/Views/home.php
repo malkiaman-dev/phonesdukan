@@ -386,7 +386,7 @@ foreach ($latest_posts_raw as $post) {
         <div class="na-grid" data-carousel>
             <?php
             // Fetch Smart Watches products (only category_id = 11)
-            $products = $productModel->getSmartWatches(4);
+            $products = $productModel->getSmartWatches(20);
 
             if (!empty($products)):
                 foreach ($products as $product):
@@ -494,7 +494,7 @@ foreach ($latest_posts_raw as $post) {
         <div class="na-grid" data-carousel>
             <?php
             // Fetch products from category 13 (limit to 4)
-            $products = $productModel->getCategory13Products(4);
+            $products = $productModel->getCategory13Products(20);
 
             if (!empty($products)):
                 foreach ($products as $product):
@@ -645,7 +645,7 @@ foreach ($latest_posts_raw as $post) {
 
         <div class="na-grid" data-carousel>
             <?php
-            $products = $productModel->getCategory2Products(4);
+            $products = $productModel->getCategory2Products(20);
 
             if (!empty($products)):
                 foreach ($products as $product):
@@ -755,7 +755,7 @@ foreach ($latest_posts_raw as $post) {
 
         <div class="na-grid" data-carousel>
             <?php
-            $products = $productModel->getCategory9Products(4);
+            $products = $productModel->getCategory9Products(20);
 
             if (!empty($products)):
                 foreach ($products as $product):
@@ -847,7 +847,7 @@ foreach ($latest_posts_raw as $post) {
 
         <div class="na-grid" data-carousel>
             <?php
-            $products = $productModel->getCategory10Products(4);
+            $products = $productModel->getCategory10Products(20);
 
             if (!empty($products)):
                 foreach ($products as $product):
@@ -938,7 +938,7 @@ foreach ($latest_posts_raw as $post) {
 
         <div class="na-grid" data-carousel>
             <?php
-            $products = $productModel->getCategory4Products(4);
+            $products = $productModel->getCategory4Products(20);
 
             if (!empty($products)):
                 foreach ($products as $product):
@@ -1309,6 +1309,7 @@ foreach ($latest_posts_raw as $post) {
         startX    = e.clientX;
         startLeft = carousel.scrollLeft;
         carousel.classList.add('is-dragging');
+        carousel.style.scrollSnapType = 'none';
         pauseThenResume();
         e.preventDefault();
     });
@@ -1324,6 +1325,7 @@ foreach ($latest_posts_raw as $post) {
         if (!dragging) return;
         dragging = false;
         carousel.classList.remove('is-dragging');
+        carousel.style.scrollSnapType = '';
     });
 
     /* Prevent a drag-release from firing a card link */

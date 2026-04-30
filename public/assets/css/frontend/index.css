@@ -735,6 +735,7 @@ h3.product-title {
 .na-grid.is-dragging {
   cursor: grabbing;
   scroll-behavior: auto;
+  scroll-snap-type: none;
   user-select: none;
 }
 
@@ -1931,6 +1932,7 @@ a.brandItem {
 .home-blog-grid.is-dragging {
   cursor: grabbing;
   scroll-behavior: auto;
+  scroll-snap-type: none;
   user-select: none;
 }
 

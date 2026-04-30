@@ -83,6 +83,7 @@
       startX    = e.clientX;
       startLeft = track.scrollLeft;
       track.classList.add('is-dragging');
+      track.style.scrollSnapType = 'none'; /* disable snap mid-drag */
       pauseThenResume();
       e.preventDefault();
     });
@@ -98,6 +99,7 @@
       if (!dragging) return;
       dragging = false;
       track.classList.remove('is-dragging');
+      track.style.scrollSnapType = ''; /* restore CSS snap so release snaps cleanly */
     });
 
     /* Prevent link/button clicks from firing after a drag */
