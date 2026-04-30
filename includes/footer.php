@@ -2,8 +2,32 @@
 
 <footer id="footer">
     <div class="footer-widgets">
-        <div class="footer-widget">
-            <h4>Locations</h4>
+        <div class="footer-widget footer-brand">
+            <a href="<?= url(); ?>" class="footer-brand-logo" aria-label="Visit Phones Dukan Home">
+                <img src="<?= url('public/assets/images/phonesdukan_logo.png'); ?>" alt="Phones Dukan Logo">
+            </a>
+            <p class="footer-brand-about">PhonesDukan is your trusted store for mobiles, smart watches, earbuds, accessories, power banks, and speakers across Pakistan.</p>
+            <div class="footer-social-icons">
+                <a href="https://www.facebook.com/phonesdukan" aria-label="Visit our Facebook page" class="footer-social-icon facebook-icon">
+                    <img src="<?= url('public/assets/images/facebook_icon.svg'); ?>" alt="Facebook">
+                </a>
+                <a href="https://www.youtube.com/c/MobileIsland" aria-label="Visit our YouTube channel" class="footer-social-icon youtube-icon">
+                    <img src="<?= url('public/assets/images/youtube_icon.svg'); ?>" alt="YouTube">
+                </a>
+                <a href="https://www.instagram.com/phonesdukan/" aria-label="Visit our Instagram page" class="footer-social-icon instagram-icon">
+                    <img src="<?= url('public/assets/images/instagram_icon.svg'); ?>" alt="Instagram">
+                </a>
+                <a href="https://www.tiktok.com/@phonesdukan" aria-label="Visit our TikTok page" class="footer-social-icon tiktok-icon">
+                    <img src="<?= url('public/assets/images/tiktok_icon.svg'); ?>" alt="TikTok">
+                </a>
+                <a href="https://x.com/phonesdukan/" aria-label="Visit our Twitter page" class="footer-social-icon twitter-icon">
+                    <img src="<?= url('public/assets/images/twitter_icon.svg'); ?>" alt="Twitter">
+                </a>
+            </div>
+        </div>
+
+        <div class="footer-widget footer-locations">
+            <h4>Contact Info</h4>
             <div class="footer-block">
                 <img src="<?= url('public/assets/images/map_icon.svg'); ?>" alt="Location Icon" class="footer-icon">
                 <div class="footer-block-content">
@@ -36,57 +60,35 @@
                     <a href="tel:0512756587" class="footer-block-caption">0512756587</a>
                 </div>
             </div> -->
-            <div class="footer-social-icons">
-    <!-- Facebook -->
-    <a href="https://www.facebook.com/phonesdukan" aria-label="Visit our Facebook page" class="footer-social-icon facebook-icon">
-        <img src="https://www.phonesdukan.com/public/assets/images/facebook_icon.svg" alt="Facebook">
-    </a>
-    <!-- YouTube -->
-    <a href="https://www.youtube.com/c/MobileIsland" aria-label="Visit our YouTube channel" class="footer-social-icon youtube-icon">
-        <img src="https://www.phonesdukan.com/public/assets/images/youtube_icon.svg" alt="YouTube">
-    </a>
-    <!-- Instagram -->
-    <a href="https://www.instagram.com/phonesdukan/" aria-label="Visit our Instagram page" class="footer-social-icon instagram-icon">
-        <img src="https://www.phonesdukan.com/public/assets/images/instagram_icon.svg" alt="Instagram">
-    </a>
-    <!-- TikTok -->
-    <a href="https://www.tiktok.com/@phonesdukan" aria-label="Visit our TikTok page" class="footer-social-icon tiktok-icon">
-        <img src="https://www.phonesdukan.com/public/assets/images/tiktok_icon.svg" alt="TikTok">
-    </a>
-    <!-- Twitter -->
-    <a href="https://x.com/phonesdukan/" aria-label="Visit our Twitter page" class="footer-social-icon twitter-icon">
-        <img src="https://www.phonesdukan.com/public/assets/images/twitter_icon.svg" alt="Twitter">
-    </a>
-</div>
         </div>
 
-        <div class="footer-widget">
+        <div class="footer-widget footer-categories">
             <h4>Categories</h4>
             <ul>
                 <li><a href="<?= url('mobiles/'); ?>">Mobiles</a></li>
                 <li><a href="<?= url('smart-watches/'); ?>">Smart Watches</a></li>
                 <li><a href="<?= url('wireless-earbuds/'); ?>">Wireless Earbuds</a></li>
-                <li><a href="<?= url('mobile-accessories/'); ?>">Mobiles Accessories</a></li>
+                <li><a href="<?= url('mobile-accessories/'); ?>">Mobile Accessories</a></li>
                 <li><a href="<?= url('power-banks/'); ?>">Power Banks</a></li>
                 <li><a href="<?= url('bluetooth-speakers/'); ?>">Bluetooth Speakers</a></li>
             </ul>
         </div>
 
-        <div class="footer-widget">
+        <div class="footer-widget footer-links">
             <h4>Quick Links</h4>
             <ul>
                 <li><a href="<?= url(); ?>">Home</a></li>
                 <li><a href="<?= url('about-us'); ?>">About Us</a></li>
                 <li><a href="<?= url('contact-us/'); ?>">Contact</a></li>
-                <li><a href="<?= url('my-account'); ?>">My account</a></li>
+                <li><a href="<?= url('my-account'); ?>">My Account</a></li>
                 <li><a href="<?= url('track-order'); ?>">Track Order</a></li>
                 <li><a href="<?= url('return-policy/'); ?>">Return Policy</a></li>
             </ul>
         </div>
 
-        <div class="footer-widget">
+        <div class="footer-widget footer-newsletter">
             <h4>Newsletter</h4>
-            <p>Stay updated with our latest news, exclusive offers, and insights by subscribing to our newsletter!</p>
+            <p>Get product updates and exclusive offers straight to your inbox.</p>
             <form action="" method="post" class="contact-form">
                 <input type="hidden" name="newsletter_submitted" value="1">
                 <div class="form-group">
@@ -95,7 +97,7 @@
                 <div class="form-group">
                     <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
                 </div>
-                <button type="submit" class="news-submit">Submit</button>
+                <button type="submit" class="news-submit">Subscribe</button>
             </form>
         </div>
     </div>
