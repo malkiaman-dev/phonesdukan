@@ -1231,6 +1231,14 @@ a.view-all-btn {
   padding: 0;
 }
 
+/* Acc section uses the same bottom padding as every other na-section (44px).
+   The unfilled AdSense is collapsed by JS so no extra gap appears. */
+
+/* Reduce top padding so Power Banks title sits closer to the banner */
+.pb-na-section {
+  padding-top: 20px;
+}
+
 .s-banner--full > a {
   display: block;
   width: 100%;
@@ -1253,6 +1261,16 @@ a.view-all-btn {
 
 .home-feed-ad .adsbygoogle {
   margin: 0 !important;
+}
+
+/* ── Power Banks ad strip: white background + height cap so no gray void ── */
+.acc-na-section + .ad-container {
+  background: #ffffff;
+  max-height: 120px;
+  overflow: hidden;
+}
+.acc-na-section + .ad-container .adsbygoogle {
+  max-height: 120px !important;
 }
 
 .m-banner {

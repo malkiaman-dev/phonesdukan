@@ -129,4 +129,48 @@
   } else {
     init();
   }
+
+  /* ── Collapse unfilled AdSense slots so they leave no blank space ──
+     AdSense injects inline "height:auto!important; max-height:none!important"
+     which defeats CSS. We watch for data-ad-status="unfilled" and override
+     the container height via JS inline styles (which win over AdSense's own). */
+  function collapseUnfilledAds() {
+    document.querySelectorAll('.adsbygoogle').forEach(function (ins) {
+      function tryCollapse() {
+        if (ins.dataset.adStatus === 'unfilled') {
+          var container = ins.closest ? ins.closest('.ad-container') : (function () {
+            var n = ins.parentNode;
+            while (n && !(n.classList && n.classList.contains('ad-container'))) n = n.parentNode;
+            return n;
+          })();
+          if (container) {
+            container.style.setProperty('height',     '0',        'important');
+            container.style.setProperty('min-height', '0',        'important');
+            container.style.setProperty('max-height', '0',        'important');
+            container.style.setProperty('overflow',   'hidden',   'important');
+            container.style.setProperty('padding',    '0',        'important');
+            container.style.setProperty('margin',     '0',        'important');
+          }
+          /* also collapse the ins itself */
+          ins.style.setProperty('height',     '0',      'important');
+          ins.style.setProperty('max-height', '0',      'important');
+          ins.style.setProperty('overflow',   'hidden', 'important');
+        }
+      }
+
+      /* Check immediately (in case AdSense already ran) */
+      tryCollapse();
+
+      /* Watch for when AdSense sets the status attribute */
+      if ('MutationObserver' in window) {
+        new MutationObserver(function () { tryCollapse(); })
+          .observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
+      }
+    });
+  }
+
+  /* Run after load so AdSense has had a chance to execute */
+  window.addEventListener('load', collapseUnfilledAds);
+  /* Fallback: also check after 4 s for slow connections */
+  window.addEventListener('load', function () { setTimeout(collapseUnfilledAds, 4000); });
 })();
