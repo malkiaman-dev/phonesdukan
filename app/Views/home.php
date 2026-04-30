@@ -258,7 +258,8 @@ foreach ($latest_posts_raw as $post) {
                                     Add to Cart
                                 </button>
                                 <button class="na-btn na-btn--buy buy-button"
-                                    data-product-id="<?= (int)$product['product_id'] ?>">
+                                    data-product-id="<?= (int)$product['product_id'] ?>"
+                                    data-unit-price="<?= (float)$unit_price ?>">
                                     Buy Now
                                 </button>
                             <?php else: ?>

@@ -1,7 +1,18 @@
-// buy now
-$(document).ready(function() {
+/**
+ * buy-now.js — handles .buy-button clicks across all homepage carousels.
+ *
+ * Key design choices:
+ *  - Pure fetch/vanilla JS (no jQuery required)
+ *  - Event delegation on document so carousel-cloned cards work automatically
+ *  - Reads data-unit-price so CartController receives a valid price
+ *  - Redirects to /checkout on success
+ */
+(function () {
+    'use strict';
+
     const withBase = window.pdWithBase || function (path) {
-        const basePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
+        var basePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan')
+            ? '/phonesdukan' : '';
         if (!path) return basePath + '/';
         if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
         if (path.startsWith(basePath + '/')) return path;
@@ -9,40 +20,74 @@ $(document).ready(function() {
         return basePath + '/' + path;
     };
 
-    $(".buy-button").click(function() {
-        let productId = $(this).data("product-id");
-        let quantity = 1; // Default quantity as 1 for direct purchase
+    /* Single delegated listener — catches clicks on original AND cloned cards */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.buy-button');
+        if (!btn) return;
 
-        $.ajax({
-            url: withBase("/app/Controllers/CartController.php"),
-            type: "POST",
-            data: JSON.stringify({
-                product_id: productId,
-                quantity: quantity
-            }),
-            contentType: "application/json",
-            dataType: "json",
-            success: function(response) {
-                if (response.status === "success") {
-                    window.location.href = withBase("/checkout"); // Redirect to checkout after adding to cart
-                } else {
-                    Swal.fire({
-                        title: "Oops!",
-                        text: response.message,
-                        icon: "error",
-                        confirmButtonText: "Try Again"
+        /* Ignore if already processing */
+        if (btn.disabled) return;
+
+        var productId = btn.dataset.productId;
+        var unitPrice = parseFloat(btn.dataset.unitPrice) || 0;
+
+        if (!productId) return;
+
+        /* Visual feedback */
+        btn.disabled = true;
+        var origText = btn.textContent.trim();
+        btn.textContent = 'Processing…';
+
+        fetch(withBase('/app/Controllers/CartController.php'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                product_id:     parseInt(productId, 10),
+                quantity:       1,
+                unit_price:     unitPrice,
+                payment_method: 'cod'
+            })
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.status === 'success') {
+                /* Sync cart badge before leaving the page */
+                var total = (data.cart_summary && data.cart_summary.total_quantity)
+                    ? data.cart_summary.total_quantity : 0;
+                if (total > 0) {
+                    document.querySelectorAll('.cart-count').forEach(function (el) {
+                        el.textContent = total;
                     });
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error:", error);
+                window.location.href = withBase('/checkout');
+            } else {
+                btn.disabled = false;
+                btn.textContent = origText;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Oops!',
+                        text: data.message || 'Could not add to cart.',
+                        icon: 'error',
+                        confirmButtonText: 'Try Again'
+                    });
+                } else {
+                    alert(data.message || 'Could not add to cart.');
+                }
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.textContent = origText;
+            if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    title: "Error!",
-                    text: "Something went wrong, please try again.",
-                    icon: "error",
-                    confirmButtonText: "OK"
+                    title: 'Error!',
+                    text: 'Something went wrong. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
                 });
+            } else {
+                alert('Something went wrong. Please try again.');
             }
         });
     });
-});
+})();

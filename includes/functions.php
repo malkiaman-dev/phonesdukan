@@ -215,6 +215,7 @@ if (!function_exists('loadJS')) {
 
         if ($uri === '/' || strpos($uri, '/index') !== false) {
             emitJs('public/assets/js/frontend/index.js');
+            emitJs('public/assets/js/frontend/buy-now.js');
         }
 
         if (strpos($uri, '/wholesale') === 0) {
