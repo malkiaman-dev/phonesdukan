@@ -147,12 +147,20 @@
             });
     });
 
-    /* ── Collapse unfilled AdSense containers ───────────── */
+    /* ── Collapse targeted empty AdSense containers ─────── */
     (function () {
+        var TARGET_SLOTS = ['8736670293', '4555776348'];
+
+        function isTargetSlot(ins) {
+            if (!ins) return false;
+            return TARGET_SLOTS.indexOf(String(ins.getAttribute('data-ad-slot') || '')) !== -1;
+        }
+
         function collapseContainer(ins) {
-            var container = ins.closest ? ins.closest('.ad-container') : null;
+            var container = ins && ins.closest ? ins.closest('.ad-container') : null;
             if (!container) return;
 
+            container.classList.add('is-collapsed');
             container.style.setProperty('display', 'none', 'important');
             container.style.setProperty('height', '0', 'important');
             container.style.setProperty('margin', '0', 'important');
@@ -160,28 +168,73 @@
             container.style.setProperty('overflow', 'hidden', 'important');
         }
 
-        function checkUnfilled() {
+        function hasOnePixelIframe(ins) {
+            var iframe = ins.querySelector('iframe');
+            if (!iframe) return false;
+
+            var rect = iframe.getBoundingClientRect ? iframe.getBoundingClientRect() : null;
+            var h = rect ? rect.height : (iframe.offsetHeight || iframe.clientHeight || parseInt(iframe.getAttribute('height') || '0', 10));
+            var w = rect ? rect.width : (iframe.offsetWidth || iframe.clientWidth || parseInt(iframe.getAttribute('width') || '0', 10));
+
+            return (h > 0 && h <= 1) || (w > 0 && w <= 1);
+        }
+
+        function hasOnePixelInlineHeight(ins) {
+            var styleHeight = parseFloat((ins.style.height || '').replace('px', ''));
+            return !isNaN(styleHeight) && styleHeight > 0 && styleHeight <= 1;
+        }
+
+        function shouldCollapse(ins) {
+            if (!isTargetSlot(ins)) return false;
+
+            var status = String(ins.getAttribute('data-ad-status') || '').toLowerCase();
+            if (status === 'unfilled') return true;
+
+            if (hasOnePixelInlineHeight(ins)) return true;
+            if (hasOnePixelIframe(ins)) return true;
+
+            return false;
+        }
+
+        function evaluateAd(ins) {
+            if (shouldCollapse(ins)) {
+                collapseContainer(ins);
+            }
+        }
+
+        function evaluateAllTargetAds() {
             document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
-                if (ins.getAttribute('data-ad-status') === 'unfilled') {
-                    collapseContainer(ins);
+                if (isTargetSlot(ins)) {
+                    evaluateAd(ins);
                 }
             });
         }
 
         function watchAds() {
             document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
-                new MutationObserver(function (mutations) {
-                    mutations.forEach(function (mutation) {
-                        if (mutation.attributeName === 'data-ad-status' &&
-                            ins.getAttribute('data-ad-status') === 'unfilled') {
-                            collapseContainer(ins);
-                        }
-                    });
-                }).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
+                if (!isTargetSlot(ins)) return;
+
+                new MutationObserver(function () {
+                    evaluateAd(ins);
+                }).observe(ins, {
+                    attributes: true,
+                    childList: true,
+                    subtree: true,
+                    attributeFilter: ['data-ad-status', 'style']
+                });
             });
 
-            setTimeout(checkUnfilled, 1500);
-            setTimeout(checkUnfilled, 5000);
+            var tries = 0;
+            var poller = setInterval(function () {
+                evaluateAllTargetAds();
+                tries += 1;
+                if (tries >= 25) {
+                    clearInterval(poller);
+                }
+            }, 400);
+
+            setTimeout(evaluateAllTargetAds, 1500);
+            setTimeout(evaluateAllTargetAds, 5000);
         }
 
         if (document.readyState === 'loading') {

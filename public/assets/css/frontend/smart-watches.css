@@ -159,7 +159,7 @@
   line-height: 1.4;
   font-weight: 700;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* -webkit-line-clamp: 2; */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -323,12 +323,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
+.sw-pagination a:visited {
+  color: #111111;
+}
+
 .sw-pagination a:hover {
-  border-color: #111111;
+  border-color: #f7cf04;
+  background: #fffbe5;
+  color: #111111;
   transform: translateY(-1px);
+}
+
+.sw-pagination a:active {
+  border-color: #f7cf04;
+  background: #fff7cc;
+  color: #111111;
 }
 
 .sw-pagination a.active {
@@ -336,6 +349,13 @@
   border-color: #f7cf04;
   color: #111111;
   font-weight: 700;
+}
+
+.sw-pagination a:focus,
+.sw-pagination a:focus-visible {
+  outline: 2px solid #f7cf04;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba(247, 207, 4, 0.22);
 }
 
 /* ── SEO/content section ────────────────────────────── */
@@ -680,17 +700,23 @@
   }
 
   .na-actions {
-    flex-direction: column;
-    gap: 7px;
-    padding: 4px 8px 10px;
+    flex-direction: row;
+    gap: 5px;
+    padding: 4px 6px 10px;
   }
 
   .na-actions .na-btn,
-  .na-actions .buy-button,
+  .na-actions .buy-button {
+    font-size: 10px;
+    padding-inline: 4px;
+    letter-spacing: -0.04em;
+    height: 32px;
+  }
+
   .na-actions .na-btn--soldout {
-    width: 100%;
-    height: 34px;
-    font-size: 12px;
+    font-size: 10px;
+    height: 32px;
+    letter-spacing: -0.02em;
   }
 
   .sw-pagination a {
@@ -722,6 +748,14 @@
   overflow: hidden;
 }
 
+.ad-container.is-collapsed {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
 .ad-container:has(.adsbygoogle[data-ad-status="unfilled"]) {
   display: none !important;
   height: 0 !important;
@@ -732,4 +766,15 @@
 .adsbygoogle[data-ad-status="unfilled"] {
   display: none !important;
   height: 0 !important;
+}
+
+.ad-container:has(.adsbygoogle[data-ad-slot="8736670293"][data-ad-status="unfilled"]),
+.ad-container:has(.adsbygoogle[data-ad-slot="4555776348"][data-ad-status="unfilled"]),
+.ad-container:has(.adsbygoogle[data-ad-slot="8736670293"] iframe[height="1"]),
+.ad-container:has(.adsbygoogle[data-ad-slot="4555776348"] iframe[height="1"]) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }

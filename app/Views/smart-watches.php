@@ -81,10 +81,6 @@ foreach ($rawProducts as $product) {
 
 <section class="sw-products-section">
     <div class="sw-container">
-        <div class="sw-products-head">
-            <h2>Latest <span>Smartwatches</span></h2>
-        </div>
-
         <?php if (!empty($products)): ?>
             <div class="sw-product-grid">
                 <?php foreach ($products as $product): ?>
@@ -303,30 +299,6 @@ $conn = null;
 
                 <div class="sw-faq-item">
                     <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Where can I buy authentic smartwatches at the best price in Pakistan?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>You can buy authentic smartwatches at competitive prices from trusted online stores like <a href="https://www.phonesdukan.com">Phones Dukan</a>, where you’ll find a variety of models and brands.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Can I use an Android smartwatch with an iPhone?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>Yes, you can use an Android smartwatch with an iPhone, but the experience may vary. Many smartwatches like <span>Samsung Galaxy Watch</span> and <span>Fitbit</span> models offer compatibility with iOS, though some features may be limited.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
                         <span>Which brand is good in smartwatches?</span>
                         <span class="sw-faq-icon" aria-hidden="true"></span>
                     </button>
@@ -349,94 +321,6 @@ $conn = null;
                     <div class="sw-faq-answer">
                         <div class="sw-faq-answer-inner">
                             <p>Smartwatches in Pakistan range between <span>Rs. 1,499</span> to <span>Rs. 150,000</span>, depending on the brand and features.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Do smartwatches have fitness trackers?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>Yes, fitness tracking is a standard feature in almost all modern smartwatches, including step counting, calorie burn, heart rate, and sleep monitoring.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>How long can a smartwatch battery last?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>Battery life varies by model. Basic smartwatches last <span>5-7 days</span>, while feature-rich models last <span>1-2 days</span>.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Can you swim with a smartwatch?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>Most smartwatches have water resistance ratings like <span>IP68</span> or <span>5ATM</span>, making them suitable for swimming.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Can you get phone calls on a smartwatch?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>Yes, smartwatches with <span>Bluetooth calling</span> or <span>LTE connectivity</span> allow you to make and receive calls.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Which smartwatch is best for health and fitness?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p><span>Garmin</span> and <span>Fitbit</span> offer advanced health tracking, while <span>Apple Watch</span> and <span>Samsung Galaxy Watch</span> balance health features with smartphone functionality.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>Can you change smartwatch straps?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <p>Yes, most smartwatches have <span>interchangeable straps</span>, allowing customization with different materials and styles.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sw-faq-item">
-                    <button class="sw-faq-question" type="button" aria-expanded="false">
-                        <span>How do I update my watch software?</span>
-                        <span class="sw-faq-icon" aria-hidden="true"></span>
-                    </button>
-                    <div class="sw-faq-answer">
-                        <div class="sw-faq-answer-inner">
-                            <ul>
-                                <li>Connect your watch to the companion app.</li>
-                                <li>Check for updates in settings.</li>
-                                <li>Ensure sufficient battery and Wi-Fi connection.</li>
-                            </ul>
                         </div>
                     </div>
                 </div>
@@ -479,22 +363,6 @@ $conn = null;
     },
     {
       "@type": "Question",
-      "name": "Where can I buy authentic smartwatches at the best price in Pakistan?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "You can buy authentic smartwatches at competitive prices from trusted online stores like Phones Dukan, where you’ll find a variety of models and brands."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I use an Android smartwatch with an iPhone?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, you can use an Android smartwatch with an iPhone, but the experience may vary. Many smartwatches like Samsung Galaxy Watch and Fitbit models offer compatibility with iOS. However, certain features, such as replying to messages or using advanced integrations, might be limited compared to pairing with an Android phone. If seamless compatibility is your priority, it’s better to choose a smartwatch designed specifically for your operating system."
-      }
-    },
-    {
-      "@type": "Question",
       "name": "Which brand is good in smartwatches?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -507,62 +375,6 @@ $conn = null;
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Smartwatches in Pakistan range between Rs. 1,499 to Rs. 150,000 or more, depending on the brand and features. Budget-friendly options like Amazfit or local brands offer basic functionality, while high-end models such as Samsung Galaxy Watches and Apple Watches provide premium features like advanced fitness tracking and cellular connectivity."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do smartwatches have fitness trackers?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, fitness tracking is a standard feature in almost all modern smartwatches. They monitor activities like step counting, calorie burn, heart rate, and sleep patterns. Advanced models also offer SpO2 tracking, ECG, and stress monitoring. Studies suggest that these trackers help improve physical activity, making them a valuable tool for fitness lovers and individuals with specific health goals."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How long can a smartwatch battery last?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Battery life varies by model and usage. Basic smartwatches without heavy features can last 5-7 days. Watches with GPS, always-on display, and advanced health tracking often last 1-2 days on a full charge. Factors like frequent notifications and GPS usage can drain the battery faster."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can you swim with a smartwatch?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Most modern smartwatches come with water resistance ratings, such as IP68 or 5ATM, meaning they can withstand water immersion. Models like the Apple Watch Series or Garmin Forerunner are swim-proof and track swimming metrics. However, not all smartwatches are built for water sports, so it’s important to check the manufacturer’s guidelines to avoid potential damage."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can you get phone calls on a smartwatch?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, many smartwatches allow you to make and receive calls. Models with Bluetooth calling or LTE connectivity, like the Samsung Galaxy Watch 6 and Apple Watch Series 8, enable this feature. Note that LTE-enabled models often require a separate data plan."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which smartwatch is best for health and fitness?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "For health and fitness, Garmin and Fitbit are top choices due to their detailed insights and features like heart rate monitoring, sleep analysis, and stress tracking. If you’re looking for a balance of health tracking and smartphone functionality, Apple Watch Series 8 and Samsung Galaxy Watch are excellent options."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can you change smartwatch straps?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, most smartwatches come with interchangeable straps, making it easy to switch between styles or materials like silicone, leather, or stainless steel. Changing straps is simple and often requires no tools, giving you flexibility in customizing your look."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I update my watch software?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Smartwatch software updates are essential to improve functionality and fix bugs. Most updates are done through the companion app on your smartphone. For example, connect your watch to the app (like Galaxy Wearable or Apple Watch App), check for updates under the settings menu, and ensure the watch has sufficient battery and is connected to Wi-Fi for a smooth update."
       }
     }
   ]
