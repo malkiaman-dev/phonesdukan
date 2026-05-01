@@ -147,66 +147,124 @@
             });
     });
 
-    /* ── Collapse targeted empty AdSense containers ─────── */
+    /* ── Smartwatch ads: CSS-first + JS fallback ────────── */
     (function () {
         var TARGET_SLOTS = ['8736670293', '4555776348'];
+        var TINY_IFRAME_THRESHOLD = 5;
 
         function isTargetSlot(ins) {
             if (!ins) return false;
             return TARGET_SLOTS.indexOf(String(ins.getAttribute('data-ad-slot') || '')) !== -1;
         }
 
-        function collapseContainer(ins) {
-            var container = ins && ins.closest ? ins.closest('.ad-container') : null;
-            if (!container) return;
-
-            container.classList.add('is-collapsed');
-            container.style.setProperty('display', 'none', 'important');
-            container.style.setProperty('height', '0', 'important');
-            container.style.setProperty('margin', '0', 'important');
-            container.style.setProperty('padding', '0', 'important');
-            container.style.setProperty('overflow', 'hidden', 'important');
+        function getContainer(ins) {
+            return ins && ins.closest ? ins.closest('.ad-container') : null;
         }
 
-        function hasOnePixelIframe(ins) {
+        function collapseContainer(ins) {
+            var container = getContainer(ins);
+            if (!container) return;
+            container.classList.remove('is-visible');
+            container.classList.add('is-collapsed');
+        }
+
+        function showContainer(ins) {
+            var container = getContainer(ins);
+            if (!container) return;
+            container.classList.remove('is-collapsed');
+            container.classList.add('is-visible');
+        }
+
+        function readSize(value) {
+            if (value === null || typeof value === 'undefined' || value === '') return 0;
+            var n = parseFloat(String(value).replace('px', '').trim());
+            return isNaN(n) ? 0 : n;
+        }
+
+        function getIframeMetrics(ins) {
             var iframe = ins.querySelector('iframe');
-            if (!iframe) return false;
+            if (!iframe) return null;
 
             var rect = iframe.getBoundingClientRect ? iframe.getBoundingClientRect() : null;
-            var h = rect ? rect.height : (iframe.offsetHeight || iframe.clientHeight || parseInt(iframe.getAttribute('height') || '0', 10));
-            var w = rect ? rect.width : (iframe.offsetWidth || iframe.clientWidth || parseInt(iframe.getAttribute('width') || '0', 10));
+            var height = rect && rect.height
+                ? rect.height
+                : (iframe.offsetHeight || iframe.clientHeight || readSize(iframe.getAttribute('height')));
+            var width = rect && rect.width
+                ? rect.width
+                : (iframe.offsetWidth || iframe.clientWidth || readSize(iframe.getAttribute('width')));
 
-            return (h > 0 && h <= 1) || (w > 0 && w <= 1);
+            return {
+                height: readSize(height),
+                width: readSize(width)
+            };
         }
 
-        function hasOnePixelInlineHeight(ins) {
-            var styleHeight = parseFloat((ins.style.height || '').replace('px', ''));
-            return !isNaN(styleHeight) && styleHeight > 0 && styleHeight <= 1;
+        function isTinyAd(ins) {
+            var inlineHeight = readSize(ins.style.height);
+            if (inlineHeight > 0 && inlineHeight <= TINY_IFRAME_THRESHOLD) return true;
+
+            var metrics = getIframeMetrics(ins);
+            if (!metrics) return false;
+
+            return (metrics.height > 0 && metrics.height <= TINY_IFRAME_THRESHOLD) ||
+                (metrics.width > 0 && metrics.width <= TINY_IFRAME_THRESHOLD);
         }
 
-        function shouldCollapse(ins) {
-            if (!isTargetSlot(ins)) return false;
+        function hasRenderableSize(ins) {
+            var inlineHeight = readSize(ins.style.height);
+            if (inlineHeight > TINY_IFRAME_THRESHOLD) return true;
 
-            var status = String(ins.getAttribute('data-ad-status') || '').toLowerCase();
-            if (status === 'unfilled') return true;
+            var metrics = getIframeMetrics(ins);
+            if (!metrics) return false;
 
-            if (hasOnePixelInlineHeight(ins)) return true;
-            if (hasOnePixelIframe(ins)) return true;
-
-            return false;
+            return metrics.height > TINY_IFRAME_THRESHOLD && metrics.width > TINY_IFRAME_THRESHOLD;
         }
 
         function evaluateAd(ins) {
-            if (shouldCollapse(ins)) {
+            if (!isTargetSlot(ins)) return;
+
+            var status = String(ins.getAttribute('data-ad-status') || '').toLowerCase();
+
+            if (status === 'unfilled') {
                 collapseContainer(ins);
+                return;
             }
+
+            if (status === 'filled') {
+                showContainer(ins);
+
+                if (isTinyAd(ins)) {
+                    collapseContainer(ins);
+                    return;
+                }
+
+                setTimeout(function () {
+                    if (isTinyAd(ins)) {
+                        collapseContainer(ins);
+                    } else {
+                        showContainer(ins);
+                    }
+                }, 250);
+
+                return;
+            }
+
+            if (isTinyAd(ins)) {
+                collapseContainer(ins);
+                return;
+            }
+
+            if (hasRenderableSize(ins)) {
+                showContainer(ins);
+                return;
+            }
+
+            collapseContainer(ins);
         }
 
         function evaluateAllTargetAds() {
             document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
-                if (isTargetSlot(ins)) {
-                    evaluateAd(ins);
-                }
+                evaluateAd(ins);
             });
         }
 
@@ -222,13 +280,20 @@
                     subtree: true,
                     attributeFilter: ['data-ad-status', 'style']
                 });
+
+                var iframe = ins.querySelector('iframe');
+                if (iframe) {
+                    iframe.addEventListener('load', function () {
+                        evaluateAd(ins);
+                    }, { passive: true });
+                }
             });
 
             var tries = 0;
             var poller = setInterval(function () {
                 evaluateAllTargetAds();
                 tries += 1;
-                if (tries >= 25) {
+                if (tries >= 30) {
                     clearInterval(poller);
                 }
             }, 400);

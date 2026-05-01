@@ -742,34 +742,24 @@
   }
 }
 
-/* ── Prevent blank ad space (unfilled ads) ──────────── */
+/* ── Smartwatch ads: CSS-first visibility control ───── */
 .ad-container {
-  min-height: 0;
+  display: none;
+  height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden;
 }
 
-.ad-container.is-collapsed {
-  display: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
+.ad-container.is-visible,
+.ad-container:has(.adsbygoogle[data-ad-status="filled"]) {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
-.ad-container:has(.adsbygoogle[data-ad-status="unfilled"]) {
-  display: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.adsbygoogle[data-ad-status="unfilled"] {
-  display: none !important;
-  height: 0 !important;
-}
-
-.ad-container:has(.adsbygoogle[data-ad-slot="8736670293"][data-ad-status="unfilled"]),
-.ad-container:has(.adsbygoogle[data-ad-slot="4555776348"][data-ad-status="unfilled"]),
+.ad-container.is-collapsed,
+.ad-container:has(.adsbygoogle[data-ad-status="unfilled"]),
 .ad-container:has(.adsbygoogle[data-ad-slot="8736670293"] iframe[height="1"]),
 .ad-container:has(.adsbygoogle[data-ad-slot="4555776348"] iframe[height="1"]) {
   display: none !important;
@@ -777,4 +767,9 @@
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
+}
+
+.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+  height: 0 !important;
 }

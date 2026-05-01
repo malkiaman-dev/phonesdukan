@@ -14,7 +14,7 @@ if (!$conn) {
     die('Database connection error.');
 }
 
-$limit = 8;
+$limit = 12;
 $paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
 $paged = $paged > 0 ? $paged : 1;
 $offset = ($paged - 1) * $limit;
