@@ -1,176 +1,148 @@
 /* ================================================================
-   BLOG POST VIEW — Premium Design
-   Prefix: pv- (avoids conflicts with blog listing classes)
-   Design System: #111 | #f7cf04 | #fff | #f5f5f5
+   BLOG POST VIEW — Premium Design v2
+   Prefix: pv-   Colors: #111 | #f7cf04 | #fff | #f5f5f5
    ================================================================ */
 
-/* ================================================================
-   SHELL — narrow centered reading column
-   ================================================================ */
+/* ── Shell ──────────────────────────────────────────────────── */
 .pv-shell {
-  max-width: 800px;
+  max-width: 740px;
   margin: 0 auto;
   padding: 0 24px;
   box-sizing: border-box;
 }
 
+/* Hide old breadcrumb if it leaks */
+.nav-path { display: none; }
+
 /* ================================================================
-   HERO SECTION
+   HERO
    ================================================================ */
 .pv-hero {
   background: #fff;
   border-bottom: 1px solid #ebebeb;
-  padding: 32px 0 28px;
+  padding: 40px 0 36px;
 }
 
 .pv-hero-inner {
-  max-width: 800px;
+  max-width: 740px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
-/* ── Breadcrumb ── */
+/* Breadcrumb */
 .pv-breadcrumb {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 18px;
+  gap: 5px;
+  margin-bottom: 22px;
   font-size: 12px;
-  color: #999;
+  color: #bbb;
 }
-
 .pv-breadcrumb a {
-  color: #555;
+  color: #666;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.15s;
 }
-
-.pv-breadcrumb a:hover {
-  color: #111;
-}
-
-.pv-breadcrumb span[aria-hidden] {
-  color: #ccc;
-}
-
+.pv-breadcrumb a:hover { color: #111; }
+.pv-breadcrumb span[aria-hidden] { color: #ddd; }
 .pv-breadcrumb > span:last-child {
-  color: #aaa;
-  max-width: 280px;
+  color: #bbb;
+  max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ── Category badge + date ── */
+/* Category badge + date row */
 .pv-top-meta {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
-
 .pv-cat-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
+  gap: 5px;
+  padding: 5px 13px;
   background: #f7cf04;
   color: #111;
   border-radius: 20px;
   font-size: 11px;
   font-weight: 800;
   text-decoration: none;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   transition: opacity 0.2s;
 }
+.pv-cat-badge:hover { opacity: 0.85; color: #111; }
+.pv-meta-dot { color: #e0e0e0; font-size: 14px; }
+.pv-meta-date { font-size: 13px; color: #999; font-weight: 500; }
 
-.pv-cat-badge:hover {
-  opacity: 0.85;
-  color: #111;
-}
-
-.pv-meta-dot {
-  color: #ccc;
-  font-size: 13px;
-}
-
-.pv-meta-date {
-  font-size: 13px;
-  color: #888;
-  font-weight: 500;
-}
-
-/* ── Post title ── */
+/* Title */
 .pv-title {
-  margin: 0 0 20px;
+  margin: 0 0 26px;
   font-family: "Poppins", "Inter", sans-serif;
-  font-size: clamp(22px, 3.5vw, 34px);
+  font-size: clamp(24px, 4vw, 38px);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.22;
   color: #111;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
-/* ── Share row (hero top) ── */
+/* ================================================================
+   SHARE BUTTONS — platform-colored circles
+   ================================================================ */
 .pv-share-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
-
 .pv-share-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #888;
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
 }
-
-.pv-share-icon {
+.pv-share-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background: #f5f5f5;
-  transition: background 0.2s, transform 0.15s;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   text-decoration: none;
-  overflow: hidden;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, opacity 0.2s;
 }
+.pv-share-btn svg { display: block; flex-shrink: 0; }
+.pv-share-btn:hover { transform: translateY(-3px); opacity: 0.9; }
 
-.pv-share-icon img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  display: block;
-}
-
-.pv-share-icon:hover {
-  background: #f7cf04;
-  transform: translateY(-2px);
-}
+/* Platform colors */
+.pv-share-fb { background: #1877F2; }
+.pv-share-x  { background: #111111; }
+.pv-share-wa { background: #25D366; }
+.pv-share-li { background: #0A66C2; }
 
 /* ================================================================
    FEATURED IMAGE
    ================================================================ */
 .pv-feat-wrap {
   background: #f5f5f5;
-  padding: 28px 0;
+  padding: 32px 0 28px;
 }
-
 .pv-feat-fig {
   margin: 0;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   line-height: 0;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
-
 .pv-feat-fig img {
   width: 100%;
   height: auto;
@@ -182,25 +154,58 @@
    ================================================================ */
 .pv-content-wrap {
   background: #fff;
-  padding: 40px 0 56px;
+  padding: 44px 0 60px;
 }
 
-/* ── Post body typography ── */
+/* ── Table of Contents ─────────────────────────────────── */
+.pv-toc {
+  background: #f9f9f9;
+  border-left: 3px solid #f7cf04;
+  border-radius: 0 10px 10px 0;
+  padding: 18px 22px;
+  margin-bottom: 36px;
+}
+.pv-toc-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #555;
+  margin: 0 0 12px;
+}
+.pv-toc-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pv-toc-list li { margin: 0; }
+.pv-toc-list a {
+  font-size: 14px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 0.15s;
+}
+.pv-toc-list a:hover { color: #111; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── Post Body Typography ──────────────────────────────── */
 .pv-body {
-  font-family: "Inter", Georgia, serif;
-  font-size: 16px;
+  font-family: "Inter", Arial, sans-serif;
+  font-size: 16.5px;
   line-height: 1.85;
-  color: #2d3748;
-}
-
-.pv-body > * + * {
-  margin-top: 0;
+  color: #2c2c2c;
 }
 
 /* Paragraphs */
 .pv-body p {
-  margin: 0 0 20px;
-  font-size: 16px;
+  margin: 0 0 22px;
+  font-size: 16.5px;
   line-height: 1.85;
   color: #333;
 }
@@ -211,64 +216,54 @@
   font-size: clamp(20px, 3vw, 28px);
   font-weight: 800;
   color: #111;
-  margin: 40px 0 16px;
+  margin: 48px 0 18px;
   line-height: 1.2;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
-
 .pv-body h2 {
   font-family: "Poppins", "Inter", sans-serif;
-  font-size: clamp(18px, 2.5vw, 24px);
+  font-size: clamp(19px, 2.8vw, 26px);
+  font-weight: 700;
+  color: #111;
+  margin: 48px 0 16px;
+  line-height: 1.25;
+  padding-left: 16px;
+  border-left: 4px solid #f7cf04;
+}
+.pv-body h3 {
+  font-size: clamp(17px, 2.2vw, 21px);
   font-weight: 700;
   color: #111;
   margin: 36px 0 14px;
-  line-height: 1.25;
-  border-left: 3px solid #f7cf04;
-  padding-left: 14px;
-}
-
-.pv-body h3 {
-  font-size: clamp(16px, 2vw, 20px);
-  font-weight: 700;
-  color: #111;
-  margin: 28px 0 12px;
   line-height: 1.3;
 }
-
 .pv-body h4 {
   font-size: 16px;
   font-weight: 700;
-  color: #333;
-  margin: 24px 0 10px;
+  color: #222;
+  margin: 28px 0 10px;
 }
 
-/* First heading after start — less top margin */
+/* First child: no extra top margin */
 .pv-body > h2:first-child,
-.pv-body > h3:first-child {
-  margin-top: 0;
-}
+.pv-body > h3:first-child,
+.pv-body > p:first-child { margin-top: 0; }
 
 /* Lists */
 .pv-body ul,
 .pv-body ol {
-  margin: 0 0 20px 0;
+  margin: 0 0 24px;
   padding-left: 28px;
 }
-
 .pv-body ul li,
 .pv-body ol li {
-  margin-bottom: 8px;
-  line-height: 1.7;
+  margin-bottom: 10px;
+  line-height: 1.75;
   color: #333;
+  font-size: 16px;
 }
-
-.pv-body ul {
-  list-style: disc;
-}
-
-.pv-body ol {
-  list-style: decimal;
-}
+.pv-body ul { list-style: disc; }
+.pv-body ol { list-style: decimal; }
 
 /* Links */
 .pv-body a {
@@ -279,209 +274,145 @@
   font-weight: 500;
   transition: color 0.15s;
 }
-
-.pv-body a:hover {
-  color: #f7cf04;
-}
+.pv-body a:hover { color: #555; text-decoration-color: #555; }
 
 /* Bold / italic */
-.pv-body strong,
-.pv-body b {
-  font-weight: 700;
-  color: #111;
-}
-
-.pv-body em,
-.pv-body i {
-  font-style: italic;
-}
+.pv-body strong, .pv-body b { font-weight: 700; color: #111; }
+.pv-body em, .pv-body i     { font-style: italic; }
 
 /* Blockquote */
 .pv-body blockquote {
-  margin: 28px 0;
-  padding: 18px 22px;
+  margin: 32px 0;
+  padding: 20px 24px;
   background: #fffbe6;
   border-left: 4px solid #f7cf04;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 10px 10px 0;
   font-style: italic;
   color: #444;
+  font-size: 16px;
+  line-height: 1.7;
 }
-
-.pv-body blockquote p {
-  margin: 0;
-}
+.pv-body blockquote p { margin: 0; }
 
 /* Inline code */
 .pv-body code {
-  background: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 4px;
+  background: #f3f4f6;
+  padding: 2px 7px;
+  border-radius: 5px;
   font-size: 14px;
   font-family: "Courier New", monospace;
   color: #333;
 }
-
-/* Code blocks */
+/* Code block */
 .pv-body pre {
-  background: #1e1e1e;
-  color: #f8f8f8;
-  padding: 20px;
-  border-radius: 10px;
+  background: #1a1a2e;
+  color: #e8eaf6;
+  padding: 22px;
+  border-radius: 12px;
   overflow-x: auto;
-  margin: 24px 0;
+  margin: 28px 0;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
+.pv-body pre code { background: none; padding: 0; color: inherit; }
 
-.pv-body pre code {
-  background: none;
-  padding: 0;
-  color: inherit;
-  font-size: inherit;
-}
-
-/* Images inside content */
+/* Images in body */
 .pv-body img {
   max-width: 100%;
   height: auto;
   border-radius: 10px;
   display: block;
-  margin: 24px auto;
+  margin: 28px auto;
 }
 
-/* Gallery images from shortcodes */
+/* Inline gallery shortcode images */
 .pv-inline-fig {
-  margin: 28px 0;
+  margin: 32px 0;
   text-align: center;
 }
-
 .pv-inline-fig img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
   display: inline-block;
   margin: 0 auto;
-}
-
-/* Tables */
-.pv-body table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 24px 0;
-  font-size: 15px;
-}
-
-.pv-body table th {
-  background: #f5f5f5;
-  padding: 10px 14px;
-  text-align: left;
-  font-weight: 700;
-  color: #111;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.pv-body table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid #ebebeb;
-  color: #333;
-}
-
-.pv-body table tr:hover td {
-  background: #fafafa;
 }
 
 /* HR */
 .pv-body hr {
   border: none;
   border-top: 1px solid #ebebeb;
-  margin: 36px 0;
+  margin: 44px 0;
 }
 
-/* ── Tax table (existing class) ── */
+/* ── Tables ──────────────────────────────────────────── */
+.pv-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 28px 0;
+  border-radius: 10px;
+  border: 1px solid #ebebeb;
+}
+.pv-body table,
 .tax-table {
   width: 100%;
-  max-width: 100%;
-  margin: 20px 0;
   border-collapse: collapse;
-  border: 1px solid #ebebeb;
-  font-size: 14px;
+  font-size: 15px;
+  min-width: 400px;
 }
-
-.tax-table thead {
-  background: #f5f5f5;
-}
-
+.pv-body table th,
 .tax-table th {
-  padding: 10px 14px;
+  background: #f5f5f5;
+  padding: 12px 16px;
+  text-align: left;
   font-weight: 700;
   color: #111;
-  text-align: left;
+  border-bottom: 2px solid #e0e0e0;
+  white-space: nowrap;
 }
-
-.tax-table tbody tr {
-  border-bottom: 1px solid #ebebeb;
-}
-
+.pv-body table td,
 .tax-table td {
-  padding: 10px 14px;
+  padding: 11px 16px;
+  border-bottom: 1px solid #f0f0f0;
   color: #333;
+  line-height: 1.5;
 }
+.pv-body table tr:last-child td,
+.tax-table tr:last-child td { border-bottom: none; }
+.pv-body table tr:hover td { background: #fafafa; }
+.tax-table tbody tr:hover   { background: #fffbe6; }
+table tr:nth-child(even)    { background: #fafafa; }
+.tax-tables { display: flex; flex-direction: column; gap: 20px; }
+.tax-table thead { background: #f5f5f5; }
 
-table tr:nth-child(even) {
-  background: #fafafa;
-}
-
-.tax-table tbody tr:hover {
-  background: #fffbe6;
-}
-
-.tax-tables {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* ── PTA Calculator ── */
+/* ── PTA Calculator ──────────────────────────────────── */
 .pta-calculator {
-  background: #f9f9f9;
-  border: 2px solid #f7cf04;
-  border-radius: 14px;
-  padding: 28px;
-  margin: 32px 0;
-  max-width: 100%;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  background: #f8f9fa;
+  border: none;
+  border-left: 4px solid #f7cf04;
+  border-radius: 0 12px 12px 0;
+  padding: 28px 28px 28px 24px;
+  margin: 36px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   text-align: center;
+  transition: box-shadow 0.2s;
 }
-
+.pta-calculator:hover { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10); }
 .pta-calculator h2 {
   border-left: none !important;
   padding-left: 0 !important;
-  font-size: 18px;
-  margin-top: 0;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: #111;
 }
-
-.pta-calculator:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
-}
-
-.pta-calculator .exchange-rate-info {
-  color: #555;
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
-.pta-calculator .calculator-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: center;
-}
-
+.pta-calculator .exchange-rate-info { color: #666; font-size: 14px; margin-bottom: 22px; }
+.pta-calculator .calculator-form    { display: flex; flex-direction: column; gap: 14px; align-items: center; }
 .pta-calculator select,
 .pta-calculator input[type="number"] {
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   border: 1.5px solid #e0e0e0;
   border-radius: 8px;
   padding: 11px 14px;
@@ -490,13 +421,8 @@ table tr:nth-child(even) {
   color: #111;
   transition: border-color 0.2s;
 }
-
 .pta-calculator select:focus,
-.pta-calculator input[type="number"]:focus {
-  border-color: #f7cf04;
-  outline: none;
-}
-
+.pta-calculator input[type="number"]:focus { border-color: #f7cf04; outline: none; }
 .pta-calculator .results {
   background: #fff;
   border: 1px solid #ebebeb;
@@ -504,60 +430,24 @@ table tr:nth-child(even) {
   padding: 16px 20px;
   margin-top: 16px;
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   text-align: left;
 }
+.pta-calculator .results p { font-size: 14px; margin: 8px 0; display: flex; justify-content: space-between; }
+.pta-calculator .results span { color: #111; font-weight: 700; margin: 0; }
+.pta-calculator .error-message { color: #dc2626; font-size: 14px; margin-top: 8px; }
+.passport-tax, .cnic-tax { display: flex; align-items: center; justify-content: space-between; }
 
-.pta-calculator .results p {
-  font-size: 14px;
-  margin: 8px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pta-calculator .results span {
-  color: #111;
-  font-weight: 700;
-  margin: 0;
-}
-
-.pta-calculator .error-message {
-  color: #dc2626;
-  font-size: 14px;
-  margin-top: 8px;
-}
-
-.passport-tax,
-.cnic-tax {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* ── CNIC Check ── */
+/* ── CNIC Check ──────────────────────────────────────── */
 .cnic-check .content-area {
-  background: #f9f9f9;
-  padding: 24px;
-  border-radius: 12px;
+  background: #f8f9fa;
+  border-left: 4px solid #f7cf04;
+  border-radius: 0 12px 12px 0;
+  padding: 24px 24px 24px 20px;
   margin-bottom: 24px;
 }
-
-.cnic-check .cnic-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  max-width: 380px;
-  margin: 0 auto;
-}
-
-.cnic-check label {
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-  text-align: center;
-}
-
+.cnic-check .cnic-form { display: flex; flex-direction: column; gap: 14px; max-width: 380px; margin: 0 auto; }
+.cnic-check label { font-size: 15px; font-weight: 600; color: #333; text-align: center; }
 .cnic-check input[type="text"] {
   padding: 11px 14px;
   border: 1.5px solid #e0e0e0;
@@ -567,176 +457,197 @@ table tr:nth-child(even) {
   box-sizing: border-box;
   transition: border-color 0.2s;
 }
+.cnic-check input[type="text"]:focus { border-color: #f7cf04; outline: none; }
+.cnic-check button { padding: 12px; background: #111; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+.cnic-check button:hover { background: #333; }
+.cnic-check .error-message { font-size: 13px; color: #dc2626; text-align: center; }
+.cnic-check p { font-size: 13px; color: #666; text-align: center; }
 
-.cnic-check input[type="text"]:focus {
-  border-color: #f7cf04;
-  outline: none;
-}
-
-.cnic-check button {
-  padding: 12px;
+/* ── Inline CTA Block ────────────────────────────────── */
+.pv-cta-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   background: #111;
+  border-radius: 14px;
+  padding: 28px 28px;
+  margin: 48px 0 0;
+  flex-wrap: wrap;
+}
+.pv-cta-text { flex: 1; min-width: 200px; }
+.pv-cta-eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #f7cf04;
+  margin: 0 0 6px;
+}
+.pv-cta-heading {
+  font-size: 17px;
+  font-weight: 700;
   color: #fff;
-  border: none;
+  margin: 0 0 4px;
+  line-height: 1.35;
+}
+.pv-cta-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin: 0; }
+.pv-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 24px;
+  background: #f7cf04;
+  color: #111;
   border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
 }
+.pv-cta-btn:hover { background: #e5bf00; transform: translateY(-1px); color: #111; }
 
-.cnic-check button:hover {
-  background: #333;
-}
-
-.cnic-check .error-message {
-  font-size: 13px;
-  color: #dc2626;
-  text-align: center;
-}
-
-.cnic-check p {
-  font-size: 13px;
-  color: #666;
-  text-align: center;
-}
-
-/* ── Bottom share strip ── */
+/* ── Bottom Share Strip ──────────────────────────────── */
 .pv-bottom-share {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 24px 0 0;
-  margin-top: 40px;
+  margin-top: 36px;
   border-top: 1px solid #ebebeb;
   flex-wrap: wrap;
 }
+.pv-share-btns-row { display: flex; gap: 10px; align-items: center; }
 
-.pv-share-icons {
-  display: flex;
-  gap: 8px;
+/* ================================================================
+   STICKY SHARE SIDEBAR (desktop)
+   ================================================================ */
+.pv-sticky-share {
+  position: fixed;
+  left: max(16px, calc(50% - 440px));
+  top: 50%;
+  transform: translateY(-50%);
+  display: none; /* shown by JS via class */
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 40;
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 40px;
+  padding: 14px 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.pv-sticky-share--visible { display: flex; }
+.pv-sticky-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #aaa;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  margin-bottom: 4px;
+}
+.pv-sticky-share .pv-share-btn {
+  width: 36px;
+  height: 36px;
+}
+
+/* Hide sticky bar on narrow viewports */
+@media (max-width: 1060px) {
+  .pv-sticky-share { display: none !important; }
 }
 
 /* ================================================================
-   NAV PATH (existing breadcrumb, may still be rendered)
+   RELATED BLOGS SECTION
    ================================================================ */
-.nav-path {
-  display: none; /* Hidden — replaced by pv-breadcrumb inside hero */
+.pv-related-section {
+  background: #f5f5f5;
+  padding: 52px 0 56px;
+  border-top: 1px solid #ebebeb;
+}
+.pv-related-title {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800;
+  color: #111;
+  text-align: center;
+  margin: 0 0 28px;
+  letter-spacing: -0.02em;
+}
+.pv-related-title span { color: #f7cf04; }
+
+.pv-related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Post cards reuse blog.css classes — extra overrides if needed */
+.pv-related-section .post-card {
+  background: #fff;
 }
 
 /* ================================================================
-   LEGACY: Gallery image wrapper (old class names kept for compat)
+   LEGACY gallery wrappers
    ================================================================ */
-.gallery-post-wrapper {
-  margin: 28px 0;
-  display: flex;
-  justify-content: center;
-}
-
-img.gallery-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
-}
+.gallery-post-wrapper { margin: 28px 0; display: flex; justify-content: center; }
+img.gallery-image     { max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); }
 
 /* ================================================================
    RESPONSIVE
    ================================================================ */
-@media (max-width: 768px) {
-  .pv-hero {
-    padding: 24px 0 20px;
-  }
-
-  .pv-hero-inner,
-  .pv-shell {
-    padding: 0 16px;
-  }
-
-  .pv-title {
-    font-size: clamp(20px, 6vw, 26px);
-  }
-
-  .pv-feat-wrap {
-    padding: 16px 0;
-  }
-
-  .pv-feat-fig {
-    border-radius: 10px;
-  }
-
-  .pv-content-wrap {
-    padding: 28px 0 40px;
-  }
-
-  .pv-body {
-    font-size: 15px;
-  }
-
-  .pv-body h2 {
-    font-size: 18px;
-    padding-left: 12px;
-  }
-
-  .pv-body h3 {
-    font-size: 16px;
-  }
-
-  .pta-calculator {
-    padding: 20px 16px;
-  }
-
-  .pta-calculator select,
-  .pta-calculator input[type="number"] {
-    max-width: 100%;
-    font-size: 14px;
-  }
-
-  .tax-table thead {
-    display: none;
-  }
-
-  .tax-table tbody,
-  .tax-table tr,
-  .tax-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .tax-table tr {
-    margin-bottom: 8px;
-    border-bottom: 1px solid #ebebeb;
-  }
-
-  .tax-table td {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .tax-table td:nth-child(1)::before { content: "Value (USD): "; font-weight: 700; color: #333; }
-  .tax-table td:nth-child(2)::before { content: "Tax (PKR): ";   font-weight: 700; color: #333; }
-
-  .pv-bottom-share {
-    gap: 10px;
+@media (max-width: 900px) {
+  .pv-related-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
+@media (max-width: 768px) {
+  .pv-hero  { padding: 28px 0 24px; }
+  .pv-hero-inner,
+  .pv-shell { padding: 0 16px; }
+
+  .pv-title { font-size: clamp(22px, 6vw, 28px); line-height: 1.25; }
+  .pv-feat-wrap { padding: 20px 0 16px; }
+  .pv-feat-fig  { border-radius: 12px; }
+  .pv-content-wrap { padding: 32px 0 44px; }
+
+  .pv-body { font-size: 16px; }
+  .pv-body h2 { font-size: 19px; padding-left: 12px; margin-top: 36px; }
+  .pv-body h3 { font-size: 17px; }
+  .pv-body p  { font-size: 16px; }
+
+  .pta-calculator { padding: 22px 16px; }
+  .pta-calculator select,
+  .pta-calculator input[type="number"] { max-width: 100%; }
+
+  /* Mobile table: stack rows */
+  .pv-table-scroll { border-radius: 8px; }
+  .tax-table thead { display: none; }
+  .tax-table tbody,
+  .tax-table tr,
+  .tax-table td { display: block; width: 100%; }
+  .tax-table tr  { margin-bottom: 8px; border-bottom: 1px solid #ebebeb; }
+  .tax-table td  { padding: 8px 12px; font-size: 13px; }
+  .tax-table td:nth-child(1)::before { content: "Value (USD): "; font-weight: 700; color: #333; }
+  .tax-table td:nth-child(2)::before { content: "Tax (PKR): ";   font-weight: 700; color: #333; }
+
+  .pv-cta-block  { flex-direction: column; align-items: flex-start; padding: 22px 20px; gap: 16px; }
+  .pv-cta-btn    { width: 100%; justify-content: center; }
+
+  .pv-related-section { padding: 36px 0 40px; }
+  .pv-related-grid    { grid-template-columns: 1fr; gap: 14px; }
+}
+
 @media (max-width: 480px) {
-  .pv-breadcrumb > span:last-child {
-    max-width: 160px;
-  }
-
-  .pv-share-row {
-    gap: 6px;
-  }
-
-  .pv-share-icon {
-    width: 30px;
-    height: 30px;
-  }
-
-  .pv-share-icon img {
-    width: 15px;
-    height: 15px;
-  }
+  .pv-breadcrumb > span:last-child { max-width: 160px; }
+  .pv-share-btn { width: 36px; height: 36px; }
+  .pv-share-btn svg { width: 16px; height: 16px; }
+  .pv-related-section { padding: 28px 0 32px; }
 }

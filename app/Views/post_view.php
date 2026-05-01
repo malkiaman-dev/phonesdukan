@@ -1,101 +1,93 @@
 <?php
 require_once dirname(__DIR__, 2) . '/app/Controllers/PostController.php';
 
-/* ── Set variables header.php expects ── */
+/* ── Meta for main header.php ── */
 $pageTitle = $metaTitle ?? ($post['title'] ?? 'Blog | Phones Dukan');
-
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 
-/* ── Fetch inline gallery images ── */
+/* ── Fetch non-primary gallery images ── */
 $postModel          = new PostModel();
 $non_primary_images = $postModel->getNonPrimaryImages($post['id']);
 
-/* ── Shortcode: [pta_calculator] ── */
+/* ── Fetch related posts (same category, excluding current) ── */
+$_related_raw   = $postModel->getPaginatedPosts(4, 0, $post['category_slug']);
+$related_posts  = array_slice(
+    array_filter($_related_raw, function($p) use ($post) { return (int)$p['id'] !== (int)$post['id']; }),
+    0, 3
+);
+
+/* ──────────────────────────────────────────────────────────
+   SHORTCODE: [pta_calculator]
+   ────────────────────────────────────────────────────────── */
 function pta_calculator_shortcode($data) {
     if (!isset($data['phone_models']) || !isset($data['usd_to_pkr'])) {
         return '<p>Error: Calculator data not available.</p>';
     }
-
-    $calculator_html = '
+    $html = '
     <div class="pta-calculator">
-        <div class="content-area">
-            <h2>PTA Tax Calculator Pakistan ' . date('F Y') . '</h2>
-            <p class="exchange-rate-info">Instantly calculate mobile import taxes with our updated PTA Tax Calculator for ' . date('F Y') . ', aligned with Pakistan\'s latest budget and PTA regulations</p>
-            <div class="calculator-form">
-                <div>
-                    <select name="brand" id="brand">
-                        <option value="">Select a brand</option>';
-
+      <div class="content-area">
+        <h2>PTA Tax Calculator Pakistan ' . date('F Y') . '</h2>
+        <p class="exchange-rate-info">Instantly calculate mobile import taxes with our updated PTA Tax Calculator for ' . date('F Y') . ', aligned with Pakistan\'s latest budget and PTA regulations.</p>
+        <div class="calculator-form">
+          <div>
+            <select name="brand" id="brand">
+              <option value="">Select a brand</option>';
     foreach (array_keys($data['phone_models']) as $brand) {
-        $calculator_html .= '<option value="' . htmlspecialchars(trim(ucfirst(strtolower($brand)))) . '">' . htmlspecialchars($brand) . '</option>';
+        $html .= '<option value="' . htmlspecialchars(trim(ucfirst(strtolower($brand)))) . '">' . htmlspecialchars($brand) . '</option>';
     }
-
-    $calculator_html .= '
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div>
-                    <select name="model" id="model">
-                        <option value="">Select a model</option>
-                    </select>
-                </div>
-                <div id="custom-price-wrapper" class="hidden" style="display: none;">
-                    <label for="custom_price">Enter Price (PKR)</label>
-                    <input type="number" step="0.01" min="0" name="custom_price" id="custom_price" placeholder="e.g., 200000">
-                </div>
-                <p class="error-message" style="display: none;"></p>
-                <div class="results" style="display: none;">
-                    <p class="passport-tax"><strong>Passport Registration:</strong> <span></span></p>
-                    <p class="cnic-tax"><strong>CNIC Registration:</strong> <span></span></p>
-                </div>
-            </div>
+    $html .= '
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <select name="model" id="model">
+              <option value="">Select a model</option>
+            </select>
+          </div>
+          <div id="custom-price-wrapper" class="hidden" style="display:none;">
+            <label for="custom_price">Enter Price (PKR)</label>
+            <input type="number" step="0.01" min="0" name="custom_price" id="custom_price" placeholder="e.g., 200000">
+          </div>
+          <p class="error-message" style="display:none;"></p>
+          <div class="results" style="display:none;">
+            <p class="passport-tax"><strong>Passport Registration:</strong> <span></span></p>
+            <p class="cnic-tax"><strong>CNIC Registration:</strong> <span></span></p>
+          </div>
         </div>
-    </div>';
-
-    $calculator_html .= '
+      </div>
+    </div>
     <script>
-        const phoneModels = ' . json_encode($data['phone_models']) . ';
-        const usdToPkr = ' . json_encode($data['usd_to_pkr']) . ';
+      const phoneModels = ' . json_encode($data['phone_models']) . ';
+      const usdToPkr    = ' . json_encode($data['usd_to_pkr'])    . ';
     </script>';
-
-    return $calculator_html;
+    return $html;
 }
 
-/* ── Shortcode: [cnic_check] ── */
+/* ──────────────────────────────────────────────────────────
+   SHORTCODE: [cnic_check]
+   ────────────────────────────────────────────────────────── */
 function cnic_check_shortcode() {
     return '
     <div class="cnic-check">
-        <div class="content-area">
-            <h2>Check Ehsaas Program Eligibility with CNIC</h2>
-            <p>Enter your 13-digit CNIC number below to check your eligibility for the Ehsaas Program via SMS to 8171.</p>
-            <div class="cnic-form">
-                <label for="cnic_input">CNIC Number (without dashes)</label>
-                <input type="text" name="cnic_input" id="cnic_input" placeholder="e.g., 1234512345671" maxlength="13" pattern="[0-9]{13}" required>
-                <button type="button" onclick="sendCnicSMS()">Submit</button>
-                <p class="error-message" style="display: none; color: red;"></p>
-            </div>
-            <p><strong>Note:</strong> Use the SIM registered with your CNIC. Standard SMS charges apply (Rs. 1–2).</p>
+      <div class="content-area">
+        <h2>Check Ehsaas Program Eligibility with CNIC</h2>
+        <p>Enter your 13-digit CNIC number below to check eligibility via SMS to 8171.</p>
+        <div class="cnic-form">
+          <label for="cnic_input">CNIC Number (without dashes)</label>
+          <input type="text" name="cnic_input" id="cnic_input" placeholder="e.g., 1234512345671" maxlength="13" pattern="[0-9]{13}" required>
+          <button type="button" onclick="sendCnicSMS()">Submit</button>
+          <p class="error-message" style="display:none;color:red;"></p>
         </div>
-        <script>
-            function sendCnicSMS() {
-                var cnicInput = document.getElementById("cnic_input").value;
-                var errorMessage = document.querySelector(".cnic-form .error-message");
-                var cnicPattern = /^[0-9]{13}$/;
-                if (!cnicPattern.test(cnicInput)) {
-                    errorMessage.textContent = "Please enter a valid 13-digit CNIC number without dashes.";
-                    errorMessage.style.display = "block";
-                    return;
-                }
-                var smsUri = "sms:8171?body=" + encodeURIComponent(cnicInput);
-                try {
-                    window.location.href = smsUri;
-                    errorMessage.style.display = "none";
-                } catch (e) {
-                    errorMessage.textContent = "Unable to open SMS app. Please send your CNIC to 8171 manually.";
-                    errorMessage.style.display = "block";
-                }
-            }
-        </script>
+        <p><strong>Note:</strong> Use the SIM registered with your CNIC. Standard SMS charges apply (Rs. 1–2).</p>
+      </div>
+      <script>
+        function sendCnicSMS(){
+          var v=document.getElementById("cnic_input").value,e=document.querySelector(".cnic-form .error-message");
+          if(!/^[0-9]{13}$/.test(v)){e.textContent="Please enter a valid 13-digit CNIC.";e.style.display="block";return;}
+          try{window.location.href="sms:8171?body="+encodeURIComponent(v);e.style.display="none";}
+          catch(ex){e.textContent="Unable to open SMS app. Send your CNIC to 8171 manually.";e.style.display="block";}
+        }
+      </script>
     </div>';
 }
 
@@ -103,39 +95,74 @@ function cnic_check_shortcode() {
 $content = $post['content'];
 
 if (!empty($non_primary_images)) {
-    foreach ($non_primary_images as $image) {
-        $shortcode = "[image id={$image['id']}]";
-        $img_tag   = '<figure class="pv-inline-fig">'
-                   . '<img src="' . htmlspecialchars($image['image_url']) . '" alt="' . htmlspecialchars($image['alt_text'] ?? $post['title']) . '" loading="lazy">'
-                   . '</figure>';
-        $content   = str_replace($shortcode, $img_tag, $content);
+    foreach ($non_primary_images as $img) {
+        $content = str_replace(
+            "[image id={$img['id']}]",
+            '<figure class="pv-inline-fig"><img src="' . htmlspecialchars($img['image_url']) . '" alt="' . htmlspecialchars($img['alt_text'] ?? $post['title']) . '" loading="lazy"></figure>',
+            $content
+        );
     }
 }
-
 $content = str_replace('[pta_calculator]', pta_calculator_shortcode($data), $content);
 $content = str_replace('[cnic_check]',     cnic_check_shortcode(),           $content);
 
-/* ── Date logic ── */
-$published_at   = new DateTime($post['published_at']);
-$updated_at     = new DateTime($post['updated_at']);
-$hours_diff     = (int)(($published_at->diff($updated_at)->days * 24) + $published_at->diff($updated_at)->h);
-$display_date   = ($hours_diff > 24)
-    ? 'Updated ' . $updated_at->format('F j, Y')
-    : $published_at->format('F j, Y');
+/* ── Date ── */
+$pub  = new DateTime($post['published_at']);
+$upd  = new DateTime($post['updated_at']);
+$diff = (int)(($pub->diff($upd)->days * 24) + $pub->diff($upd)->h);
+$display_date = ($diff > 24) ? 'Updated ' . $upd->format('F j, Y') : $pub->format('F j, Y');
 
-/* ── Category href ── */
+/* ── Category ── */
 $cat_href  = ($post['category_slug'] === 'news') ? '/news' : '/blog/' . htmlspecialchars($post['category_slug']);
 $cat_label = htmlspecialchars($post['category_name'] ?? 'Blog');
+
+/* ── Share URLs ── */
+$page_url = 'https://www.phonesdukan.com' . $cat_href . '/' . htmlspecialchars($post['slug']);
+$share_fb = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($page_url);
+$share_x  = 'https://x.com/intent/post?url='               . rawurlencode($page_url) . '&text=' . rawurlencode($post['title']);
+$share_wa = 'https://api.whatsapp.com/send?text='           . rawurlencode($post['title'] . ' ' . $page_url);
+$share_li = 'https://www.linkedin.com/shareArticle?mini=true&url=' . rawurlencode($page_url) . '&title=' . rawurlencode($post['title']);
+
+/* ── Reusable share button helper ── */
+function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
+    return '
+    <a href="' . $fb . '" target="_blank" rel="noopener noreferrer" class="pv-share-btn pv-share-fb" aria-label="Share on Facebook">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+        </svg>
+    </a>
+    <a href="' . $x  . '" target="_blank" rel="noopener noreferrer" class="pv-share-btn pv-share-x"  aria-label="Share on X">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6"  x2="6"  y2="18"/>
+            <line x1="6"  y1="6"  x2="18" y2="18"/>
+        </svg>
+    </a>
+    <a href="' . $wa . '" target="_blank" rel="noopener noreferrer" class="pv-share-btn pv-share-wa" aria-label="Share on WhatsApp">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+    </a>
+    <a href="' . $li . '" target="_blank" rel="noopener noreferrer" class="pv-share-btn pv-share-li" aria-label="Share on LinkedIn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+        </svg>
+    </a>';
+}
 ?>
 <link rel="stylesheet" href="<?= url('public/assets/css/frontend/post_view.css') ?>">
 
-<!-- ══════════════════════════════════════════
-     POST HERO
-══════════════════════════════════════════ -->
+<!-- ══ STICKY SHARE SIDEBAR (desktop) ══════════════════ -->
+<div class="pv-sticky-share" id="pv-sticky-share" aria-label="Share this article">
+    <span class="pv-sticky-label">Share</span>
+    <?= pv_share_btns($share_fb, $share_x, $share_wa, $share_li) ?>
+</div>
+
+<!-- ══ HERO ════════════════════════════════════════════ -->
 <div class="pv-hero">
     <div class="pv-hero-inner">
 
-        <!-- Breadcrumb -->
         <nav class="pv-breadcrumb" aria-label="Breadcrumb">
             <a href="/">Home</a>
             <span aria-hidden="true">›</span>
@@ -152,43 +179,27 @@ $cat_label = htmlspecialchars($post['category_name'] ?? 'Blog');
             <?php endif; ?>
         </nav>
 
-        <!-- Category badge + date -->
         <div class="pv-top-meta">
-            <a href="<?= $cat_href ?>" class="pv-cat-badge"><?= $cat_label ?></a>
+            <a href="<?= $cat_href ?>" class="pv-cat-badge">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                <?= $cat_label ?>
+            </a>
             <span class="pv-meta-dot" aria-hidden="true">·</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <time class="pv-meta-date"><?= htmlspecialchars($display_date) ?></time>
         </div>
 
-        <!-- Title -->
         <h1 class="pv-title"><?= htmlspecialchars($post['title']) ?></h1>
 
-        <!-- Social share row -->
         <div class="pv-share-row">
-            <span class="pv-share-label">Share:</span>
-            <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator"
-               target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-fb" aria-label="Share on Facebook">
-                <img src="/public/assets/images/facebook_icon.svg" alt="">
-            </a>
-            <a href="https://x.com/intent/post?url=https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator&text=<?= rawurlencode($post['title']) ?>"
-               target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-x" aria-label="Share on X">
-                <img src="/public/assets/images/twitter_icon.svg" alt="">
-            </a>
-            <a href="https://api.whatsapp.com/send?text=<?= rawurlencode($post['title']) ?>+https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator"
-               target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-wa" aria-label="Share on WhatsApp">
-                <img src="/public/assets/images/whatsapp-icon.svg" alt="">
-            </a>
-            <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator&title=<?= rawurlencode($post['title']) ?>"
-               target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-li" aria-label="Share on LinkedIn">
-                <img src="/public/assets/images/linkedin-icon.svg" alt="">
-            </a>
+            <span class="pv-share-label">Share</span>
+            <?= pv_share_btns($share_fb, $share_x, $share_wa, $share_li) ?>
         </div>
 
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     FEATURED IMAGE
-══════════════════════════════════════════ -->
+<!-- ══ FEATURED IMAGE ══════════════════════════════════ -->
 <?php if (!empty($post['image_url'])): ?>
 <div class="pv-feat-wrap">
     <div class="pv-shell">
@@ -201,44 +212,87 @@ $cat_label = htmlspecialchars($post['category_name'] ?? 'Blog');
 </div>
 <?php endif; ?>
 
-<!-- ══════════════════════════════════════════
-     POST CONTENT
-══════════════════════════════════════════ -->
+<!-- ══ CONTENT ═════════════════════════════════════════ -->
 <div class="pv-content-wrap">
     <div class="pv-shell">
-        <div class="pv-body">
+
+        <!-- Table of Contents (auto-built by JS if 3+ H2s) -->
+        <div class="pv-toc" id="pv-toc" style="display:none;" aria-label="Table of contents">
+            <p class="pv-toc-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Contents
+            </p>
+            <ol class="pv-toc-list" id="pv-toc-list"></ol>
+        </div>
+
+        <div class="pv-body" id="pv-body">
             <?= $content ?>
+        </div>
+
+        <!-- Inline CTA -->
+        <div class="pv-cta-block">
+            <div class="pv-cta-text">
+                <p class="pv-cta-eyebrow">Phones Dukan</p>
+                <p class="pv-cta-heading">Looking for the best mobiles or accessories?</p>
+                <p class="pv-cta-sub">Explore the latest deals, compare prices, and shop trusted brands.</p>
+            </div>
+            <a href="<?= url() ?>" class="pv-cta-btn">Explore Deals →</a>
         </div>
 
         <!-- Bottom share strip -->
         <div class="pv-bottom-share">
-            <span class="pv-share-label">Share this post:</span>
-            <div class="pv-share-icons">
-                <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator"
-                   target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-fb" aria-label="Share on Facebook">
-                    <img src="/public/assets/images/facebook_icon.svg" alt="">
-                </a>
-                <a href="https://x.com/intent/post?url=https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator&text=<?= rawurlencode($post['title']) ?>"
-                   target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-x" aria-label="Share on X">
-                    <img src="/public/assets/images/twitter_icon.svg" alt="">
-                </a>
-                <a href="https://api.whatsapp.com/send?text=<?= rawurlencode($post['title']) ?>+https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator"
-                   target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-wa" aria-label="Share on WhatsApp">
-                    <img src="/public/assets/images/whatsapp-icon.svg" alt="">
-                </a>
-                <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.phonesdukan.com%2Fblog%2Fpta-tax-calculator&title=<?= rawurlencode($post['title']) ?>"
-                   target="_blank" rel="noopener noreferrer" class="pv-share-icon pv-share-li" aria-label="Share on LinkedIn">
-                    <img src="/public/assets/images/linkedin-icon.svg" alt="">
-                </a>
+            <span class="pv-share-label">Share this article</span>
+            <div class="pv-share-btns-row">
+                <?= pv_share_btns($share_fb, $share_x, $share_wa, $share_li) ?>
             </div>
         </div>
 
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     JSON-LD SCHEMA
-══════════════════════════════════════════ -->
+<!-- ══ RELATED BLOGS ════════════════════════════════════ -->
+<?php if (!empty($related_posts)): ?>
+<section class="pv-related-section">
+    <div class="pv-shell">
+        <h2 class="pv-related-title">Related <span>Blogs</span></h2>
+        <div class="pv-related-grid">
+            <?php foreach ($related_posts as $rp):
+                $rp_slug = ($rp['category_slug'] === 'news')
+                    ? '/news/' . htmlspecialchars($rp['slug'])
+                    : '/blog/' . htmlspecialchars($rp['category_slug']) . '/' . htmlspecialchars($rp['slug']);
+                $rp_img  = !empty($rp['image_url']) ? $rp['image_url'] : '/public/assets/images/Phones_dukan_favicon.png';
+                $rp_date = date('M j, Y', strtotime($rp['published_at']));
+            ?>
+                <article class="post-card">
+                    <a href="<?= $rp_slug ?>" class="post-thumb" tabindex="-1" aria-hidden="true">
+                        <div class="post-img-wrapper">
+                            <img src="<?= htmlspecialchars($rp_img) ?>"
+                                 alt="<?= htmlspecialchars($rp['alt_text'] ?? $rp['title']) ?>"
+                                 loading="lazy">
+                        </div>
+                        <span class="post-badge"><?= htmlspecialchars($rp['category_name'] ?? '') ?></span>
+                    </a>
+                    <div class="post-content">
+                        <p class="post-meta">
+                            <span class="post-meta-icon" aria-hidden="true">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </span>
+                            <time class="post-date"><?= $rp_date ?></time>
+                        </p>
+                        <h3 class="post-title">
+                            <a href="<?= $rp_slug ?>"><?= htmlspecialchars($rp['title']) ?></a>
+                        </h3>
+                        <p class="post-excerpt"><?= htmlspecialchars($rp['excerpt'] ?? '') ?></p>
+                        <a class="post-readmore" href="<?= $rp_slug ?>">READ MORE →</a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- ══ JSON-LD ══════════════════════════════════════════ -->
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
@@ -258,5 +312,56 @@ $cat_label = htmlspecialchars($post['category_name'] ?? 'Blog');
 </script>
 
 <script src="/public/assets/js/pta_calculator.js"></script>
+
+<!-- ══ PAGE JS ══════════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ── Table of Contents (auto-generate from H2s) ── */
+    var body    = document.getElementById('pv-body');
+    var toc     = document.getElementById('pv-toc');
+    var tocList = document.getElementById('pv-toc-list');
+
+    if (body && toc && tocList) {
+        var headings = body.querySelectorAll('h2');
+        if (headings.length >= 3) {
+            headings.forEach(function (h, i) {
+                var id = 'pv-section-' + i;
+                h.id = id;
+                var li = document.createElement('li');
+                var a  = document.createElement('a');
+                a.href = '#' + id;
+                a.textContent = h.textContent;
+                li.appendChild(a);
+                tocList.appendChild(li);
+            });
+            toc.style.display = 'block';
+        }
+    }
+
+    /* ── Wrap tables for mobile scroll ── */
+    if (body) {
+        body.querySelectorAll('table').forEach(function (table) {
+            if (!table.closest('.pv-table-scroll')) {
+                var wrapper = document.createElement('div');
+                wrapper.className = 'pv-table-scroll';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            }
+        });
+    }
+
+    /* ── Sticky share: show only when content is in view ── */
+    var sticky = document.getElementById('pv-sticky-share');
+    var contentWrap = document.querySelector('.pv-content-wrap');
+    if (sticky && contentWrap) {
+        var observer = new IntersectionObserver(function (entries) {
+            sticky.classList.toggle('pv-sticky-share--visible', entries[0].isIntersecting);
+        }, { rootMargin: '0px 0px -100px 0px' });
+        observer.observe(contentWrap);
+    }
+}());
+</script>
 
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>
