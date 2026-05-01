@@ -214,7 +214,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
 .track-content-column {
     order: 2;
-    padding: 22px 24px;
+    padding: 22px 24px 18px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(5px);
@@ -271,7 +271,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     margin: 14px 0 0;
     padding: 0;
     display: grid;
-    gap: 8px;
+    gap: 6px;
 }
 
 .track-feature-list li {
@@ -280,8 +280,13 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     gap: 12px;
     font-size: 14px;
     line-height: 1.35;
-    font-weight: 500;
-    color: #222222;
+    font-weight: 700;
+    color: #111111 !important;
+}
+
+.track-feature-list li span:last-child {
+    color: #111111 !important;
+    font-style: normal;
 }
 
 .track-feature-icon {
@@ -291,7 +296,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #111827;
+    color: #111111;
     background: #facc15;
     flex: 0 0 22px;
 }
@@ -574,7 +579,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
     .track-content-column {
         order: 1;
-        padding: 22px 24px;
+        padding: 22px 24px 18px;
     }
 
     .track-form-column {
@@ -608,7 +613,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     }
 
     .track-feature-list {
-        gap: 10px;
+        gap: 8px;
     }
 
     .track-help-links {
