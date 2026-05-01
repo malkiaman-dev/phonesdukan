@@ -1,542 +1,742 @@
-.nav-path {
-    background: #fff;
-    padding: calc(20px/3) 0;
-    font-size: 0.9em;
-    color: #666;
+/* ================================================================
+   BLOG POST VIEW — Premium Design
+   Prefix: pv- (avoids conflicts with blog listing classes)
+   Design System: #111 | #f7cf04 | #fff | #f5f5f5
+   ================================================================ */
+
+/* ================================================================
+   SHELL — narrow centered reading column
+   ================================================================ */
+.pv-shell {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
-.nav-path span {
-    margin: 0 auto;
-    max-width: 124rem;
-    padding: 0 2rem;
-    position: relative;
-    font-size: 13px;
+/* ================================================================
+   HERO SECTION
+   ================================================================ */
+.pv-hero {
+  background: #fff;
+  border-bottom: 1px solid #ebebeb;
+  padding: 32px 0 28px;
 }
 
-.nav-path a {
-    font-size: 13px;
-    color: #2b6cb0;
-    text-decoration: none;
-}
-    .nav-path a:hover {
-        text-decoration: underline;
-    }
-    .nav-path span > * {
-        margin-right: 5px;
-    }
-
-.post-page-wrapper {
-    margin: 0 auto;
-    padding: 0px;
-    background-color: #fff;
+.pv-hero-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
 }
 
-.post-content-container {
-    display: flex;
-    gap: 20px;
-    margin: 0 20px;
+/* ── Breadcrumb ── */
+.pv-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: 12px;
+  color: #999;
 }
 
-/* Post Content */
-.post-content {
-    background: #fff;
-    border-radius: 12px;
-    padding: 30px;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(0,0,0,.1);
+.pv-breadcrumb a {
+  color: #555;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
 }
 
-/* Post Meta */
-.post-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    color: var(--text-light-color);
-    font-family: Arial, sans-serif;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-light-color);
+.pv-breadcrumb a:hover {
+  color: #111;
 }
 
-.post-meta .post-date {
-    color: var(--text-color);
+.pv-breadcrumb span[aria-hidden] {
+  color: #ccc;
 }
 
-.post-meta .category-link {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color 0.3s ease;
+.pv-breadcrumb > span:last-child {
+  color: #aaa;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.post-meta .category-link:hover {
-    color: var(--primary-dark-color);
+/* ── Category badge + date ── */
+.pv-top-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
-.post-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 24px 0px;
-    font-size: 0.9rem;
-    color: var(--text-light-color);
-    font-family: Arial, sans-serif;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-light-color);
+.pv-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #f7cf04;
+  color: #111;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  transition: opacity 0.2s;
 }
 
-.post-meta .post-date {
-    color: var(--text-color);
+.pv-cat-badge:hover {
+  opacity: 0.85;
+  color: #111;
 }
 
-.post-meta span {
-    margin: 0px;
+.pv-meta-dot {
+  color: #ccc;
+  font-size: 13px;
 }
 
-.post-meta .category-link {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color 0.3s ease;
+.pv-meta-date {
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
 }
 
-.post-meta .category-link:hover {
-    color: var(--primary-dark-color);
+/* ── Post title ── */
+.pv-title {
+  margin: 0 0 20px;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #111;
+  letter-spacing: -0.02em;
 }
 
-.post-meta .social-share {
-    display: flex;
-    gap: 10px;
+/* ── Share row (hero top) ── */
+.pv-share-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.post-meta .social-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease;
+.pv-share-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.post-meta .social-share img {
-    width: 35px;
-    background-color: var(--primary-color);
-    padding: 10px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-.post-meta .social-icon:hover img {
-    background-color: var(--secondary-color); /* #fd8311 for hover background */
-    border-color: var(--secondary-dark-color); /* #e68a00 for hover border */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
-}
-
-.post-meta .social-icon:hover {
-    transform: scale(1.15);
-}
-/* Post Image Wrapper */
-.post-img-wrapper {
-    position: relative;
-    margin: 0px;
-    overflow: hidden;
-    border-radius: 8px;
-    max-width: 100%;
-    height: auto;
-    margin-bottom: 20px;
+.pv-share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  transition: background 0.2s, transform 0.15s;
+  text-decoration: none;
+  overflow: hidden;
 }
 
-/* Post Image */
-.post-img-wrapper img {
-    width: 100%;
-    height: auto;
-    display: block;
+.pv-share-icon img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
 }
 
-
-/* Post Caption */
-.post-caption {
-    font-size: 0.875rem;
-    color: #4a5568;
-    margin-top: 0.75rem;
-    font-style: italic;
-    text-align: center;
-    padding: 0 1rem;
+.pv-share-icon:hover {
+  background: #f7cf04;
+  transform: translateY(-2px);
 }
 
-/* Post Body */
-.post-body {
-    font-size: 1.125rem;
-    line-height: 1.8;
-    color: #2d3748;
-    margin-top: 1.5rem;
+/* ================================================================
+   FEATURED IMAGE
+   ================================================================ */
+.pv-feat-wrap {
+  background: #f5f5f5;
+  padding: 28px 0;
 }
 
-/* General table styling */
+.pv-feat-fig {
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  line-height: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+}
+
+.pv-feat-fig img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ================================================================
+   CONTENT AREA
+   ================================================================ */
+.pv-content-wrap {
+  background: #fff;
+  padding: 40px 0 56px;
+}
+
+/* ── Post body typography ── */
+.pv-body {
+  font-family: "Inter", Georgia, serif;
+  font-size: 16px;
+  line-height: 1.85;
+  color: #2d3748;
+}
+
+.pv-body > * + * {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+.pv-body p {
+  margin: 0 0 20px;
+  font-size: 16px;
+  line-height: 1.85;
+  color: #333;
+}
+
+/* Headings */
+.pv-body h1 {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 800;
+  color: #111;
+  margin: 40px 0 16px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.pv-body h2 {
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 700;
+  color: #111;
+  margin: 36px 0 14px;
+  line-height: 1.25;
+  border-left: 3px solid #f7cf04;
+  padding-left: 14px;
+}
+
+.pv-body h3 {
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 700;
+  color: #111;
+  margin: 28px 0 12px;
+  line-height: 1.3;
+}
+
+.pv-body h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 24px 0 10px;
+}
+
+/* First heading after start — less top margin */
+.pv-body > h2:first-child,
+.pv-body > h3:first-child {
+  margin-top: 0;
+}
+
+/* Lists */
+.pv-body ul,
+.pv-body ol {
+  margin: 0 0 20px 0;
+  padding-left: 28px;
+}
+
+.pv-body ul li,
+.pv-body ol li {
+  margin-bottom: 8px;
+  line-height: 1.7;
+  color: #333;
+}
+
+.pv-body ul {
+  list-style: disc;
+}
+
+.pv-body ol {
+  list-style: decimal;
+}
+
+/* Links */
+.pv-body a {
+  color: #111;
+  text-decoration: underline;
+  text-decoration-color: #f7cf04;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.pv-body a:hover {
+  color: #f7cf04;
+}
+
+/* Bold / italic */
+.pv-body strong,
+.pv-body b {
+  font-weight: 700;
+  color: #111;
+}
+
+.pv-body em,
+.pv-body i {
+  font-style: italic;
+}
+
+/* Blockquote */
+.pv-body blockquote {
+  margin: 28px 0;
+  padding: 18px 22px;
+  background: #fffbe6;
+  border-left: 4px solid #f7cf04;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: #444;
+}
+
+.pv-body blockquote p {
+  margin: 0;
+}
+
+/* Inline code */
+.pv-body code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: "Courier New", monospace;
+  color: #333;
+}
+
+/* Code blocks */
+.pv-body pre {
+  background: #1e1e1e;
+  color: #f8f8f8;
+  padding: 20px;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin: 24px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pv-body pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Images inside content */
+.pv-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  margin: 24px auto;
+}
+
+/* Gallery images from shortcodes */
+.pv-inline-fig {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.pv-inline-fig img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+  display: inline-block;
+  margin: 0 auto;
+}
+
+/* Tables */
+.pv-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 15px;
+}
+
+.pv-body table th {
+  background: #f5f5f5;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 700;
+  color: #111;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.pv-body table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #ebebeb;
+  color: #333;
+}
+
+.pv-body table tr:hover td {
+  background: #fafafa;
+}
+
+/* HR */
+.pv-body hr {
+  border: none;
+  border-top: 1px solid #ebebeb;
+  margin: 36px 0;
+}
+
+/* ── Tax table (existing class) ── */
 .tax-table {
-    width: 100%;
-    max-width: 600px; /* Limits width for readability */
-    margin: 10px auto; /* Minimal margin */
-    border-collapse: collapse;
-    border: 2px solid #eeeeee;
-    font-family: Arial, sans-serif;
-    background-color: #fff; /* Pure white background */
+  width: 100%;
+  max-width: 100%;
+  margin: 20px 0;
+  border-collapse: collapse;
+  border: 1px solid #ebebeb;
+  font-size: 14px;
 }
 
-/* Table header */
 .tax-table thead {
-    background-color: #f0f0f0;
-    border-bottom: 2px solid #eee; /* Light gray border */
+  background: #f5f5f5;
 }
 
 .tax-table th {
-    padding: 10px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #000; /* Black text */
-    text-align: left;
+  padding: 10px 14px;
+  font-weight: 700;
+  color: #111;
+  text-align: left;
 }
 
-/* Table body */
 .tax-table tbody tr {
-    border-bottom: 1px solid #eee; /* Light gray separator */
+  border-bottom: 1px solid #ebebeb;
+}
+
+.tax-table td {
+  padding: 10px 14px;
+  color: #333;
 }
 
 table tr:nth-child(even) {
-    background-color: #f0f0f0;
+  background: #fafafa;
 }
 
-
-.tax-table td {
-    padding: 10px;
-    font-size: 14px;
-    color: #333; /* Dark gray text for readability */
-}
-
-/* Remove hover effects for simplicity */
 .tax-table tbody tr:hover {
-    background-color: #fff; /* No hover color change */
+  background: #fffbe6;
 }
 
-
-/* Ensure tables stack cleanly */
 .tax-tables {
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Minimal spacing between tables */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.table-container {
-    width: 100%;
-}
-
-/* Highlight for calculator interaction */
-.tax-table tbody tr.highlight {
-    background-color: #f5f5f5; /* Very light gray for highlight */
-}
-
+/* ── PTA Calculator ── */
 .pta-calculator {
-    background-color: var(--background-light-color); /* Light grey for a clean, distinct section */
-    border: 2px solid var(--primary-color); /* Dark blue border for professionalism and emphasis */
-    border-radius: 12px; /* Rounded corners for a modern look */
-    padding: 24px; /* Ample padding for spacious, user-friendly layout */
-    margin: 20px auto; /* Centered with balanced spacing */
-    max-width: 600px; /* Fixed width for readability on all devices */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth and focus */
-    text-align: center; /* Center-align content for symmetry */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
-  }
-  
-  .pta-calculator:hover {
-    transform: translateY(-5px); /* Slight lift on hover to draw attention */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover for interactivity */
-  }
-  
-  
-  .pta-calculator .exchange-rate-info {
-    color: var(--text-color); /* Standard text color for readability */
-    font-size: 1rem; /* Slightly smaller for balance */
-    margin-bottom: 20px; /* Space before form */
-  }
-  
-  .pta-calculator .calculator-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px; /* Consistent spacing between form elements */
-  }
-  
-  .pta-calculator select,
-  .pta-calculator input[type="number"] {
-    width: 50%;
-    border: 1px solid var(--border-color); /* Light grey border for inputs */
-    border-radius: 8px; /* Rounded input fields */
-    padding: 12px; /* Comfortable padding for usability */
-    font-size: 1rem; /* Readable text size */
-    background-color: var(--background-color); /* White background for inputs */
-    color: var(--text-color); /* Dark text for contrast */
-    transition: border-color 0.3s ease; /* Smooth border transition */
-  }
-  
-  .pta-calculator select:focus,
-  .pta-calculator input[type="number"]:focus {
-    border-color: var(--secondary-color); /* Orange border on focus for visibility */
-    outline: none; /* Remove default outline */
-  }
-  
-  .pta-calculator .error-message {
-    color: #d32f2f; /* Red for error visibility */
-    font-size: 0.9rem; /* Slightly smaller for errors */
-    margin-top: 8px;
-  }
-  .passport-tax, .cnic-tax {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  background: #f9f9f9;
+  border: 2px solid #f7cf04;
+  border-radius: 14px;
+  padding: 28px;
+  margin: 32px 0;
+  max-width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  text-align: center;
 }
 
-  .pta-calculator .results {
-    background-color: var(--background-color); /* White background for results */
-    border: 1px solid var(--border-light-color); /* Light border for results */
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 20px;
-  }
-  
-  .pta-calculator .results p {
-    color: var(--text-dark-color); /* Dark text for result emphasis */
-    font-size: 15px; /* Slightly larger for clarity */
-    margin: 8px 0; /* Balanced spacing */
-  }
-  
-  .pta-calculator .results span {
-    margin: 0px;
-    color: var(--secondary-color); /* Orange for tax amounts to stand out */
-    font-weight: bold; /* Bold for emphasis */
-  }
-  
+.pta-calculator h2 {
+  border-left: none !important;
+  padding-left: 0 !important;
+  font-size: 18px;
+  margin-top: 0;
+}
 
-.pta-calculator .custom-price-wrapper.hidden {
-    display: none;
+.pta-calculator:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+}
+
+.pta-calculator .exchange-rate-info {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.pta-calculator .calculator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.pta-calculator select,
+.pta-calculator input[type="number"] {
+  width: 100%;
+  max-width: 360px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 15px;
+  background: #fff;
+  color: #111;
+  transition: border-color 0.2s;
+}
+
+.pta-calculator select:focus,
+.pta-calculator input[type="number"]:focus {
+  border-color: #f7cf04;
+  outline: none;
+}
+
+.pta-calculator .results {
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  width: 100%;
+  max-width: 360px;
+  text-align: left;
+}
+
+.pta-calculator .results p {
+  font-size: 14px;
+  margin: 8px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pta-calculator .results span {
+  color: #111;
+  font-weight: 700;
+  margin: 0;
 }
 
 .pta-calculator .error-message {
-    color: #e53e3e;
-    font-size: 0.875rem;
-    margin-top: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 8px;
 }
 
+.passport-tax,
+.cnic-tax {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── CNIC Check ── */
 .cnic-check .content-area {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #f9f9f9;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
 }
 
 .cnic-check .cnic-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-width: 400px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
 .cnic-check label {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-    text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
 }
 
 .cnic-check input[type="text"] {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease;
+  padding: 11px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
 }
 
 .cnic-check input[type="text"]:focus {
-    border-color: #007bff;
-    outline: none;
+  border-color: #f7cf04;
+  outline: none;
 }
 
 .cnic-check button {
-    padding: 12px;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease;
+  padding: 12px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .cnic-check button:hover {
-    background: #0056b3;
+  background: #333;
 }
 
 .cnic-check .error-message {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #d32f2f;
-    text-align: center;
+  font-size: 13px;
+  color: #dc2626;
+  text-align: center;
 }
 
 .cnic-check p {
-    font-size: 14px;
-    color: #555;
-    margin-top: 10px;
-    text-align: center;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
 }
 
-.cnic-check p strong {
-    color: #333;
+/* ── Bottom share strip ── */
+.pv-bottom-share {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0 0;
+  margin-top: 40px;
+  border-top: 1px solid #ebebeb;
+  flex-wrap: wrap;
 }
 
+.pv-share-icons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ================================================================
+   NAV PATH (existing breadcrumb, may still be rendered)
+   ================================================================ */
+.nav-path {
+  display: none; /* Hidden — replaced by pv-breadcrumb inside hero */
+}
+
+/* ================================================================
+   LEGACY: Gallery image wrapper (old class names kept for compat)
+   ================================================================ */
 .gallery-post-wrapper {
-    display: flex;
-    justify-content: center;
+  margin: 28px 0;
+  display: flex;
+  justify-content: center;
 }
 
 img.gallery-image {
-    overflow: hidden;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
 }
-/* Responsive Design */
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
 @media (max-width: 768px) {
-    .post-page-wrapper {
-        padding: 0px;
-    }
+  .pv-hero {
+    padding: 24px 0 20px;
+  }
 
-    .post-content {
-        padding: 5px 15px;
-        width: 100% !important;
-        border: none;
-         margin: 0px;
-    }
+  .pv-hero-inner,
+  .pv-shell {
+    padding: 0 16px;
+  }
 
-    .post-content-container {
-        gap: 5px;
-        margin: 0px;
-    }
+  .pv-title {
+    font-size: clamp(20px, 6vw, 26px);
+  }
 
-    .post-body {
-        font-size: 1rem;
-    }
+  .pv-feat-wrap {
+    padding: 16px 0;
+  }
 
-    .nav-path span {
-        padding: 4px 10px;
-        margin: 0px;
-    }
-    
-    .nav-path {
-        display: flex;
-        padding: 0px;
-    }
-    
-    .nav-path span > * {
-        margin: 0px;
-    }
-    .tax-table {
-        margin: 5px 0; /* Minimal margin */
-    }
+  .pv-feat-fig {
+    border-radius: 10px;
+  }
 
-    .tax-table thead {
-        display: none; /* Hide header on mobile */
-    }
+  .pv-content-wrap {
+    padding: 28px 0 40px;
+  }
 
-    .tax-table tbody,
-    .tax-table tr,
-    .tax-table td {
-        display: block;
-        width: 100%;
-    }
+  .pv-body {
+    font-size: 15px;
+  }
 
-    .tax-table tr {
-        margin-bottom: 8px;
-        border-bottom: 1px solid #eee; /* Thin gray separator */
-        background-color: #fff;
-    }
+  .pv-body h2 {
+    font-size: 18px;
+    padding-left: 12px;
+  }
 
-    .tax-table td {
-        padding: 6px 10px; /* Minimal padding */
-        font-size: 13px; /* Slightly smaller font */
-        text-align: left;
-        position: relative;
-    }
+  .pv-body h3 {
+    font-size: 16px;
+  }
 
-    /* Simple labels */
-    .tax-table td:before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #333; /* Dark gray labels */
-        display: inline-block;
-        width: 35%; /* Narrow labels */
-        font-size: 12px; /* Small label font */
-    }
+  .pta-calculator {
+    padding: 20px 16px;
+  }
 
-    .tax-table td:nth-child(1):before {
-        content: "Value (USD): ";
-    }
+  .pta-calculator select,
+  .pta-calculator input[type="number"] {
+    max-width: 100%;
+    font-size: 14px;
+  }
 
-    .tax-table td:nth-child(2):before {
-        content: "Tax (PKR): ";
-    }
-    .pta-calculator {
-        max-width: 100%; /* Responsive width for smaller screens */
-        padding: 16px; /* Slightly less padding on mobile */
-      }
-    
-      .pta-calculator .exchange-rate-info {
-        font-size: 0.9rem; /* Slightly smaller text on mobile */
-      }
+  .tax-table thead {
+    display: none;
+  }
+
+  .tax-table tbody,
+  .tax-table tr,
+  .tax-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .tax-table tr {
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ebebeb;
+  }
+
+  .tax-table td {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .tax-table td:nth-child(1)::before { content: "Value (USD): "; font-weight: 700; color: #333; }
+  .tax-table td:nth-child(2)::before { content: "Tax (PKR): ";   font-weight: 700; color: #333; }
+
+  .pv-bottom-share {
+    gap: 10px;
+  }
 }
 
 @media (max-width: 480px) {
-    .post-content h1 {
-        margin: 10px 0;
-    }
-    .post-meta .separator {
-        display: none; /* Hide pipe separators */
-    }
-    .post-meta {
-        font-size: 0.85rem;
-        gap: 0.5rem;
-        flex-direction: column;
-        margin: 5px 0px;
-    }
+  .pv-breadcrumb > span:last-child {
+    max-width: 160px;
+  }
 
-    .post-img-wrapper {
-        margin: 0px;
-    }
+  .pv-share-row {
+    gap: 6px;
+  }
 
-    .post-caption {
-        font-size: 0.8rem;
-    }
+  .pv-share-icon {
+    width: 30px;
+    height: 30px;
+  }
 
-    .pta-calculator {
-        padding: 16px;
-    }
-
-    .pta-calculator select,
-    .pta-calculator input[type="number"] {
-        width: 100%;
-        font-size: 0.75rem;
-        padding: 6px;
-    }
-
-    .results {
-        margin: 0px !important;
-        padding: 15px;
-    }
-
-    .results strong {
-        font-size: 13px;
-    }
-}
-
-/* SEO Meta Tags Styling (Optional for Visual Debugging) */
-head {
-    display: none; /* Ensure head content is not visible */
+  .pv-share-icon img {
+    width: 15px;
+    height: 15px;
+  }
 }
