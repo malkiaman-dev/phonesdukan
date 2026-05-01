@@ -101,7 +101,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         </section>
 
         <section class="track-content-column" aria-label="Order tracking guidance">
-            <p class="track-kicker">Order Tracking</p>
             <h1 class="track-heading"><span>Track</span> Your Order Easily</h1>
             <p class="track-subtext">
                 Enter your email and order ID to check real-time order status, shipping updates, and delivery progress.
@@ -156,8 +155,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <span>Works for all orders</span>
                 </li>
             </ul>
-
-            <p class="track-trust">Trusted by 10,000+ customers across Pakistan</p>
         </section>
     </div>
 </div>
