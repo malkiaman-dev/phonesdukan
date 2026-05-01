@@ -71,7 +71,6 @@ foreach ($rawProducts as $product) {
 
 <section class="sw-hero">
     <div class="sw-container sw-hero-inner">
-        <p class="sw-hero-eyebrow">Phones Dukan Smartwatch Collection</p>
         <h1 class="sw-hero-title"><span>Smart Watch</span> Prices in Pakistan</h1>
         <p class="sw-hero-sub">Explore the latest smartwatch deals in Pakistan with trusted pricing, premium models, and budget-friendly options for every lifestyle.</p>
     </div>
