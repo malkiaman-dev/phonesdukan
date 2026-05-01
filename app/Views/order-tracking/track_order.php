@@ -335,7 +335,11 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-field-group {
-    margin-bottom: 13px;
+    margin-bottom: 14px;
+}
+
+.track-field-group:last-of-type {
+    margin-bottom: 16px;
 }
 
 .track-field-group label {
@@ -400,7 +404,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-helper-text {
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     font-size: 12px;
     color: #6b7280;
 }
@@ -415,7 +419,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -453,7 +457,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-help-links {
-    margin-top: 18px;
+    margin-top: 22px;
     border-top: 1px solid #edf1f6;
     padding-top: 16px;
     display: flex;
