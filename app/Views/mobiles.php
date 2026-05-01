@@ -188,6 +188,7 @@ $totalBrands   = count($brandList);
                             draggable="false"
                             onerror="this.style.display='none'"
                         >
+                        <span class="mob-brand-card-text">View all mobiles</span>
                     </a>
                 <?php endforeach; ?>
             </div>
