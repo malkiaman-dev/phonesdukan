@@ -254,7 +254,7 @@ foreach ($paragraphs as $index => $para) {
                         <div class="stock-info">
                             <span class="availability-label">Availability</span>
                             <span class="stock-status <?php echo htmlspecialchars($availabilityClass); ?>">
-                                <?php echo htmlspecialchars($availabilityText); ?>
+                                <span class="stock-dot"></span><?php echo htmlspecialchars($availabilityText); ?>
                             </span>
                         </div>
                     </div>
@@ -267,67 +267,9 @@ foreach ($paragraphs as $index => $para) {
                 $showLocationMessage = (isset($product['category_slug']) && strtolower($product['category_slug']) === 'mobiles') && !isset($isComingSoon);
                 error_log("Location Message Check - Product ID: {$product['product_id']}, Category: " . ($product['category_slug'] ?? 'unset') . ", Coming Soon: " . (isset($isComingSoon) ? ($isComingSoon ? 'true' : 'false') : 'unset'));
                 if ($showLocationMessage): ?>
-                    <p class="location-restriction-msg" style="color: #ff6200; font-weight: bold; margin-bottom: 15px;">
+                    <p class="location-restriction-msg">
                         This product is available for delivery only in Rawalpindi and Islamabad.
                     </p>
-                <?php endif; ?>
-                <?php
-                if (!isset($product['category_slug']) || strtolower($product['category_slug']) !== 'mobiles'):
-                    // Cache directory and file for sold count
-                    $cacheDir = dirname(__DIR__, 3) . '/cache/sold_counts/';
-                    $cacheFile = $cacheDir . 'sold_count_' . $product['product_id'] . '.json';
-                    $soldCount = rand(5, 20); // Default random count
-                    $cacheDuration = 3 * 3600; // 3 hours in seconds
-
-                    // Ensure cache directory exists and is writable
-                    if (!is_dir($cacheDir)) {
-                        if (!mkdir($cacheDir, 0755, true) || !is_writable($cacheDir)) {
-                            error_log("Cannot create or write to cache directory: $cacheDir");
-                            // Use default sold count and skip writing to cache
-                        }
-                    } else {
-                        // Check if directory is writable
-                        if (!is_writable($cacheDir)) {
-                            error_log("Cache directory is not writable: $cacheDir");
-                            // Use default sold count and skip writing to cache
-                        } else {
-                            // Check cache file
-                            if (file_exists($cacheFile) && is_readable($cacheFile)) {
-                                $cacheData = json_decode(file_get_contents($cacheFile), true);
-                                if ($cacheData && isset($cacheData['count']) && isset($cacheData['timestamp']) && (time() - $cacheData['timestamp'] < $cacheDuration)) {
-                                    $soldCount = $cacheData['count'];
-                                } else {
-                                    // Cache expired or invalid, generate new count
-                                    $soldCount = rand(5, 20);
-                                    if (is_writable($cacheDir)) {
-                                        if (@file_put_contents($cacheFile, json_encode(['count' => $soldCount, 'timestamp' => time()])) === false) {
-                                            error_log("Failed to write to cache file: $cacheFile");
-                                            // Use default sold count
-                                        }
-                                    } else {
-                                        error_log("Cache directory is not writable for new file: $cacheDir");
-                                    }
-                                }
-                            } else {
-                                // No cache file, create new if directory is writable
-                                if (is_writable($cacheDir)) {
-                                    if (@file_put_contents($cacheFile, json_encode(['count' => $soldCount, 'timestamp' => time()])) === false) {
-                                        error_log("Failed to create cache file: $cacheFile");
-                                        // Use default sold count
-                                    }
-                                } else {
-                                    error_log("Cache directory is not writable for new file: $cacheDir");
-                                    // Use default sold count
-                                }
-                            }
-                        }
-                    }
-                ?>
-                    <div class="product-stats sold-block sold-style" data-product-id="<?php echo htmlspecialchars($product['product_id']); ?>">
-                        <span class="sold-icon"></span>
-                        <span class="sold-count"><?php echo $soldCount; ?></span>
-                        <span class="sold-message">Items sold in last 24 hours</span>
-                    </div>
                 <?php endif; ?>
                 <?php if ($productAvailability === 'instock' && $stockQuantity > 0 && $validPrice > 0): ?>
                     <div class="bulk-cta-grid slider slider--mobile">
@@ -356,12 +298,13 @@ foreach ($paragraphs as $index => $para) {
 $cartFormCondition = $productAvailability === 'instock' && $stockQuantity > 0 && ($validPrice > 0 || !empty($productAttributes));
 error_log("Cart form condition: " . ($cartFormCondition ? 'true' : 'false') . ", Availability: $productAvailability, Stock: $stockQuantity, Valid Price: $validPrice, Attributes: " . (empty($productAttributes) ? 'none' : 'present'));
 if ($cartFormCondition): ?>
-             <!-- Payment Method Selection -->
+            <!-- Payment Method Selection -->
     <div class="payment-method-selection">
-            <button type="button" class="payment-btn cod active" data-method="cod">COD</button>
-            <button type="button" class="payment-btn prepaid" data-method="prepaid">Prepaid (6% Off)</button>
-        </div>
-            <!-- Desktop Cart Form -->
+        <button type="button" class="payment-btn cod active" data-method="cod">COD</button>
+        <button type="button" class="payment-btn prepaid" data-method="prepaid">Prepaid · Save 6%</button>
+    </div>
+
+    <!-- Desktop Cart Form -->
     <div class="cart-form desktop-cart-form">
         <div class="quantity-container">
             <button type="button" class="quantity-btn minus">−</button>
@@ -369,9 +312,9 @@ if ($cartFormCondition): ?>
             <button type="button" class="quantity-btn plus">+</button>
         </div>
 
-        <button class="add-to-cart" 
-                data-product-id="<?php echo $product['product_id']; ?>" 
-                data-unit-price="<?php echo $validPrice; ?>" 
+        <button class="add-to-cart"
+                data-product-id="<?php echo $product['product_id']; ?>"
+                data-unit-price="<?php echo $validPrice; ?>"
                 data-attribute-value=""
                 data-payment-method="cod"
                 id="add-to-cart-btn-desktop">
@@ -381,19 +324,41 @@ if ($cartFormCondition): ?>
         <button class="buy-now" id="buy-now-desktop">Buy Now</button>
     </div>
 
+    <!-- Trust Signals -->
+    <div class="trust-signals">
+        <div class="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <span>Fast Delivery</span>
+        </div>
+        <div class="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Warranty</span>
+        </div>
+        <div class="trust-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
+            </svg>
+            <span>Easy Returns</span>
+        </div>
+    </div>
+
     <!-- Sticky Cart for Mobile -->
     <?php if ($productAvailability === 'instock' && $validPrice > 0): ?>
         <div class="sticky-cart-wrapper">
             <div class="cart-form mobile-cart-form">
                 <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product['product_id']); ?>">
                 <div class="quantity-wrapper">
-                    <button type="button" class="quantity-btn minus">-</button>
+                    <button type="button" class="quantity-btn minus">−</button>
                     <input type="number" id="quantity-mobile" name="quantity" value="1" min="1" max="<?php echo $stockQuantity; ?>" readonly>
                     <button type="button" class="quantity-btn plus">+</button>
                 </div>
-                <button type="button" id="add-to-cart-btn-mobile" class="btn add-to-cart" 
-                        data-product-id="<?php echo htmlspecialchars($product['product_id']); ?>" 
-                        data-unit-price="<?php echo $validPrice; ?>" 
+                <button type="button" id="add-to-cart-btn-mobile" class="btn add-to-cart"
+                        data-product-id="<?php echo htmlspecialchars($product['product_id']); ?>"
+                        data-unit-price="<?php echo $validPrice; ?>"
                         data-attribute-value="<?php echo isset($selectedAttributeValue) ? htmlspecialchars($selectedAttributeValue) : ''; ?>"
                         data-payment-method="cod">
                     Add to Cart
@@ -404,17 +369,12 @@ if ($cartFormCondition): ?>
     <?php endif; ?>
 <?php else: ?>
     <?php if ($productAvailability !== 'instock'): ?>
-        <p class="status-msg" style="color: red; font-weight: bold;">
-            <?php echo $availabilityText; ?>
+        <p class="status-msg">
+            <?php echo htmlspecialchars($availabilityText); ?>
         </p>
     <?php endif; ?>
 <?php endif; ?>
 
-                <div class="product-stats viewers-block viewers-style" data-product-id="<?php echo htmlspecialchars($product['product_id']); ?>">
-                    <span class="viewers-icon"></span>
-                    <span class="viewers-count"><?php echo rand(10, 100); ?></span>
-                    <span class="viewers-message">People watching <?php echo htmlspecialchars($product['product_name']); ?> now!</span>
-                </div>
             </div>
         </div>
     </div>
@@ -424,12 +384,9 @@ if ($cartFormCondition): ?>
 
 <div class="custom-tabs">
     <ul class="custom-tab-titles">
-        <li class="custom-tab-title description active" data-tab="tab-description">
-            <h2 class="desc">Description</h2>
-        </li>
-        <li class="custom-tab-title specification" data-tab="tab-specification">
-            <h2 class="spec">Specification</h2>
-        </li>
+        <li class="custom-tab-title description active" data-tab="tab-description">Description</li>
+        <li class="custom-tab-title specification" data-tab="tab-specification">Specification</li>
+        <li class="custom-tab-title reviews" data-tab="tab-reviews">Reviews (<?php echo $reviewCount; ?>)</li>
     </ul>
 
     <div class="custom-tab-content">
@@ -439,24 +396,23 @@ if ($cartFormCondition): ?>
         <div id="tab-specification" class="custom-tab specification" style="display: none;">
             <?php echo !empty($product['short_description']) ? $product['short_description'] : '<p>No specification available</p>'; ?>
         </div>
+        <div id="tab-reviews" class="custom-tab reviews" style="display: none;">
+            <div class="reviews-section-wrapper">
+                <div class="review-form-box">
+                    <?php
+                    $product_id = $product['product_id'] ?? 0;
+                    require_once __DIR__ . '/reviews_form.php';
+                    ?>
+                </div>
+                <div class="review-display-box">
+                    <?php require_once __DIR__ . '/reviews_display.php'; ?>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <?php include_once (__DIR__ . '/../ad/display3.php'); ?>
-
-<!-- Reviews -->
-<div class="reviews-section-wrapper">
-    <div class="review-form-box">
-        <?php
-        $product_id = $product['product_id'] ?? 0;
-        require_once __DIR__ . '/reviews_form.php';
-        ?>
-    </div>
-
-    <div class="review-display-box">
-        <?php require_once __DIR__ . '/reviews_display.php'; ?>
-    </div>
-</div>
 
 <!-- Bulk Inquiry Popup -->
 <div class="bulk-inquiry-overlay" aria-hidden="true">

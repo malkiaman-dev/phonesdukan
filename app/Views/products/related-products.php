@@ -8,46 +8,50 @@
             <div class="product-grid-wrapper">
                 <?php foreach ($relatedProducts as $product): ?>
                     <?php
-                    // Construct product URL
                     $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
                         . htmlspecialchars($product['brand_slug']) . '/'
                         . htmlspecialchars($product['product_slug']);
 
-                    // Set product image with fallback
-                    $product_image = !empty($product['image_url']) ? $product['image_url'] : '/public/assets/images/Phones_dukan_favicon.png';
+                    $product_image = !empty($product['image_url'])
+                        ? $product['image_url']
+                        : '/public/assets/images/Phones_dukan_favicon.png';
 
-                    // Format product price
-                    $product_price = '';
-
-                    if (!empty($product['sale_price']) && !empty($product['regular_price'])) {
-                        $product_price = '<span class="r-regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> '
-                            . '<span class="r-sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                    } elseif (!empty($product['regular_price'])) {
-                        $product_price = '<span class="regular-price new-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-                    } elseif (!empty($product['sale_price'])) {
-                        $product_price = '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                    } else {
-                        $product_price = '<span>Price: Not available</span>';
-                    }
-
+                    $regular = !empty($product['regular_price']) ? (float)$product['regular_price'] : 0;
+                    $sale    = !empty($product['sale_price'])    ? (float)$product['sale_price']    : 0;
+                    $hasDiscount = $sale > 0 && $regular > $sale;
+                    $discountPct = $hasDiscount ? round((($regular - $sale) / $regular) * 100) : 0;
                     ?>
                     <div class="product-card">
-                        <a href="<?php echo $product_url; ?>">
-                            <div class="product-img-wrapper">
-                                <div class="product-img">
-                                    <img src="<?php echo $product_image; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
-                                </div>
+                        <?php if ($hasDiscount): ?>
+                            <span class="na-badge"><?php echo $discountPct; ?>% OFF</span>
+                        <?php endif; ?>
+
+                        <a href="<?php echo $product_url; ?>" class="na-img-link">
+                            <div class="product-img">
+                                <img src="<?php echo htmlspecialchars($product_image); ?>"
+                                     alt="<?php echo htmlspecialchars($product['product_name']); ?>"
+                                     loading="lazy">
                             </div>
                         </a>
+
                         <h3 class="product-title">
                             <a href="<?php echo $product_url; ?>">
                                 <?php echo htmlspecialchars($product['product_name']); ?>
                             </a>
                         </h3>
-                        <div class="r-product-price">
-    <?php echo $product_price; ?>
-</div>
 
+                        <div class="r-product-price">
+                            <?php if ($hasDiscount): ?>
+                                <span class="r-regular-price old-price">Rs. <?php echo number_format($regular); ?></span>
+                                <span class="r-sale-price new-price">Rs. <?php echo number_format($sale); ?></span>
+                            <?php elseif ($regular > 0): ?>
+                                <span class="regular-price new-price">Rs. <?php echo number_format($regular); ?></span>
+                            <?php elseif ($sale > 0): ?>
+                                <span class="sale-price new-price">Rs. <?php echo number_format($sale); ?></span>
+                            <?php else: ?>
+                                <span style="font-size:13px;color:#999;">Price not available</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>

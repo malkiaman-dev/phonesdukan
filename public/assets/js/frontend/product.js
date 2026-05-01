@@ -139,7 +139,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function scrollToReviews() {
-        document.querySelector('.reviews-section-wrapper').scrollIntoView({ behavior: 'smooth' });
+        const reviewTabTitle = document.querySelector('.custom-tab-title[data-tab="tab-reviews"]');
+        const reviewTab = document.getElementById('tab-reviews');
+        if (reviewTabTitle && reviewTab) {
+            document.querySelectorAll('.custom-tab-title').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.custom-tab').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+            reviewTabTitle.classList.add('active');
+            reviewTab.classList.add('active');
+            reviewTab.style.display = 'block';
+        }
+        const el = document.querySelector('.reviews-section-wrapper') || document.querySelector('.custom-tabs');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
     const addToCartButtons = {
