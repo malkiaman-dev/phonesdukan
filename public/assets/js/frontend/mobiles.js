@@ -55,8 +55,7 @@
         });
         var allCards = Array.from(track.children); // 21 total
 
-        var gap      = 14;
-        var perView  = 5;
+        var gap      = 16;
         var cardW    = 0;
         var curIdx   = total; // points to first original card
         var autoTimer  = null;
@@ -68,22 +67,10 @@
         var touchStartX = 0;
         var touchOff    = 0;
 
-        function calcPerView() {
-            var w = wrap.offsetWidth;
-            if (w < 480) return 2;
-            if (w < 640) return 3;
-            if (w < 900) return 4;
-            return 5;
-        }
-
         function setCardWidths() {
-            perView = calcPerView();
-            cardW   = Math.floor((wrap.offsetWidth - gap * (perView - 1)) / perView);
-            allCards.forEach(function (c) {
-                c.style.width    = cardW + 'px';
-                c.style.minWidth = cardW + 'px';
-                c.style.maxWidth = cardW + 'px';
-            });
+            /* Cards have fixed CSS width; read it from the first rendered card */
+            var first = allCards[0];
+            cardW = first ? first.offsetWidth : 150;
         }
 
         function offsetOf(idx) { return idx * (cardW + gap); }

@@ -171,19 +171,23 @@ $totalBrands   = count($brandList);
         <h2 class="mob-brands-title">Shop by <span>Brand</span></h2>
         <div class="mob-brands-carousel-wrap" id="mobBrandsCarousel">
             <div class="mob-brands-track" id="mobBrandsTrack">
-                <?php
-                $brandInitials = [
-                    'samsung' => 'S', 'infinix' => 'I', 'oppo' => 'O',
-                    'vivo'    => 'V', 'xiaomi'  => 'X', 'tecno' => 'T', 'realme' => 'R',
-                ];
-                foreach ($brandList as $slug => $name):
-                    $initial = $brandInitials[$slug] ?? strtoupper($slug[0]);
+                <?php foreach ($brandList as $slug => $name):
+                    $logoSrc  = url('public/assets/images/' . $slug . '_logo.webp');
+                    $safeSlug = htmlspecialchars($slug, ENT_QUOTES, 'UTF-8');
+                    $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
                 ?>
-                    <a href="/mobiles/<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>"
-                       class="mob-brand-card">
-                        <div class="mob-brand-card-icon"><?= htmlspecialchars($initial, ENT_QUOTES, 'UTF-8') ?></div>
-                        <span class="mob-brand-card-name"><?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?></span>
-                        <span class="mob-brand-card-sub">View all models</span>
+                    <a href="<?= url('mobiles/' . $safeSlug) ?>"
+                       class="mob-brand-card"
+                       draggable="false">
+                        <img
+                            src="<?= htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8') ?>"
+                            alt="<?= $safeName ?>"
+                            class="mob-brand-logo"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            onerror="this.style.display='none'"
+                        >
                     </a>
                 <?php endforeach; ?>
             </div>
