@@ -1304,16 +1304,15 @@ li.custom-tab-title h2 {
 }
 
 .related-product .category-header h2 {
-  font-size: 22px;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(22px, 3vw, 28px);
   font-weight: 700;
   color: #111;
+  letter-spacing: -0.02em;
 }
 
 .related-product .category-header h2 span {
   color: #f7cf04;
-  background: #111;
-  padding: 0 6px;
-  border-radius: 4px;
 }
 
 .product-grid-container {
@@ -1753,19 +1752,54 @@ li.custom-tab-title h2 {
     gap: 0;
   }
 
-  /* Related products — 2 columns on tablet */
+  /* Related products — 2 columns on tablet/mobile */
   .related-product {
     padding: 20px 14px 32px;
   }
 
-  /* 2-column: gap = 10px * 1 = 10px */
   .product-grid-wrapper {
-    gap: 10px;
+    gap: 12px;
   }
 
+  /* 2-column layout: matches homepage 768px breakpoint */
   .na-card {
-    flex: 0 0 calc((100% - 10px) / 2);
-    max-width: calc((100% - 10px) / 2);
+    flex: 0 0 calc((100% - 12px) / 2);
+    max-width: calc((100% - 12px) / 2);
+  }
+
+  /* Tighter card body — matches homepage mobile */
+  .related-product .na-body {
+    padding: 10px 12px 12px;
+    gap: 6px;
+  }
+
+  .related-product .na-name,
+  .related-product .na-name a {
+    font-size: 13px;
+  }
+
+  /* Buttons as grid — matches homepage 768px behaviour exactly */
+  .related-product .na-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .related-product .na-actions .na-btn {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 34px;
+    font-size: 10px;
+    letter-spacing: -0.02em;
+    padding-inline: 6px;
+  }
+
+  .related-product .na-actions .na-btn--soldout {
+    grid-column: 1 / -1;
   }
 
   /* Bulk inquiry form */
@@ -1793,24 +1827,19 @@ li.custom-tab-title h2 {
   }
 }
 
-/* Mobile related products — horizontal scroll on small screens */
+/* Small mobile — still 2 columns, tighter; matches homepage 480px */
 @media screen and (max-width: 480px) {
   .product-grid-wrapper {
-    flex-wrap: nowrap;
-    overflow-x: auto;
     gap: 10px;
-    padding-bottom: 8px;
-    scrollbar-width: none;
-  }
-
-  .product-grid-wrapper::-webkit-scrollbar {
-    display: none;
   }
 
   .na-card {
-    flex: 0 0 160px;
-    max-width: 160px;
-    min-width: 160px;
+    flex: 0 0 calc((100% - 10px) / 2);
+    max-width: calc((100% - 10px) / 2);
+  }
+
+  .related-product .na-actions .na-btn {
+    height: 32px;
   }
 }
 

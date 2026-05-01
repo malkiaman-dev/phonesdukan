@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const li = document.createElement('li');
                         li.textContent = suggestion.title;
                         li.addEventListener('click', () => {
-                            window.location.href = `${window.location.origin}/${suggestion.category_slug}/${suggestion.slug}`;
+                            window.location.href = `${window.location.origin}/blog/${suggestion.category_slug}/${suggestion.slug}`;
                         });
                         ul.appendChild(li);
                     });
