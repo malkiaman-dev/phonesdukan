@@ -214,12 +214,12 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
 .track-content-column {
     order: 2;
-    padding: 28px;
-    border-radius: 20px;
+    padding: 22px 24px;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 18px 45px rgba(17, 24, 39, 0.13);
 }
 
 .track-kicker {
@@ -232,7 +232,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-heading {
-    margin: 8px 0 12px;
+    margin: 4px 0 8px;
     font-size: clamp(28px, 5vw, 40px);
     line-height: 1.18;
     color: #111827;
@@ -245,13 +245,13 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 .track-subtext {
     margin: 0;
     color: #4b5563;
-    font-size: 16px;
-    line-height: 1.7;
+    font-size: 15px;
+    line-height: 1.55;
     max-width: 640px;
 }
 
 .track-visual {
-    margin-top: 22px;
+    margin-top: 12px;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid #e6ebf2;
@@ -263,22 +263,25 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     display: block;
     width: 100%;
     height: auto;
+    max-height: 210px;
 }
 
 .track-feature-list {
     list-style: none;
-    margin: 24px 0 0;
+    margin: 14px 0 0;
     padding: 0;
     display: grid;
-    gap: 12px;
+    gap: 8px;
 }
 
 .track-feature-list li {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    font-size: 15px;
-    color: #1f2937;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 500;
+    color: #222222;
 }
 
 .track-feature-icon {
@@ -299,22 +302,22 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-trust {
-    margin: 24px 0 0;
-    font-size: 14px;
+    margin: 12px 0 0;
+    font-size: 13px;
     font-weight: 600;
-    color: #374151;
+    color: #333333;
 }
 
 .track-form-card {
     background: #ffffff;
     border-radius: 16px;
     box-shadow: 0 18px 45px rgba(17, 24, 39, 0.13);
-    padding: 28px;
+    padding: 30px;
     border: 1px solid #edf0f5;
 }
 
 .track-form-title {
-    margin: 0 0 18px;
+    margin: 0 0 16px;
     color: #111827;
     font-size: 26px;
 }
@@ -330,7 +333,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-field-group {
-    margin-bottom: 14px;
+    margin-bottom: 13px;
 }
 
 .track-field-group label {
@@ -395,7 +398,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-helper-text {
-    margin: 7px 0 0;
+    margin: 6px 0 0;
     font-size: 12px;
     color: #6b7280;
 }
@@ -410,7 +413,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: 4px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -450,7 +453,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 .track-help-links {
     margin-top: 18px;
     border-top: 1px solid #edf1f6;
-    padding-top: 15px;
+    padding-top: 16px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px 14px;
@@ -477,7 +480,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
 .track-success-card {
     background: #ffffff;
-    border: 1px solid #e6f1ea;
+    border: 1px solid #eceff4;
     border-radius: 16px;
     box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
     padding: 22px;
@@ -493,9 +496,9 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
 .track-success-badge {
     font-size: 12px;
-    color: #166534;
-    background: #dcfce7;
-    border: 1px solid #bbf7d0;
+    color: #111827;
+    background: #fff8cc;
+    border: 1px solid #fde68a;
     padding: 5px 10px;
     border-radius: 999px;
     font-weight: 700;
@@ -565,13 +568,13 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 @media (min-width: 992px) {
     .track-shell {
         grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-        gap: 34px;
+        gap: 28px;
         align-items: start;
     }
 
     .track-content-column {
         order: 1;
-        padding: 36px;
+        padding: 22px 24px;
     }
 
     .track-form-column {
@@ -591,6 +594,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         border-radius: 14px;
     }
 
+    .track-visual svg {
+        max-height: 165px;
+    }
+
     .track-heading {
         font-size: 30px;
     }
@@ -602,6 +609,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
     .track-feature-list {
         gap: 10px;
+    }
+
+    .track-help-links {
+        margin-top: 16px;
     }
 
     .order-details li {
