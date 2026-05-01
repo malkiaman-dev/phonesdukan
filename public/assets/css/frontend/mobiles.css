@@ -593,3 +593,23 @@
   .mob-brand-logo        { max-width: 70px; max-height: 30px; }
   .mob-brand-card-text   { font-size: 9.5px; }
 }
+
+/* ── Ad container — prevent blank space from unfilled ads ─── */
+.ad-container {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Modern browsers: collapse instantly via CSS when AdSense marks unfilled */
+.ad-container:has(.adsbygoogle[data-ad-status="unfilled"]) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Also hide the ins element itself when unfilled */
+.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+  height: 0 !important;
+}

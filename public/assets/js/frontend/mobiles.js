@@ -303,4 +303,49 @@
             });
     });
 
+    /* ── Collapse unfilled AdSense containers ──────────────── */
+    (function () {
+        function collapseContainer(ins) {
+            var c = ins.closest ? ins.closest('.ad-container') : null;
+            if (!c) return;
+            c.style.setProperty('display',  'none',    'important');
+            c.style.setProperty('height',   '0',       'important');
+            c.style.setProperty('margin',   '0',       'important');
+            c.style.setProperty('padding',  '0',       'important');
+            c.style.setProperty('overflow', 'hidden',  'important');
+        }
+
+        function checkUnfilled() {
+            document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
+                if (ins.getAttribute('data-ad-status') === 'unfilled') {
+                    collapseContainer(ins);
+                }
+            });
+        }
+
+        function watchAds() {
+            document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
+                /* MutationObserver fires the instant AdSense sets data-ad-status */
+                new MutationObserver(function (mutations) {
+                    mutations.forEach(function (m) {
+                        if (m.attributeName === 'data-ad-status' &&
+                            ins.getAttribute('data-ad-status') === 'unfilled') {
+                            collapseContainer(ins);
+                        }
+                    });
+                }).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
+            });
+
+            /* Fallback polls in case the mutation fires before observer is attached */
+            setTimeout(checkUnfilled, 1500);
+            setTimeout(checkUnfilled, 5000);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', watchAds);
+        } else {
+            watchAds();
+        }
+    }());
+
 }());
