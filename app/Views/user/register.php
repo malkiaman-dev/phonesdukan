@@ -271,10 +271,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    color: #1f2937;
+    color: #111827;
     font-size: 16px;
-    font-weight: 500;
+    font-style: normal;
+    font-weight: 600;
     line-height: 1.35;
+}
+
+.pd-auth-features li span:not(.pd-auth-check) {
+    color: #111827 !important;
+    font-style: normal !important;
+    font-weight: 600;
 }
 
 .pd-auth-check {
@@ -284,8 +291,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #facc15;
-    color: #ffffff;
+    background: #f7cf04;
+    color: #111827;
     flex: 0 0 24px;
 }
 
