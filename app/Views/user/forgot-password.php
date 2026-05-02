@@ -48,7 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="pd-auth-page">
     <div class="pd-auth-shell">
         <section class="pd-auth-content" aria-label="Forgot password guidance">
-            <h1 class="pd-auth-heading">Reset Your Password 🔐</h1>
+            <h1 class="pd-auth-heading">
+                Reset Your Password
+                <span class="pd-auth-heading-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </h1>
             <p class="pd-auth-subtext">
                 Enter your email and we’ll send you a secure link to reset your password.
             </p>
@@ -69,9 +77,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <ul class="pd-auth-features">
-                <li><span class="pd-auth-check">✓</span><span>Secure password reset</span></li>
-                <li><span class="pd-auth-check">✓</span><span>Quick email delivery</span></li>
-                <li><span class="pd-auth-check">✓</span><span>Easy account recovery</span></li>
+                <li>
+                    <span class="pd-auth-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span>Secure password reset</span>
+                </li>
+                <li>
+                    <span class="pd-auth-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span>Quick email delivery</span>
+                </li>
+                <li>
+                    <span class="pd-auth-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span>Easy account recovery</span>
+                </li>
             </ul>
             <p class="pd-auth-trust">Built with customer security and convenience in mind.</p>
         </section>
@@ -142,11 +165,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     color: #111827;
     font-size: clamp(28px, 4vw, 38px);
     line-height: 1.15;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pd-auth-heading-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #facc15;
+    flex: 0 0 20px;
+}
+
+.pd-auth-heading-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 .pd-auth-subtext {
     margin: 12px 0 0;
-    color: #4b5563;
+    color: #6b7280;
     font-size: 15px;
     line-height: 1.65;
     max-width: 620px;
@@ -172,37 +213,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     margin: 16px 0 0;
     padding: 0;
     display: grid;
-    gap: 8px;
+    gap: 12px;
 }
 
 .pd-auth-features li {
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    color: #111111;
-    font-size: 14px;
-    font-weight: 600;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 500;
     line-height: 1.35;
 }
 
 .pd-auth-check {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: #facc15;
-    color: #111111;
-    flex: 0 0 20px;
-    font-size: 13px;
-    font-weight: 700;
+    color: #ffffff;
+    flex: 0 0 24px;
+}
+
+.pd-auth-check svg {
+    width: 14px;
+    height: 14px;
 }
 
 .pd-auth-trust {
     margin: 14px 0 0;
     color: #6b7280;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .pd-auth-form-col {
