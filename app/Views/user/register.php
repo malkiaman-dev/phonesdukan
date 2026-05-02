@@ -108,7 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="pd-auth-field">
                         <label for="register-name">Full Name</label>
                         <div class="pd-auth-input-wrap">
-                            <span class="pd-auth-icon" aria-hidden="true">👤</span>
+                            <span class="pd-auth-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </span>
                             <input id="register-name" type="text" name="full_name" placeholder="Enter your full name" required>
                         </div>
                     </div>
@@ -116,7 +121,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="pd-auth-field">
                         <label for="register-email">Email</label>
                         <div class="pd-auth-input-wrap">
-                            <span class="pd-auth-icon" aria-hidden="true">✉</span>
+                            <span class="pd-auth-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
                             <input id="register-email" type="email" name="email" placeholder="Enter your email" required>
                         </div>
                     </div>
@@ -124,7 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="pd-auth-field">
                         <label for="register-password">Password</label>
                         <div class="pd-auth-input-wrap">
-                            <span class="pd-auth-icon" aria-hidden="true">🔒</span>
+                            <span class="pd-auth-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </span>
                             <input id="register-password" type="password" name="password" placeholder="Enter your password" required>
                         </div>
                     </div>
@@ -132,7 +147,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="pd-auth-field">
                         <label for="phone">Phone</label>
                         <div class="pd-auth-input-wrap">
-                            <span class="pd-auth-icon" aria-hidden="true">📱</span>
+                            <span class="pd-auth-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <rect x="7" y="2.5" width="10" height="19" rx="2.5" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="18" r="1" fill="currentColor"/>
+                                </svg>
+                            </span>
                             <input
                                 type="text"
                                 name="phone"
@@ -331,7 +351,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     top: 50%;
     transform: translateY(-50%);
     color: #6b7280;
-    font-size: 14px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pd-auth-icon svg {
+    width: 18px;
+    height: 18px;
 }
 
 .pd-auth-input-wrap input {
@@ -339,11 +368,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     height: 50px;
     border-radius: 10px;
     border: 1px solid #d7dee9;
-    padding: 0 12px 0 36px;
+    padding: 0 12px 0 42px;
     font-size: 15px;
     color: #111827;
     background: #fff;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pd-auth-input-wrap:focus-within .pd-auth-icon {
+    color: #facc15;
 }
 
 .pd-auth-input-wrap input:focus {
