@@ -24,31 +24,7 @@ class BulkInquiryModel
         ";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
-        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Log raw query results for debugging
-        error_log("getB2BProducts: Raw query results: " . json_encode($products));
-
-        // Prepend base URL to image_url
-        $baseUrl = $this->getBaseUrl();
-        foreach ($products as &$product) {
-            if (!empty($product['image_url'])) {
-                // Ensure image_url doesn't already have the base URL
-                if (!preg_match('#^https?://#', $product['image_url'])) {
-                    $product['image_url'] = rtrim($baseUrl, '/') . '/' . ltrim($product['image_url'], '/');
-                }
-                error_log("getB2BProducts: Processed image_url for product {$product['product_id']}: {$product['image_url']}");
-            } else {
-                // Fallback default image
-                $product['image_url'] = rtrim($baseUrl, '/') . '/public/assets/images/default.jpg';
-                error_log("getB2BProducts: Using default image for product {$product['product_id']}: {$product['image_url']}");
-            }
-        }
-
-        // Log final products array
-        error_log("getB2BProducts: Final products: " . json_encode($products));
-
-        return $products;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getProductById(int $productId): array|bool
@@ -64,13 +40,6 @@ class BulkInquiryModel
         $stmt = $this->db->prepare($query);
         $stmt->execute([':product_id' => $productId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    private function getBaseUrl()
-    {
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'];
-        return $protocol . '://' . $host;
     }
 
     public function saveInquiry(array $data): int|false

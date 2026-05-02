@@ -67,9 +67,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                          data-name="<?php echo htmlspecialchars(strtolower($product['product_name'])); ?>">
 
                         <div class="ws-card__img-wrap">
-                            <img src="<?php echo htmlspecialchars($product['image_url'] ?? '/public/assets/images/default.jpg'); ?>"
+                            <img src="<?php echo url(ltrim($product['image_url'] ?? 'public/assets/images/Phones_dukan_favicon.png', '/')); ?>"
                                  alt="<?php echo htmlspecialchars($product['product_name']); ?>"
-                                 loading="lazy">
+                                 loading="lazy"
+                                 onerror="this.onerror=null;this.src='<?= url('public/assets/images/Phones_dukan_favicon.png') ?>';">
                         </div>
 
                         <div class="ws-card__body">
