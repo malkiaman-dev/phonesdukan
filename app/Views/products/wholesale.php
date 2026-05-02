@@ -18,20 +18,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
      SECTION 1 · HERO
      ═══════════════════════════════════════ -->
 <section class="ws-hero">
-    <div class="ws-hero__inner">
-        <div class="ws-hero__text">
-            <div class="ws-hero__badge">B2B Wholesale Portal</div>
-            <h1>Wholesale Mobile Accessories in Pakistan</h1>
-            <p>Get top-notch phone chargers, cases, and earphones at unbeatable bulk prices for your business across Pakistan.</p>
-            <ul class="ws-hero__bullets">
-                <li><span class="ws-bullet-icon">✔</span> Bulk discounts on all orders</li>
-                <li><span class="ws-bullet-icon">✔</span> Fast delivery across Pakistan</li>
-                <li><span class="ws-bullet-icon">✔</span> Trusted wholesale supplier</li>
-            </ul>
-        </div>
-        <div class="ws-hero__graphic">
-            <img src="<?= url('public/assets/images/wholesale.svg') ?>" alt="Wholesale Mobile Accessories" class="ws-hero__img">
-        </div>
+    <div class="ws-hero-inner">
+        <p class="ws-hero-eyebrow">B2B Wholesale Portal</p>
+        <h1 class="ws-hero-title"><span>Wholesale Mobile Accessories</span> in Pakistan</h1>
+        <p class="ws-hero-sub">Get top-notch phone chargers, cases, and earphones at unbeatable bulk prices for your business across Pakistan.</p>
     </div>
 </section>
 
