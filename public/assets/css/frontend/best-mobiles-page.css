@@ -2,6 +2,7 @@
 .best-mobiles-page {
     --pd-black: #111111;
     --pd-yellow: #f7cf04;
+    --pd-yellow-hover: #e6bf00;
     --pd-white: #ffffff;
     --pd-light-gray: #f5f5f5;
     --pd-border: #e5e7eb;
@@ -10,6 +11,22 @@
     margin: 0 auto;
     padding: 20px 14px 54px;
     color: var(--pd-black);
+}
+
+/* Global Reset for Best Mobiles Page to prevent blue hover/underline */
+.best-mobiles-page a,
+.best-mobiles-page a:visited {
+    text-decoration: none !important;
+    color: #111111 !important;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.best-mobiles-page a:hover,
+.best-mobiles-page a:focus,
+.best-mobiles-page a:active {
+    text-decoration: none !important;
+    outline: none;
 }
 
 .best-mobiles-hero {
@@ -29,6 +46,7 @@
     font-size: clamp(30px, 3.9vw, 36px);
     line-height: 1.2;
     letter-spacing: -0.02em;
+    color: var(--pd-black);
 }
 
 .best-mobiles-hero h1 .hero-accent {
@@ -59,10 +77,17 @@
     margin-top: 16px;
     display: flex;
     align-items: center;
+    flex-wrap: nowrap;
     gap: 10px;
     overflow-x: auto;
     padding: 4px;
-    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.best-mobiles-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .best-mobiles-tab {
@@ -72,24 +97,27 @@
     border-radius: 999px;
     border: 1px solid var(--pd-border);
     background: var(--pd-white);
-    color: var(--pd-black);
-    text-decoration: none;
+    color: var(--pd-black) !important;
+    text-decoration: none !important;
     white-space: nowrap;
     font-size: 14px;
     font-weight: 700;
-    padding: 10px 16px;
-    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+    padding: 10px 18px;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
 }
 
 .best-mobiles-tab:hover {
     background: #fff7cc;
-    border-color: #ebd778;
+    border-color: var(--pd-yellow);
+    color: #111 !important;
     transform: translateY(-1px);
 }
 
 .best-mobiles-tab.is-active {
     background: var(--pd-yellow);
-    border-color: #d9bc00;
+    color: var(--pd-black) !important;
+    border-color: var(--pd-yellow);
 }
 
 .best-mobiles-container {
@@ -112,11 +140,12 @@
 }
 
 .best-mobiles-range h4 {
-    margin: 0 0 8px;
+    margin: 0 0 12px;
     font-size: 13px;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: #666;
+    font-weight: 700;
 }
 
 .best-mobiles-option {
@@ -131,21 +160,24 @@
     border: 1px solid var(--pd-border);
     border-radius: 10px;
     margin-bottom: 8px;
-    text-decoration: none;
-    color: var(--pd-black);
+    text-decoration: none !important;
+    color: var(--pd-black) !important;
     font-size: 13px;
     font-weight: 600;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    transition: all 0.2s ease;
+    background: var(--pd-white);
 }
 
 .best-mobiles-link:hover {
     background: #fff7cc;
-    border-color: #e8cf64;
+    border-color: var(--pd-yellow);
+    color: #111 !important;
 }
 
 .best-mobiles-link.is-active {
     background: var(--pd-yellow);
-    border-color: #d9bc00;
+    border-color: var(--pd-yellow);
+    font-weight: 700;
 }
 
 .sidebar-image {
@@ -162,10 +194,6 @@
     gap: 14px;
 }
 
-.product-container {
-    margin: 0;
-}
-
 .product-item {
     background: var(--pd-white);
     border: 1px solid var(--pd-border);
@@ -174,21 +202,31 @@
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.04);
 }
 
-.product-details {
-    margin: 0;
-}
-
 .product-top {
     display: grid;
-    grid-template-columns: 126px minmax(0, 1fr) minmax(180px, 200px);
-    gap: 14px;
+    grid-template-columns: 140px 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 4px 24px;
     align-items: start;
 }
 
 .product-image {
-    width: 126px;
+    grid-row: span 3;
+    width: 140px;
     position: relative;
 }
+
+.buy-now {
+    grid-column: 2;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 10px;
+    width: auto;
+}
+
 
 .product-thumbnail {
     width: 100%;
@@ -198,16 +236,13 @@
     border: 1px solid var(--pd-border);
 }
 
-/* Rank badges removed — kept hidden as safety net */
-.like-number { display: none !important; }
-
 .product-title {
     margin: 0;
 }
 
 .product-title a {
-    color: var(--pd-black);
-    text-decoration: none;
+    color: #111111 !important;
+    text-decoration: none !important;
     font-size: 20px;
     line-height: 1.35;
     font-weight: 800;
@@ -215,10 +250,13 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    transition: color 0.3s ease;
 }
 
-.product-title a:hover {
-    text-decoration: none;
+.product-title a:hover,
+.product-title a:focus {
+    color: #f7cf04 !important;
+    text-decoration: none !important;
 }
 
 .product-description p {
@@ -226,10 +264,6 @@
     font-size: 15px;
     line-height: 1.7;
     color: #444;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 
 .product-price {
@@ -252,79 +286,76 @@
     color: var(--pd-black);
 }
 
-.discounted-price::before {
-    content: "Deal";
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    margin-right: 6px;
-    padding: 2px 6px;
-    border-radius: 999px;
-    background: #fff7cc;
-    border: 1px solid #ebd778;
-    color: var(--pd-black);
-    vertical-align: middle;
-}
-
-.buy-now {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: stretch;
-    justify-self: end;
-    width: 100%;
-    max-width: 200px;
-}
 
 .buy-button {
-    width: 100%;
-    height: 44px;
-    border: 2px solid #E7C063;
+    width: auto;
+    min-width: 130px;
+    min-height: 44px;
+    border: none;
     border-radius: 10px;
-    background: #E7C063;
-    color: var(--pd-black);
+    background: #f7cf04;
+    color: #111111 !important;
     font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.3px;
+    font-weight: 600;
+    padding: 10px 16px;
+    text-decoration: none !important;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.25s ease, border-color 0.25s ease,
-                box-shadow 0.25s ease, transform 0.2s ease;
+    transition: all 0.3s ease;
 }
 
-.buy-button:hover {
-    background: #d4a84b;
-    border-color: #d4a84b;
-    box-shadow: 0 6px 18px rgba(231, 192, 99, 0.40);
-    transform: translateY(-2px);
+.buy-button:hover,
+.buy-button:focus {
+    background: #e6bd00;
+    color: #111111 !important;
+    transform: translateY(-1px);
+    text-decoration: none !important;
 }
 
-.buy-now .secondary-cta {
-    width: 100%;
-    border: 1px solid var(--pd-black);
+.buy-button.disabled {
+    background: #f3f4f6;
+    color: #9ca3af !important;
+    border: 1px solid #e5e7eb;
+    cursor: not-allowed;
+    pointer-events: none;
+    width: auto;
+    min-width: 130px;
+    padding: 10px 16px;
+    box-shadow: none;
+    transform: none;
+}
+
+.secondary-cta {
+    width: auto;
+    min-width: 130px;
+    border: 1.5px solid #111111;
     border-radius: 10px;
-    background: var(--pd-white);
-    color: var(--pd-black);
-    height: 40px;
+    background: transparent !important;
+    color: #111111 !important;
+    min-height: 40px;
     font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
+    font-weight: 600;
+    text-decoration: none !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
 }
 
-.buy-now .secondary-cta:hover {
-    background: var(--pd-light-gray);
+.secondary-cta:hover,
+.secondary-cta:focus,
+.secondary-cta:active {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border-color: #111111 !important;
+    text-decoration: none !important;
 }
 
 #specs-bullet {
     margin-top: 12px;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid var(--pd-border);
     border-radius: 12px;
     background: var(--pd-light-gray);
@@ -337,19 +368,18 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-direction: row;
     justify-content: center;
 }
 
 .specification img {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
 }
 
 .spec-desc {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
 }
 
 .spec-desc strong {
@@ -385,35 +415,34 @@
 #pricing h2,
 #reviews h2,
 #faq h2 {
-    margin: 0;
+    margin: 0 0 16px;
     font-size: clamp(22px, 2.7vw, 26px);
     line-height: 1.25;
     color: var(--pd-black);
+    font-weight: 800;
 }
 
 .p-table table {
-    margin-top: 12px;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    overflow: hidden;
     border: 1px solid var(--pd-border);
     border-radius: 12px;
+    overflow: hidden;
 }
 
 .p-table th,
 .p-table td {
-    border: none;
-    border-bottom: 1px solid var(--pd-border);
-    text-align: left;
     padding: 12px 14px;
+    text-align: left;
     font-size: 14px;
+    border-bottom: 1px solid var(--pd-border);
 }
 
 .p-table th {
     background: var(--pd-light-gray);
-    color: var(--pd-black);
     font-weight: 800;
+    color: var(--pd-black);
 }
 
 .p-table tr:last-child td {
@@ -424,248 +453,132 @@
     background: #fffef2;
 }
 
-.p-table td:last-child {
-    color: #b89500;
-    font-weight: 700;
-}
-
 .buy-container {
-    margin-top: 12px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 16px;
 }
 
 #buyers-guide ul {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 8px;
 }
 
 #buyers-guide ul li {
+    margin-bottom: 10px;
+    padding: 12px 12px 12px 40px;
+    background: var(--pd-light-gray);
     border: 1px solid var(--pd-border);
     border-radius: 10px;
-    background: var(--pd-light-gray);
-    padding: 12px;
     position: relative;
-    padding-left: 40px;
     font-size: 15px;
     line-height: 1.6;
 }
 
 #buyers-guide ul li::before {
-    content: "●";
+    content: "✓";
     position: absolute;
-    left: 16px;
-    top: 14px;
-    color: var(--pd-yellow);
-    font-size: 13px;
-}
-
-#use-cases > p,
-#pricing > p,
-#reviews > p,
-#faq > p {
-    margin: 12px 0 0;
-    font-size: 15px;
-    line-height: 1.7;
-    color: #444;
+    left: 14px;
+    top: 12px;
+    color: var(--pd-yellow-hover);
+    font-weight: 900;
 }
 
 .case-container {
-    margin-top: 12px;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
 .use-case {
+    background: var(--pd-light-gray);
     border: 1px solid var(--pd-border);
     border-radius: 12px;
-    background: var(--pd-light-gray);
     padding: 16px;
 }
 
 .use-case h3 {
-    margin: 0;
+    margin: 0 0 8px;
     font-size: 18px;
-    line-height: 1.3;
-    color: var(--pd-black);
-}
-
-.use-case p {
-    margin: 8px 0 0;
-    font-size: 15px;
-    line-height: 1.7;
-    color: #444;
+    font-weight: 700;
 }
 
 #use-cases a,
-#pricing a {
-    color: var(--pd-black);
-    text-decoration: none;
+#pricing a,
+#faq a,
+#buyers-guide a {
+    color: #111 !important;
     font-weight: 700;
-    background-image: linear-gradient(var(--pd-yellow), var(--pd-yellow));
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    background-size: 0% 2px;
-    transition: background-size 0.2s ease;
+    text-decoration: none !important;
+    border-bottom: 2px solid var(--pd-yellow);
+    transition: all 0.2s ease;
 }
 
 #use-cases a:hover,
-#pricing a:hover {
-    background-size: 100% 2px;
-}
-
-#pricing ul {
-    list-style: none;
-    margin: 12px 0 0;
-    padding: 0;
-    display: grid;
-    gap: 10px;
-}
-
-#pricing ul li {
-    border: 1px solid var(--pd-border);
-    border-radius: 10px;
-    background: var(--pd-light-gray);
-    padding: 12px;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-#reviews p {
-    margin: 12px 0 0;
-    border: 1px solid var(--pd-border);
-    border-left: 4px solid var(--pd-yellow);
-    border-radius: 10px;
-    background: #fffef2;
-    padding: 14px;
-    font-size: 15px;
-    line-height: 1.7;
-    color: #444;
-}
-
-#faq .faq-item {
-    margin-top: 10px;
-    border: 1px solid var(--pd-border);
-    border-radius: 10px;
-    background: var(--pd-light-gray);
-    padding: 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-#faq .faq-item:hover {
-    border-color: #ecd987;
-}
-
-#faq .faq-item h3 {
-    margin: 0;
-    font-size: 17px;
-    line-height: 1.4;
-    color: var(--pd-black);
-}
-
-#faq .faq-item p {
-    margin: 8px 0 0;
-    font-size: 15px;
-    line-height: 1.7;
-    color: #444;
+#pricing a:hover,
+#faq a:hover,
+#buyers-guide a:hover {
+    background: #fff7cc;
+    color: #111 !important;
 }
 
 .p-note {
     background: #fffef2;
     border-left: 4px solid var(--pd-yellow);
     font-style: normal;
-    color: #444;
-    text-align: left;
-    padding: 14px;
-}
-
-.p-note::before {
-    content: "ℹ";
-    margin-right: 8px;
-    color: #b89500;
+    padding: 16px;
 }
 
 @media (max-width: 1024px) {
     .best-mobiles-container {
         grid-template-columns: 1fr;
     }
-
     .shop-sidebar {
         position: static;
+        margin-bottom: 16px;
     }
 }
 
 @media (max-width: 860px) {
     .best-mobiles-hero {
         grid-template-columns: 1fr;
-        padding: 20px;
     }
-
     .product-top {
-        grid-template-columns: 100px minmax(0, 1fr);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
-
+    .product-image {
+        width: 140px;
+        margin: 0 auto;
+    }
+    .product-title {
+        width: 100%;
+        margin-top: 12px;
+    }
+    .product-title a {
+        font-size: 18px;
+        font-weight: 600;
+    }
     .buy-now {
-        grid-column: 1 / -1;
+        width: 100%;
         max-width: 100%;
-        margin-top: 8px;
+        margin-top: 10px;
     }
-
     #specs-bullet {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .case-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 600px) {
-    .best-mobiles-page {
-        padding: 14px 10px 34px;
-    }
-
-    .best-mobiles-hero,
-    .shop-sidebar,
-    .product-item,
-    .p-table,
-    #buyers-guide,
-    #use-cases,
-    #pricing,
-    #reviews,
-    #faq,
-    .p-note {
-        border-radius: 12px;
-        padding: 14px;
-    }
-
-    .best-mobiles-link {
-        font-size: 12px;
-    }
-
-    .product-top {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .product-image {
-        width: 92px;
-    }
-
-    .product-title a {
-        font-size: 18px;
-    }
-
-    .buy-container {
-        grid-template-columns: 1fr;
-    }
-
     #specs-bullet {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+    .buy-container, .case-container {
+        grid-template-columns: 1fr;
+    }
+}
+  }
 }

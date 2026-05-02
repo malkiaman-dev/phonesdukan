@@ -255,3 +255,64 @@ if (!function_exists('loadJS')) {
         emitJs('public/assets/js/frontend/' . getCurrentPage() . '.js');
     }
 }
+
+if (!function_exists('isProductInStock')) {
+    function isProductInStock($productId)
+    {
+        static $stockCache = [];
+        if (isset($stockCache[$productId])) {
+            return $stockCache[$productId];
+        }
+
+        try {
+            require_once dirname(__DIR__) . '/database/db.php';
+            $database = new Database();
+            $db = $database->getConnection();
+            if (!$db) return true;
+
+            $stmt = $db->prepare("SELECT stock_quantity FROM products WHERE product_id = :id LIMIT 1");
+            $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $inStock = ($result && (int)($result['stock_quantity'] ?? 0) > 0);
+            $stockCache[$productId] = $inStock;
+            return $inStock;
+        } catch (Exception $e) {
+            return true; // Default to in stock on error
+        }
+    }
+}
+
+if (!function_exists('renderBestMobilesSidebar')) {
+    function renderBestMobilesSidebar($activeLimit)
+    {
+        $items = [
+            '30000'  => ['img' => '/wp-content/uploads/2024/05/Realme-Note-50-128GB.webp',          'label' => 'Best Mobiles Under Rs. 30,000'],
+            '40000'  => ['img' => '/wp-content/uploads/2024/01/Infinix-Smart-8-Plus.webp',          'label' => 'Best Mobiles Under Rs. 40,000'],
+            '50000'  => ['img' => '/wp-content/uploads/2024/03/Tecno-camon-20-Pro.webp',            'label' => 'Best Mobiles Under Rs. 50,000'],
+            '60000'  => ['img' => '/wp-content/uploads/2024/01/Oppo-A58.webp',                     'label' => 'Best Mobiles Under Rs. 60,000'],
+            '80000'  => ['img' => '/wp-content/uploads/2024/11/Realme-13.webp',                    'label' => 'Best Mobiles Under Rs. 80,000'],
+            '100000' => ['img' => '/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp','label' => 'Best Mobiles Under Rs. 100,000'],
+            '150000' => ['img' => '/wp-content/uploads/2024/03/Vivo-V30-5G.webp',                  'label' => 'Best Mobiles Under Rs. 150,000'],
+        ];
+        ?>
+        <div class="shop-sidebar">
+            <form id="best-mobiles-filter">
+                <div class="best-mobiles-range">
+                    <h4>Best Mobiles Under:</h4>
+                    <?php foreach ($items as $limit => $data): ?>
+                    <div class="best-mobiles-option">
+                        <a href="<?= url('mobiles-price-list/best-mobiles-under-' . $limit . '/'); ?>" 
+                           class="best-mobiles-link<?= ($activeLimit == $limit ? ' is-active' : '') ?>">
+                            <img src="<?= $data['img'] ?>" alt="Mobile Image" class="sidebar-image">
+                            <?= $data['label'] ?>
+                        </a>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </form>
+        </div>
+        <?php
+    }
+}

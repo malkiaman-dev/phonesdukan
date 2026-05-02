@@ -25,63 +25,17 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
     </section>
 
     <nav class="best-mobiles-tabs" aria-label="Best mobiles by budget">
-        <a class="best-mobiles-tab is-active" href="/mobiles-price-list/best-mobiles-under-30000/">Under 30,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-40000/">Under 40,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-50000/">Under 50,000</a>
+        <a class="best-mobiles-tab is-active" href="<?= url('mobiles-price-list/best-mobiles-under-30000/'); ?>">Under 30,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-40000/'); ?>">Under 40,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-50000/'); ?>">Under 50,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-60000/'); ?>">Under 60,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-80000/'); ?>">Under 80,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-100000/'); ?>">Under 100,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-150000/'); ?>">Under 150,000</a>
     </nav>
 
 <div class="best-mobiles-container">
-    <div class="shop-sidebar">
-        <form id="best-mobiles-filter">
-            <!-- Best Mobiles Range Links -->
-            <div class="best-mobiles-range">
-                <h4>Best Mobiles Under:</h4>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-30000/" class="best-mobiles-link is-active">
-                        <img src="/wp-content/uploads/2024/05/Realme-Note-50-128GB.webp" alt="Mobile Image" class="sidebar-image"> 
-                        Best mobiles under 30,000
-                    </a>
-                </div>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-40000/" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/01/Infinix-Smart-8-Plus.webp" alt="Mobile Image" class="sidebar-image"> 
-                        Best Mobiles Under Rs. 40,000
-                    </a>
-                </div>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-50000/" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/03/Tecno-camon-20-Pro.webp" alt="Mobile Image" class="sidebar-image"> 
-                        Best Mobiles Under Rs. 50,000
-                    </a>
-                </div>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-60000/" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/01/Oppo-A58.webp" alt="Mobile Image" class="sidebar-image">
-                        Best Mobiles Under Rs. 60,000
-                    </a>
-                </div>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-80000/" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/11/Realme-13.webp" alt="Mobile Image" class="sidebar-image">
-                        Best Mobiles Under Rs. 80,000
-                    </a>
-                </div>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-100000/" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp" alt="Mobile Image" class="sidebar-image">
-                        Best Mobiles Under Rs. 100,000
-                    </a>
-                </div>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-150000/" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/03/Vivo-V30-5G.webp" alt="Mobile Image" class="sidebar-image">
-                        Best Mobiles Under Rs. 150,000
-                    </a>
-                </div>
-
-            </div>
-        </form>
-    </div>
+    <?php renderBestMobilesSidebar('30000'); ?>
 
 
     <!-- Right Side Content (Products) -->
@@ -99,15 +53,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
 
                 </div>
                     <h4 class="product-title">
-                        <a href="/mobiles/infinix/infinix-hot-40i/">Infinix Hot 40i</a>
+                        <a href="<?= url('mobiles/infinix/infinix-hot-40i/'); ?>">Infinix Hot 40i</a>
                     </h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 31,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 29,499</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="53" data-unit-price="29499">Buy Now</button>
-                       <a class="secondary-cta" href="/mobiles/infinix/infinix-hot-40i/">View Details</a>
+                        <?php if (isProductInStock(53)): ?>
+                            <button class="buy-button" data-product-id="53" data-unit-price="29499">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/infinix/infinix-hot-40i/'); ?>">View Details</a>
                     </div>
 
 
@@ -170,15 +128,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
 
                 </div>
                     <h4 class="product-title">
-                        <a href="/mobiles/xiaomi/xiaomi-redmi-13c/">Xiaomi Redmi 13C</a>
+                        <a href="<?= url('mobiles/xiaomi/xiaomi-redmi-13c/'); ?>">Xiaomi Redmi 13C</a>
                     </h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 30,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 29,199</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="22" data-unit-price="29199">Buy Now</button>
-                       <a class="secondary-cta" href="/mobiles/xiaomi/xiaomi-redmi-13c/">View Details</a>
+                        <?php if (isProductInStock(22)): ?>
+                            <button class="buy-button" data-product-id="22" data-unit-price="29199">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/xiaomi/xiaomi-redmi-13c/'); ?>">View Details</a>
                     </div>
         </div>
         <div class="product-description">
@@ -240,15 +202,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
 
                 </div>
                     <h4 class="product-title">
-                        <a href="/mobiles/realme/realme-note-50-128gb/">Realme Note 50 128GB</a>
+                        <a href="<?= url('mobiles/realme/realme-note-50-128gb/'); ?>">Realme Note 50 128GB</a>
                     </h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 27,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 25,999</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="22" data-unit-price="25999">Buy Now</button>
-                       <a class="secondary-cta" href="/mobiles/realme/realme-note-50-128gb/">View Details</a>
+                        <?php if (isProductInStock(93)): ?>
+                            <button class="buy-button" data-product-id="93" data-unit-price="25999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/realme/realme-note-50-128gb/'); ?>">View Details</a>
                     </div>
 
         </div>
@@ -310,15 +276,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
 
                 </div>
                     <h4 class="product-title">
-                        <a href="/mobiles/realme/realme-c51/">Realme C51</a>
+                        <a href="<?= url('mobiles/realme/realme-c51/'); ?>">Realme C51</a>
                     </h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 28,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 27,699</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="18" data-unit-price="27699">Buy Now</button>
-                       <a class="secondary-cta" href="/mobiles/realme/realme-c51/">View Details</a>
+                        <?php if (isProductInStock(18)): ?>
+                            <button class="buy-button" data-product-id="18" data-unit-price="27699">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/realme/realme-c51/'); ?>">View Details</a>
                     </div>
         </div>
         <div class="product-description">
@@ -379,15 +349,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
 
                 </div>
                     <h4 class="product-title">
-                        <a href="/mobiles/infinix/infinix-smart-9/">Infinix Smart 9</a>
+                        <a href="<?= url('mobiles/infinix/infinix-smart-9/'); ?>">Infinix Smart 9</a>
                     </h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 28,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 27,999</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="142" data-unit-price="27999">Buy Now</button>
-                       <a class="secondary-cta" href="/mobiles/infinix/infinix-smart-9/">View Details</a>
+                        <?php if (isProductInStock(142)): ?>
+                            <button class="buy-button" data-product-id="142" data-unit-price="27999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/infinix/infinix-smart-9/'); ?>">View Details</a>
                     </div>
         </div>
         <div class="product-description">
@@ -521,8 +495,8 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
     <h2>Pricing and Availability</h2>
     <p>Find out where to purchase the latest smartphones under 30000 and their current prices:</p>
     <ul>
-        <li><strong>Xiaomi Redmi 13C:</strong> PKR 29,199 – Available on <a href="/mobiles/xiaomi/xiaomi-redmi-13c/" title="Buy Xiaomi Redmi 13C at Phones Dukan">Phones Dukan</a></li>
-        <li><strong>Realme Note 50 128GB:</strong> PKR 25,999 – Available on <a href="/mobiles/realme/realme-note-50-128gb/" title="Buy Realme Note 50 128GB at Phones Dukan">Phones Dukan</a></li>
+        <li><strong>Xiaomi Redmi 13C:</strong> PKR 29,199 – Available on <a href="<?= url('mobiles/xiaomi/xiaomi-redmi-13c/'); ?>" title="Buy Xiaomi Redmi 13C at Phones Dukan">Phones Dukan</a></li>
+        <li><strong>Realme Note 50 128GB:</strong> PKR 25,999 – Available on <a href="<?= url('mobiles/realme/realme-note-50-128gb/'); ?>" title="Buy Realme Note 50 128GB at Phones Dukan">Phones Dukan</a></li>
     </ul>
 </section>
 

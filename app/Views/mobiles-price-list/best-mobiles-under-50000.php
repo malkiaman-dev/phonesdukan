@@ -25,11 +25,13 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
     </section>
 
     <nav class="best-mobiles-tabs" aria-label="Best mobiles by budget">
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-30000/">Under 30,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-40000/">Under 40,000</a>
-        <a class="best-mobiles-tab is-active" href="/mobiles-price-list/best-mobiles-under-50000/">Under 50,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-60000/">Under 60,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-80000/">Under 80,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-30000/'); ?>">Under 30,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-40000/'); ?>">Under 40,000</a>
+        <a class="best-mobiles-tab is-active" href="<?= url('mobiles-price-list/best-mobiles-under-50000/'); ?>">Under 50,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-60000/'); ?>">Under 60,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-80000/'); ?>">Under 80,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-100000/'); ?>">Under 100,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-150000/'); ?>">Under 150,000</a>
     </nav>
 
 <div class="best-mobiles-container">
@@ -38,43 +40,43 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
             <div class="best-mobiles-range">
                 <h4>Best Mobiles Under:</h4>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-30000/" class="best-mobiles-link">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-30000/'); ?>" class="best-mobiles-link">
                         <img src="/wp-content/uploads/2024/05/Realme-Note-50-128GB.webp" alt="Mobile Image" class="sidebar-image">
-                        Best Mobiles Under Rs. 30,000
+                        Best mobiles under 30,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-40000/" class="best-mobiles-link">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-40000/'); ?>" class="best-mobiles-link">
                         <img src="/wp-content/uploads/2024/01/Infinix-Smart-8-Plus.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 40,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-50000/" class="best-mobiles-link is-active">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-50000/'); ?>" class="best-mobiles-link is-active">
                         <img src="/wp-content/uploads/2024/03/Tecno-camon-20-Pro.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 50,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-60000/" class="best-mobiles-link">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-60000/'); ?>" class="best-mobiles-link">
                         <img src="/wp-content/uploads/2024/01/Oppo-A58.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 60,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-80000/" class="best-mobiles-link">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-80000/'); ?>" class="best-mobiles-link">
                         <img src="/wp-content/uploads/2024/11/Realme-13.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 80,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-100000/" class="best-mobiles-link">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-100000/'); ?>" class="best-mobiles-link">
                         <img src="/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 100,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-150000/" class="best-mobiles-link">
+                    <a href="<?= url('mobiles-price-list/best-mobiles-under-150000/'); ?>" class="best-mobiles-link">
                         <img src="/wp-content/uploads/2024/03/Vivo-V30-5G.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 150,000
                     </a>
@@ -98,8 +100,8 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                         <span class="discounted-price"><sup>Rs</sup> 43,499</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="141" data-unit-price="43499">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/infinix/infinix-hot-50-pro/">View Details</a>
+                        <button class="buy-button" data-product-id="187" data-unit-price="45999">Buy Now</button>
+                        <a class="secondary-cta" href="<?= url('mobiles/vivo/vivo-y28/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">

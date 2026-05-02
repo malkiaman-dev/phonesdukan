@@ -26,39 +26,17 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     </section>
 
     <nav class="best-mobiles-tabs" aria-label="Best mobiles by budget">
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-40000/">Under 40,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-50000/">Under 50,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-60000/">Under 60,000</a>
-        <a class="best-mobiles-tab is-active" href="/mobiles-price-list/best-mobiles-under-80000/">Under 80,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-100000/">Under 100,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-30000/'); ?>">Under 30,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-40000/'); ?>">Under 40,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-50000/'); ?>">Under 50,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-60000/'); ?>">Under 60,000</a>
+        <a class="best-mobiles-tab is-active" href="<?= url('mobiles-price-list/best-mobiles-under-80000/'); ?>">Under 80,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-100000/'); ?>">Under 100,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-150000/'); ?>">Under 150,000</a>
     </nav>
 
 <div class="best-mobiles-container">
-    <div class="shop-sidebar">
-        <form id="best-mobiles-filter">
-            <div class="best-mobiles-range">
-                <h4>Best Mobiles Under:</h4>
-                <?php
-                $items = [
-                    '30000'  => ['/wp-content/uploads/2024/05/Realme-Note-50-128GB.webp',          'Best Mobiles Under Rs. 30,000'],
-                    '40000'  => ['/wp-content/uploads/2024/01/Infinix-Smart-8-Plus.webp',          'Best Mobiles Under Rs. 40,000'],
-                    '50000'  => ['/wp-content/uploads/2024/03/Tecno-camon-20-Pro.webp',            'Best Mobiles Under Rs. 50,000'],
-                    '60000'  => ['/wp-content/uploads/2024/01/Oppo-A58.webp',                     'Best Mobiles Under Rs. 60,000'],
-                    '80000'  => ['/wp-content/uploads/2024/11/Realme-13.webp',                    'Best Mobiles Under Rs. 80,000'],
-                    '100000' => ['/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp','Best Mobiles Under Rs. 100,000'],
-                    '150000' => ['/wp-content/uploads/2024/03/Vivo-V30-5G.webp',                  'Best Mobiles Under Rs. 150,000'],
-                ];
-                foreach ($items as $limit => [$img, $label]): ?>
-                <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-<?= $limit ?>/" class="best-mobiles-link<?= ($limit === '80000' ? ' is-active' : '') ?>">
-                        <img src="<?= $img ?>" alt="Mobile Image" class="sidebar-image">
-                        <?= $label ?>
-                    </a>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </form>
-    </div>
+    <?php renderBestMobilesSidebar('80000'); ?>
 
     <div class="shop-content-right">
     <section class="product-container">
@@ -69,14 +47,18 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <img src="/wp-content/uploads/2024/11/Realme-13.webp"
                          class="product-thumbnail" alt="Realme 13" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/realme/realme-13/">Realme 13</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/realme/realme-13/'); ?>">Realme 13</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 79,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 74,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="171" data-unit-price="74999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/realme/realme-13/">View Details</a>
+                        <?php if (isProductInStock(135)): ?>
+                            <button class="buy-button" data-product-id="135" data-unit-price="74999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/realme/realme-13/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -97,14 +79,18 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <img src="/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp"
                          class="product-thumbnail" alt="Vivo T3 Pro" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/vivo/vivo-t3-pro/">Vivo T3 Pro</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/vivo/vivo-t3-pro/'); ?>">Vivo T3 Pro</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 79,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 75,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="158" data-unit-price="75999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/vivo/vivo-t3-pro/">View Details</a>
+                        <?php if (isProductInStock(158)): ?>
+                            <button class="buy-button" data-product-id="158" data-unit-price="75999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/vivo/vivo-t3-pro/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -125,14 +111,18 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <img src="/wp-content/uploads/2024/05/Xiaomi-Redmi-Note-13.webp"
                          class="product-thumbnail" alt="Xiaomi Redmi Note 13 Pro" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/xiaomi/xiaomi-redmi-note-13-pro/">Xiaomi Redmi Note 13 Pro</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/xiaomi/xiaomi-redmi-note-13-pro/'); ?>">Xiaomi Redmi Note 13 Pro</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 79,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 72,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="175" data-unit-price="72999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/xiaomi/xiaomi-redmi-note-13-pro/">View Details</a>
+                        <?php if (isProductInStock(175)): ?>
+                            <button class="buy-button" data-product-id="175" data-unit-price="72999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/xiaomi/xiaomi-redmi-note-13-pro/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -153,14 +143,18 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <img src="/wp-content/uploads/2024/03/Vivo-V30-5G.webp"
                          class="product-thumbnail" alt="Vivo V30 5G" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/vivo/vivo-v30/">Vivo V30</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/vivo/vivo-v30/'); ?>">Vivo V30</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 84,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 79,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="60" data-unit-price="79999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/vivo/vivo-v30/">View Details</a>
+                        <?php if (isProductInStock(60)): ?>
+                            <button class="buy-button" data-product-id="60" data-unit-price="79999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/vivo/vivo-v30/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -181,14 +175,18 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <img src="/wp-content/uploads/2024/01/Oppo-A58.webp"
                          class="product-thumbnail" alt="Oppo Reno 11" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/oppo/oppo-reno-11/">Oppo Reno 11</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/oppo/oppo-reno-11/'); ?>">Oppo Reno 11</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 82,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 77,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="170" data-unit-price="77999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/oppo/oppo-reno-11/">View Details</a>
+                        <?php if (isProductInStock(170)): ?>
+                            <button class="buy-button" data-product-id="170" data-unit-price="77999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/oppo/oppo-reno-11/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -252,9 +250,9 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 <section id="pricing">
     <h2>Pricing and Availability</h2>
     <ul>
-        <li><strong>Realme 13:</strong> PKR 74,999 – Available on <a href="/mobiles/realme/realme-13/">Phones Dukan</a></li>
-        <li><strong>Vivo V30:</strong> PKR 79,999 – Available on <a href="/mobiles/vivo/vivo-v30/">Phones Dukan</a></li>
-        <li><strong>Xiaomi Redmi Note 13 Pro:</strong> PKR 72,999 – Available on <a href="/mobiles/xiaomi/xiaomi-redmi-note-13-pro/">Phones Dukan</a></li>
+        <li><strong>Realme 13:</strong> PKR 74,999 – Available on <a href="<?= url('mobiles/realme/realme-13/'); ?>">Phones Dukan</a></li>
+        <li><strong>Vivo V30:</strong> PKR 79,999 – Available on <a href="<?= url('mobiles/vivo/vivo-v30/'); ?>">Phones Dukan</a></li>
+        <li><strong>Xiaomi Redmi Note 13 Pro:</strong> PKR 72,999 – Available on <a href="<?= url('mobiles/xiaomi/xiaomi-redmi-note-13-pro/'); ?>">Phones Dukan</a></li>
     </ul>
 </section>
 <section id="reviews">

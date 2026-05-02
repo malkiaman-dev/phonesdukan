@@ -23,7 +23,7 @@ function bestMobilesSidebar(string $active): void { ?>
             ];
             foreach ($items as $limit => $data): ?>
             <div class="best-mobiles-option">
-                <a href="/mobiles-price-list/best-mobiles-under-<?= $limit ?>/" class="best-mobiles-link<?= ($active === $limit ? ' is-active' : '') ?>">
+                <a href="<?= url('mobiles-price-list/best-mobiles-under-' . $limit . '/'); ?>" class="best-mobiles-link<?= ($active === $limit ? ' is-active' : '') ?>">
                     <img src="<?= $data['img'] ?>" alt="Mobile Image" class="sidebar-image">
                     <?= $data['label'] ?>
                 </a>
@@ -55,15 +55,17 @@ function bestMobilesSidebar(string $active): void { ?>
     </section>
 
     <nav class="best-mobiles-tabs" aria-label="Best mobiles by budget">
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-30000/">Under 30,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-40000/">Under 40,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-50000/">Under 50,000</a>
-        <a class="best-mobiles-tab is-active" href="/mobiles-price-list/best-mobiles-under-60000/">Under 60,000</a>
-        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-80000/">Under 80,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-30000/'); ?>">Under 30,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-40000/'); ?>">Under 40,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-50000/'); ?>">Under 50,000</a>
+        <a class="best-mobiles-tab is-active" href="<?= url('mobiles-price-list/best-mobiles-under-60000/'); ?>">Under 60,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-80000/'); ?>">Under 80,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-100000/'); ?>">Under 100,000</a>
+        <a class="best-mobiles-tab" href="<?= url('mobiles-price-list/best-mobiles-under-150000/'); ?>">Under 150,000</a>
     </nav>
 
 <div class="best-mobiles-container">
-    <?php bestMobilesSidebar('60000'); ?>
+    <?php renderBestMobilesSidebar('60000'); ?>
 
     <div class="shop-content-right">
     <section class="product-container">
@@ -74,14 +76,18 @@ function bestMobilesSidebar(string $active): void { ?>
                     <img src="/wp-content/uploads/2024/05/Xiaomi-Redmi-Note-13.webp"
                          class="product-thumbnail" alt="Xiaomi Redmi Note 13" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/xiaomi/xiaomi-redmi-note-13/">Xiaomi Redmi Note 13</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/xiaomi/xiaomi-redmi-note-13/'); ?>">Xiaomi Redmi Note 13</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 57,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 47,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="57" data-unit-price="47999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/xiaomi/xiaomi-redmi-note-13/">View Details</a>
+                        <?php if (isProductInStock(57)): ?>
+                            <button class="buy-button" data-product-id="57" data-unit-price="47999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/xiaomi/xiaomi-redmi-note-13/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -102,14 +108,18 @@ function bestMobilesSidebar(string $active): void { ?>
                     <img src="/wp-content/uploads/2024/01/Oppo-A58.webp"
                          class="product-thumbnail" alt="Oppo A58" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/oppo/oppo-a58/">Oppo A58</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/oppo/oppo-a58/'); ?>">Oppo A58</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 54,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 49,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="44" data-unit-price="49999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/oppo/oppo-a58/">View Details</a>
+                        <?php if (isProductInStock(44)): ?>
+                            <button class="buy-button" data-product-id="44" data-unit-price="49999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/oppo/oppo-a58/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -130,14 +140,18 @@ function bestMobilesSidebar(string $active): void { ?>
                     <img src="/wp-content/uploads/2024/02/Samsung-Galaxy-A05s.webp"
                          class="product-thumbnail" alt="Samsung Galaxy A05s" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/samsung/samsung-galaxy-a05s/">Samsung Galaxy A05s</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/samsung/samsung-galaxy-a05s/'); ?>">Samsung Galaxy A05s</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 59,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 55,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="55" data-unit-price="55999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/samsung/samsung-galaxy-a05s/">View Details</a>
+                        <?php if (isProductInStock(55)): ?>
+                            <button class="buy-button" data-product-id="55" data-unit-price="55999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/samsung/samsung-galaxy-a05s/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -158,14 +172,18 @@ function bestMobilesSidebar(string $active): void { ?>
                     <img src="/wp-content/uploads/2024/11/infinix-Hot-50-pro-price-in-pakistan.webp"
                          class="product-thumbnail" alt="Infinix Hot 50 Pro" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/infinix/infinix-hot-50-pro/">Infinix Hot 50 Pro</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/infinix/infinix-hot-50-pro/'); ?>">Infinix Hot 50 Pro</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 55,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 53,499</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="141" data-unit-price="53499">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/infinix/infinix-hot-50-pro/">View Details</a>
+                        <?php if (isProductInStock(141)): ?>
+                            <button class="buy-button" data-product-id="141" data-unit-price="53499">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/infinix/infinix-hot-50-pro/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -186,14 +204,18 @@ function bestMobilesSidebar(string $active): void { ?>
                     <img src="/wp-content/uploads/2024/11/vivo-y28.webp"
                          class="product-thumbnail" alt="Vivo Y28" width="270">
                 </div>
-                    <h4 class="product-title"><a href="/mobiles/vivo/vivo-y28/">Vivo Y28</a></h4>
+                    <h4 class="product-title"><a href="<?= url('mobiles/vivo/vivo-y28/'); ?>">Vivo Y28</a></h4>
                     <div class="product-price">
                         <span class="mkt-price"><sup>Rs</sup> 58,999</span>
                         <span class="discounted-price"><sup>Rs</sup> 55,999</span>
                     </div>
                     <div class="buy-now">
-                        <button class="buy-button" data-product-id="15" data-unit-price="55999">Buy Now</button>
-                        <a class="secondary-cta" href="/mobiles/vivo/vivo-y28/">View Details</a>
+                        <?php if (isProductInStock(15)): ?>
+                            <button class="buy-button" data-product-id="15" data-unit-price="55999">Buy Now</button>
+                        <?php else: ?>
+                            <button class="buy-button disabled">Out of Stock</button>
+                        <?php endif; ?>
+                        <a class="secondary-cta" href="<?= url('mobiles/vivo/vivo-y28/'); ?>">View Details</a>
                     </div>
                 </div>
         <div class="product-description">
@@ -257,9 +279,9 @@ function bestMobilesSidebar(string $active): void { ?>
 <section id="pricing">
     <h2>Pricing and Availability</h2>
     <ul>
-        <li><strong>Xiaomi Redmi Note 13:</strong> PKR 47,999 – Available on <a href="/mobiles/xiaomi/xiaomi-redmi-note-13/">Phones Dukan</a></li>
-        <li><strong>Oppo A58:</strong> PKR 49,999 – Available on <a href="/mobiles/oppo/oppo-a58/">Phones Dukan</a></li>
-        <li><strong>Vivo Y28:</strong> PKR 55,999 – Available on <a href="/mobiles/vivo/vivo-y28/">Phones Dukan</a></li>
+        <li><strong>Xiaomi Redmi Note 13:</strong> PKR 47,999 – Available on <a href="<?= url('mobiles/xiaomi/xiaomi-redmi-note-13/'); ?>">Phones Dukan</a></li>
+        <li><strong>Oppo A58:</strong> PKR 49,999 – Available on <a href="<?= url('mobiles/oppo/oppo-a58/'); ?>">Phones Dukan</a></li>
+        <li><strong>Vivo Y28:</strong> PKR 55,999 – Available on <a href="<?= url('mobiles/vivo/vivo-y28/'); ?>">Phones Dukan</a></li>
     </ul>
 </section>
 <section id="reviews">

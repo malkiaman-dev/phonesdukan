@@ -20,6 +20,37 @@
         return basePath + '/' + path;
     };
 
+    function normalizeBestMobilesLinks() {
+        if (window.location.pathname.indexOf('/mobiles-price-list') === -1) return;
+
+        document.querySelectorAll('a[href]').forEach(function (link) {
+            var href = link.getAttribute('href');
+            if (!href) return;
+
+            var lowerHref = href.toLowerCase();
+            if (
+                href.startsWith('#') ||
+                lowerHref.startsWith('javascript:') ||
+                lowerHref.startsWith('mailto:') ||
+                lowerHref.startsWith('tel:')
+            ) {
+                return;
+            }
+
+            if (/^https?:\/\//i.test(href) || href.startsWith('//')) return;
+
+            if (href.startsWith('/mobiles-price-list/') || href.startsWith('/mobiles/')) {
+                link.setAttribute('href', withBase(href));
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', normalizeBestMobilesLinks);
+    } else {
+        normalizeBestMobilesLinks();
+    }
+
     /* Single delegated listener — catches clicks on original AND cloned cards */
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('.buy-button');
