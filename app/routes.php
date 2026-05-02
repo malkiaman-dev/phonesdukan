@@ -284,6 +284,22 @@ switch (true) {
         include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-50000.php';
         break;
 
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-60000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-60000.php';
+        break;
+
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-80000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-80000.php';
+        break;
+
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-100000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-100000.php';
+        break;
+
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-150000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-150000.php';
+        break;
+
     case (preg_match('/^thankyou\/order_id=(\d+)$/', $request_uri, $matches)):
         $_GET['order_id'] = $matches[1];
         include __DIR__ . '/Views/thankyou/order_confirmation.php';

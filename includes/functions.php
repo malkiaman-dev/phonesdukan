@@ -194,11 +194,7 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/product.css');
         }
 
-        if (
-            strpos($uri, 'mobiles-price-list/best-mobiles-under-30000') !== false ||
-            strpos($uri, 'mobiles-price-list/best-mobiles-under-40000') !== false ||
-            strpos($uri, 'mobiles-price-list/best-mobiles-under-50000') !== false
-        ) {
+        if (strpos($uri, 'mobiles-price-list/best-mobiles-under-') !== false) {
             emitCss('public/assets/css/frontend/best-mobiles-page.css');
         }
 
@@ -240,6 +236,10 @@ if (!function_exists('loadJS')) {
 
         if (strpos($uri, '/shop') !== false) {
             emitJs('public/assets/js/frontend/shop-filter.js');
+            emitJs('public/assets/js/frontend/buy-now.js');
+        }
+
+        if (strpos($uri, '/mobiles-price-list') !== false) {
             emitJs('public/assets/js/frontend/buy-now.js');
         }
 

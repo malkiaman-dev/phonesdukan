@@ -55,26 +55,26 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="#" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/01/Oppo-A58.webp" alt="Mobile Image" class="sidebar-image"> 
+                    <a href="/mobiles-price-list/best-mobiles-under-60000/" class="best-mobiles-link">
+                        <img src="/wp-content/uploads/2024/01/Oppo-A58.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 60,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="#" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/11/Realme-13.webp" alt="Mobile Image" class="sidebar-image"> 
+                    <a href="/mobiles-price-list/best-mobiles-under-80000/" class="best-mobiles-link">
+                        <img src="/wp-content/uploads/2024/11/Realme-13.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 80,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="#" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp" alt="Mobile Image" class="sidebar-image"> 
+                    <a href="/mobiles-price-list/best-mobiles-under-100000/" class="best-mobiles-link">
+                        <img src="/wp-content/uploads/2024/11/vivo-3t-pro-price-in-pakistan.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 100,000
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="#" class="best-mobiles-link">
-                        <img src="/wp-content/uploads/2024/03/Vivo-V30-5G.webp" alt="Mobile Image" class="sidebar-image"> 
+                    <a href="/mobiles-price-list/best-mobiles-under-150000/" class="best-mobiles-link">
+                        <img src="/wp-content/uploads/2024/03/Vivo-V30-5G.webp" alt="Mobile Image" class="sidebar-image">
                         Best Mobiles Under Rs. 150,000
                     </a>
                 </div>
@@ -106,7 +106,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                         <span class="discounted-price"><sup>Rs</sup> 29,499</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="53">Buy Now</button>
+                       <button class="buy-button" data-product-id="53" data-unit-price="29499">Buy Now</button>
                        <a class="secondary-cta" href="/mobiles/infinix/infinix-hot-40i/">View Details</a>
                     </div>
 
@@ -177,7 +177,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                         <span class="discounted-price"><sup>Rs</sup> 29,199</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="22">Buy Now</button>
+                       <button class="buy-button" data-product-id="22" data-unit-price="29199">Buy Now</button>
                        <a class="secondary-cta" href="/mobiles/xiaomi/xiaomi-redmi-13c/">View Details</a>
                     </div>
         </div>
@@ -247,7 +247,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                         <span class="discounted-price"><sup>Rs</sup> 25,999</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="22">Buy Now</button>
+                       <button class="buy-button" data-product-id="22" data-unit-price="25999">Buy Now</button>
                        <a class="secondary-cta" href="/mobiles/realme/realme-note-50-128gb/">View Details</a>
                     </div>
 
@@ -317,7 +317,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                         <span class="discounted-price"><sup>Rs</sup> 27,699</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="18">Buy Now</button>
+                       <button class="buy-button" data-product-id="18" data-unit-price="27699">Buy Now</button>
                        <a class="secondary-cta" href="/mobiles/realme/realme-c51/">View Details</a>
                     </div>
         </div>
@@ -386,7 +386,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                         <span class="discounted-price"><sup>Rs</sup> 27,999</span>
                     </div>
                     <div class="buy-now">
-                       <button class="buy-button" data-product-id="142">Buy Now</button>
+                       <button class="buy-button" data-product-id="142" data-unit-price="27999">Buy Now</button>
                        <a class="secondary-cta" href="/mobiles/infinix/infinix-smart-9/">View Details</a>
                     </div>
         </div>
