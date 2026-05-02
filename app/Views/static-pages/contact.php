@@ -34,7 +34,7 @@ $controller->handleFormSubmission();
                     </svg>
                 </span>
                 <h3>Call Us</h3>
-                <p><a href="tel:+923170003777">(+92) 3170003777</a></p>
+                <p><a href="tel:+923116600031">(+92) 3116600031</a></p>
             </article>
 
             <article class="pd-contact-info-card">
