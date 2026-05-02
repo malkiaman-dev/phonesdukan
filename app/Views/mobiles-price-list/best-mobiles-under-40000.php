@@ -4,6 +4,32 @@ $metaDescription = "Explore the top 5 best mobiles under 40000 PKR in Pakistan f
 $metaKeywords = "best mobiles under 40000, top mobiles under 40000,  best mobiles under 40000 Pakistan, best mobiles under 40000 phonesdukan top 10";
 $metaRobots = "index, follow"; // Optional; default is good 
 require_once dirname(__DIR__, 3) . '/includes/header.php';?>
+<div class="best-mobiles-page">
+    <section class="best-mobiles-hero">
+        <div class="best-mobiles-hero-content">
+            <h1>Best Mobiles <span class="hero-accent">Under 40000</span> in Pakistan</h1>
+            <p>Explore top smartphones under 40000 with latest specs, verified prices, and best deals.</p>
+        </div>
+        <div class="best-mobiles-hero-art" aria-hidden="true">
+            <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg">
+                <rect x="26" y="22" width="368" height="214" rx="24" fill="#ffffff" stroke="#e5e7eb"/>
+                <rect x="62" y="54" width="124" height="176" rx="14" fill="#111111"/>
+                <rect x="72" y="66" width="104" height="132" rx="9" fill="#f5f5f5"/>
+                <circle cx="124" cy="212" r="7" fill="#f7cf04"/>
+                <rect x="216" y="66" width="146" height="56" rx="10" fill="#fff7cc" stroke="#f7cf04"/>
+                <rect x="216" y="134" width="146" height="64" rx="10" fill="#f5f5f5" stroke="#e5e7eb"/>
+                <path d="M236 88h102M236 104h78" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+                <path d="M236 158h101M236 174h83" stroke="#666666" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </section>
+
+    <nav class="best-mobiles-tabs" aria-label="Best mobiles by budget">
+        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-30000/">Under 30,000</a>
+        <a class="best-mobiles-tab is-active" href="/mobiles-price-list/best-mobiles-under-40000/">Under 40,000</a>
+        <a class="best-mobiles-tab" href="/mobiles-price-list/best-mobiles-under-50000/">Under 50,000</a>
+    </nav>
+
 <div class="best-mobiles-container">
     <div class="shop-sidebar">
         <form id="best-mobiles-filter">
@@ -17,7 +43,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </a>
                 </div>
                 <div class="best-mobiles-option">
-                    <a href="/mobiles-price-list/best-mobiles-under-40000/" class="best-mobiles-link">
+                    <a href="/mobiles-price-list/best-mobiles-under-40000/" class="best-mobiles-link is-active">
                         <img src="/wp-content/uploads/2024/01/Infinix-Smart-8-Plus.webp" alt="Mobile Image" class="sidebar-image"> 
                         Best Mobiles Under Rs. 40,000
                     </a>
@@ -69,7 +95,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Realme C67" 
                              width="270" >
-                             <span class="like-number">1</span>
 
                 </div>
                     <h4 class="product-title">
@@ -81,6 +106,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </div>
                     <div class="buy-now">
                        <button class="buy-button" data-product-id="77">Buy Now</button>
+                       <a class="secondary-cta" href="/mobiles/realme/realme-c67/">View Details</a>
                     </div>
         </div>
         <div class="product-description">
@@ -138,7 +164,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Tecno Spark 20" 
                              width="270" >
-                             <span class="like-number">2</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/tecno/tecno-spark-20/">Tecno Spark 20</a>
@@ -149,6 +174,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </div>
                     <div class="buy-now">
                        <button class="buy-button" data-product-id="145">Buy Now</button>
+                       <a class="secondary-cta" href="/mobiles/tecno/tecno-spark-20/">View Details</a>
                     </div>
         </div>
         <div class="product-description">
@@ -207,7 +233,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Infinix Hot 50" 
                              width="270" >
-                             <span class="like-number">3</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/infinix/infinix-hot-50/">Infinix Hot 50</a>
@@ -218,6 +243,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </div>
                     <div class="buy-now">
                        <button class="buy-button" data-product-id="139">Buy Now</button>
+                       <a class="secondary-cta" href="/mobiles/infinix/infinix-hot-50/">View Details</a>
                     </div>
         <div class="product-description">
          <p>The Infinix Hot 50 was launched on 31st October of the year 2024 and comes equipped with a 50 MP triple camera for the rear side and an 8 MP camera for the front side to easily have great photography. It has a highly capable 6.78 inch high definition+ LCD capable of 120hz refresh rate with 8GB RAM ensuring great graphics and smooth functionality. Under hood lies the Helio G100 processor coupled with a massive 5000 mAh battery making it a day long efficient device with decent 128 GB of storage.
@@ -275,7 +301,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Xiaomi Redmi 14C" 
                              width="270" >
-                             <span class="like-number">4</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/xiaomi/xiaomi-redmi-14c/">Xiaomi Redmi 14C</a>
@@ -286,6 +311,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </div>
                     <div class="buy-now">
                        <button class="buy-button" data-product-id="163">Buy Now</button>
+                       <a class="secondary-cta" href="/mobiles/xiaomi/xiaomi-redmi-14c/">View Details</a>
                     </div>
         </div>
         <div class="product-description">
@@ -343,7 +369,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Vivo Y19s" 
                              width="270" >
-                             <span class="like-number">5</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/vivo/vivo-y19s/">Vivo Y19s</a>
@@ -354,6 +379,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                     </div>
                     <div class="buy-now">
                        <button class="buy-button" data-product-id="17">Buy Now</button>
+                       <a class="secondary-cta" href="/mobiles/vivo/vivo-y19s/">View Details</a>
                     </div>
         </div>
         <div class="product-description">

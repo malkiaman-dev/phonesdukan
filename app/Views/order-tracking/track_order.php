@@ -155,6 +155,8 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <span>Works for all orders</span>
                 </li>
             </ul>
+
+            <p class="track-trust">Trusted by 10,000+ customers across Pakistan</p>
         </section>
     </div>
 </div>

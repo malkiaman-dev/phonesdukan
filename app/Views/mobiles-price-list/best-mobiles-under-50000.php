@@ -70,7 +70,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Infinix Hot 50 Pro" 
                              width="270" >
-                             <span class="like-number">1</span>
 
                 </div>
                     <h4 class="product-title">
@@ -139,7 +138,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Vivo Y28" 
                              width="270" >
-                             <span class="like-number">2</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/vivo/vivo-y28/">Vivo Y28</a>
@@ -208,7 +206,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Samsung Galaxy A05s" 
                              width="270" >
-                             <span class="like-number">3</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/samsung/samsung-galaxy-a05s/">Samsung Galaxy A05s</a>
@@ -277,7 +274,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Xiaomi Redmi Note 13" 
                              width="270" >
-                             <span class="like-number">4</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/xiaomi/xiaomi-redmi-note-13/">Xiaomi Redmi Note 13</a>
@@ -345,7 +341,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';?>
                              class="product-thumbnail" 
                              alt="Oppo A58" 
                              width="270" >
-                             <span class="like-number">5</span>
                 </div>
                     <h4 class="product-title">
                         <a href="/mobiles/oppo/oppo-a58/">Oppo A58</a>
