@@ -18,53 +18,136 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    cartContainer.addEventListener("click", function (e) {
-        const button = e.target;
-        const isPlus = button.classList.contains('plus');
-        const isMinus = button.classList.contains('minus');
+    // ----------------------------------------------------------------
+    // Toast — lightweight non-blocking notification
+    // ----------------------------------------------------------------
+    function showToast(msg, type) {
+        type = type || 'success';
+        const prev = document.getElementById('cart-toast');
+        if (prev) prev.remove();
 
-        if (!isPlus && !isMinus) return;
+        const toast = document.createElement('div');
+        toast.id = 'cart-toast';
+        toast.className = 'cart-toast cart-toast--' + type;
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(function () { toast.classList.add('cart-toast--show'); });
+        setTimeout(function () {
+            toast.classList.remove('cart-toast--show');
+            setTimeout(function () { if (toast.parentNode) toast.remove(); }, 320);
+        }, 2800);
+    }
+
+    // ----------------------------------------------------------------
+    // Sync header cart-count badge from live cart_items array
+    // Replaces the missing syncCartBadge() that was causing the false
+    // "Something went wrong" error on every successful quantity update.
+    // ----------------------------------------------------------------
+    function updateCartBadge(cartItems) {
+        if (!Array.isArray(cartItems)) return;
+        const total = cartItems.reduce(function (sum, item) {
+            return sum + (parseInt(item.total_quantity, 10) || 0);
+        }, 0);
+        document.querySelectorAll('.cart-count').forEach(function (el) {
+            el.textContent = total;
+        });
+    }
+
+    // ----------------------------------------------------------------
+    // Update the right-side Order Summary card + all discount badges
+    // ----------------------------------------------------------------
+    function updateSummaryCard(summary) {
+        if (!summary) return;
+
+        // Grand total (already targeted by original code)
+        const totalEl = document.getElementById('total-price');
+        if (totalEl) totalEl.textContent = 'PKR ' + summary.total;
+
+        // Subtotal row
+        const subtotalEl = document.getElementById('summary-subtotal-val');
+        if (subtotalEl) subtotalEl.textContent = 'PKR ' + summary.subtotal;
+
+        // Discount row — label + value
+        const discountLabel = document.getElementById('summary-discount-label');
+        const discountVal   = document.getElementById('summary-discount-val');
+
+        if (discountLabel) {
+            discountLabel.textContent = summary.discount_rate > 0
+                ? 'Discount (' + summary.discount_rate + '%)'
+                : 'Discount';
+        }
+        if (discountVal) {
+            if (summary.discount_rate > 0) {
+                discountVal.textContent = '− PKR ' + summary.discount_amount;
+                discountVal.classList.add('summary-val--discount');
+            } else {
+                discountVal.textContent = 'PKR 0.00';
+                discountVal.classList.remove('summary-val--discount');
+            }
+        }
+
+        // Per-row discount badges in the table
+        const discountText = summary.discount_rate === 7 ? '7% OFF'
+                           : summary.discount_rate === 5 ? '5% OFF' : '0% OFF';
+        document.querySelectorAll('.discount-cell').forEach(function (cell) {
+            let p = cell.querySelector('p');
+            if (!p) {
+                p = document.createElement('p');
+                cell.innerHTML = '';
+                cell.appendChild(p);
+            }
+            p.textContent = discountText;
+        });
+    }
+
+    // ================================================================
+    // QUANTITY  +  /  −
+    // ================================================================
+    cartContainer.addEventListener("click", function (e) {
+        // closest() handles clicks on child SVG/text nodes inside the button
+        const button = e.target.closest('.plus, .minus');
+        if (!button) return;
 
         e.preventDefault();
+
+        const isPlus    = button.classList.contains('plus');
         const productId = button.getAttribute("data-id");
-        const quantityInput = document.querySelector(`#quantity_${productId}`);
-        
+        const quantityInput = document.querySelector('#quantity_' + productId);
+
         if (!quantityInput) {
             console.error("Quantity input not found for product ID:", productId);
             return;
         }
 
-        let currentQuantity = parseInt(quantityInput.value, 10) || 1;
-        let newQuantity = currentQuantity;
-        if (isPlus) {
-            newQuantity = currentQuantity + 1;
-        } else if (isMinus && currentQuantity > 1) {
-            newQuantity = currentQuantity - 1;
-        } else if (isMinus) {
-            Swal.fire("Error!", "Quantity can't be less than 1.", "warning");
+        const currentQty = parseInt(quantityInput.value, 10) || 1;
+
+        if (!isPlus && currentQty <= 1) {
+            showToast("Quantity can't be less than 1.", 'warning');
             return;
         }
 
-        updateCart(productId, newQuantity, button);
+        const newQty = isPlus ? currentQty + 1 : currentQty - 1;
+        updateCart(productId, newQty, button);
     });
 
     function updateCart(productId, newQuantity, clickedButton) {
         if (clickedButton) clickedButton.disabled = true;
 
-        let unitPriceElement = document.querySelector(`#unit-price_${productId}`);
-        if (!unitPriceElement) {
-            console.error(`Unit price element not found for product ID: ${productId}`);
+        const unitPriceEl = document.querySelector('#unit-price_' + productId);
+        if (!unitPriceEl) {
             if (clickedButton) clickedButton.disabled = false;
             return;
         }
-        let unitPrice = parseFloat(unitPriceElement.textContent);
+        const unitPrice = parseFloat(unitPriceEl.textContent);
 
-        let attributeElement = document.querySelector(`#attribute_${productId}`);
-        let attributeValue = attributeElement && attributeElement.textContent.trim() !== "No attribute available" ? attributeElement.textContent : null;
+        const attrEl = document.querySelector('#attribute_' + productId);
+        const attributeValue = (attrEl && attrEl.textContent.trim() !== "No attribute available")
+            ? attrEl.textContent.trim()
+            : null;
 
         if (isNaN(unitPrice) || unitPrice <= 0) {
-            console.error(`Invalid unit price for product ID: ${productId}`);
-            Swal.fire("Error!", "Invalid unit price. Please refresh the page.", "error");
+            showToast("Invalid unit price. Please refresh the page.", 'error');
             if (clickedButton) clickedButton.disabled = false;
             return;
         }
@@ -73,142 +156,120 @@ document.addEventListener("DOMContentLoaded", function () {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                product_id: productId,
-                quantity: newQuantity,
-                unit_price: unitPrice,
+                product_id:      productId,
+                quantity:        newQuantity,
+                unit_price:      unitPrice,
                 attribute_value: attributeValue
             })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+        .then(function (response) {
+            if (!response.ok) throw new Error("HTTP error! Status: " + response.status);
             return response.json();
         })
-        .then(data => {
+        .then(function (data) {
             if (data.status === "success") {
-                let updated = data.updated_item;
-                let quantityInput = document.querySelector(`#quantity_${productId}`);
-                let tr = quantityInput.closest('tr');
+                const updated      = data.updated_item;
+                const qInput       = document.querySelector('#quantity_' + productId);
+                const tr           = qInput.closest('tr');
 
-                quantityInput.value = newQuantity;
+                // Update quantity display
+                qInput.value = newQuantity;
 
-                let subtotalTd = tr.querySelector('td:nth-child(4)');
-                if (subtotalTd) subtotalTd.textContent = `PKR ${Number(updated.subtotal).toFixed(2)}`;
+                // Update per-row subtotal — td:nth-child(4) as expected by this handler
+                const subtotalTd = tr.querySelector('td:nth-child(4)');
+                if (subtotalTd) subtotalTd.textContent = 'PKR ' + Number(updated.subtotal).toFixed(2);
 
-                let attrP = tr.querySelector('.attribute');
-                if (attrP) attrP.textContent = updated.attribute_value || 'No attribute available';
+                // Update attribute text if returned
+                const attrP = tr.querySelector('.attribute');
+                if (attrP && updated.attribute_value) attrP.textContent = updated.attribute_value;
 
-                if (data.cart_summary) {
-                    document.querySelector('#total-price').textContent = `PKR ${data.cart_summary.total}`;
-                    let discountText = data.cart_summary.discount_rate === 7 ? '7% OFF' : data.cart_summary.discount_rate === 5 ? '5% OFF' : '0% OFF';
-                    document.querySelectorAll('.discount-cell').forEach(cell => {
-                        let pTag = document.createElement('p');
-                        pTag.textContent = discountText;
-                        cell.innerHTML = '';
-                        cell.appendChild(pTag);
-                    });
-                }
-
-                // Sync header cart badge from live DOM
-                syncCartBadge();
-
-                Swal.fire({
-                    title: "Updated!",
-                    text: "The cart has been updated successfully.",
-                    icon: "success",
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                // Silently update summary card, discount badges, header badge — no popup
+                updateSummaryCard(data.cart_summary);
+                updateCartBadge(data.cart_items);
             } else {
-                Swal.fire("Error!", data.message, "error");
+                showToast(data.message || "Failed to update cart.", 'error');
             }
-            if (clickedButton) clickedButton.disabled = false;
         })
-        .catch(error => {
+        .catch(function (error) {
             console.error("UpdateCart AJAX Error:", error.message);
-            Swal.fire("Oops!", "Something went wrong. Please try again.", "error");
+            showToast("Something went wrong. Please try again.", 'error');
+        })
+        .finally(function () {
             if (clickedButton) clickedButton.disabled = false;
         });
     }
 
+    // ================================================================
+    // REMOVE ITEM
+    // ================================================================
     cartContainer.addEventListener("click", function (e) {
-        if (!e.target.classList.contains('remove-item')) return;
+        // closest() so clicking the SVG icon inside the button is caught
+        const removeButton = e.target.closest('.remove-item');
+        if (!removeButton) return;
 
-        let productId = e.target.getAttribute("data-id");
-        let removeButton = e.target;
+        const productId = removeButton.getAttribute("data-id");
 
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to undo this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Yes, remove it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(withBase("/app/Controllers/CartController.php?action=removeCartItem"), {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ product_id: productId })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
+        // Visual feedback: fade the row while request is in-flight
+        const row = removeButton.closest('tr');
+        if (row) row.style.opacity = '0.4';
+        removeButton.disabled = true;
+
+        fetch(withBase("/app/Controllers/CartController.php?action=removeCartItem"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: productId })
+        })
+        .then(function (response) {
+            if (!response.ok) throw new Error("HTTP error! Status: " + response.status);
+            return response.json();
+        })
+        .then(function (data) {
+            if (data.status === "success") {
+                // Remove card row from DOM immediately
+                if (row) row.remove();
+
+                if (document.querySelectorAll('tbody tr').length === 0) {
+                    // Cart is now empty — hide layout, show empty state
+                    const table       = document.querySelector('.cart-container table');
+                    const cartTotal   = document.querySelector('.cart-total');
+                    const checkoutBtn = document.querySelector('.checkout-btn');
+                    const cartLayout  = document.querySelector('.cart-layout');
+
+                    if (table)       table.style.display       = 'none';
+                    if (cartTotal)   cartTotal.style.display    = 'none';
+                    if (checkoutBtn) checkoutBtn.style.display  = 'none';
+                    if (cartLayout)  cartLayout.style.display   = 'none';
+
+                    let emptyMsg = document.querySelector('.empty-cart-message');
+                    if (!emptyMsg) {
+                        emptyMsg = document.createElement('p');
+                        emptyMsg.className = 'empty-cart-message';
+                        cartContainer.appendChild(emptyMsg);
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("RemoveCartItem Response:", data); // Debug log
-                    if (data.status === "success") {
-                        removeButton.closest('tr').remove();
+                    emptyMsg.textContent = 'Your cart is empty.';
+                    emptyMsg.style.display = 'block';
 
-                        if (data.cart_summary) {
-                            let discountText = data.cart_summary.discount_rate === 7 ? '7%' : data.cart_summary.discount_rate === 5 ? '5%' : '0%';
-                            document.querySelectorAll('.discount-cell').forEach(cell => {
-                                cell.textContent = discountText;
-                            });
+                    // Badge must update to 0 even when no rows remain
+                    updateCartBadge(data.cart_items);
+                } else {
+                    // Update totals for remaining items
+                    updateSummaryCard(data.cart_summary);
+                    updateCartBadge(data.cart_items);
+                }
 
-                            if (document.querySelectorAll('tbody tr').length === 0) {
-                                // Hide table and cart-total, show empty message
-                                const table = document.querySelector('.cart-container table');
-                                const cartTotal = document.querySelector('.cart-total');
-                                const checkoutBtn = document.querySelector('.checkout-btn');
-                                const emptyMessage = document.querySelector('.empty-cart-message') || document.createElement('p');
-
-                                if (table) table.style.display = 'none';
-                                if (cartTotal) cartTotal.style.display = 'none';
-                                if (checkoutBtn) checkoutBtn.style.display = 'none';
-
-                                emptyMessage.className = 'empty-cart-message';
-                                emptyMessage.textContent = 'Your cart is empty.';
-                                emptyMessage.style.display = 'block';
-                                if (!document.querySelector('.empty-cart-message')) {
-                                    cartContainer.appendChild(emptyMessage);
-                                }
-                            } else {
-                                // Update total for non-empty cart
-                                document.querySelector('#total-price').textContent = `PKR ${data.cart_summary.total}`;
-                            }
-                        }
-
-                        Swal.fire({
-                            title: "Removed!",
-                            text: "The item has been removed.",
-                            icon: "success",
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire("Error!", data.message, "error");
-                    }
-                })
-                .catch(error => {
-                    console.error("RemoveCartItem AJAX Error:", error.message);
-                    Swal.fire("Oops!", "Something went wrong. Please try again.", "error");
-                });
+                showToast("Item removed from cart.");
+            } else {
+                // Restore row opacity on failure
+                if (row) row.style.opacity = '1';
+                removeButton.disabled = false;
+                showToast(data.message || "Failed to remove item.", 'error');
             }
+        })
+        .catch(function (error) {
+            console.error("RemoveCartItem AJAX Error:", error.message);
+            if (row) row.style.opacity = '1';
+            removeButton.disabled = false;
+            showToast("Something went wrong. Please try again.", 'error');
         });
     });
 });
