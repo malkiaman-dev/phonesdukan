@@ -8,9 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return basePath + '/' + path;
     };
 
-    let isInitialized = false;
-    if (isInitialized) return;
-    isInitialized = true;
+    if (window.__cartInitialized) return;
+    window.__cartInitialized = true;
 
     const cartContainer = document.querySelector('.cart-container');
     if (!cartContainer) {
