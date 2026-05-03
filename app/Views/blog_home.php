@@ -44,7 +44,10 @@ require_once dirname(__DIR__, 2) . '/includes/header.php';
                 $post_image  = !empty($post['image_url'])
                              ? $post['image_url']
                              : '/public/assets/images/Phones_dukan_favicon.png';
-                $post_date   = date('M j, Y', strtotime($post['published_at']));
+                $post_date    = date('M j, Y', strtotime($post['published_at']));
+                $post_excerpt = !empty($post['excerpt'])
+                              ? $post['excerpt']
+                              : mb_substr(strip_tags($post['content'] ?? ''), 0, 160);
         ?>
             <article class="post-card"
                      data-category="<?= htmlspecialchars($post['category_slug']) ?>">
@@ -61,19 +64,19 @@ require_once dirname(__DIR__, 2) . '/includes/header.php';
                 <div class="post-content">
                     <p class="post-meta">
                         <span class="post-meta-icon" aria-hidden="true">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </span>
                         <span class="post-cat"><?= htmlspecialchars($catData['category_name']) ?></span>
                         <span class="post-meta-sep" aria-hidden="true">·</span>
                         <span class="post-meta-icon" aria-hidden="true">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </span>
                         <time class="post-date" datetime="<?= htmlspecialchars($post['published_at']) ?>"><?= $post_date ?></time>
                     </p>
                     <h3 class="post-title">
                         <a href="<?= $post_url ?>"><?= htmlspecialchars($post['title']) ?></a>
                     </h3>
-                    <p class="post-excerpt"><?= htmlspecialchars($post['excerpt']) ?></p>
+                    <p class="post-excerpt"><?= htmlspecialchars($post_excerpt) ?></p>
                     <a class="post-readmore" href="<?= $post_url ?>">READ MORE →</a>
                 </div>
             </article>
