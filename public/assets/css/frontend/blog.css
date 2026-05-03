@@ -162,6 +162,12 @@ body {
   position: relative;
   display: block;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.post-thumb:focus,
+.post-thumb:active {
+  outline: none;
 }
 
 .post-img-wrapper {
@@ -266,13 +272,22 @@ body {
   overflow: hidden;
 }
 
-.post-title a {
+.post-title a,
+.post-title a:link,
+.post-title a:visited {
   color: #111;
   text-decoration: none;
 }
 
 .post-title a:hover {
   color: #111;
+}
+
+.post-title a:focus,
+.post-title a:active {
+  outline: none;
+  color: #111;
+  text-decoration: none;
 }
 
 /* ── Excerpt ──────────────────────────── */
@@ -290,7 +305,9 @@ body {
 }
 
 /* ── READ MORE button ─────────────────── */
-.post-readmore {
+.post-readmore,
+.post-readmore:link,
+.post-readmore:visited {
   margin-top: auto;
   display: inline-flex;
   align-items: center;
@@ -307,6 +324,7 @@ body {
   background: #fff;
   text-transform: uppercase;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .post-readmore:hover {
@@ -314,6 +332,21 @@ body {
   border-color: #f7cf04;
   color: #111;
   text-decoration: none;
+}
+
+.post-readmore:focus,
+.post-readmore:active {
+  outline: none !important;
+  box-shadow: none !important;
+  color: #f7cf04 !important;
+  background: #fff !important;
+  border-color: #cfcfcf !important;
+  text-decoration: none;
+}
+
+.post-readmore:focus-visible {
+  outline: none !important;
+  border-color: #f7cf04 !important;
 }
 
 /* ================================================================
