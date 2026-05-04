@@ -564,47 +564,55 @@
   .mob-brand-logo        { max-width: 88px; max-height: 36px; }
 }
 @media (max-width: 480px) {
-  .mob-hero              { padding: 28px 16px 24px; }
-  .mob-hero-title        { font-size: 30px; }
-  .mob-hero-sub          { font-size: 14px; }
-  /* Tighter grid gap → more width per card */
-  .mob-product-grid      { gap: 8px; }
-  .mob-products-section  { padding: 20px 12px 32px; }
-  /* Buttons: fit two in one row without clipping on ~160px-wide cards */
   .mob-products-section .na-actions {
+    display: flex;
+    flex-direction: row;
     gap: 6px;
-    padding: 4px 6px 10px;
+    padding: 4px 8px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
   }
+
   .mob-products-section .na-actions .na-btn,
   .mob-products-section .na-actions .buy-button {
-    font-size: 10px;
-    padding-inline: 6px;
-    letter-spacing: -0.02em;
-    height: 35px;
-    line-height: 1;
-    flex: 1 1 50%;
+    flex: 1 1 0;
     min-width: 0;
-    width: auto;
+    width: 100%;
+
+    height: 34px;
+    min-height: 34px;
+
+    padding: 0 5px;
+
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     border-radius: 8px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: visible;
+    text-align: center;
   }
-  /* Ensure Add to Cart matches Buy Now horizontal padding on Latest Mobiles */
+
   .mob-products-section .na-actions .na-btn--cart {
-    padding-inline: 32px;
+    background: #111;
+    color: #fff;
+    border: 1.5px solid #111;
   }
-  .mob-products-section .na-actions .na-btn--soldout {
-    font-size: 10px;
-    height: 32px;
-    letter-spacing: -0.02em;
+
+  .mob-products-section .na-actions .na-btn--buy,
+  .mob-products-section .na-actions .buy-button {
+    background: #fff;
+    color: #111;
+    border: 1.5px solid #d0d0d0;
   }
-  .mob-why-grid          { grid-template-columns: 1fr; }
-  .mob-why-card          { padding: 22px 18px; }
-  .mob-seo-inner h2      { font-size: 18px; }
-  .mob-brand-card        { width: 96px; height: 72px; padding: 7px 8px 6px; gap: 5px; }
-  .mob-brand-logo        { max-width: 70px; max-height: 30px; }
-  .mob-brand-card-text   { font-size: 9.5px; }
 }
 
 /* ── Ad container — prevent blank space from unfilled ads ─── */

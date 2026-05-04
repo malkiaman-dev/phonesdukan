@@ -401,51 +401,55 @@ a.secondary-cta:active {
 
 /* Mobile: normalize Best Mobiles buttons to match Home New Arrivals */
 @media (max-width: 480px) {
-    .best-mobiles-page .buy-now {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 6px;
-        align-items: center;
-    }
+  .mob-products-section .na-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    padding: 4px 8px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+  }
 
-    .best-mobiles-page .buy-now .secondary-cta,
-    .best-mobiles-page .buy-now .buy-button {
-        flex: 1 1 50%;
-        min-width: 0;
-        width: auto;
-        height: 34px;
-        min-height: 34px;
-        padding-inline: 32px;
-        padding-block: 0;
-        font-size: 10px;
-        line-height: 1;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        box-sizing: border-box;
-    }
+  .mob-products-section .na-actions .na-btn,
+  .mob-products-section .na-actions .buy-button {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
 
-    /* Ensure visual roles match New Arrivals: Add to Cart = black, Buy Now = white */
-    .best-mobiles-page .buy-now .secondary-cta {
-        background: #111111 !important;
-        color: #ffffff !important;
-        border: 1.5px solid #111111 !important;
-        font-weight: 700;
-    }
+    height: 34px;
+    min-height: 34px;
 
-    .best-mobiles-page .buy-now .buy-button {
-        background: #ffffff !important;
-        color: #111111 !important;
-        border: 1.5px solid #d0d0d0 !important;
-        font-weight: 700;
-        padding-inline: 32px !important;
-        min-height: 34px !important;
-    }
+    padding: 0 5px;
 
-    /* Remove conflicting sizing from page-level defaults */
-    .best-mobiles-page .buy-button { min-width: unset !important; min-height: unset !important; }
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: visible;
+    text-align: center;
+  }
+
+  .mob-products-section .na-actions .na-btn--cart {
+    background: #111;
+    color: #cfd529;
+    border: 1.5px solid #111;
+  }
+
+  .mob-products-section .na-actions .na-btn--buy,
+  .mob-products-section .na-actions .buy-button {
+    background: #fff;
+    color: #111;
+    border: 1.5px solid #d0d0d0;
+  }
 }
 
 .spec-desc span {
