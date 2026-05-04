@@ -711,8 +711,8 @@
 
   .na-actions .na-btn,
   .na-actions .buy-button {
-    font-size: 11px;
-    padding: 0 6px;
+    font-size: 10px;
+    padding-inline: 6px;
     letter-spacing: -0.02em;
     height: 34px;
     flex: 1 1 50%;
@@ -721,6 +721,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
+    border-radius: 8px;
   }
 
   .na-actions .na-btn--soldout {
