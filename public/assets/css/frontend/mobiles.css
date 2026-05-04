@@ -571,15 +571,23 @@
   .mob-products-section  { padding: 20px 12px 32px; }
   /* Buttons: fit two in one row without clipping on ~160px-wide cards */
   .mob-products-section .na-actions {
-    gap: 5px;
+    gap: 6px;
     padding: 4px 6px 10px;
   }
   .mob-products-section .na-actions .na-btn,
   .mob-products-section .na-actions .buy-button {
     font-size: 10px;
-    padding-inline: 4px;
-    letter-spacing: -0.04em;
-    height: 32px;
+    padding-inline: 6px;
+    letter-spacing: -0.02em;
+    height: 35px;
+    line-height: 1;
+    flex: 1 1 50%;
+    min-width: 0;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
   }
   .mob-products-section .na-actions .na-btn--soldout {
     font-size: 10px;
