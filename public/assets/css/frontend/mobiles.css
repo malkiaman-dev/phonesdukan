@@ -599,19 +599,39 @@
     white-space: nowrap;
     overflow: visible;
     text-align: center;
+
+    transition: all 0.2s ease;
   }
 
+  /* Add to Cart */
   .mob-products-section .na-actions .na-btn--cart {
     background: #111;
-    color: #fff;
+    color: #fff; /* fixed better contrast */
     border: 1.5px solid #111;
   }
 
+  /* Buy Now default */
   .mob-products-section .na-actions .na-btn--buy,
   .mob-products-section .na-actions .buy-button {
     background: #fff;
     color: #111;
     border: 1.5px solid #d0d0d0;
+  }
+
+  /* 🔥 Buy Now click (active state) */
+  .mob-products-section .na-actions .na-btn--buy:active,
+  .mob-products-section .na-actions .buy-button:active {
+    border-color: #f7cf04;
+    color: #f7cf04;
+    background: #fff;
+  }
+
+  /* Optional: focus state (better UX) */
+  .mob-products-section .na-actions .na-btn--buy:focus,
+  .mob-products-section .na-actions .buy-button:focus {
+    border-color: #f7cf04;
+    color: #f7cf04;
+    outline: none;
   }
 }
 
