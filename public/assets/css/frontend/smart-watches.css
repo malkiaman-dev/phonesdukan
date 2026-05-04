@@ -703,25 +703,36 @@
   }
 
   .na-actions {
-    flex-direction: column;
-    gap: 5px;
+    /* Keep buttons side-by-side on small screens: two equal columns */
+    flex-direction: row;
+    gap: 6px;
     padding: 4px 6px 10px;
   }
 
   .na-actions .na-btn,
   .na-actions .buy-button {
     font-size: 11px;
-    padding-inline: 6px;
+    padding: 0 6px;
     letter-spacing: -0.02em;
     height: 34px;
-    width: 100%;
+    flex: 1 1 50%;
+    min-width: 0;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .na-actions .na-btn--soldout {
     font-size: 11px;
     height: 34px;
     letter-spacing: -0.02em;
-    width: 100%;
+    flex: 1 1 50%;
+    min-width: 0;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .sw-pagination a {

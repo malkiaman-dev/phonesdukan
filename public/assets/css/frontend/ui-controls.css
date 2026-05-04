@@ -151,3 +151,37 @@ select:disabled,
 .product-card a:hover {
     text-decoration: none !important;
 }
+
+/* Universal button normalization: ensure Add to Cart and Buy Now match site-wide */
+.na-actions .na-btn--cart,
+.na-actions .na-btn--buy,
+.na-actions .buy-button {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 6px;
+  font-size: 10px;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* Kill all custom size overrides coming from .buy-button */
+.buy-button {
+  min-height: unset !important;
+  padding: 0 6px !important;
+}
+
+@media (max-width: 480px) {
+  .na-actions .na-btn--cart,
+  .na-actions .na-btn--buy,
+  .na-actions .buy-button {
+    height: 30px;
+    min-height: 30px;
+    padding: 0 4px;
+  }
+}
