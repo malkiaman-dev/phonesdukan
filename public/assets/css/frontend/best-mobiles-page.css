@@ -306,6 +306,18 @@
     transition: all 0.3s ease;
 }
 
+/* Make Buy Now border yellow on click/focus and during processing/disabled states */
+.best-mobiles-page .buy-now .buy-button:active,
+.best-mobiles-page .buy-now .buy-button:focus,
+.best-mobiles-page .buy-now .buy-button:focus-visible,
+.best-mobiles-page .buy-now .buy-button.processing,
+.best-mobiles-page .buy-now .buy-button.is-processing,
+.best-mobiles-page .buy-now .buy-button.disabled,
+.best-mobiles-page .buy-now .buy-button[disabled] {
+    border: 1.5px solid #f7d117 !important;
+    box-shadow: 0 0 0 3px rgba(247,209,23,0.10) !important;
+}
+
 .best-mobiles-page .buy-button:hover,
 .best-mobiles-page .buy-button:focus {
     background: #fff !important;

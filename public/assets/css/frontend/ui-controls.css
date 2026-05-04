@@ -176,3 +176,21 @@ select:disabled,
     font-size: 10px;
   }
 }
+
+.na-actions .na-btn--buy,
+.na-actions .buy-button {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 1.5px solid #d0d0d0 !important;
+}
+
+.na-actions .na-btn--buy:hover,
+.na-actions .na-btn--buy:focus,
+.na-actions .na-btn--buy:active,
+.na-actions .buy-button:hover,
+.na-actions .buy-button:focus,
+.na-actions .buy-button:active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #f7cf04 !important;
+}
