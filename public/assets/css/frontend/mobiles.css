@@ -606,7 +606,7 @@
   /* Add to Cart */
   .mob-products-section .na-actions .na-btn--cart {
     background: #111;
-    color: #fff; /* fixed better contrast */
+    color: #fff;
     border: 1.5px solid #111;
   }
 
@@ -618,20 +618,17 @@
     border: 1.5px solid #d0d0d0;
   }
 
-  /* 🔥 Buy Now click (active state) */
+  /* 🔥 CLICK / TAP STATE (FORCED) */
   .mob-products-section .na-actions .na-btn--buy:active,
-  .mob-products-section .na-actions .buy-button:active {
-    border-color: #f7cf04;
-    color: #f7cf04;
-    background: #fff;
-  }
-
-  /* Optional: focus state (better UX) */
+  .mob-products-section .na-actions .buy-button:active,
   .mob-products-section .na-actions .na-btn--buy:focus,
-  .mob-products-section .na-actions .buy-button:focus {
-    border-color: #f7cf04;
-    color: #f7cf04;
-    outline: none;
+  .mob-products-section .na-actions .buy-button:focus,
+  .mob-products-section .na-actions .na-btn--buy:focus-visible,
+  .mob-products-section .na-actions .buy-button:focus-visible {
+    border-color: #f7cf04 !important;
+    color: #f7cf04 !important;
+    background: #fff !important;
+    outline: none !important;
   }
 }
 
