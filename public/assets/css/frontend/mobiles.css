@@ -154,6 +154,7 @@
   background: #111;
   color: #fff;
   border: 1.5px solid #111;
+  padding-inline: 12px;
 }
 .na-actions .na-btn--cart:hover {
   background: #2c2c2c;
@@ -588,6 +589,10 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
+  }
+  /* Ensure Add to Cart matches Buy Now horizontal padding on Latest Mobiles */
+  .mob-products-section .na-actions .na-btn--cart {
+    padding-inline: 32px;
   }
   .mob-products-section .na-actions .na-btn--soldout {
     font-size: 10px;
