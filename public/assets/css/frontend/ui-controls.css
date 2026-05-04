@@ -78,7 +78,7 @@ select:disabled,
 .buy-button {
     width: auto;
     min-width: 130px;
-    min-height: 44px;
+    min-height: 35px;
     border: none;
     border-radius: 10px;
     background: #f7cf04;
