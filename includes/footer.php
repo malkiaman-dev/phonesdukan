@@ -20,8 +20,8 @@
                 <a href="https://www.tiktok.com/@phonesdukan" aria-label="Visit our TikTok page" class="footer-social-icon tiktok-icon">
                     <img src="<?= url('public/assets/images/tiktok_icon.svg'); ?>" alt="TikTok">
                 </a>
-                <a href="https://x.com/phonesdukan/" aria-label="Visit our Twitter page" class="footer-social-icon twitter-icon">
-                    <img src="<?= url('public/assets/images/twitter_icon.svg'); ?>" alt="Twitter">
+                <a href="https://wa.me/923116600031" aria-label="Visit our WhatsApp page" class="footer-social-icon whatsapp-icon">
+                    <img src="<?= url('public/assets/images/whatsapp_icon.svg'); ?>" alt="Whatsapp">
                 </a>
             </div>
         </div>
