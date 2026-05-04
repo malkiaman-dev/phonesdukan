@@ -287,7 +287,7 @@
 }
 
 
-.buy-button {
+.best-mobiles-page .buy-button {
     width: auto;
     min-width: 130px;
     min-height: 44px;
@@ -306,15 +306,15 @@
     transition: all 0.3s ease;
 }
 
-.buy-button:hover,
-.buy-button:focus {
+.best-mobiles-page .buy-button:hover,
+.best-mobiles-page .buy-button:focus {
     background: #e6bd00;
     color: #111111 !important;
     transform: translateY(-1px);
     text-decoration: none !important;
 }
 
-.buy-button.disabled {
+.best-mobiles-page .buy-button.disabled {
     background: #f3f4f6;
     color: #9ca3af !important;
     border: 1px solid #e5e7eb;
