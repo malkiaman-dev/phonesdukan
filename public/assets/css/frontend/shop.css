@@ -259,6 +259,37 @@
   color: #111;
 }
 
+/* Normalize Buy Now / Add to Cart on shop page to prevent height mismatch */
+.na-actions .na-btn--cart,
+.na-actions .na-btn--buy,
+.na-actions .buy-button {
+    height: 34px;
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 10px;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Kill extra size coming from buy button */
+.na-actions .buy-button {
+    min-height: unset;
+    padding: 0 6px;
+}
+
+@media (max-width: 480px) {
+    .na-actions .na-btn--cart,
+    .na-actions .na-btn--buy,
+    .na-actions .buy-button {
+        height: 34px;
+        min-height: 34px;
+        padding: 0 4px;
+    }
+}
+
 .shop-brand-search:focus {
   border-color: var(--shop-yellow);
   box-shadow: 0 0 0 2px rgba(247, 209, 23, 0.25);
