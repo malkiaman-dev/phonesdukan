@@ -1,9 +1,30 @@
+.admin-page,
+.admin-page * {
+    box-sizing: border-box;
+}
+
+/* Allow normal page scrolling (single scrollbar) */
+html,
+body {
+    height: auto;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
 .admin-page {
     max-width: 1320px;
     margin: 0 auto;
     padding: 24px 24px 32px;
     background: #f8fafc;
     overflow: visible;
+    overflow-x: hidden;
+}
+
+.admin-page .product-form,
+.admin-page .form-grid,
+.admin-page .form-card,
+.admin-page .gallery-metadata-grid {
+    min-width: 0;
 }
 
 .admin-page .page-header {
