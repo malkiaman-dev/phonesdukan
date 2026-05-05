@@ -428,12 +428,22 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             background: #fff;
             color: var(--brand-black);
             border-color: var(--brand-border);
+            border-radius: 10px;
+            box-shadow: 0 8px 18px rgba(17, 17, 17, 0.08);
+            transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
         }
 
         .ord-btn.ghost:hover {
             background: var(--brand-yellow-light);
             color: var(--brand-black);
             border-color: var(--brand-yellow);
+            box-shadow: 0 12px 24px rgba(17, 17, 17, 0.14);
+            transform: translateY(-1px);
+        }
+
+        .ord-btn.ghost:active {
+            transform: translateY(0);
+            box-shadow: 0 6px 12px rgba(17, 17, 17, 0.1);
         }
 
         .ord-action {
