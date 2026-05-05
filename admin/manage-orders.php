@@ -481,6 +481,13 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-decoration:none;
             transition: transform .12s ease, box-shadow .12s ease, color .12s ease, border-color .12s ease, background .12s ease;
             white-space: nowrap;
+            text-decoration: none;
+        }
+        .ord-btn:link,
+        .ord-btn:visited,
+        .ord-btn:active {
+            color: #ffffff;
+            text-decoration: none;
         }
         .ord-btn:hover{
             color: var(--accent);
@@ -548,9 +555,17 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-decoration:none;
             transition: border-color .15s ease, background .15s ease, transform .12s ease;
         }
+        .page-link:link,
+        .page-link:visited,
+        .page-link:active {
+            color: var(--primary);
+            text-decoration: none;
+        }
         .page-link:hover{
             border-color: var(--accent);
             background: var(--lightYellow);
+            color: var(--primary);
+            text-decoration: none;
             transform: translateY(-1px);
         }
         .page-link.is-active{
@@ -839,10 +854,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td data-label="Actions" style="text-align:right;">
                                 <div class="ord-actions">
                                     <button class="ord-btn view" type="button" data-order-id="<?= $order['order_id'] ?>">View</button>
-                                    <?php if (($order['payment_method'] ?? '') === 'prepaid' && !empty($order['payment_screenshot'])): ?>
-                                        <a href="/admin/view-screenshot.php?file=<?= htmlspecialchars($order['payment_screenshot']) ?>"
-                                           target="_blank" class="ord-btn ghost">Screenshot</a>
-                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
