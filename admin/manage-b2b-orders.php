@@ -424,6 +424,18 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             background: var(--brand-black);
         }
 
+        .ord-btn.ghost {
+            background: #fff;
+            color: var(--brand-black);
+            border-color: var(--brand-border);
+        }
+
+        .ord-btn.ghost:hover {
+            background: var(--brand-yellow-light);
+            color: var(--brand-black);
+            border-color: var(--brand-yellow);
+        }
+
         .ord-action {
             min-width: 124px;
             white-space: nowrap;
@@ -723,6 +735,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                     <li><button type="button" class="filter-option" data-value="100">100 / page</button></li>
                 </ul>
             </div>
+            <button id="b2bExport" class="ord-btn ghost" type="button">Export CSV</button>
         </div>
     </div>
     <div class="ord-table-wrap">
@@ -846,6 +859,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchEl = document.getElementById("b2bSearch");
     const statusFilterEl = document.getElementById("b2bStatusFilter");
     const limitFilterEl = document.getElementById("b2bLimitFilter");
+    const exportBtn = document.getElementById("b2bExport");
     const visibleCountEl = document.getElementById("b2bVisibleCount");
     const paginationEl = document.getElementById("b2bPagination");
     const rows = Array.from(document.querySelectorAll("#b2bOrdersTable tbody tr"));
@@ -943,6 +957,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return String(value || "").toLowerCase().trim();
     }
 
+    function csvEscape(value) {
+        const s = String(value ?? "");
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+
     function getFilteredRows() {
         const q = normalizeText(searchEl ? searchEl.value : "");
         const status = statusFilterEl ? statusFilterEl.value : "all";
@@ -1027,6 +1046,43 @@ document.addEventListener("DOMContentLoaded", function () {
     limitFilterEl?.addEventListener("change", function () {
         currentPage = 1;
         applyFiltersAndPagination();
+    });
+
+    exportBtn?.addEventListener("click", function () {
+        const headers = ["ID", "Name", "Business", "Phone", "Tel No", "Price", "Status", "Date", "Note"];
+        const lines = [headers.join(",")];
+
+        const filteredRows = getFilteredRows();
+        filteredRows.forEach(function (row) {
+            const cells = row.querySelectorAll("td");
+            const id = (cells[0]?.textContent || "").trim();
+            const name = (cells[1]?.textContent || "").trim();
+            const business = (cells[2]?.textContent || "").trim();
+            const phone = (cells[3]?.textContent || "").trim();
+            const telNo = (cells[4]?.textContent || "").trim();
+            const price = (cells[5]?.textContent || "").trim();
+            const status = (row.querySelector('select[name="inquiry_status"]')?.value || row.dataset.status || "").trim();
+            const date = (cells[7]?.textContent || "").trim();
+            const note = (cells[8]?.textContent || "").trim();
+
+            lines.push([id, name, business, phone, telNo, price, status, date, note].map(csvEscape).join(","));
+        });
+
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+        const filename = `b2b-orders-${y}${m}${d}.csv`;
+
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
     });
 
     document.querySelectorAll(".ord-btn.upd").forEach(function (btn) {
