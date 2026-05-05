@@ -20,11 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $bulkInquiryModel = new BulkInquiryModel();
     $result = $bulkInquiryModel->updateB2BOrderStatus($inquiry_id, $new_status);
 
-    if ($result) {
-        echo "<script>alert('B2B Order status updated successfully!'); window.location.href='manage-b2b-orders.php';</script>";
-    } else {
-        echo "<script>alert('Failed to update B2B order status.');</script>";
-    }
+    header('Location: manage-b2b-orders.php?updated=' . ($result ? '1' : '0'));
+    exit();
 }
 
 include __DIR__ . '/admin_sidebar.php';
@@ -100,8 +97,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             flex-wrap: wrap;
         }
 
-        .ui-input,
-        .ui-select {
+        .ui-input {
             font-family: inherit;
             font-size: 0.9rem;
             color: var(--brand-black);
@@ -117,20 +113,102 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             width: min(320px, 70vw);
         }
 
-        .ui-input:focus,
-        .ui-select:focus {
+        .ui-input:focus {
             border-color: var(--brand-yellow);
             box-shadow: 0 0 0 4px rgba(250,204,21,0.25);
         }
 
-        .ui-select {
-            appearance: none;
-            -webkit-appearance: none;
-            padding-right: 36px;
-            background:
-                linear-gradient(45deg, transparent 50%, #111 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
-                linear-gradient(135deg, #111 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
-                #fff;
+        .native-filter-select {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
+        }
+
+        .filter-select-wrap {
+            position: relative;
+            min-width: 130px;
+        }
+
+        .filter-select-wrap.limit-wrap {
+            min-width: 116px;
+        }
+
+        .filter-display {
+            width: 100%;
+            border: 1px solid var(--brand-border);
+            border-radius: 12px;
+            padding: 10px 34px 10px 12px;
+            background: #fff;
+            color: var(--brand-black);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .filter-display::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #111;
+            border-bottom: 2px solid #111;
+            transform: translateY(-65%) rotate(45deg);
+        }
+
+        .filter-display:hover,
+        .filter-select-wrap.is-open .filter-display,
+        .filter-display:focus {
+            outline: none;
+            border-color: var(--brand-yellow);
+            box-shadow: 0 0 0 4px rgba(250,204,21,0.25);
+        }
+
+        .filter-options {
+            position: absolute;
+            z-index: 210;
+            left: 0;
+            right: 0;
+            margin-top: 6px;
+            list-style: none;
+            background: #fff;
+            border: 1px solid var(--brand-border);
+            border-radius: 12px;
+            box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
+            padding: 6px;
+            display: none;
+        }
+
+        .filter-select-wrap.is-open .filter-options {
+            display: block;
+        }
+
+        .filter-option {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--brand-black);
+            cursor: pointer;
+        }
+
+        .filter-option:hover {
+            background: var(--brand-yellow-light);
+        }
+
+        .filter-option.is-selected {
+            background: var(--brand-yellow);
         }
 
         .ord-table-wrap {
@@ -412,6 +490,83 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             overflow: visible;
         }
 
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17,17,17,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 16px;
+        }
+        .confirm-overlay.is-open { display: flex; }
+        .confirm-modal {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid var(--brand-border);
+            box-shadow: 0 20px 40px rgba(17,17,17,0.18);
+            padding: 20px;
+        }
+        .confirm-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--brand-black);
+            margin-bottom: 6px;
+        }
+        .confirm-text {
+            color: var(--brand-muted);
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+        .confirm-actions {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .confirm-btn {
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-weight: 700;
+            border: 1px solid var(--brand-border);
+            background: #fff;
+            color: var(--brand-black);
+            cursor: pointer;
+        }
+        .confirm-btn.confirm-yes {
+            background: var(--brand-black);
+            color: #fff;
+            border-color: var(--brand-black);
+        }
+        .confirm-btn.confirm-yes:hover {
+            color: var(--brand-yellow);
+        }
+
+        .status-toast {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 1300;
+            background: #111;
+            color: #fff;
+            border: 1px solid var(--brand-yellow);
+            border-left: 5px solid var(--brand-yellow);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 14px 30px rgba(17,17,17,0.3);
+            display: none;
+        }
+        .status-toast.is-failure {
+            border-left-color: var(--brand-yellow);
+            border-color: var(--brand-yellow);
+        }
+        .status-toast.show { display: block; }
+
         /* ===== Modal Overlay ===== */
         .custom-order-popup-overlay {
             position: fixed;
@@ -514,8 +669,8 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                 flex-wrap: wrap;
                 min-width: 0;
             }
-            .orders-controls .ui-select,
-            .orders-controls .ui-input {
+            .orders-controls .ui-input,
+            .filter-select-wrap {
                 width: 100%;
             }
         }
@@ -531,18 +686,36 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         </div>
         <div class="orders-controls">
             <input id="b2bSearch" class="ui-input" type="search" placeholder="Search B2B orders..." autocomplete="off">
-            <select id="b2bStatusFilter" class="ui-select" aria-label="Filter by status">
+            <select id="b2bStatusFilter" class="native-filter-select" aria-label="Filter by status">
                 <option value="all">All statuses</option>
                 <option value="Pending">Pending</option>
                 <option value="Cancelled">Cancelled</option>
                 <option value="Completed">Completed</option>
             </select>
-            <select id="b2bLimitFilter" class="ui-select" aria-label="Rows per page">
+            <div class="filter-select-wrap" data-filter-select>
+                <button type="button" class="filter-display" data-filter-display>All statuses</button>
+                <ul class="filter-options" data-filter-options>
+                    <li><button type="button" class="filter-option is-selected" data-value="all">All statuses</button></li>
+                    <li><button type="button" class="filter-option" data-value="Pending">Pending</button></li>
+                    <li><button type="button" class="filter-option" data-value="Cancelled">Cancelled</button></li>
+                    <li><button type="button" class="filter-option" data-value="Completed">Completed</button></li>
+                </ul>
+            </div>
+            <select id="b2bLimitFilter" class="native-filter-select" aria-label="Rows per page">
                 <option value="10">10 / page</option>
                 <option value="20" selected>20 / page</option>
                 <option value="50">50 / page</option>
                 <option value="100">100 / page</option>
             </select>
+            <div class="filter-select-wrap limit-wrap" data-filter-select>
+                <button type="button" class="filter-display" data-filter-display>20 / page</button>
+                <ul class="filter-options" data-filter-options>
+                    <li><button type="button" class="filter-option" data-value="10">10 / page</button></li>
+                    <li><button type="button" class="filter-option is-selected" data-value="20">20 / page</button></li>
+                    <li><button type="button" class="filter-option" data-value="50">50 / page</button></li>
+                    <li><button type="button" class="filter-option" data-value="100">100 / page</button></li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="ord-table-wrap">
@@ -560,19 +733,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                 <col style="width:11%">
             </colgroup>
             <thead class="ord-head">
-                <tr class="ord-row"
-                    data-status="<?= htmlspecialchars($order['status'] ?? '') ?>"
-                    data-search="<?= htmlspecialchars(
-                        ($order['id'] ?? '') . ' ' .
-                        ($order['name'] ?? '') . ' ' .
-                        ($order['business_name'] ?? '') . ' ' .
-                        ($order['phone'] ?? '') . ' ' .
-                        ($order['tel_no'] ?? '') . ' ' .
-                        ($order['total_price'] ?? '') . ' ' .
-                        ($order['status'] ?? '') . ' ' .
-                        ($order['created_at'] ?? '') . ' ' .
-                        ($order['message'] ?? '')
-                    ) ?>">
+                <tr>
                     <th>ID</th>
                     <th>Name</th>
                     <th>Business</th>
@@ -587,7 +748,19 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             </thead>
             <tbody>
                 <?php foreach ($b2b_orders as $order): ?>
-                <tr>
+                <tr class="ord-row"
+                    data-status="<?= htmlspecialchars($order['status'] ?? '') ?>"
+                    data-search="<?= htmlspecialchars(
+                        ($order['id'] ?? '') . ' ' .
+                        ($order['name'] ?? '') . ' ' .
+                        ($order['business_name'] ?? '') . ' ' .
+                        ($order['phone'] ?? '') . ' ' .
+                        ($order['tel_no'] ?? '') . ' ' .
+                        ($order['total_price'] ?? '') . ' ' .
+                        ($order['status'] ?? '') . ' ' .
+                        ($order['created_at'] ?? '') . ' ' .
+                        ($order['message'] ?? '')
+                    ) ?>">
                     <td data-label="ID"><?= htmlspecialchars($order['id']) ?></td>
                     <td data-label="Name"><?= htmlspecialchars($order['name']) ?></td>
                     <td data-label="Business"><?= htmlspecialchars($order['business_name']) ?></td>
@@ -648,6 +821,17 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         <div id="b2b-ord-detail-content"><p>Loading...</p></div>
     </div>
 </div>
+<div class="confirm-overlay" id="statusConfirmOverlay" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div id="confirmTitle" class="confirm-title">Update B2B Order Status?</div>
+        <p class="confirm-text">Are you sure you want to update this B2B order status?</p>
+        <div class="confirm-actions">
+            <button type="button" class="confirm-btn" id="confirmCancelBtn">Cancel</button>
+            <button type="button" class="confirm-btn confirm-yes" id="confirmYesBtn">Yes, Update</button>
+        </div>
+    </div>
+</div>
+<div id="statusToast" class="status-toast" role="status" aria-live="polite"></div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -658,7 +842,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const visibleCountEl = document.getElementById("b2bVisibleCount");
     const paginationEl = document.getElementById("b2bPagination");
     const rows = Array.from(document.querySelectorAll("#b2bOrdersTable tbody tr"));
+    const confirmOverlay = document.getElementById("statusConfirmOverlay");
+    const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+    const confirmYesBtn = document.getElementById("confirmYesBtn");
+    const toastEl = document.getElementById("statusToast");
     let currentPage = 1;
+    let pendingSubmitForm = null;
     
     document.querySelectorAll("[data-status-select]").forEach(function (wrap) {
         const display = wrap.querySelector("[data-status-display]");
@@ -697,6 +886,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener("click", function () {
         document.querySelectorAll(".status-select-wrap.is-open").forEach(function (openWrap) {
+            openWrap.classList.remove("is-open");
+        });
+    });
+
+    document.querySelectorAll("[data-filter-select]").forEach(function (wrap) {
+        const display = wrap.querySelector("[data-filter-display]");
+        const options = Array.from(wrap.querySelectorAll(".filter-option"));
+        const nativeSelect = wrap.previousElementSibling;
+        if (!display || !nativeSelect || !nativeSelect.classList.contains("native-filter-select")) return;
+
+        function setValue(value) {
+            nativeSelect.value = value;
+            const selectedOpt = options.find(function (opt) {
+                return opt.dataset.value === value;
+            });
+            display.textContent = selectedOpt ? selectedOpt.textContent.trim() : value;
+            options.forEach(function (opt) {
+                opt.classList.toggle("is-selected", opt.dataset.value === value);
+            });
+            nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        display.addEventListener("click", function (e) {
+            e.stopPropagation();
+            document.querySelectorAll(".filter-select-wrap.is-open").forEach(function (openWrap) {
+                if (openWrap !== wrap) openWrap.classList.remove("is-open");
+            });
+            wrap.classList.toggle("is-open");
+        });
+
+        options.forEach(function (opt) {
+            opt.addEventListener("click", function () {
+                setValue(this.dataset.value || "");
+                wrap.classList.remove("is-open");
+            });
+        });
+
+        setValue(nativeSelect.value || options[0].dataset.value || "");
+    });
+
+    document.addEventListener("click", function () {
+        document.querySelectorAll(".filter-select-wrap.is-open").forEach(function (openWrap) {
             openWrap.classList.remove("is-open");
         });
     });
@@ -791,7 +1022,68 @@ document.addEventListener("DOMContentLoaded", function () {
         applyFiltersAndPagination();
     });
 
+    document.querySelectorAll(".ord-btn.upd").forEach(function (btn) {
+        btn.addEventListener("click", function (event) {
+            event.preventDefault();
+            const form = this.closest("td")?.previousElementSibling?.querySelector("form") || this.closest("tr")?.querySelector("form");
+            if (!form) return;
+            pendingSubmitForm = form;
+            confirmOverlay?.classList.add("is-open");
+        });
+    });
+
+    confirmCancelBtn?.addEventListener("click", function () {
+        confirmOverlay?.classList.remove("is-open");
+        pendingSubmitForm = null;
+    });
+
+    confirmYesBtn?.addEventListener("click", function () {
+        if (!pendingSubmitForm) return;
+        let hiddenAction = pendingSubmitForm.querySelector('input[name="update_status"]');
+        if (!hiddenAction) {
+            hiddenAction = document.createElement("input");
+            hiddenAction.type = "hidden";
+            hiddenAction.name = "update_status";
+            hiddenAction.value = "1";
+            pendingSubmitForm.appendChild(hiddenAction);
+        } else {
+            hiddenAction.value = "1";
+        }
+        const formToSubmit = pendingSubmitForm;
+        pendingSubmitForm = null;
+        confirmOverlay?.classList.remove("is-open");
+        formToSubmit.submit();
+    });
+
+    confirmOverlay?.addEventListener("click", function (e) {
+        if (e.target === confirmOverlay) {
+            confirmOverlay.classList.remove("is-open");
+            pendingSubmitForm = null;
+        }
+    });
+
     applyFiltersAndPagination();
+
+    const params = new URLSearchParams(window.location.search);
+    if (toastEl) {
+        const updatedState = params.get("updated");
+        if (updatedState === "1") {
+            toastEl.textContent = "B2B order status updated successfully.";
+            toastEl.classList.remove("is-failure");
+            toastEl.classList.add("show");
+        } else if (updatedState === "0") {
+            toastEl.textContent = "Failed to update B2B order status. Please try again.";
+            toastEl.classList.add("is-failure");
+            toastEl.classList.add("show");
+        }
+        if (updatedState === "1" || updatedState === "0") {
+            setTimeout(function () { toastEl.classList.remove("show"); }, 3200);
+            params.delete("updated");
+            const newQuery = params.toString();
+            const newUrl = window.location.pathname + (newQuery ? ("?" + newQuery) : "");
+            window.history.replaceState({}, document.title, newUrl);
+        }
+    }
 
     document.querySelectorAll(".view").forEach(function (button) {
         button.addEventListener("click", function () {
