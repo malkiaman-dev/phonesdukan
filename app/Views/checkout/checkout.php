@@ -206,9 +206,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $clearStmt = $conn->prepare('DELETE FROM cart WHERE session_id = ?');
         $clearStmt->execute([$session_id]);
 
-        // Redirect to thank you page (MATCH ROUTER PATTERN)
-        header('Location: /thankyou/order_id=' . $orderResult['order_id']);
-        exit();
+        // Redirect to thank you page (base-aware)
+        if (function_exists('redirectTo')) {
+            redirectTo('thankyou/order_id=' . $orderResult['order_id']);
+        } else {
+            header('Location: /thankyou/order_id=' . $orderResult['order_id']);
+            exit();
+        }
     } else {
         $errorMessage = $orderResult['message'];
         // Cleanup temp file if failed
