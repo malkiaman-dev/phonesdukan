@@ -31,8 +31,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     }
 }
 
-$query = "SELECT * FROM orders ORDER BY created_at DESC";
-$stmt = $conn->query($query);
+// Pagination (safe + minimal backend change)
+$allowedLimits = [20, 50, 100];
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+if (!in_array($limit, $allowedLimits, true)) {
+    $limit = 20;
+}
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) {
+    $page = 1;
+}
+
+$totalOrders = (int)$conn->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+$totalPages = max(1, (int)ceil($totalOrders / $limit));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+
+$offset = ($page - 1) * $limit;
+
+$stmt = $conn->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -45,300 +67,623 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ===== Reset & Base ===== */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root{
+            --primary:#111111;
+            --accent:#facc15;
+            --accentHover:#eab308;
+            --lightYellow:#fffbeb;
+            --bg:#f8fafc;
+            --card:#ffffff;
+            --border:#e5e7eb;
+            --divider:#f1f5f9;
+            --text:#111111;
+            --muted:#6b7280;
+            --shadow: 0 12px 30px rgba(17,17,17,0.06);
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
         body {
             font-family: 'DM Sans', sans-serif;
-            background: #f0f2f5;
-            color: #222;
+            background: var(--bg);
+            color: var(--text);
         }
 
-        /* ===== Wrapper ===== */
-        .ord-wrap {
-            max-width: 1400px;
-            margin: 30px auto;
-            padding: 0 24px;
+        /* ===== Page layout ===== */
+        .ord-wrap{
+            max-width: 1280px;
+            margin: 28px auto;
+            padding: 0 20px;
         }
 
-        /* ===== Title ===== */
-        .ord-title {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            text-align: center;
-            margin-bottom: 24px;
-            letter-spacing: -0.3px;
+        /* ===== Header section ===== */
+        .orders-head{
+            display:flex;
+            align-items:flex-end;
+            justify-content:space-between;
+            gap:16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .orders-title{
+            display:flex;
+            flex-direction:column;
+            gap: 4px;
+            min-width: 240px;
+        }
+        .orders-title h2{
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--primary);
+        }
+        .orders-title p{
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.35;
         }
 
-        /* ===== Table Wrapper ===== */
-        .ord-table-wrap {
+        .orders-controls{
+            display:flex;
+            gap:10px;
+            flex-wrap: wrap;
+            align-items:center;
+            justify-content:flex-end;
+        }
+
+        .ui-input, .ui-select{
+            font-family: inherit;
+            font-size: 0.92rem;
+            color: var(--text);
+            border: 1px solid var(--border);
             background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 10px 12px;
+            outline: none;
+            transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+        }
+        .ui-input::placeholder{ color: #9ca3af; }
+        .ui-input:focus, .ui-select:focus{
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(250,204,21,0.25);
+        }
+        .ui-input{
+            width: min(360px, 70vw);
+        }
+
+        /* Custom select (filter) */
+        .ui-select{
+            appearance:none;
+            -webkit-appearance:none;
+            padding-right: 40px;
+            background:
+                linear-gradient(45deg, transparent 50%, #111 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
+                linear-gradient(135deg, #111 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
+                linear-gradient(to right, transparent, transparent) 0 0 / 100% 100% no-repeat,
+                #fff;
+        }
+
+        /* ===== Card wrapper ===== */
+        .table-card{
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+        .table-header{
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--divider);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .table-meta{
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        .table-body{
+            padding: 0;
         }
 
         /* ===== Table ===== */
-        .ord-table {
+        .ord-table{
             width: 100%;
+            table-layout: fixed;
             border-collapse: collapse;
-            font-size: 0.92rem;
+            font-size: 0.88rem; /* ~14px */
         }
-
-        /* ===== Header ===== */
-        .ord-head tr {
-            background: #1a7fe8;
-        }
-
-        .ord-head th {
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 0.8px;
+        .ord-table thead th{
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f9fafb;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 14px 18px;
+            padding: 10px 8px;
             text-align: left;
+            border-bottom: 1px solid var(--divider);
             white-space: nowrap;
         }
 
-        /* ===== Body Rows ===== */
-        .ord-table tbody tr {
-            border-bottom: 1px solid #e8ecf0;
-            transition: background 0.15s ease;
+        .ord-table tbody tr{
+            transition: background .15s ease;
         }
-
-        .ord-table tbody tr:last-child {
+        .ord-table tbody tr:nth-child(even){
+            background: #fcfcfd;
+        }
+        .ord-table tbody tr:hover{
+            background: var(--lightYellow);
+        }
+        .ord-table tbody td{
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--divider);
+            vertical-align: middle;
+            color: #111827;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        /* Status column: allow full dropdown text (no clipping/ellipsis) */
+        .ord-table td.ord-status-cell{
+            overflow: visible;
+            text-overflow: unset;
+        }
+        .ord-table td.ord-update-cell{
+            overflow: visible;
+            text-overflow: unset;
+        }
+        .ord-table tbody tr:last-child td{
             border-bottom: none;
         }
 
-        .ord-table tbody tr:hover {
-            background: #f5f8ff;
+        .ord-id{
+            font-weight: 800;
+            color: var(--primary);
+            width: 86px;
         }
-
-        .ord-table tbody td {
-            padding: 16px 18px;
-            vertical-align: middle;
-            color: #333;
-            line-height: 1.5;
+        .ord-customer{
+            display:flex;
+            flex-direction:column;
+            gap: 2px;
+            min-width: 0;
         }
-
-        /* ID column */
-        .ord-table tbody td:first-child {
+        .ord-customer .name{
             font-weight: 700;
-            color: #555;
-            width: 55px;
-        }
-
-        /* Price bold */
-        .ord-table tbody td strong {
-            font-weight: 700;
-            color: #1a1a2e;
-        }
-
-        /* Note italic */
-        .ord-table tbody td i {
-            color: #aaa;
-            font-style: italic;
-        }
-
-        /* ===== Status Dropdown ===== */
-        .ord-select {
-            appearance: none;
-            -webkit-appearance: none;
-            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;
-            border: 1.5px solid #d0d7e2;
-            border-radius: 6px;
-            padding: 7px 30px 7px 10px;
-            font-size: 0.85rem;
-            font-family: 'DM Sans', sans-serif;
-            color: #333;
-            cursor: pointer;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            min-width: 130px;
-        }
-
-        .ord-select:focus {
-            outline: none;
-            border-color: #1a7fe8;
-            box-shadow: 0 0 0 3px rgba(26,127,232,0.12);
-        }
-
-        /* ===== Buttons ===== */
-        .ord-btn {
-            display: inline-block;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+            color: var(--primary);
+            line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
-            margin: 2px 2px;
+        }
+        .ord-customer .note{
+            color: var(--muted);
+            font-size: 0.86rem;
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .ord-btn:hover {
+        .ord-amount{
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: unset;
+        }
+        .ord-date{
+            color: var(--muted);
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .ord-phone{
+            color: #111827;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        /* ===== Status pill select ===== */
+        .status-pill{
+            display:inline-flex;
+            align-items:center;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #fff;
+            padding: 2px;
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        .status-pill:hover{
+            border-color: var(--accent);
+        }
+        .status-pill:focus-within{
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(250,204,21,0.25);
+        }
+        .ord-select{
+            appearance:none;
+            -webkit-appearance:none;
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 700;
+            padding: 8px 28px 8px 12px;
+            border: 0;
+            outline: none;
+            background:
+                linear-gradient(45deg, transparent 50%, #111 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
+                linear-gradient(135deg, #111 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
+                transparent;
+            cursor: pointer;
+            border-radius: 999px;
+            color: var(--primary);
+            width: 125px;
+            min-width: 125px;
+            max-width: none;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: unset;
+        }
+        .status-pill[data-status="pending"]{ background: var(--lightYellow); }
+        .status-pill[data-status="processing"]{ background: #f3f4f6; }
+        .status-pill[data-status="completed"]{ background: #ecfdf5; } /* soft green */
+        .status-pill[data-status="cancelled"]{ background: #f8fafc; }
+
+        /* ===== Buttons (black/yellow) ===== */
+        .ord-actions{
+            display:flex;
+            align-items:center;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .ord-btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 9px;
+            border: 1px solid transparent;
+            background: var(--primary);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration:none;
+            transition: transform .12s ease, box-shadow .12s ease, color .12s ease, border-color .12s ease, background .12s ease;
+            white-space: nowrap;
+        }
+        .ord-btn:hover{
+            color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(17,17,17,0.12);
+        }
+        .ord-btn:active{
+            transform: translateY(0);
+        }
+        .ord-btn.ghost{
+            background: transparent;
+            color: var(--primary);
+            border-color: var(--border);
+        }
+        .ord-btn.ghost:hover{
+            border-color: var(--accent);
+            color: var(--primary);
+            background: var(--lightYellow);
+        }
+
+        /* Compact form reset */
+        .status-update-wrap{
+            display:flex;
+            align-items:center;
+            gap: 8px;
+            flex-wrap: nowrap;
+        }
+        .ord-status-form{ margin: 0; display:flex; gap: 6px; align-items:center; }
+        .ord-status-form .status-pill{ width: auto; }
+        .update-btn{
+            padding: 8px 10px;
+            font-size: 12px;
+            min-width: 58px;
+            white-space: nowrap;
+        }
+
+        /* ===== Pagination ===== */
+        .table-footer{
+            padding: 14px 18px;
+            border-top: 1px solid var(--divider);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .pagination{
+            display:flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items:center;
+        }
+        .page-link{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--primary);
+            font-weight: 800;
+            text-decoration:none;
+            transition: border-color .15s ease, background .15s ease, transform .12s ease;
+        }
+        .page-link:hover{
+            border-color: var(--accent);
+            background: var(--lightYellow);
             transform: translateY(-1px);
         }
-
-        .ord-btn:active {
-            transform: translateY(0);
-            opacity: 0.9;
+        .page-link.is-active{
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--primary);
+        }
+        .page-link.is-disabled{
+            opacity: 0.55;
+            pointer-events: none;
         }
 
-        /* Green - Update */
-        .ord-btn.upd {
-            background: #22c55e;
-            color: #fff;
-            box-shadow: 0 2px 6px rgba(34,197,94,0.3);
-        }
-        .ord-btn.upd:hover {
-            background: #16a34a;
-            box-shadow: 0 4px 12px rgba(34,197,94,0.35);
-        }
-
-        /* Blue - View */
-        .ord-btn.view {
-            background: #1a7fe8;
-            color: #fff;
-            box-shadow: 0 2px 6px rgba(26,127,232,0.3);
-        }
-        .ord-btn.view:hover {
-            background: #1565c0;
-            box-shadow: 0 4px 12px rgba(26,127,232,0.35);
-        }
-
-        /* Teal - Screenshot */
-        .ord-btn.screenshot {
-            background: #0ea5e9;
-            color: #fff;
-            box-shadow: 0 2px 6px rgba(14,165,233,0.3);
-        }
-        .ord-btn.screenshot:hover {
-            background: #0284c7;
-            box-shadow: 0 4px 12px rgba(14,165,233,0.35);
-        }
-
-        /* Action cell layout */
-        .ord-table tbody td:last-child {
-            white-space: nowrap;
-        }
-
-        /* ===== Modal Overlay ===== */
+        /* ===== Modal overlay polish (keeps existing JS working) ===== */
         #ord-modal,
-        .custom-order-popup-overlay {
+        .custom-order-popup-overlay{
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(17,17,17,0.56);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 18px;
         }
-
-        .modal-content {
+        .modal-content{
             background: #fff;
-            border-radius: 12px;
-            padding: 30px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            animation: modalIn 0.2s ease;
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.96) translateY(10px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-content .close,
-        .custom-close-modal {
-            position: absolute;
-            top: 14px;
-            right: 18px;
-            font-size: 1.4rem;
-            cursor: pointer;
-            color: #888;
-            line-height: 1;
-            transition: color 0.15s;
-            background: none;
-            border: none;
-        }
-
-        .modal-content .close:hover,
-        .custom-close-modal:hover {
-            color: #222;
+            border-radius: 16px;
+            padding: 22px;
+            width: 100%;
+            max-width: 720px;
+            max-height: 86vh;
+            overflow: auto;
+            box-shadow: 0 24px 70px rgba(17,17,17,0.18);
         }
 
         /* ===== Responsive ===== */
-        @media (max-width: 768px) {
-            .ord-wrap { padding: 0 12px; margin: 16px auto; }
-            .ord-title { font-size: 1.4rem; }
-            .ord-table { font-size: 0.8rem; }
-            .ord-head th,
-            .ord-table tbody td { padding: 10px 10px; }
-            .ord-select { min-width: 110px; }
+        @media (max-width: 900px){
+            .ord-wrap{ padding: 0 14px; margin: 18px auto; }
+            .ui-input{ width: min(320px, 78vw); }
+            .ord-table thead th{ padding: 10px 8px; }
+            .ord-table tbody td{ padding: 10px 8px; }
+        }
+
+        /* Mobile: table -> cards (no horizontal overflow) */
+        @media (max-width: 640px){
+            .orders-controls{ width: 100%; justify-content: flex-start; }
+            .ui-input{ width: 100%; }
+            .ui-select{ width: 100%; }
+            .table-header{ align-items:flex-start; }
+            .table-footer{ align-items: stretch; }
+            .pagination{ width: 100%; }
+            .page-link{ flex: 1 1 auto; }
+
+            .ord-table{ display:block; }
+            .ord-table thead{ display:none; }
+            .ord-table tbody{ display:block; padding: 10px; }
+            .ord-table tbody tr{
+                display:block;
+                background: #fff;
+                border: 1px solid var(--divider);
+                border-radius: 14px;
+                box-shadow: 0 8px 20px rgba(17,17,17,0.05);
+                margin-bottom: 10px;
+                overflow: hidden;
+            }
+            .ord-table tbody tr:nth-child(even){ background: #fff; }
+            .ord-table tbody td{
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap: 12px;
+                border-bottom: 1px solid var(--divider);
+                padding: 12px 12px;
+                white-space: normal;
+            }
+            .ord-table tbody td:last-child{ border-bottom: none; }
+            .ord-table tbody td::before{
+                content: attr(data-label);
+                font-size: 0.74rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--muted);
+                font-weight: 800;
+                flex: 0 0 44%;
+            }
+            .ord-customer{ min-width: 0; }
+            .ord-customer .note{ white-space: normal; overflow: visible; text-overflow: clip; }
+            .ord-actions{ width: 100%; justify-content: flex-start; }
+            .ord-status-form{ width: 100%; justify-content: flex-start; }
         }
     </style>
 </head>
 <body>
 
 <div class="ord-wrap">
-    <h2 class="ord-title">Manage Orders</h2>
-    <div class="ord-table-wrap">
-        <table class="ord-table">
-            <thead class="ord-head">
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Note</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($orders as $order): ?>
-                <tr>
-                    <td><?= htmlspecialchars($order['order_id']) ?></td>
-                    <td><?= htmlspecialchars($order['customer_name']) ?></td>
-                    <td><strong>PKR <?= number_format($order['total_price'], 2) ?></strong></td>
-                    <td>
-                        <form method="post" style="margin:0;">
-                            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
-                            <select name="order_status" class="ord-select">
-                                <option value="Pending"    <?= ($order['order_status'] === 'Pending')    ? 'selected' : '' ?>>Pending</option>
-                                <option value="Processing" <?= ($order['order_status'] === 'Processing') ? 'selected' : '' ?>>Processing</option>
-                                <option value="Completed"  <?= ($order['order_status'] === 'Completed')  ? 'selected' : '' ?>>Completed</option>
-                                <option value="Cancelled"  <?= ($order['order_status'] === 'Cancelled')  ? 'selected' : '' ?>>Cancelled</option>
-                            </select>
-                    </td>
-                    <td><?= date('d-M-Y H:i', strtotime($order['created_at'])) ?></td>
-                    <td>
-                        <?= !empty($order['customer_note'])
-                            ? htmlspecialchars($order['customer_note'])
-                            : '<i>No note.</i>' ?>
-                    </td>
-                    <td>
-                        <button type="submit" name="update_status" class="ord-btn upd">Update</button>
-                        </form>
-                        <button class="ord-btn view" data-order-id="<?= $order['order_id'] ?>">View</button>
-                        <?php if ($order['payment_method'] === 'prepaid' && !empty($order['payment_screenshot'])): ?>
-                            <a href="/admin/view-screenshot.php?file=<?= htmlspecialchars($order['payment_screenshot']) ?>"
-                               target="_blank" class="ord-btn screenshot">Screenshot</a>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <div class="orders-head">
+        <div class="orders-title">
+            <h2>Manage Orders</h2>
+            <p>View and manage all customer orders</p>
+        </div>
+        <div class="orders-controls">
+            <input id="ordersSearch" class="ui-input" type="search" placeholder="Search orders…" autocomplete="off">
+            <select id="ordersStatusFilter" class="ui-select">
+                <option value="all">All statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <select id="ordersLimit" class="ui-select" aria-label="Orders per page">
+                <option value="20" <?= $limit === 20 ? 'selected' : '' ?>>20 / page</option>
+                <option value="50" <?= $limit === 50 ? 'selected' : '' ?>>50 / page</option>
+                <option value="100" <?= $limit === 100 ? 'selected' : '' ?>>100 / page</option>
+            </select>
+            <button id="ordersExport" class="ord-btn ghost" type="button">Export CSV</button>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-header">
+            <div class="table-meta">
+                <strong><?= number_format($totalOrders) ?></strong> total orders
+                <span style="margin:0 8px; color:#cbd5e1;">•</span>
+                Showing <span id="ordersCount"><?= count($orders) ?></span>
+            </div>
+        </div>
+        <div class="table-body">
+            <table class="ord-table" id="ordersTable">
+                <colgroup>
+                    <col style="width:7%">
+                    <col style="width:20%">
+                    <col style="width:14%">
+                    <col style="width:18%">
+                    <col style="width:10%">
+                    <col style="width:13%">
+                    <col style="width:10%">
+                    <col style="width:8%">
+                </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Update</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($orders as $order): ?>
+                        <tr class="ord-row"
+                            data-status="<?= htmlspecialchars($order['order_status'] ?? '') ?>"
+                            data-search="<?= htmlspecialchars(
+                                ($order['order_id'] ?? '') . ' ' .
+                                ($order['customer_name'] ?? '') . ' ' .
+                                ($order['customer_phone'] ?? '') . ' ' .
+                                ($order['order_status'] ?? '') . ' ' .
+                                ($order['total_price'] ?? '') . ' ' .
+                                ($order['created_at'] ?? '') . ' ' .
+                                ($order['customer_note'] ?? '')
+                            ) ?>">
+                            <td class="ord-id" data-label="Order ID">#<?= htmlspecialchars($order['order_id']) ?></td>
+                            <td data-label="Customer">
+                                <div class="ord-customer">
+                                    <div class="name"><?= htmlspecialchars($order['customer_name'] ?? '') ?></div>
+                                    <div class="note">
+                                        <?= !empty($order['customer_note'])
+                                            ? htmlspecialchars($order['customer_note'])
+                                            : '—' ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="ord-phone" data-label="Phone"><?= htmlspecialchars($order['customer_phone'] ?? '') ?></td>
+                            <?php $statusFormId = 'status-form-' . (int)($order['order_id'] ?? 0); ?>
+                            <td data-label="Status" class="ord-status-cell">
+                                <form method="post" class="ord-status-form" id="<?= htmlspecialchars($statusFormId) ?>">
+                                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['order_id']) ?>">
+                                    <div class="status-update-wrap">
+                                        <span class="status-pill">
+                                            <select name="order_status" class="ord-select" aria-label="Order status">
+                                                <option value="Pending"    <?= ($order['order_status'] === 'Pending')    ? 'selected' : '' ?>>Pending</option>
+                                                <option value="Processing" <?= ($order['order_status'] === 'Processing') ? 'selected' : '' ?>>Processing</option>
+                                                <option value="Completed"  <?= ($order['order_status'] === 'Completed')  ? 'selected' : '' ?>>Completed</option>
+                                                <option value="Cancelled"  <?= ($order['order_status'] === 'Cancelled')  ? 'selected' : '' ?>>Cancelled</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                </form>
+                            </td>
+                            <td data-label="Update" class="ord-update-cell">
+                                <button type="submit" name="update_status" class="ord-btn update-btn" form="<?= htmlspecialchars($statusFormId) ?>">Update</button>
+                            </td>
+                            <td class="ord-amount" data-label="Amount">PKR <?= number_format((float)($order['total_price'] ?? 0), 2) ?></td>
+                            <td class="ord-date" data-label="Date"><?= date('d-M-Y', strtotime($order['created_at'])) ?></td>
+                            <td data-label="Actions" style="text-align:right;">
+                                <div class="ord-actions">
+                                    <button class="ord-btn view" type="button" data-order-id="<?= $order['order_id'] ?>">View</button>
+                                    <?php if (($order['payment_method'] ?? '') === 'prepaid' && !empty($order['payment_screenshot'])): ?>
+                                        <a href="/admin/view-screenshot.php?file=<?= htmlspecialchars($order['payment_screenshot']) ?>"
+                                           target="_blank" class="ord-btn ghost">Screenshot</a>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <div class="table-meta">
+                Page <strong><?= (int)$page ?></strong> of <strong><?= (int)$totalPages ?></strong>
+            </div>
+            <div class="pagination" aria-label="Pagination">
+                <?php
+                    $baseParams = ['limit' => $limit];
+                    $prevPage = max(1, $page - 1);
+                    $nextPage = min($totalPages, $page + 1);
+                    $prevHref = 'manage-orders.php?' . http_build_query($baseParams + ['page' => $prevPage]);
+                    $nextHref = 'manage-orders.php?' . http_build_query($baseParams + ['page' => $nextPage]);
+                ?>
+
+                <a class="page-link <?= $page <= 1 ? 'is-disabled' : '' ?>" href="<?= htmlspecialchars($prevHref) ?>">Previous</a>
+
+                <?php
+                    $window = 2;
+                    $start = max(1, $page - $window);
+                    $end = min($totalPages, $page + $window);
+
+                    if ($start > 1) {
+                        $firstHref = 'manage-orders.php?' . http_build_query($baseParams + ['page' => 1]);
+                        echo '<a class="page-link" href="' . htmlspecialchars($firstHref) . '">1</a>';
+                        if ($start > 2) {
+                            echo '<span style="color:#9ca3af; font-weight:800; padding:0 4px;">…</span>';
+                        }
+                    }
+
+                    for ($p = $start; $p <= $end; $p++) {
+                        $href = 'manage-orders.php?' . http_build_query($baseParams + ['page' => $p]);
+                        $cls = $p === $page ? 'page-link is-active' : 'page-link';
+                        echo '<a class="' . $cls . '" href="' . htmlspecialchars($href) . '">' . (int)$p . '</a>';
+                    }
+
+                    if ($end < $totalPages) {
+                        if ($end < $totalPages - 1) {
+                            echo '<span style="color:#9ca3af; font-weight:800; padding:0 4px;">…</span>';
+                        }
+                        $lastHref = 'manage-orders.php?' . http_build_query($baseParams + ['page' => $totalPages]);
+                        echo '<a class="page-link" href="' . htmlspecialchars($lastHref) . '">' . (int)$totalPages . '</a>';
+                    }
+                ?>
+
+                <a class="page-link <?= $page >= $totalPages ? 'is-disabled' : '' ?>" href="<?= htmlspecialchars($nextHref) ?>">Next</a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -355,6 +700,27 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const modalContainerId = "custom-ord-modal";
+
+    // Status pill coloring (keeps backend values untouched)
+    function normalizeStatus(v) {
+        return String(v || '').trim().toLowerCase();
+    }
+    function refreshStatusPills(scope) {
+        (scope || document).querySelectorAll('.status-pill').forEach(function (pill) {
+            const sel = pill.querySelector('select');
+            if (!sel) return;
+            pill.dataset.status = normalizeStatus(sel.value);
+        });
+    }
+    refreshStatusPills(document);
+    document.querySelectorAll('.ord-select').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            const pill = this.closest('.status-pill');
+            if (pill) pill.dataset.status = normalizeStatus(this.value);
+            const row = this.closest('.ord-row');
+            if (row) row.dataset.status = this.value;
+        });
+    });
 
     document.querySelectorAll(".view").forEach(function (button) {
         button.addEventListener("click", function () {
@@ -386,6 +752,79 @@ document.addEventListener("DOMContentLoaded", function () {
                 .catch(error => console.error("Error loading order details:", error));
         });
     });
+
+    // Search + filter (client-side only, no backend changes)
+    const searchEl = document.getElementById('ordersSearch');
+    const filterEl = document.getElementById('ordersStatusFilter');
+    const limitEl = document.getElementById('ordersLimit');
+    const countEl = document.getElementById('ordersCount');
+    const rows = Array.from(document.querySelectorAll('#ordersTable tbody .ord-row'));
+
+    function applyTableFilters() {
+        const q = normalizeStatus(searchEl ? searchEl.value : '').replace(/\s+/g, ' ').trim();
+        const status = filterEl ? filterEl.value : 'all';
+        let visible = 0;
+
+        rows.forEach(function (row) {
+            const rowText = String(row.dataset.search || '').toLowerCase();
+            const rowStatus = String(row.dataset.status || '');
+            const matchesQuery = q === '' ? true : rowText.includes(q);
+            const matchesStatus = status === 'all' ? true : rowStatus === status;
+            const show = matchesQuery && matchesStatus;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        if (countEl) countEl.textContent = String(visible);
+    }
+
+    if (searchEl) searchEl.addEventListener('input', applyTableFilters);
+    if (filterEl) filterEl.addEventListener('change', applyTableFilters);
+    applyTableFilters();
+
+    // Orders per page dropdown (server-side pagination)
+    if (limitEl) {
+        limitEl.addEventListener('change', function () {
+            const url = new URL(window.location.href);
+            url.searchParams.set('limit', this.value);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        });
+    }
+
+    // Export visible rows as CSV (client-side only)
+    const exportBtn = document.getElementById('ordersExport');
+    function csvEscape(v) {
+        const s = String(v ?? '');
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function () {
+            const headers = ['Order ID', 'Customer', 'Phone', 'Status', 'Amount', 'Date', 'Note'];
+            const lines = [headers.join(',')];
+            rows.forEach(function (row) {
+                if (row.style.display === 'none') return;
+                const orderId = (row.querySelector('.ord-id')?.textContent || '').trim();
+                const name = (row.querySelector('.ord-customer .name')?.textContent || '').trim();
+                const phone = (row.querySelector('.ord-phone')?.textContent || '').trim();
+                const status = (row.querySelector('select[name="order_status"]')?.value || '').trim();
+                const amount = (row.querySelector('.ord-amount')?.textContent || '').trim();
+                const date = (row.querySelector('.ord-date')?.textContent || '').trim();
+                const note = (row.querySelector('.ord-customer .note')?.textContent || '').trim();
+                lines.push([orderId, name, phone, status, amount, date, note].map(csvEscape).join(','));
+            });
+
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'orders.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        });
+    }
 
     // Close modal on outside click
     document.addEventListener("click", function (event) {
