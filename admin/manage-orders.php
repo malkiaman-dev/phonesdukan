@@ -93,11 +93,18 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; }
+        /* Match Add Product page: single normal page scrollbar */
+        html, body {
+            height: auto;
+            overflow: auto;
+            overflow-x: hidden;
+        }
         body {
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
             color: var(--text);
+            overflow: visible;
+            overflow-x: hidden;
         }
         body.modal-open {
             overflow: hidden;
@@ -600,7 +607,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .status-toast {
             position: fixed;
             right: 16px;
-            top: 16px;
+            bottom: 16px;
             z-index: 1300;
             background: #111;
             color: #fff;
@@ -1159,6 +1166,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (updatedState === '1' || updatedState === '0') {
             setTimeout(function () { toastEl.classList.remove('show'); }, 3200);
+            // Prevent toast from reappearing on page refresh.
+            params.delete('updated');
+            const newQuery = params.toString();
+            const newUrl = window.location.pathname + (newQuery ? ('?' + newQuery) : '');
+            window.history.replaceState({}, document.title, newUrl);
         }
     }
 });
