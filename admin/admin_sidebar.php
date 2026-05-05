@@ -26,7 +26,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             <a class="nav-link <?= ($current_page == 'manage-orders.php') ? 'active' : '' ?>" href="<?= url('admin/manage-orders.php'); ?>">
                 <i class="fas fa-shopping-cart"></i> Orders
                 <?php if ($pending_orders_count > 0): ?>
-                    <span>
+                    <span class="nav-badge">
                         <?php echo htmlspecialchars($pending_orders_count); ?>
                     </span>
                 <?php endif; ?>
@@ -36,7 +36,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             <a class="nav-link <?= ($current_page == 'manage-b2b-orders.php') ? 'active' : '' ?>" href="<?= url('admin/manage-b2b-orders.php'); ?>">
                 <i class="fas fa-briefcase"></i> B2B Orders
                 <?php if ($pending_b2b_orders_count > 0): ?>
-                    <span>
+                    <span class="nav-badge">
                         <?php echo htmlspecialchars($pending_b2b_orders_count); ?>
                     </span>
                 <?php endif; ?>
@@ -90,7 +90,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             <a class="nav-link <?= ($current_page == 'manage-reviews.php') ? 'active' : '' ?>" href="<?= url('admin/manage-reviews.php'); ?>">
                 <i class="fas fa-star"></i> Reviews
                 <?php if ($pending_reviews_count > 0): ?>
-                    <span>
+                    <span class="nav-badge">
                         <?php echo htmlspecialchars($pending_reviews_count); ?>
                     </span>
                 <?php endif; ?>

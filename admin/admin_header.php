@@ -24,10 +24,14 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
 <!-- Navbar -->
 <nav class="navbar">
     <div class="container">
-        <!-- Admin Dashboard (Left Side) -->
-        <a class="navbar-brand" href="<?= url(); ?>">
-            <i class="fas fa-chart-line"></i> Visit Website
-        </a>
+        <div class="navbar-left">
+            <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="<?= url(); ?>">
+                <i class="fas fa-chart-line"></i> Visit Website
+            </a>
+        </div>
 
         <!-- Admin Profile Dropdown (Right Side) -->
         <div class="admin-dropdown">
@@ -42,4 +46,26 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
         </div>
     </div>
 </nav>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toggleBtn = document.getElementById('sidebarToggle');
+    var sidebar = document.getElementById('sidebar');
+    if (!toggleBtn || !sidebar) {
+        return;
+    }
+
+    toggleBtn.addEventListener('click', function () {
+        sidebar.classList.toggle('is-open');
+    });
+
+    document.addEventListener('click', function (event) {
+        if (window.innerWidth > 992) {
+            return;
+        }
+        if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+            sidebar.classList.remove('is-open');
+        }
+    });
+});
+</script>
 
