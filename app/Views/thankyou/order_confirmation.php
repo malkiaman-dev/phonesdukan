@@ -65,104 +65,101 @@ $totalPriceWithDelivery = $totalPrice + $deliveryCharge;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- FontAwesome Link -->
 </head>
 <body>
-<div class="order_container">
-    <h1><i class="fas fa-check-circle"></i> Order Placed Successfully!</h1>
-    <div class="thank-you-message">
-        <div class="thank-you-icon">
-            <i class="fas fa-gift"></i> <!-- Icon to represent the purchase -->
+<main class="order_container">
+    <section class="hero card fade-in">
+        <div class="hero-icon" aria-hidden="true">
+            <i class="fas fa-check"></i>
         </div>
-        <h1 class="thank-you-title">Thank You for Your Purchase!</h1>
-        <p class="thank-you-text">
-            <span class="highlighted"><?php echo htmlspecialchars($order['customer_name']); ?></span>, your order is being processed.
-        </p>
-        <p class="thank-you-subtext">We appreciate your business. You will receive an email confirmation soon.</p>
-    </div>
+        <h1>Order Placed Successfully</h1>
+        <p class="hero-subtext">Your order is confirmed and being processed.</p>
+        <div class="hero-order-line">
+            <span class="hero-order-label">Order #</span>
+            <span id="orderNumber" class="hero-order-number"><?php echo $order['order_id']; ?></span>
+            <button id="copyButton" class="copy-btn" onclick="copyOrderNumber()" type="button" aria-label="Copy order number">
+                <i class="fas fa-copy"></i>
+            </button>
+        </div>
+    </section>
 
-    <div class="order-details card">
-        <div class="card-header">
-            <i class="fas fa-info-circle"></i>
-            <h2>Order Details</h2>
+    <section class="card fade-in section-card">
+        <div class="section-title">
+            <i class="fas fa-receipt"></i>
+            <h2>Order Summary</h2>
         </div>
-        <div class="card-body">
-            <p>
-                <strong>Order Number:</strong> 
-                <span id="orderNumber"><?php echo $order['order_id']; ?></span>
-                <!-- Copy Icon -->
-                <button id="copyButton" class="copy-btn" onclick="copyOrderNumber()">
-                    <i class="fas fa-copy"></i> <!-- FontAwesome copy icon -->
-                </button>
-            </p>
-            <p><strong>Order Date:</strong> <?php echo date('F j, Y', strtotime($order['created_at'])); ?></p>
-            <p><strong>Status:</strong> <span class="status-processing">Processing</span></p>
+        <div class="info-grid">
+            <div class="info-row"><span class="label">Order Number</span><span class="value"><?php echo $order['order_id']; ?></span></div>
+            <div class="info-row"><span class="label">Date</span><span class="value"><?php echo date('F j, Y', strtotime($order['created_at'])); ?></span></div>
+            <div class="info-row"><span class="label">Status</span><span class="value status-processing">Processing</span></div>
+            <div class="info-row"><span class="label">Payment Method</span><span class="value"><?php echo ucfirst(str_replace('_', ' ', $order['payment_method'])); ?></span></div>
+            <div class="info-row total-row"><span class="label">Total Amount</span><span class="value">Rs. <?php echo number_format($totalPriceWithDelivery, 2); ?></span></div>
         </div>
-    </div>
+    </section>
 
-    <div class="customer-info card">
-        <div class="card-header">
+    <section class="card fade-in section-card">
+        <div class="section-title">
             <i class="fas fa-user"></i>
-            <h2>Customer Information</h2>
+            <h2>Customer &amp; Shipping</h2>
         </div>
-        <div class="card-body">
-            <p><strong>Email:</strong> <?php echo htmlspecialchars($order['customer_email']); ?></p>
-            <p><strong>Phone:</strong> <?php echo htmlspecialchars($order['customer_phone']); ?></p>
+        <div class="split-grid">
+            <div>
+                <div class="info-row"><span class="label">Name</span><span class="value"><?php echo htmlspecialchars($order['customer_name']); ?></span></div>
+                <div class="info-row"><span class="label">Email</span><span class="value"><?php echo htmlspecialchars($order['customer_email']); ?></span></div>
+                <div class="info-row"><span class="label">Phone</span><span class="value"><?php echo htmlspecialchars($order['customer_phone']); ?></span></div>
+            </div>
+            <div>
+                <div class="section-title mini">
+                    <i class="fas fa-truck"></i>
+                    <h3>Shipping Address</h3>
+                </div>
+                <p class="address">
+                    <?php echo htmlspecialchars($order['shipping_address']); ?>,
+                    <?php echo htmlspecialchars($order['shipping_city']); ?>,
+                    <?php echo htmlspecialchars($order['shipping_country']); ?>
+                </p>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="shipping-info card">
-        <div class="card-header">
-            <i class="fas fa-truck"></i>
-            <h2>Shipping Information</h2>
+    <section class="fade-in products-wrap">
+        <div class="section-title">
+            <i class="fas fa-box-open"></i>
+            <h2>Ordered Products</h2>
         </div>
-        <div class="card-body">
-            <p><strong>Address:</strong> <?php echo htmlspecialchars($order['shipping_address']); ?>, <?php echo htmlspecialchars($order['shipping_city']); ?>, <?php echo htmlspecialchars($order['shipping_country']); ?></p>
-        </div>
-    </div>
-
-    <div class="order-items">
-        <h2>Ordered Products</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Product Image</th>
-                    <th>Product Name</th>
-                    <th>Quantity</th>
-                    <th>Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php 
-            foreach ($orderItems as $item): 
-                $itemTotalPrice = $item['subtotal_price']; // Price of the item
-            ?>
-            <tr>
-                <td data-label="Product Image">
-                    <img src="<?php echo htmlspecialchars($item['image_url'] ?? '/public/assets/images/default.jpg'); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>" width="80" height="80">
-                </td>
-                <td data-label="Product Name"><?php echo htmlspecialchars($item['product_name']); ?></td>
-                <td data-label="Quantity"><?php echo htmlspecialchars($item['quantity']); ?></td>
-                <td data-label="Subtotal">Rs. <?php echo number_format($item['subtotal_price'], 2); ?></td>  <!-- Show subtotal_price -->
-            </tr>
+        <div class="products-list">
+            <?php foreach ($orderItems as $item): ?>
+                <article class="product-item card">
+                    <div class="product-left">
+                        <img src="<?php echo htmlspecialchars($item['image_url'] ?? '/public/assets/images/default.jpg'); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                    </div>
+                    <div class="product-center">
+                        <h3><?php echo htmlspecialchars($item['product_name']); ?></h3>
+                        <p>Unit Price: Rs. <?php echo number_format(($item['quantity'] > 0 ? ($item['subtotal_price'] / $item['quantity']) : 0), 2); ?></p>
+                    </div>
+                    <div class="product-right">
+                        <span class="qty">Qty: <?php echo htmlspecialchars($item['quantity']); ?></span>
+                        <span class="price">Rs. <?php echo number_format($item['subtotal_price'], 2); ?></span>
+                    </div>
+                </article>
             <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+        </div>
+    </section>
 
-    <div class="summary card">
-        <div class="card-header">
+    <section class="card fade-in section-card">
+        <div class="section-title">
             <i class="fas fa-credit-card"></i>
             <h2>Payment Summary</h2>
         </div>
-        <div class="card-body">
-            <p><strong>Payment Method:</strong> <?php echo ucfirst(str_replace('_', ' ', $order['payment_method'])); ?></p>
-            <!-- Add delivery charge to the summary -->
-            <p><strong>Delivery Charges:</strong> <span class="delivery-price">Rs. <?php echo number_format($deliveryCharge, 2); ?></span></p>
-            <!-- Show total amount including the delivery charge -->
-            <p><strong>Total Amount (including Delivery):</strong> <span class="total-price">Rs. <?php echo number_format($totalPriceWithDelivery, 2); ?></span></p>
+        <div class="info-grid">
+            <div class="info-row"><span class="label">Subtotal</span><span class="value">Rs. <?php echo number_format($totalPrice, 2); ?></span></div>
+            <div class="info-row"><span class="label">Delivery</span><span class="value">Rs. <?php echo number_format($deliveryCharge, 2); ?></span></div>
+            <div class="info-row total-row"><span class="label">Total</span><span class="value total-price">Rs. <?php echo number_format($totalPriceWithDelivery, 2); ?></span></div>
         </div>
-    </div>
+    </section>
 
-    <a href="/" class="btn"><i class="fas fa-home"></i> Back to Home</a>
-</div>
+    <section class="cta-wrap fade-in">
+        <a href="/" class="btn btn-primary"><i class="fas fa-store"></i> Continue Shopping</a>
+    </section>
+</main>
 
 <script>
     function copyOrderNumber() {
@@ -181,8 +178,13 @@ $totalPriceWithDelivery = $totalPrice + $deliveryCharge;
         // Remove the temporary text area
         document.body.removeChild(tempTextArea);
 
-        // Optionally show an alert or visual confirmation
-        alert('Order number copied to clipboard!');
+        var copyButton = document.getElementById('copyButton');
+        copyButton.classList.add('copied');
+        copyButton.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(function () {
+            copyButton.classList.remove('copied');
+            copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+        }, 1200);
     }
 </script>
 </body>
