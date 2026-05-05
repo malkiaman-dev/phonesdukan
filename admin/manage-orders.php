@@ -152,7 +152,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             justify-content:flex-end;
         }
 
-        .ui-input, .ui-select{
+        .ui-input{
             font-family: inherit;
             font-size: 0.92rem;
             color: var(--text);
@@ -164,7 +164,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
         }
         .ui-input::placeholder{ color: #9ca3af; }
-        .ui-input:focus, .ui-select:focus{
+        .ui-input:focus{
             border-color: var(--accent);
             box-shadow: 0 0 0 4px rgba(250,204,21,0.25);
         }
@@ -172,16 +172,84 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             width: min(360px, 70vw);
         }
 
-        /* Custom select (filter) */
-        .ui-select{
-            appearance:none;
-            -webkit-appearance:none;
-            padding-right: 40px;
-            background:
-                linear-gradient(45deg, transparent 50%, #111 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
-                linear-gradient(135deg, #111 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
-                linear-gradient(to right, transparent, transparent) 0 0 / 100% 100% no-repeat,
-                #fff;
+        .native-filter-select{
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
+        }
+        .filter-select-wrap{
+            position: relative;
+            min-width: 136px;
+        }
+        .filter-select-wrap.limit-wrap{
+            min-width: 112px;
+        }
+        .filter-display{
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 34px 10px 12px;
+            background: #fff;
+            color: var(--primary);
+            font-size: 0.92rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            transition: border-color .15s ease, box-shadow .15s ease;
+            white-space: nowrap;
+        }
+        .filter-display::after{
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid #111;
+            border-bottom: 2px solid #111;
+            transform: translateY(-65%) rotate(45deg);
+        }
+        .filter-display:hover,
+        .filter-select-wrap.is-open .filter-display,
+        .filter-display:focus{
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(250,204,21,0.25);
+            outline: none;
+        }
+        .filter-options{
+            position: absolute;
+            z-index: 40;
+            left: 0;
+            right: 0;
+            margin-top: 6px;
+            list-style: none;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 14px 30px rgba(17,17,17,0.12);
+            padding: 6px;
+            display: none;
+        }
+        .filter-select-wrap.is-open .filter-options{ display: block; }
+        .filter-option{
+            width: 100%;
+            border: 0;
+            background: transparent;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .filter-option:hover{ background: var(--lightYellow); }
+        .filter-option.is-selected{ background: var(--accent); }
+        .filter-select-wrap.is-open{
+            z-index: 50;
         }
 
         /* ===== Card wrapper ===== */
@@ -693,7 +761,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         @media (max-width: 640px){
             .orders-controls{ width: 100%; justify-content: flex-start; }
             .ui-input{ width: 100%; }
-            .ui-select{ width: 100%; }
+            .filter-select-wrap{ width: 100%; }
             .table-header{ align-items:flex-start; }
             .table-footer{ align-items: stretch; }
             .pagination{ width: 100%; }
@@ -748,18 +816,36 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="orders-controls">
             <input id="ordersSearch" class="ui-input" type="search" placeholder="Search orders…" autocomplete="off">
-            <select id="ordersStatusFilter" class="ui-select">
+            <select id="ordersStatusFilter" class="native-filter-select">
                 <option value="all">All statuses</option>
                 <option value="Pending">Pending</option>
                 <option value="Processing">Processing</option>
                 <option value="Completed">Completed</option>
                 <option value="Cancelled">Cancelled</option>
             </select>
-            <select id="ordersLimit" class="ui-select" aria-label="Orders per page">
+            <div class="filter-select-wrap" data-filter-select>
+                <button type="button" class="filter-display" data-filter-display>All statuses</button>
+                <ul class="filter-options" data-filter-options>
+                    <li><button type="button" class="filter-option is-selected" data-value="all">All statuses</button></li>
+                    <li><button type="button" class="filter-option" data-value="Pending">Pending</button></li>
+                    <li><button type="button" class="filter-option" data-value="Processing">Processing</button></li>
+                    <li><button type="button" class="filter-option" data-value="Completed">Completed</button></li>
+                    <li><button type="button" class="filter-option" data-value="Cancelled">Cancelled</button></li>
+                </ul>
+            </div>
+            <select id="ordersLimit" class="native-filter-select" aria-label="Orders per page">
                 <option value="20" <?= $limit === 20 ? 'selected' : '' ?>>20 / page</option>
                 <option value="50" <?= $limit === 50 ? 'selected' : '' ?>>50 / page</option>
                 <option value="100" <?= $limit === 100 ? 'selected' : '' ?>>100 / page</option>
             </select>
+            <div class="filter-select-wrap limit-wrap" data-filter-select>
+                <button type="button" class="filter-display" data-filter-display><?= (int)$limit ?> / page</button>
+                <ul class="filter-options" data-filter-options>
+                    <li><button type="button" class="filter-option <?= $limit === 20 ? 'is-selected' : '' ?>" data-value="20">20 / page</button></li>
+                    <li><button type="button" class="filter-option <?= $limit === 50 ? 'is-selected' : '' ?>" data-value="50">50 / page</button></li>
+                    <li><button type="button" class="filter-option <?= $limit === 100 ? 'is-selected' : '' ?>" data-value="100">100 / page</button></li>
+                </ul>
+            </div>
             <button id="ordersExport" class="ord-btn ghost" type="button">Export CSV</button>
         </div>
     </div>
@@ -999,6 +1085,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.addEventListener('click', function () {
         document.querySelectorAll('.status-select-wrap.is-open').forEach(function (openWrap) {
+            openWrap.classList.remove('is-open');
+        });
+    });
+
+    // Custom filter dropdowns (top controls)
+    document.querySelectorAll('[data-filter-select]').forEach(function (wrap) {
+        const display = wrap.querySelector('[data-filter-display]');
+        const options = Array.from(wrap.querySelectorAll('.filter-option'));
+        const nativeSelect = wrap.previousElementSibling;
+        if (!display || !nativeSelect || !nativeSelect.classList.contains('native-filter-select')) return;
+
+        function setValue(value) {
+            nativeSelect.value = value;
+            const selectedOpt = options.find(function (opt) {
+                return opt.dataset.value === value;
+            });
+            if (selectedOpt) {
+                display.textContent = selectedOpt.textContent.trim();
+            }
+            options.forEach(function (opt) {
+                opt.classList.toggle('is-selected', opt.dataset.value === value);
+            });
+            nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        display.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
+                if (openWrap !== wrap) openWrap.classList.remove('is-open');
+            });
+            wrap.classList.toggle('is-open');
+        });
+
+        options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                setValue(this.dataset.value || '');
+                wrap.classList.remove('is-open');
+            });
+        });
+
+        setValue(nativeSelect.value || options[0]?.dataset.value || '');
+    });
+
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
             openWrap.classList.remove('is-open');
         });
     });

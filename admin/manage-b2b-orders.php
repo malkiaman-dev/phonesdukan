@@ -425,11 +425,18 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         }
 
         .ord-action {
-            min-width: 190px;
+            min-width: 124px;
             white-space: nowrap;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+        }
+
+        .ord-action .ord-btn {
+            width: 88%;
+            text-align: center;
+            align-self: center;
         }
 
         .table-footer {
@@ -666,7 +673,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             }
             .ord-action {
                 justify-content: flex-start;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 min-width: 0;
             }
             .orders-controls .ui-input,
