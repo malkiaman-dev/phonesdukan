@@ -239,7 +239,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
     </section>
 
     <section class="dashboard-main-grid">
-        <article class="panel-card">
+        <article class="panel-card recent-orders-panel">
             <div class="panel-header">
                 <h2>Recent Orders</h2>
                 <a href="<?= url('admin/manage-orders.php'); ?>">View all</a>
@@ -278,8 +278,41 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 </table>
             </div>
         </article>
+    </section>
 
+    <section class="dashboard-bottom-grid">
         <article class="panel-card">
+            <div class="panel-header">
+                <h2>Store Activity</h2>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-shopping-bag"></i>New orders today</p><strong><?= htmlspecialchars((string) $kpis['today_orders']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-calendar-alt"></i>Orders this month</p><strong><?= htmlspecialchars((string) $kpis['month_orders']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-user-plus"></i>New customers today</p><strong><?= htmlspecialchars((string) $quickStats['new_customers_today']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-hourglass-half"></i>Pending orders</p><strong><?= htmlspecialchars((string) $kpis['pending_orders']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-star"></i>Total reviews</p><strong><?= htmlspecialchars((string) $kpis['total_reviews']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-envelope"></i>Total contacts</p><strong><?= htmlspecialchars((string) $kpis['unread_contacts']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-blog"></i>Total posts</p><strong><?= htmlspecialchars((string) $kpis['total_posts']) ?></strong></div>
+                <div class="activity-item"><p class="activity-label"><i class="fas fa-briefcase"></i>B2B orders</p><strong><?= htmlspecialchars((string) $kpis['b2b_orders']) ?></strong></div>
+            </div>
+        </article>
+
+        <div class="dashboard-right-stack">
+            <article class="panel-card">
+                <div class="panel-header">
+                    <h2>Quick Actions</h2>
+                </div>
+                <div class="quick-actions-grid">
+                    <a href="<?= url('admin/add-product.php'); ?>" class="quick-action-card"><i class="fas fa-plus-circle"></i><p>Add Product</p></a>
+                    <a href="<?= url('admin/manage-orders.php'); ?>" class="quick-action-card"><i class="fas fa-shopping-cart"></i><p>View Orders</p></a>
+                    <a href="<?= url('admin/customers.php'); ?>" class="quick-action-card"><i class="fas fa-user-friends"></i><p>Manage Customers</p></a>
+                    <a href="<?= url('admin/manage-reviews.php'); ?>" class="quick-action-card"><i class="fas fa-star"></i><p>Manage Reviews</p></a>
+                    <a href="<?= url('admin/media-library.php'); ?>" class="quick-action-card"><i class="fas fa-upload"></i><p>Upload Media</p></a>
+                    <a href="<?= url('admin/reports.php'); ?>" class="quick-action-card"><i class="fas fa-chart-line"></i><p>View Reports</p></a>
+                </div>
+            </article>
+
+            <article class="panel-card">
             <div class="panel-header">
                 <h2>Recent Reviews</h2>
                 <a href="<?= url('admin/manage-reviews.php'); ?>">Manage reviews</a>
@@ -311,37 +344,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <div class="empty-state block-empty">No recent reviews found.</div>
             <?php endif; ?>
         </article>
-    </section>
-
-    <section class="dashboard-secondary-grid">
-        <article class="panel-card">
-            <div class="panel-header">
-                <h2>Store Activity</h2>
-            </div>
-            <div class="activity-list">
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-shopping-bag"></i>New orders today</p><strong><?= htmlspecialchars((string) $kpis['today_orders']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-calendar-alt"></i>Orders this month</p><strong><?= htmlspecialchars((string) $kpis['month_orders']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-user-plus"></i>New customers today</p><strong><?= htmlspecialchars((string) $quickStats['new_customers_today']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-hourglass-half"></i>Pending orders</p><strong><?= htmlspecialchars((string) $kpis['pending_orders']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-star"></i>Total reviews</p><strong><?= htmlspecialchars((string) $kpis['total_reviews']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-envelope"></i>Total contacts</p><strong><?= htmlspecialchars((string) $kpis['unread_contacts']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-blog"></i>Total posts</p><strong><?= htmlspecialchars((string) $kpis['total_posts']) ?></strong></div>
-                <div class="activity-item"><p class="activity-label"><i class="fas fa-briefcase"></i>B2B orders</p><strong><?= htmlspecialchars((string) $kpis['b2b_orders']) ?></strong></div>
-            </div>
-        </article>
-        <article class="panel-card">
-            <div class="panel-header">
-                <h2>Quick Actions</h2>
-            </div>
-            <div class="quick-actions-grid">
-                <a href="<?= url('admin/add-product.php'); ?>" class="quick-action-card"><i class="fas fa-plus-circle"></i><p>Add Product</p></a>
-                <a href="<?= url('admin/manage-orders.php'); ?>" class="quick-action-card"><i class="fas fa-shopping-cart"></i><p>View Orders</p></a>
-                <a href="<?= url('admin/customers.php'); ?>" class="quick-action-card"><i class="fas fa-user-friends"></i><p>Manage Customers</p></a>
-                <a href="<?= url('admin/manage-reviews.php'); ?>" class="quick-action-card"><i class="fas fa-star"></i><p>Manage Reviews</p></a>
-                <a href="<?= url('admin/media-library.php'); ?>" class="quick-action-card"><i class="fas fa-upload"></i><p>Upload Media</p></a>
-                <a href="<?= url('admin/reports.php'); ?>" class="quick-action-card"><i class="fas fa-chart-line"></i><p>View Reports</p></a>
-            </div>
-        </article>
+        </div>
     </section>
 </div>
 <script>
