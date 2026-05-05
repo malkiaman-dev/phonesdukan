@@ -43,7 +43,7 @@ CREATE TABLE `admins` (
 --
 
 INSERT INTO `admins` (`id`, `name`, `email`, `password`, `role`, `description`, `is_indexed`, `username`) VALUES
-(1, 'Azmeryal Akhtar', 'admin@phonesdukan.com', '$2y$10$R6xX.v698bbZAWddOuszCeK52tdhXgdo7fEdY8qAhLvrRCzRA8Miy', 'superadmin', NULL, 1, 'azmeryalakhtar'),
+(1, 'Azmeryal Akhtar', 'admin@phonesdukan.com', '$2y$10$mBg15plFGEqBvvtv/llU7.aPgo4di.vNT85DQjX4ChL6Wk09dRxu.', 'superadmin', NULL, 1, 'admin'),
 (3, 'Afzaal Khattak', 'afzaalkhattak22@gmail.com', '$2y$10$0McRCI8cAx8zVZetLhB6.OMsftWx4zm8C9wzJG/xOofsNzlyQRbRy', 'admin', NULL, 0, NULL),
 (4, 'Nayyer Sultan', 'mobileisland01@gmail.com', '$2y$10$mchsgAQMUZ0YU4YLVDhyEemDx8Gzs7PgfXhrrHEMvds9G8aqLMjEW', 'admin', NULL, 0, NULL);
 
