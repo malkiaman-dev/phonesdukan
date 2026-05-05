@@ -1,78 +1,227 @@
-form {
-    max-width: 800px;
+.admin-page {
+    max-width: 1320px;
     margin: 0 auto;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px 24px 32px;
+    background: #f8fafc;
 }
 
-label {
+.admin-page .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.admin-page .page-header h1 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 34px);
+    color: #111111;
+}
+
+.admin-page .page-header p {
+    margin: 6px 0 0;
+    color: #6b7280;
     font-size: 14px;
-    color: #666;
-    margin-bottom: 5px;
+}
+
+.admin-page .product-form {
+    display: grid;
+    gap: 24px;
+}
+
+.admin-page .form-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 30px rgba(17, 17, 17, 0.05);
+    margin-bottom: 0;
+}
+
+.admin-page .form-card-header {
+    margin-bottom: 16px;
+}
+
+.admin-page .form-card-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #111111;
+}
+
+.admin-page .form-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+}
+
+.admin-page .form-grid.cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-page .form-grid.cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-page .form-group {
+    min-width: 0;
+}
+
+.admin-page .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.admin-page .form-group label {
     display: block;
+    margin-bottom: 8px;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 600;
 }
 
-input[type="text"],
-input[type="number"],
-select,
-textarea {
+.admin-page .form-group input[type="text"],
+.admin-page .form-group input[type="number"],
+.admin-page .form-group input[type="file"],
+.admin-page .form-group select,
+.admin-page .form-group textarea,
+.admin-page .gallery-meta-input,
+.admin-page .gallery-meta-textarea {
     width: 100%;
-    padding: 12px;
-    margin: 8px 0 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    height: 46px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0 14px;
+    background: #ffffff;
+    color: #111111;
     font-size: 14px;
-    color: #333;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-textarea {
+.admin-page .form-group textarea,
+.admin-page .gallery-meta-textarea {
+    min-height: 120px;
+    height: auto;
+    padding: 12px 14px;
     resize: vertical;
-    min-height: 100px;
 }
 
-select {
+.admin-page .form-group input:focus,
+.admin-page .form-group select:focus,
+.admin-page .form-group textarea:focus,
+.admin-page .gallery-meta-input:focus,
+.admin-page .gallery-meta-textarea:focus {
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.18);
+    outline: none;
+}
+
+.admin-page .dimensions-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-page .submit-btn {
+    border: 1px solid #eab308;
+    background: #facc15;
+    color: #111111;
+    border-radius: 10px;
+    min-height: 46px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-button[type="submit"] {
-    background-color: #007bff;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 15px;
+.admin-page .submit-btn:hover {
+    background: #eab308;
+    box-shadow: 0 8px 18px rgba(234, 179, 8, 0.28);
+    transform: translateY(-1px);
+}
+
+.admin-page .submit-btn:active {
+    transform: scale(0.98);
+}
+
+.admin-page .form-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-page .gallery-metadata-grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.admin-page .gallery-image-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.admin-page .gallery-image-preview {
     width: 100%;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    max-width: 170px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
 }
 
-button[type="submit"]:hover {
-    background-color: #0056b3;
+.add-product-alert {
+    max-width: 1320px;
+    margin: 12px auto 0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
 }
 
-.section-header {
-    font-size: 18px;
-    color: #444;
-    margin-top: 30px;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 5px;
+.add-product-alert.success {
+    background: #ecfdf3;
+    border: 1px solid #bbf7d0;
+    color: #166534;
 }
 
-.input-group {
-    margin-bottom: 20px;
+.add-product-alert.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
 }
 
-/* File upload preview */
-#gallery_images_metadata {
-    margin-top: 10px;
+@media (max-width: 1200px) {
+    .admin-page .form-grid.cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-#gallery_images_metadata img {
-    max-width: 150px;
-    margin: 10px 5px 10px 0;
-    border-radius: 5px;
+@media (max-width: 900px) {
+    .admin-page {
+        padding: 16px;
+    }
+
+    .admin-page .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-page .form-grid.cols-2,
+    .admin-page .form-grid.cols-4,
+    .admin-page .dimensions-group,
+    .admin-page .gallery-metadata-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-page .submit-btn {
+        width: 100%;
+    }
+
+    .admin-page .form-footer-actions {
+        display: block;
+    }
 }

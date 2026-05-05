@@ -39,161 +39,230 @@ $brands_result = $conn->query($brands_query);
 
 <!-- Display Session Messages -->
 <?php if (isset($_SESSION['message'])): ?>
-    <div class="alert <?php echo $_SESSION['message_type']; ?>">
+    <div class="add-product-alert <?php echo $_SESSION['message_type']; ?>">
         <?php echo $_SESSION['message']; ?>
     </div>
-    <?php unset($_SESSION['message']); unset($_SESSION['message_type']); ?>
+    <?php unset($_SESSION['message']);
+    unset($_SESSION['message_type']); ?>
 <?php endif; ?>
 
-<form action="add-product.php?action=add" method="POST" enctype="multipart/form-data">
-    <h1>Add New Product</h1>
+<div class="admin-page">
+    <div class="page-header form-card">
+        <div>
+            <h1>Add New Product</h1>
+            <p>Create and publish a new product in your store</p>
+        </div>
+        <button type="submit" form="add-product-form" class="submit-btn">Save Product</button>
+    </div>
 
-    <!-- Product Details Section -->
-    <label>Product Name</label>
-    <input type="text" name="product_name" required>
+    <form id="add-product-form" action="add-product.php?action=add" method="POST" enctype="multipart/form-data" class="product-form">
+        <section class="form-card">
+            <div class="form-card-header"><h2>Basic Information</h2></div>
+            <div class="form-grid cols-2">
+                <div class="form-group">
+                    <label for="product_name">Product Name</label>
+                    <input id="product_name" type="text" name="product_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="product_slug">Product Slug</label>
+                    <input id="product_slug" type="text" name="product_slug" required>
+                </div>
+                <div class="form-group">
+                    <label for="category_id">Category</label>
+                    <select id="category_id" name="category_id" required>
+                        <?php while ($row = $categories_result->fetch(PDO::FETCH_ASSOC)) { ?>
+                            <option value="<?php echo $row['category_id']; ?>"><?php echo $row['category_name']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="brand_id">Brand</label>
+                    <select id="brand_id" name="brand_id" required>
+                        <?php while ($row = $brands_result->fetch(PDO::FETCH_ASSOC)) { ?>
+                            <option value="<?php echo $row['brand_id']; ?>"><?php echo $row['brand_name']; ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+        </section>
 
-    <label>Product Slug</label>
-    <input type="text" name="product_slug" required>
+        <section class="form-card">
+            <div class="form-card-header"><h2>Description</h2></div>
+            <div class="form-grid cols-2">
+                <div class="form-group full-width">
+                    <label for="product_description">Product Description</label>
+                    <textarea id="product_description" name="product_description" required></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label for="short_description">Short Description</label>
+                    <textarea id="short_description" name="short_description" required></textarea>
+                </div>
+            </div>
+        </section>
 
-    <label>Category</label>
-    <select name="category_id" required>
-        <?php while ($row = $categories_result->fetch(PDO::FETCH_ASSOC)) { ?>
-            <option value="<?php echo $row['category_id']; ?>"><?php echo $row['category_name']; ?></option>
-        <?php } ?>
-    </select>
+        <section class="form-card">
+            <div class="form-card-header"><h2>Pricing &amp; Inventory</h2></div>
+            <div class="form-grid cols-4">
+                <div class="form-group">
+                    <label for="regular_price">Regular Price</label>
+                    <input id="regular_price" type="number" name="regular_price" required>
+                </div>
+                <div class="form-group">
+                    <label for="sale_price">Sale Price</label>
+                    <input id="sale_price" type="number" name="sale_price">
+                </div>
+                <div class="form-group">
+                    <label for="stock_quantity">Stock Quantity</label>
+                    <input id="stock_quantity" type="number" name="stock_quantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="product_sku">Product SKU</label>
+                    <input id="product_sku" type="text" name="product_sku">
+                </div>
+            </div>
+        </section>
 
-    <label>Brand</label>
-    <select name="brand_id" required>
-        <?php while ($row = $brands_result->fetch(PDO::FETCH_ASSOC)) { ?>
-            <option value="<?php echo $row['brand_id']; ?>"><?php echo $row['brand_name']; ?></option>
-        <?php } ?>
-    </select>
+        <section class="form-card">
+            <div class="form-card-header"><h2>Product Details</h2></div>
+            <div class="form-grid cols-2">
+                <div class="form-group">
+                    <label for="weight_kg">Weight (kg)</label>
+                    <input id="weight_kg" type="text" name="weight_kg">
+                </div>
+                <div class="form-group">
+                    <label for="tax_class">Tax Class</label>
+                    <input id="tax_class" type="text" name="tax_class">
+                </div>
+                <div class="form-group full-width">
+                    <label>Dimensions (L x W x H in cm)</label>
+                    <div class="dimensions-group">
+                        <input type="text" name="length_cm" placeholder="Length (cm)">
+                        <input type="text" name="width_cm" placeholder="Width (cm)">
+                        <input type="text" name="height_cm" placeholder="Height (cm)">
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="product_tag">Product Tags</label>
+                    <input id="product_tag" type="text" name="product_tag">
+                </div>
+            </div>
+        </section>
 
-    <label>Product Description</label>
-    <textarea name="product_description" required></textarea>
+        <section class="form-card">
+            <div class="form-card-header"><h2>Status</h2></div>
+            <div class="form-grid cols-2">
+                <div class="form-group">
+                    <label for="product_status">Product Status</label>
+                    <select id="product_status" name="product_status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+        </section>
 
-    <label>Short Description</label>
-    <textarea name="short_description" required></textarea>
+        <section class="form-card">
+            <div class="form-card-header"><h2>SEO Information</h2></div>
+            <div class="form-grid cols-2">
+                <div class="form-group">
+                    <label for="seo_title">SEO Title</label>
+                    <input id="seo_title" type="text" name="seo_title" required>
+                </div>
+                <div class="form-group">
+                    <label for="focus_keyword">Focus Keyword</label>
+                    <input id="focus_keyword" type="text" name="focus_keyword">
+                </div>
+                <div class="form-group full-width">
+                    <label for="seo_description">SEO Description</label>
+                    <textarea id="seo_description" name="seo_description" required></textarea>
+                </div>
+            </div>
+        </section>
 
-    <label>Product Status</label>
-    <select name="product_status" required>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-    </select>
+        <section class="form-card">
+            <div class="form-card-header"><h2>Product Images</h2></div>
+            <div class="form-grid cols-2">
+                <div class="form-group">
+                    <label for="primary_image">Primary Image</label>
+                    <input type="file" name="primary_image" id="primary_image" required>
+                </div>
+                <div class="form-group">
+                    <label for="gallery_images">Gallery Images</label>
+                    <input type="file" name="gallery_images[]" id="gallery_images" multiple onchange="previewGalleryImages(event)">
+                </div>
+                <div class="form-group">
+                    <label for="primary_alt_text">Alt Text for Primary Image</label>
+                    <input type="text" name="primary_alt_text" id="primary_alt_text" required>
+                </div>
+                <div class="form-group">
+                    <label for="primary_image_title">Title for Primary Image</label>
+                    <input type="text" name="primary_image_title" id="primary_image_title" required>
+                </div>
+                <div class="form-group">
+                    <label for="primary_image_caption">Caption for Primary Image</label>
+                    <input type="text" name="primary_image_caption" id="primary_image_caption" required>
+                </div>
+                <div class="form-group">
+                    <label for="primary_image_description">Description for Primary Image</label>
+                    <input type="text" name="primary_image_description" id="primary_image_description" required>
+                </div>
+            </div>
 
-    <label>Stock Quantity</label>
-    <input type="number" name="stock_quantity" required>
+            <div id="gallery_images_metadata" class="gallery-metadata-grid"></div>
+        </section>
 
-    <label>Regular Price</label>
-    <input type="number" name="regular_price" required>
-
-    <label>Sale Price</label>
-    <input type="number" name="sale_price">
-
-    <label>Product SKU</label>
-    <input type="text" name="product_sku">
-
-    <label>Weight (kg)</label>
-    <input type="text" name="weight_kg">
-
-    <label>Dimensions (L x W x H in cm)</label>
-    <input type="text" name="length_cm" placeholder="Length (cm)">
-    <input type="text" name="width_cm" placeholder="Width (cm)">
-    <input type="text" name="height_cm" placeholder="Height (cm)">
-
-    <label>Tax Class</label>
-    <input type="text" name="tax_class">
-
-    <label>Product Tags</label>
-    <input type="text" name="product_tag">
-
-    <!-- SEO Section -->
-    <h2>SEO Information</h2>
-    <label>SEO Title</label>
-    <input type="text" name="seo_title" required>
-
-    <label>SEO Description</label>
-    <textarea name="seo_description" required></textarea>
-
-    <label>Focus Keyword</label>
-    <input type="text" name="focus_keyword">
-
-    <h2>Product Images</h2>
-
-<!-- Primary Image Upload -->
-<label for="primary_image">Primary Image</label>
-<input type="file" name="primary_image" id="primary_image" required />
-
-<label for="primary_alt_text">Alt Text for Primary Image</label>
-<input type="text" name="primary_alt_text" id="primary_alt_text" required>
-
-<label for="primary_image_title">Title for Primary Image</label>
-<input type="text" name="primary_image_title" id="primary_image_title" required>
-
-<label for="primary_image_caption">Caption for Primary Image</label>
-<input type="text" name="primary_image_caption" id="primary_image_caption" required>
-
-<label for="primary_image_description">Description for Primary Image</label>
-<input type="text" name="primary_image_description" id="primary_image_description" required>
-
-<!-- Gallery Images Upload -->
-<label for="gallery_images">Gallery Images</label>
-<input type="file" name="gallery_images[]" id="gallery_images" multiple onchange="previewGalleryImages(event)" />
-
-<!-- Container for gallery image metadata -->
-<div id="gallery_images_metadata"></div>
-
-<button type="submit">Add Product</button>
-</form>
+        <div class="form-footer-actions">
+            <button type="submit" class="submit-btn">Save Product</button>
+        </div>
+    </form>
+</div>
 
 <script>
-// Function to preview gallery images and create metadata fields dynamically
 function previewGalleryImages(event) {
     const metadataContainer = document.getElementById('gallery_images_metadata');
-    metadataContainer.innerHTML = ''; // Clear any existing metadata fields
+    metadataContainer.innerHTML = '';
 
-    const files = event.target.files; // Get the selected files
+    const files = event.target.files;
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        // Create a section for each image
         const imageSection = document.createElement('div');
         imageSection.classList.add('gallery-image-section');
 
-        // Create an image preview
         const imagePreview = document.createElement('img');
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.alt = file.name;
-        imagePreview.style.maxWidth = '100px'; // Adjust the size of the preview
+        imagePreview.classList.add('gallery-image-preview');
         imageSection.appendChild(imagePreview);
 
-        // Create fields for metadata
         const altTextInput = document.createElement('input');
         altTextInput.type = 'text';
         altTextInput.name = 'alt_text_gallery[]';
         altTextInput.placeholder = 'Alt Text for Gallery Image';
+        altTextInput.classList.add('gallery-meta-input');
 
         const titleInput = document.createElement('input');
         titleInput.type = 'text';
         titleInput.name = 'image_title_gallery[]';
         titleInput.placeholder = 'Title for Gallery Image';
+        titleInput.classList.add('gallery-meta-input');
 
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
         captionInput.name = 'image_caption_gallery[]';
         captionInput.placeholder = 'Caption for Gallery Image';
+        captionInput.classList.add('gallery-meta-input');
 
         const descriptionTextarea = document.createElement('textarea');
         descriptionTextarea.name = 'image_description_gallery[]';
         descriptionTextarea.placeholder = 'Description for Gallery Image';
+        descriptionTextarea.classList.add('gallery-meta-textarea');
 
-        // Append the inputs to the section
         imageSection.appendChild(altTextInput);
         imageSection.appendChild(titleInput);
         imageSection.appendChild(captionInput);
         imageSection.appendChild(descriptionTextarea);
 
-        // Append the image section to the container
         metadataContainer.appendChild(imageSection);
     }
 }

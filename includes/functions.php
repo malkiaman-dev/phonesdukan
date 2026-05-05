@@ -159,6 +159,7 @@ if (!function_exists('loadCSS')) {
 
         $cssMap = [
             '/admin/' => 'public/assets/css/admin/admin.css',
+            '/admin/add-product' => 'public/assets/css/admin/add-product.css',
             '/mobiles' => 'public/assets/css/frontend/mobiles.css',
             '/power-banks' => 'public/assets/css/frontend/power-banks.css',
             '/smart-watches' => 'public/assets/css/frontend/smart-watches.css',
