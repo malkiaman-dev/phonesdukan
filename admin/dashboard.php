@@ -172,7 +172,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
     </section>
 
     <section class="kpi-grid">
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/manage-products.php'); ?>" role="button" tabindex="0" aria-label="Open Total Products">
             <div class="kpi-icon"><i class="fas fa-box"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Total Products</p>
@@ -180,7 +180,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small>Catalog items in store</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/manage-orders.php'); ?>" role="button" tabindex="0" aria-label="Open Total Orders">
             <div class="kpi-icon"><i class="fas fa-shopping-bag"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Total Orders</p>
@@ -188,7 +188,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small><?= htmlspecialchars((string) $kpis['today_orders']) ?> placed today</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/customers.php'); ?>" role="button" tabindex="0" aria-label="Open Total Users">
             <div class="kpi-icon"><i class="fas fa-users"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Total Users</p>
@@ -196,7 +196,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small><?= htmlspecialchars((string) $quickStats['new_customers_today']) ?> new today</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/reports.php'); ?>" role="button" tabindex="0" aria-label="Open Total Revenue">
             <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Total Revenue</p>
@@ -204,7 +204,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small>Rs. <?= number_format($revenueMonth, 0) ?> this month</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/manage-orders.php?status=pending'); ?>" role="button" tabindex="0" aria-label="Open Pending Orders">
             <div class="kpi-icon"><i class="fas fa-hourglass-half"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Pending Orders</p>
@@ -212,7 +212,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small>Need fulfillment action</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/manage-orders.php?status=processing'); ?>" role="button" tabindex="0" aria-label="Open Processing Orders">
             <div class="kpi-icon"><i class="fas fa-spinner"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Processing Orders</p>
@@ -220,7 +220,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small>Currently being prepared</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/manage-orders.php?status=completed'); ?>" role="button" tabindex="0" aria-label="Open Completed Orders">
             <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Completed Orders</p>
@@ -228,7 +228,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                 <small>Successfully delivered</small>
             </div>
         </article>
-        <article class="kpi-card">
+        <article class="kpi-card kpi-clickable" data-href="<?= url('admin/manage-orders.php?status=cancelled'); ?>" role="button" tabindex="0" aria-label="Open Cancelled Orders">
             <div class="kpi-icon"><i class="fas fa-times-circle"></i></div>
             <div class="kpi-meta">
                 <p class="kpi-title">Cancelled Orders</p>
@@ -260,7 +260,7 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
                     <?php if (!empty($recentOrders)): ?>
                         <?php foreach ($recentOrders as $order): ?>
                             <?php $status = strtolower((string) ($order['order_status'] ?? 'pending')); ?>
-                            <tr>
+                            <tr class="interactive-row" data-href="<?= url('admin/manage-orders.php'); ?>">
                                 <td>#<?= htmlspecialchars((string) ($order['order_id'] ?? '-')) ?></td>
                                 <td><?= htmlspecialchars((string) ($order['customer_name'] ?? 'Guest')) ?></td>
                                 <td><span class="status-badge status-<?= htmlspecialchars($status) ?>"><?= htmlspecialchars(ucfirst($status)) ?></span></td>
@@ -344,3 +344,30 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
         </article>
     </section>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var interactiveNodes = document.querySelectorAll('[data-href]');
+    interactiveNodes.forEach(function (node) {
+        var goToHref = function () {
+            var href = node.getAttribute('data-href');
+            if (href) {
+                window.location.href = href;
+            }
+        };
+
+        node.addEventListener('click', function (event) {
+            if (event.target.closest('a, button, input, select, textarea')) {
+                return;
+            }
+            goToHref();
+        });
+
+        node.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                goToHref();
+            }
+        });
+    });
+});
+</script>

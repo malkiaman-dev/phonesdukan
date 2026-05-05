@@ -406,6 +406,12 @@ body {
     cursor: pointer;
 }
 
+.sidebar-toggle:hover {
+    border-color: var(--ad-yellow);
+    color: var(--ad-yellow);
+    background: rgba(250, 204, 21, 0.18);
+}
+
 .navbar-brand {
     font-size: 14px;
     font-weight: 600;
@@ -425,6 +431,11 @@ body {
     font-weight: 600;
     color: #f3f4f6;
     background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-name:hover {
+    color: var(--ad-yellow);
+    background: #1f1f1f;
 }
 
 .dropdown-menu {
@@ -462,8 +473,8 @@ body {
 }
 
 #sidebar .nav-link:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    color: #facc15;
+    background: rgba(250, 204, 21, 0.12);
     text-decoration: none;
 }
 
@@ -548,6 +559,7 @@ body {
     justify-content: space-between;
     gap: 16px;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    animation: fadeSlideIn 0.32s ease both;
 }
 
 .dashboard-page-header h1 {
@@ -588,8 +600,13 @@ body {
 }
 
 .quick-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(250, 204, 21, 0.35);
+    transform: translateY(-2px);
+    background: #eab308;
+    box-shadow: 0 10px 20px rgba(234, 179, 8, 0.35);
+}
+
+.quick-btn:active {
+    transform: scale(0.98);
 }
 
 .kpi-grid {
@@ -608,13 +625,14 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     animation: cardFadeIn 0.35s ease both;
 }
 
 .kpi-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
+    border-color: #facc15;
 }
 
 .kpi-icon {
@@ -626,6 +644,16 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.kpi-card:hover .kpi-icon {
+    background: #facc15;
+    color: #111111;
+}
+
+.kpi-clickable {
+    cursor: pointer;
 }
 
 .kpi-meta span {
@@ -677,6 +705,7 @@ body {
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
     overflow: hidden;
     height: fit-content;
+    animation: fadeSlideIn 0.35s ease both;
 }
 
 .panel-header {
@@ -731,7 +760,12 @@ body {
 }
 
 .admin-table tbody tr:hover {
-    background: #fcfcfd;
+    background: #fffbeb;
+}
+
+.interactive-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .status-badge {
@@ -765,9 +799,9 @@ body {
 }
 
 .table-action:hover {
-    border-color: var(--ad-yellow);
-    background: #fffbeb;
-    color: #111111;
+    border-color: #111111;
+    background: #111111;
+    color: #facc15;
 }
 
 .empty-state {
@@ -793,6 +827,13 @@ body {
     border: 1px solid #edf0f3;
     border-radius: 12px;
     padding: 9px 10px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-item:hover {
+    transform: translateY(-2px);
+    border-color: #facc15;
+    box-shadow: 0 10px 20px rgba(17, 17, 17, 0.08);
 }
 
 .review-top {
@@ -832,6 +873,10 @@ body {
     overflow: hidden;
 }
 
+.review-item strong {
+    color: #111111;
+}
+
 .rating-stars {
     margin-top: 7px;
     display: inline-flex;
@@ -861,6 +906,13 @@ body {
     padding: 10px;
     border: 1px solid #edf0f3;
     border-radius: 12px;
+    transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.activity-item:hover {
+    background: #fffbeb;
+    border-color: #facc15;
+    transform: translateX(2px);
 }
 
 .activity-item span {
@@ -882,6 +934,14 @@ body {
     color: #7a5600;
     width: 18px;
     text-align: center;
+    border-radius: 8px;
+    padding: 4px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.activity-item:hover .activity-label i {
+    color: #111111;
+    background: #facc15;
 }
 
 .activity-item strong {
@@ -908,6 +968,7 @@ body {
     font-weight: 600;
     font-size: 13px;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .quick-action-card p {
@@ -924,6 +985,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .quick-action-card:hover {
@@ -937,10 +999,29 @@ body {
     color: #111111;
 }
 
+.quick-action-card:hover i {
+    background: #facc15;
+    color: #111111;
+}
+
 @keyframes cardFadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.kpi-grid .kpi-card:nth-child(1) { animation-delay: 0.02s; }
+.kpi-grid .kpi-card:nth-child(2) { animation-delay: 0.04s; }
+.kpi-grid .kpi-card:nth-child(3) { animation-delay: 0.06s; }
+.kpi-grid .kpi-card:nth-child(4) { animation-delay: 0.08s; }
+.kpi-grid .kpi-card:nth-child(5) { animation-delay: 0.10s; }
+.kpi-grid .kpi-card:nth-child(6) { animation-delay: 0.12s; }
+.kpi-grid .kpi-card:nth-child(7) { animation-delay: 0.14s; }
+.kpi-grid .kpi-card:nth-child(8) { animation-delay: 0.16s; }
 
 @media (max-width: 1200px) {
     .kpi-grid {
@@ -1011,4 +1092,16 @@ body {
 #sidebar a:hover {
     color: var(--ad-yellow);
     text-decoration: none;
+}
+
+.dashboard-content a:focus-visible,
+.dashboard-content button:focus-visible,
+.dashboard-content [tabindex]:focus-visible,
+.navbar a:focus-visible,
+.navbar button:focus-visible,
+#sidebar a:focus-visible {
+    outline: 2px solid #facc15;
+    outline-offset: 2px;
+    box-shadow: none;
+    border-radius: 8px;
 }
