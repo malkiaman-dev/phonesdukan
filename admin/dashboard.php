@@ -138,7 +138,7 @@ if ($hasReviews) {
                   FROM reviews r
                   LEFT JOIN products p ON p.product_id = r.product_id
                   ORDER BY r.created_at DESC
-                  LIMIT 3";
+                  LIMIT 2";
         $recentReviews = $conn->query($query)->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Throwable $e) {
         $recentReviews = [];
