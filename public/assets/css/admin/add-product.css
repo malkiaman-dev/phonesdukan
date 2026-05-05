@@ -3,6 +3,7 @@
     margin: 0 auto;
     padding: 24px 24px 32px;
     background: #f8fafc;
+    overflow: visible;
 }
 
 .admin-page .page-header {
@@ -10,6 +11,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    margin-bottom: 12px;
 }
 
 .admin-page .page-header h1 {
@@ -26,7 +28,8 @@
 
 .admin-page .product-form {
     display: grid;
-    gap: 24px;
+    gap: 20px;
+    overflow: visible;
 }
 
 .admin-page .form-card {
@@ -36,6 +39,16 @@
     padding: 24px;
     box-shadow: 0 12px 30px rgba(17, 17, 17, 0.05);
     margin-bottom: 0;
+}
+
+/* Neutralize legacy global span badges in admin.css */
+.admin-page span {
+    background: transparent !important;
+    color: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    font-size: inherit !important;
 }
 
 .admin-page .form-card-header {
@@ -97,6 +110,13 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.admin-page .form-group input::placeholder,
+.admin-page .form-group textarea::placeholder,
+.admin-page .gallery-meta-input::placeholder,
+.admin-page .gallery-meta-textarea::placeholder {
+    color: #9ca3af;
+}
+
 .admin-page .form-group textarea,
 .admin-page .gallery-meta-textarea {
     min-height: 120px;
@@ -121,10 +141,188 @@
     gap: 10px;
 }
 
-.admin-page .submit-btn {
-    border: 1px solid #eab308;
+.admin-page .custom-select {
+    position: relative;
+}
+
+.admin-page .native-select {
+    position: absolute;
+    inset: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.admin-page .custom-select-btn {
+    width: 100%;
+    height: 48px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #111111;
+    padding: 0 44px 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-page .custom-select-btn span {
+    background: transparent !important;
+    color: inherit !important;
+}
+
+.admin-page .custom-select-btn:hover {
+    border-color: #facc15;
+}
+
+.admin-page .custom-select-btn:focus-visible {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.18);
+}
+
+.admin-page .custom-select-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 10px;
+}
+
+.admin-page .custom-select-arrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #111111;
+    border-bottom: 2px solid #111111;
+    transform: translateY(-60%) rotate(45deg);
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.admin-page .custom-select-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 16px 30px rgba(17, 17, 17, 0.12);
+    max-height: 260px;
+    overflow: auto;
+    padding: 6px;
+    display: none;
+    z-index: 50;
+}
+
+.admin-page .custom-select.is-open .custom-select-menu {
+    display: block;
+}
+
+.admin-page .custom-select-option {
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #111111;
+    font-size: 14px;
+    transition: background-color 0.15s ease;
+}
+
+.admin-page .custom-select-option:hover {
+    background: #fffbeb;
+}
+
+.admin-page .custom-select-option.is-selected {
     background: #facc15;
     color: #111111;
+    font-weight: 700;
+}
+
+.admin-page .custom-select-menu::-webkit-scrollbar {
+    width: 10px;
+}
+
+.admin-page .custom-select-menu::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 999px;
+}
+
+.admin-page .custom-select-menu::-webkit-scrollbar-thumb {
+    background: #facc15;
+    border-radius: 999px;
+}
+
+.admin-page .file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.admin-page .upload-box {
+    display: grid;
+    gap: 6px;
+    padding: 20px;
+    border: 1px dashed #e5e7eb;
+    border-radius: 14px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+}
+
+.admin-page .upload-box:hover {
+    border-color: #facc15;
+    background: #fffbeb;
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.05);
+}
+
+.admin-page .upload-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #facc15;
+    color: #111111;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.admin-page .upload-title {
+    font-weight: 700;
+    color: #111111;
+    font-size: 14px;
+}
+
+.admin-page .upload-help {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.admin-page .upload-filename {
+    font-size: 12px;
+    color: #111111 !important;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-page .submit-btn {
+    border: 1px solid #111111;
+    background: #111111;
+    color: #ffffff;
     border-radius: 10px;
     min-height: 46px;
     padding: 0 18px;
@@ -135,13 +333,29 @@
 }
 
 .admin-page .submit-btn:hover {
-    background: #eab308;
-    box-shadow: 0 8px 18px rgba(234, 179, 8, 0.28);
+    background: #111111;
+    color: #facc15;
+    border-color: #111111;
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
     transform: translateY(-1px);
 }
 
 .admin-page .submit-btn:active {
     transform: scale(0.98);
+}
+
+.admin-page .submit-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.22);
+}
+
+/* Prevent internal scroll containers (double scrollbar) */
+.admin-page,
+.admin-page .form-card,
+.admin-page .form-grid,
+.admin-page .gallery-metadata-grid {
+    max-height: none;
+    overflow: visible;
 }
 
 .admin-page .form-footer-actions {

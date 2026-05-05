@@ -61,27 +61,41 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-2">
                 <div class="form-group">
                     <label for="product_name">Product Name</label>
-                    <input id="product_name" type="text" name="product_name" required>
+                    <input id="product_name" type="text" name="product_name" placeholder="Enter product name" required>
                 </div>
                 <div class="form-group">
                     <label for="product_slug">Product Slug</label>
-                    <input id="product_slug" type="text" name="product_slug" required>
+                    <input id="product_slug" type="text" name="product_slug" placeholder="product-name-slug" required>
                 </div>
                 <div class="form-group">
                     <label for="category_id">Category</label>
-                    <select id="category_id" name="category_id" required>
-                        <?php while ($row = $categories_result->fetch(PDO::FETCH_ASSOC)) { ?>
-                            <option value="<?php echo $row['category_id']; ?>"><?php echo $row['category_name']; ?></option>
-                        <?php } ?>
-                    </select>
+                    <div class="custom-select" data-select-id="category_id">
+                        <select class="native-select" id="category_id" name="category_id" required>
+                            <?php while ($row = $categories_result->fetch(PDO::FETCH_ASSOC)) { ?>
+                                <option value="<?php echo $row['category_id']; ?>"><?php echo $row['category_name']; ?></option>
+                            <?php } ?>
+                        </select>
+                        <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-value">Select category</span>
+                            <span class="custom-select-arrow" aria-hidden="true"></span>
+                        </button>
+                        <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="brand_id">Brand</label>
-                    <select id="brand_id" name="brand_id" required>
-                        <?php while ($row = $brands_result->fetch(PDO::FETCH_ASSOC)) { ?>
-                            <option value="<?php echo $row['brand_id']; ?>"><?php echo $row['brand_name']; ?></option>
-                        <?php } ?>
-                    </select>
+                    <div class="custom-select" data-select-id="brand_id">
+                        <select class="native-select" id="brand_id" name="brand_id" required>
+                            <?php while ($row = $brands_result->fetch(PDO::FETCH_ASSOC)) { ?>
+                                <option value="<?php echo $row['brand_id']; ?>"><?php echo $row['brand_name']; ?></option>
+                            <?php } ?>
+                        </select>
+                        <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-value">Select brand</span>
+                            <span class="custom-select-arrow" aria-hidden="true"></span>
+                        </button>
+                        <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -91,11 +105,11 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-2">
                 <div class="form-group full-width">
                     <label for="product_description">Product Description</label>
-                    <textarea id="product_description" name="product_description" required></textarea>
+                    <textarea id="product_description" name="product_description" placeholder="Write full product description" required></textarea>
                 </div>
                 <div class="form-group full-width">
                     <label for="short_description">Short Description</label>
-                    <textarea id="short_description" name="short_description" required></textarea>
+                    <textarea id="short_description" name="short_description" placeholder="Write short product summary" required></textarea>
                 </div>
             </div>
         </section>
@@ -105,19 +119,19 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-4">
                 <div class="form-group">
                     <label for="regular_price">Regular Price</label>
-                    <input id="regular_price" type="number" name="regular_price" required>
+                    <input id="regular_price" type="number" name="regular_price" placeholder="4999" required>
                 </div>
                 <div class="form-group">
                     <label for="sale_price">Sale Price</label>
-                    <input id="sale_price" type="number" name="sale_price">
+                    <input id="sale_price" type="number" name="sale_price" placeholder="4499">
                 </div>
                 <div class="form-group">
                     <label for="stock_quantity">Stock Quantity</label>
-                    <input id="stock_quantity" type="number" name="stock_quantity" required>
+                    <input id="stock_quantity" type="number" name="stock_quantity" placeholder="25" required>
                 </div>
                 <div class="form-group">
                     <label for="product_sku">Product SKU</label>
-                    <input id="product_sku" type="text" name="product_sku">
+                    <input id="product_sku" type="text" name="product_sku" placeholder="MI-IPH-001">
                 </div>
             </div>
         </section>
@@ -127,23 +141,23 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-2">
                 <div class="form-group">
                     <label for="weight_kg">Weight (kg)</label>
-                    <input id="weight_kg" type="text" name="weight_kg">
+                    <input id="weight_kg" type="text" name="weight_kg" placeholder="0.5">
                 </div>
                 <div class="form-group">
                     <label for="tax_class">Tax Class</label>
-                    <input id="tax_class" type="text" name="tax_class">
+                    <input id="tax_class" type="text" name="tax_class" placeholder="Standard">
                 </div>
                 <div class="form-group full-width">
                     <label>Dimensions (L x W x H in cm)</label>
                     <div class="dimensions-group">
-                        <input type="text" name="length_cm" placeholder="Length (cm)">
-                        <input type="text" name="width_cm" placeholder="Width (cm)">
-                        <input type="text" name="height_cm" placeholder="Height (cm)">
+                        <input type="text" name="length_cm" placeholder="15">
+                        <input type="text" name="width_cm" placeholder="7">
+                        <input type="text" name="height_cm" placeholder="1">
                     </div>
                 </div>
                 <div class="form-group full-width">
                     <label for="product_tag">Product Tags</label>
-                    <input id="product_tag" type="text" name="product_tag">
+                    <input id="product_tag" type="text" name="product_tag" placeholder="mobile, apple, iphone">
                 </div>
             </div>
         </section>
@@ -153,10 +167,17 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-2">
                 <div class="form-group">
                     <label for="product_status">Product Status</label>
-                    <select id="product_status" name="product_status" required>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
+                    <div class="custom-select" data-select-id="product_status">
+                        <select class="native-select" id="product_status" name="product_status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-value">Select status</span>
+                            <span class="custom-select-arrow" aria-hidden="true"></span>
+                        </button>
+                        <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -166,15 +187,15 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-2">
                 <div class="form-group">
                     <label for="seo_title">SEO Title</label>
-                    <input id="seo_title" type="text" name="seo_title" required>
+                    <input id="seo_title" type="text" name="seo_title" placeholder="Buy product name online in Pakistan" required>
                 </div>
                 <div class="form-group">
                     <label for="focus_keyword">Focus Keyword</label>
-                    <input id="focus_keyword" type="text" name="focus_keyword">
+                    <input id="focus_keyword" type="text" name="focus_keyword" placeholder="product keyword">
                 </div>
                 <div class="form-group full-width">
                     <label for="seo_description">SEO Description</label>
-                    <textarea id="seo_description" name="seo_description" required></textarea>
+                    <textarea id="seo_description" name="seo_description" placeholder="Write a short SEO description" required></textarea>
                 </div>
             </div>
         </section>
@@ -184,27 +205,43 @@ $brands_result = $conn->query($brands_query);
             <div class="form-grid cols-2">
                 <div class="form-group">
                     <label for="primary_image">Primary Image</label>
-                    <input type="file" name="primary_image" id="primary_image" required>
+                    <label class="upload-box" for="primary_image">
+                        <span class="upload-icon" aria-hidden="true">
+                            <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="upload-title">Click to upload primary image</span>
+                        <span class="upload-help">PNG, JPG, WEBP up to 5MB</span>
+                        <span class="upload-filename" data-for="primary_image">No file selected</span>
+                    </label>
+                    <input class="file-input" type="file" name="primary_image" id="primary_image" required>
                 </div>
                 <div class="form-group">
                     <label for="gallery_images">Gallery Images</label>
-                    <input type="file" name="gallery_images[]" id="gallery_images" multiple onchange="previewGalleryImages(event)">
+                    <label class="upload-box" for="gallery_images">
+                        <span class="upload-icon" aria-hidden="true">
+                            <i class="fas fa-images"></i>
+                        </span>
+                        <span class="upload-title">Click to upload gallery images</span>
+                        <span class="upload-help">Upload multiple PNG, JPG, or WEBP images</span>
+                        <span class="upload-filename" data-for="gallery_images">No files selected</span>
+                    </label>
+                    <input class="file-input" type="file" name="gallery_images[]" id="gallery_images" multiple onchange="previewGalleryImages(event)">
                 </div>
                 <div class="form-group">
                     <label for="primary_alt_text">Alt Text for Primary Image</label>
-                    <input type="text" name="primary_alt_text" id="primary_alt_text" required>
+                    <input type="text" name="primary_alt_text" id="primary_alt_text" placeholder="Product image alt text" required>
                 </div>
                 <div class="form-group">
                     <label for="primary_image_title">Title for Primary Image</label>
-                    <input type="text" name="primary_image_title" id="primary_image_title" required>
+                    <input type="text" name="primary_image_title" id="primary_image_title" placeholder="Product image title" required>
                 </div>
                 <div class="form-group">
                     <label for="primary_image_caption">Caption for Primary Image</label>
-                    <input type="text" name="primary_image_caption" id="primary_image_caption" required>
+                    <input type="text" name="primary_image_caption" id="primary_image_caption" placeholder="Product image caption" required>
                 </div>
                 <div class="form-group">
                     <label for="primary_image_description">Description for Primary Image</label>
-                    <input type="text" name="primary_image_description" id="primary_image_description" required>
+                    <input type="text" name="primary_image_description" id="primary_image_description" placeholder="Product image description" required>
                 </div>
             </div>
 
@@ -266,4 +303,133 @@ function previewGalleryImages(event) {
         metadataContainer.appendChild(imageSection);
     }
 }
+
+function updateUploadFilename(inputId) {
+    const input = document.getElementById(inputId);
+    const label = document.querySelector('.upload-filename[data-for="' + inputId + '"]');
+    if (!input || !label) return;
+
+    input.addEventListener('change', function () {
+        if (!input.files || input.files.length === 0) {
+            label.textContent = input.multiple ? 'No files selected' : 'No file selected';
+            return;
+        }
+        if (input.multiple) {
+            label.textContent = input.files.length + ' file(s) selected';
+        } else {
+            label.textContent = input.files[0].name;
+        }
+    });
+}
+
+updateUploadFilename('primary_image');
+updateUploadFilename('gallery_images');
+
+function initCustomSelect(root) {
+    const select = root.querySelector('select.native-select');
+    const btn = root.querySelector('.custom-select-btn');
+    const valueEl = root.querySelector('.custom-select-value');
+    const menu = root.querySelector('.custom-select-menu');
+    if (!select || !btn || !valueEl || !menu) return;
+
+    function renderOptions() {
+        menu.innerHTML = '';
+        Array.from(select.options).forEach((opt, idx) => {
+            const item = document.createElement('div');
+            item.className = 'custom-select-option';
+            item.setAttribute('role', 'option');
+            item.dataset.value = opt.value;
+            item.dataset.index = String(idx);
+            item.textContent = opt.textContent;
+            if (opt.selected) item.classList.add('is-selected');
+            menu.appendChild(item);
+        });
+    }
+
+    function syncFromNative() {
+        const selected = select.options[select.selectedIndex];
+        valueEl.textContent = selected ? selected.textContent : 'Select';
+        Array.from(menu.querySelectorAll('.custom-select-option')).forEach((el) => {
+            el.classList.toggle('is-selected', el.dataset.value === (selected ? selected.value : ''));
+        });
+    }
+
+    function openMenu() {
+        root.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        menu.focus();
+        syncFromNative();
+    }
+
+    function closeMenu() {
+        root.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+    }
+
+    renderOptions();
+    syncFromNative();
+
+    btn.addEventListener('click', function () {
+        if (root.classList.contains('is-open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    menu.addEventListener('click', function (e) {
+        const optEl = e.target.closest('.custom-select-option');
+        if (!optEl) return;
+        select.value = optEl.dataset.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        syncFromNative();
+        closeMenu();
+        btn.focus();
+    });
+
+    menu.addEventListener('keydown', function (e) {
+        const options = Array.from(menu.querySelectorAll('.custom-select-option'));
+        const selectedIndex = Math.max(0, options.findIndex((o) => o.classList.contains('is-selected')));
+        let nextIndex = selectedIndex;
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            closeMenu();
+            btn.focus();
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            nextIndex = Math.min(options.length - 1, selectedIndex + 1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            nextIndex = Math.max(0, selectedIndex - 1);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const chosen = options[selectedIndex];
+            if (chosen) chosen.click();
+            return;
+        } else {
+            return;
+        }
+
+        const next = options[nextIndex];
+        if (next) {
+            options.forEach((o) => o.classList.remove('is-selected'));
+            next.classList.add('is-selected');
+            next.scrollIntoView({ block: 'nearest' });
+        }
+    });
+
+    select.addEventListener('change', syncFromNative);
+
+    document.addEventListener('click', function (e) {
+        if (!root.contains(e.target)) {
+            closeMenu();
+        }
+    });
+}
+
+document.querySelectorAll('.custom-select').forEach(initCustomSelect);
 </script>
