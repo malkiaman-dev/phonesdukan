@@ -391,6 +391,7 @@ switch (true) {
     // E-commerce Routes (Category, Brand, Product)
     default:
         $segments = explode('/', $request_uri);
+        $segments = array_map('urldecode', $segments);
 
         // Category Page (e.g., /mobiles, /smartwatches, /tablets)
         if (count($segments) === 1 && !empty($segments[0])) {

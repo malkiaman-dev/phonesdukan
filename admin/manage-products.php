@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 
 session_start();
 require_once __DIR__ . '/../database/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -945,8 +946,12 @@ if (!$result) {
                             <a href="delete_product.php?id=<?= $row['product_id'] ?>"
                                class="prd-btn prd-btn-delete"
                                onclick="return confirm('Are you sure you want to delete this product and all associated data?')">Delete</a>
-                            <a href="/<?= htmlspecialchars($row['category_slug'] . '/' . $row['brand_slug'] . '/' . $row['product_slug']) ?>"
-                               class="prd-btn prd-btn-view" target="_blank">View</a>
+                            <?php
+                                $viewPath = rawurlencode((string)($row['category_slug'] ?? '')) . '/' .
+                                            rawurlencode((string)($row['brand_slug'] ?? '')) . '/' .
+                                            rawurlencode((string)($row['product_slug'] ?? ''));
+                            ?>
+                            <a href="<?= url($viewPath); ?>" class="prd-btn prd-btn-view">View</a>
                         </div>
                     </td>
                 </tr>
