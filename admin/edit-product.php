@@ -13,12 +13,12 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
 
+$flashMessage = null;
+$flashType = 'success';
 if (isset($_SESSION['message'])) {
-    $messageType = $_SESSION['message_type'] ?? 'success';
-    $messageClass = $messageType === 'success' ? 'success-message' : 'error-message';
-    echo '<div class="' . $messageClass . '">' . htmlspecialchars($_SESSION['message']) . '</div>';
-    unset($_SESSION['message']);
-    unset($_SESSION['message_type']);
+    $flashMessage = (string) $_SESSION['message'];
+    $flashType = ($_SESSION['message_type'] ?? 'success') === 'error' ? 'error' : 'success';
+    unset($_SESSION['message'], $_SESSION['message_type']);
 }
 
 require_once dirname(__DIR__, 1) . '/app/Controllers/EditProductController.php';
@@ -156,6 +156,42 @@ function epImageCandidates($rawPath)
     .ep-wrap small,
     .ep-wrap p {
         background: transparent !important;
+    }
+
+    .ep-toast {
+        position: fixed;
+        right: 22px;
+        bottom: 22px;
+        z-index: 4000;
+        min-width: 260px;
+        max-width: 380px;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: 1px solid var(--border);
+        box-shadow: 0 16px 30px rgba(17, 17, 17, 0.15);
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none;
+        transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .ep-toast.is-show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .ep-toast-success {
+        background: #111111;
+        color: #ffffff;
+        border-color: #111111;
+    }
+
+    .ep-toast-error {
+        background: #fffbeb;
+        color: #111111;
+        border-color: #facc15;
     }
 
     .ep-header,
@@ -682,7 +718,7 @@ function epImageCandidates($rawPath)
         <button type="submit" class="ep-btn" form="product-form">Update Product</button>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" action="/admin/edit-product.php?id=<?= $product['product_id'] ?>" id="product-form">
+    <form method="POST" enctype="multipart/form-data" action="" id="product-form">
         <div class="ep-card">
             <h3>Basic Information</h3>
             <div class="ep-grid">
@@ -936,6 +972,11 @@ function epImageCandidates($rawPath)
         <button type="submit" class="ep-btn">Update Product</button>
     </form>
 </div>
+<?php if ($flashMessage !== null): ?>
+    <div id="ep-toast" class="ep-toast <?= $flashType === 'error' ? 'ep-toast-error' : 'ep-toast-success' ?>">
+        <?= htmlspecialchars($flashMessage) ?>
+    </div>
+<?php endif; ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Attach event listeners to existing remove buttons
@@ -975,6 +1016,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     initCustomDropdowns(document);
+
+    const toast = document.getElementById('ep-toast');
+    if (toast) {
+        requestAnimationFrame(() => toast.classList.add('is-show'));
+        setTimeout(() => toast.classList.remove('is-show'), 3200);
+    }
 });
 
 function initCustomDropdowns(scope) {

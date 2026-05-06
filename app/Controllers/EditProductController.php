@@ -9,6 +9,18 @@ class ProductController
 {
     private $model;
 
+    private function redirectToCurrentEditPage($id)
+    {
+        $requestPath = $_SERVER['REQUEST_URI'] ?? '';
+        $basePath = strtok($requestPath, '?');
+        if (!is_string($basePath) || trim($basePath) === '') {
+            $basePath = 'edit-product.php';
+        }
+
+        header('Location: ' . $basePath . '?id=' . urlencode((string) $id));
+        exit();
+    }
+
     public function __construct()
     {
         $database = new Database();
@@ -64,8 +76,7 @@ class ProductController
             session_start();
             $_SESSION['message'] = 'Error: Invalid product ID or data.';
             $_SESSION['message_type'] = 'error';
-            header('Location: /admin/edit-product.php?id=' . $id);
-            exit();
+            $this->redirectToCurrentEditPage($id);
         }
     
         try {
@@ -101,8 +112,7 @@ class ProductController
             error_log('Update product error: ' . $e->getMessage());
         }
         
-        header('Location: /admin/edit-product.php?id=' . $id);
-        exit();
+        $this->redirectToCurrentEditPage($id);
     }
     
     public function updateProductImages($productId, $primaryImage, $imageMetadata, $primaryImageId = null)
