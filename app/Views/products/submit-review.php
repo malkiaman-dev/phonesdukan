@@ -9,6 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reviewContent = isset($_POST['content']) ? htmlspecialchars($_POST['content']) : '';
     $authorName = isset($_POST['author']) ? htmlspecialchars($_POST['author']) : '';
     $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
+    $return_url = isset($_POST['return_url']) ? (string)$_POST['return_url'] : '/';
+
+    // Keep redirects local-only and fallback safely.
+    if ($return_url === '' || strpos($return_url, '://') !== false || strpos($return_url, '//') === 0) {
+        $return_url = '/';
+    }
+    if ($return_url[0] !== '/') {
+        $return_url = '/' . ltrim($return_url, '/');
+    }
 
     // Validate rating (default to 5 if not valid)
     $rating = (isset($_POST['rating']) && $_POST['rating'] >= 1 && $_POST['rating'] <= 5)
@@ -42,7 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'author' => $authorName,
             'content' => $reviewContent,
             'email' => $email,
-            'product_name' => $product_name
+            'product_name' => $product_name,
+            'return_url' => $return_url
         ];
     } else {
         $_SESSION['error'] = 'There was an issue with submitting your review. Please try again.';
@@ -97,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                         Back to Product
                     </button>
-                    <a href="/" class="rs-btn rs-btn--secondary">
+                    <a href="<?= htmlspecialchars($_SESSION['review']['return_url'] ?? '/') ?>" class="rs-btn rs-btn--secondary">
                         Continue Shopping
                     </a>
                 </div>

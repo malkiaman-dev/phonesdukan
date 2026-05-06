@@ -15,6 +15,7 @@ endif;
 $isLoggedIn = isset($_SESSION['user_id']);
 $userName = $isLoggedIn && isset($_SESSION['user_name']) && $_SESSION['user_name'] !== 'Guest' ? htmlspecialchars($_SESSION['user_name']) : 'Guest';
 $userEmail = isset($_SESSION['email']) && !empty($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : '';
+$returnUrl = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '/';
 
 // Debugging: Print session data to verify
 // echo '<pre>';
@@ -39,6 +40,7 @@ $userEmail = isset($_SESSION['email']) && !empty($_SESSION['email']) ? htmlspeci
 
     <form action="/submit-review" method="post">
         <input type="hidden" name="product_id" value="<?= htmlspecialchars($product_id) ?>">
+        <input type="hidden" name="return_url" value="<?= htmlspecialchars($returnUrl) ?>">
 
         <!-- Review Content -->
         <label for="content">Your Review:</label>
