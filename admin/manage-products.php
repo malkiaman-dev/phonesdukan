@@ -69,255 +69,697 @@ if (!$result) {
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #f0f2f5;
-            color: #222;
+        :root {
+            --black: #111111;
+            --white: #ffffff;
+            --bg: #f8fafc;
+            --border: #e5e7eb;
+            --muted: #6b7280;
+            --yellow: #facc15;
+            --light-yellow: #fffbeb;
+            --yellow-glow: rgba(250, 204, 21, 0.18);
         }
 
-        /* ===== Wrapper ===== */
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--black);
+        }
+
         .prd-wrap {
             max-width: 1400px;
-            margin: 30px auto;
+            margin: 24px auto;
             padding: 0 24px;
         }
 
-        /* ===== Top Bar ===== */
         .prd-topbar {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 14px;
+            padding: 20px 22px;
+            margin-bottom: 16px;
         }
 
         .prd-title {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            letter-spacing: -0.3px;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--black);
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            margin: 0;
         }
 
-        /* ===== Add Button ===== */
-        .btn-add {
-            display: inline-block;
-            background: #22c55e;
-            color: #fff;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.88rem;
+        .prd-subtitle {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 0.95rem;
             font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 8px;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--black);
+            color: var(--white);
+            border: 1px solid var(--black);
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 14px 24px;
+            border-radius: 14px;
             text-decoration: none;
-            box-shadow: 0 2px 8px rgba(34,197,94,0.3);
-            transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+            box-shadow: 0 12px 24px rgba(17, 17, 17, 0.14);
+            transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
             white-space: nowrap;
         }
         .btn-add:hover {
-            background: #16a34a;
+            color: var(--yellow);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(34,197,94,0.35);
+            box-shadow: 0 16px 30px rgba(17, 17, 17, 0.18);
         }
 
-        /* ===== Filter & Search Bar ===== */
         .prd-controls {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
+            padding: 14px 16px;
             display: flex;
-            align-items: center;
+            justify-content: space-between;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 16px;
+            align-items: center;
+            margin-bottom: 12px;
         }
+
+        .prd-controls-left,
+        .prd-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .prd-controls-left { justify-content: flex-start; }
+        .prd-controls-right { justify-content: flex-end; margin-left: auto; }
 
         .prd-controls form {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            flex-wrap: nowrap;
         }
 
         .prd-controls label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #444;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--black);
             white-space: nowrap;
         }
 
         .prd-select,
         .prd-search-input {
             font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem;
-            color: #333;
-            border: 1.5px solid #d0d7e2;
-            border-radius: 7px;
-            padding: 8px 12px;
-            background: #fff;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--black);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0 18px;
+            background: var(--white);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
             outline: none;
+            height: 52px;
         }
 
         .prd-select {
             appearance: none;
             -webkit-appearance: none;
-            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;
-            padding-right: 30px;
-            min-width: 130px;
+            background:
+                #fff
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+                no-repeat right 16px center;
+            padding-right: 44px;
+            min-width: 170px;
+        }
+        .native-filter-select {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
+        }
+
+        .filter-select-wrap {
+            position: relative;
+            min-width: 170px;
+        }
+
+        .filter-display {
+            width: 100%;
+            height: 52px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0 44px 0 16px;
+            background: var(--white);
+            color: var(--black);
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .filter-display::after {
+            content: "";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid var(--black);
+            border-bottom: 2px solid var(--black);
+            transform: translateY(-65%) rotate(45deg);
+        }
+
+        .filter-display:hover,
+        .filter-select-wrap.is-open .filter-display {
+            background-color: #fcfcfd;
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px var(--yellow-glow);
+        }
+
+        .filter-options {
+            position: absolute;
+            left: 0;
+            right: 0;
+            z-index: 70;
+            list-style: none;
+            margin-top: 6px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 14px 28px rgba(17,17,17,0.12);
+            padding: 6px;
+            display: none;
+        }
+
+        .filter-select-wrap.is-open .filter-options {
+            display: block;
+        }
+
+        .filter-option {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            border-radius: 8px;
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--black);
+            cursor: pointer;
+        }
+
+        .filter-option:hover {
+            background: var(--light-yellow);
+        }
+
+        .filter-option.is-selected {
+            background: var(--yellow);
+        }
+
+        .prd-search-input {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .prd-select:hover,
+        .prd-search-input:hover {
+            background-color: #fcfcfd;
         }
 
         .prd-select:focus,
         .prd-search-input:focus {
-            border-color: #1a7fe8;
-            box-shadow: 0 0 0 3px rgba(26,127,232,0.12);
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px var(--yellow-glow);
         }
-
-        .prd-search-input { min-width: 220px; }
 
         .btn-search {
             font-family: 'DM Sans', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #fff;
-            background: #1a7fe8;
-            border: none;
-            border-radius: 7px;
-            padding: 8px 18px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--white);
+            background: var(--black);
+            border: 1px solid var(--black);
+            border-radius: 14px;
+            padding: 0 18px;
+            height: 52px;
             cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
+            transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
         }
         .btn-search:hover {
-            background: #1565c0;
+            color: var(--yellow);
             transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(17, 17, 17, 0.14);
         }
 
-        /* ===== Count Label ===== */
-        .prd-count {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 12px;
+        .btn-export {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--black);
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0 18px;
+            height: 52px;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+            white-space: nowrap;
         }
-        .prd-count strong { color: #1a1a2e; }
+        .btn-export:hover {
+            color: var(--black);
+            border-color: var(--yellow);
+            background: #fcfcfd;
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 3px var(--yellow-glow);
+        }
 
-        /* ===== Table Wrapper ===== */
+        .prd-count-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--black);
+            border: 1px solid var(--black);
+            border-radius: 999px;
+            padding: 10px 14px;
+            margin: 10px 0 14px;
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+            color: var(--white);
+            font-weight: 700;
+            width: fit-content;
+        }
+        .prd-count-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--yellow);
+            box-shadow: 0 0 0 3px var(--yellow-glow);
+        }
+        .prd-count-pill span {
+            color: rgba(255,255,255,0.85);
+            font-weight: 800;
+        }
+        .prd-count-pill strong {
+            color: var(--white);
+            font-weight: 900;
+        }
+
         .prd-table-wrap {
-            background: #fff;
-            border-radius: 10px;
+            background: var(--white);
+            border-radius: 22px;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+            box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
         }
 
-        /* ===== Table ===== */
         .prd-table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.92rem;
         }
 
-        .prd-table thead tr { background: #1a7fe8; }
+        .prd-table thead tr { background: #f9fafb; }
 
         .prd-table thead th {
-            color: #fff;
-            font-weight: 700;
+            color: var(--black);
+            font-weight: 900;
             font-size: 0.78rem;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 14px 16px;
+            padding: 18px 16px;
             text-align: left;
             white-space: nowrap;
+            border-bottom: 1px solid var(--border);
         }
 
         .prd-table tbody tr {
-            border-bottom: 1px solid #e8ecf0;
-            transition: background 0.15s;
+            transition: background 0.2s ease, transform 0.2s ease;
         }
-        .prd-table tbody tr:last-child { border-bottom: none; }
-        .prd-table tbody tr:hover { background: #f5f8ff; }
+        .prd-table tbody tr:hover { background: var(--light-yellow); }
 
         .prd-table tbody td {
-            padding: 12px 16px;
+            padding: 10px 14px;
             vertical-align: middle;
-            color: #333;
+            color: var(--black);
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .prd-table tbody tr:last-child td { border-bottom: 0; }
+
+        .prd-imgbox {
+            width: 84px;
+            height: 84px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
         }
 
-        /* Product image */
         .prd-img {
-            width: 52px;
-            height: 52px;
+            width: 72px;
+            height: 72px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #e8ecf0;
+            border-radius: 12px;
+            display: block;
+            background: var(--bg);
+            color: transparent;
+            font-size: 0;
         }
 
-        /* Product name */
+        .prd-imgbox.is-placeholder .prd-img {
+            display: none;
+        }
+
+        .prd-img-placeholder {
+            display: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: var(--yellow);
+            color: var(--black);
+            font-weight: 900;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .prd-imgbox.is-placeholder .prd-img-placeholder {
+            display: inline-flex;
+        }
+
         .prd-name {
-            font-weight: 600;
-            color: #1a1a2e;
-            max-width: 220px;
+            font-weight: 900;
+            color: var(--black);
+            max-width: 320px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        /* Price */
         .prd-price {
-            font-weight: 700;
-            color: #1a1a2e;
+            font-weight: 900;
+            color: var(--black);
             white-space: nowrap;
         }
 
-        /* Stock badge */
         .stock-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 900;
         }
-        .stock-ok  { background: #dcfce7; color: #166534; }
-        .stock-low { background: #fef9c3; color: #854d0e; }
-        .stock-out { background: #fee2e2; color: #991b1b; }
+        /* Stock badge (palette-safe, always readable) */
+        .stock-ok,
+        .stock-low,
+        .stock-out {
+            background: var(--light-yellow) !important;
+            border: 1px solid var(--yellow) !important;
+            color: var(--black) !important;
+            font-weight: 700 !important;
+        }
 
-        /* Status badge */
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 900;
         }
-        .status-active   { background: #22c55e; color: #fff; }
-        .status-inactive { background: #94a3b8; color: #fff; }
+        /* Status badge (same style as stock for visibility) */
+        .status-active,
+        .status-inactive {
+            background: var(--light-yellow) !important;
+            border: 1px solid var(--yellow) !important;
+            color: var(--black) !important;
+            font-weight: 700 !important;
+            text-transform: capitalize;
+        }
 
-        /* ===== Action Buttons ===== */
+        .prd-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            min-width: 170px;
+        }
+
+        .prd-actions .prd-btn:nth-child(3) {
+            grid-column: 1 / -1;
+        }
+
         .prd-btn {
-            display: inline-block;
-            padding: 6px 13px;
-            border: none;
-            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 42px;
+            padding: 0 14px;
+            border: 1px solid var(--black);
+            border-radius: 12px;
             font-family: 'DM Sans', sans-serif;
-            font-size: 0.78rem;
-            font-weight: 600;
+            font-size: 0.86rem;
+            font-weight: 700;
             cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.1s, box-shadow 0.15s;
+            text-decoration: none !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
             white-space: nowrap;
-            margin: 2px 1px;
+            overflow: visible;
+            min-width: 0;
+            line-height: 1;
+            z-index: 1;
+        }
+        .prd-btn:link,
+        .prd-btn:visited,
+        .prd-btn:active {
+            color: var(--white);
+            text-decoration: none !important;
         }
         .prd-btn:hover { transform: translateY(-1px); }
         .prd-btn:active { transform: translateY(0); }
 
-        .prd-btn-edit   { background: #f59e0b; color: #fff; box-shadow: 0 2px 6px rgba(245,158,11,0.3); }
-        .prd-btn-edit:hover { background: #d97706; box-shadow: 0 4px 10px rgba(245,158,11,0.35); }
+        .prd-btn-edit { background: var(--black); color: var(--white); }
+        .prd-btn-edit:hover { color: var(--yellow); box-shadow: 0 10px 18px rgba(17, 17, 17, 0.14); }
 
-        .prd-btn-delete { background: #ef4444; color: #fff; box-shadow: 0 2px 6px rgba(239,68,68,0.3); }
-        .prd-btn-delete:hover { background: #dc2626; box-shadow: 0 4px 10px rgba(239,68,68,0.35); }
+        /* Delete button (no red; palette-safe) */
+        .prd-btn-delete { background: var(--black); color: var(--white); border-color: var(--black); }
+        .prd-btn-delete:hover { color: var(--yellow); box-shadow: 0 10px 18px rgba(17, 17, 17, 0.14); }
 
-        .prd-btn-view   { background: #1a7fe8; color: #fff; box-shadow: 0 2px 6px rgba(26,127,232,0.3); }
-        .prd-btn-view:hover { background: #1565c0; box-shadow: 0 4px 10px rgba(26,127,232,0.35); }
+        .prd-btn-view { background: var(--black); color: var(--white); border-color: var(--black); }
+        .prd-btn-view:hover { color: var(--yellow); box-shadow: 0 10px 18px rgba(17, 17, 17, 0.14); }
 
-        /* ===== Responsive ===== */
+        /* Remove any default link underline/blue in this page */
+        .prd-wrap a:not(.prd-btn):not(.btn-add),
+        .prd-wrap a:hover,
+        .prd-wrap a:visited,
+        .prd-wrap a:active {
+            text-decoration: none !important;
+            color: inherit;
+        }
+
+        .btn-add,
+        .btn-add:link,
+        .btn-add:visited,
+        .btn-add:active {
+            color: var(--white) !important;
+            text-decoration: none !important;
+        }
+        .btn-add:hover {
+            color: var(--yellow) !important;
+        }
+
+        .prd-btn,
+        .prd-btn:link,
+        .prd-btn:visited,
+        .prd-btn:active {
+            color: var(--white) !important;
+            text-decoration: none !important;
+        }
+        .prd-btn:hover {
+            color: var(--yellow) !important;
+            text-decoration: none !important;
+        }
+
+        /* Ensure badges are never affected by global span rules */
+        .stock-badge,
+        .status-badge {
+            background-image: none !important;
+            padding: 6px 12px !important;
+            margin: 0 !important;
+            border-radius: 999px !important;
+        }
+
+        .prd-count-pill,
+        .prd-count-pill span,
+        .prd-count-pill strong {
+            background-image: none !important;
+        }
+        .prd-count-pill span,
+        .prd-count-pill strong {
+            background-color: transparent !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+        .prd-count-pill {
+            background: var(--black) !important;
+            color: var(--white) !important;
+        }
+        .prd-count-pill span {
+            color: rgba(255,255,255,0.85) !important;
+        }
+        .prd-count-pill strong {
+            color: var(--white) !important;
+        }
+
+        .prd-img-placeholder {
+            color: var(--black) !important;
+            background: var(--yellow) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .prd-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .prd-page-info {
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .prd-page-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .prd-page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--black);
+            font-weight: 900;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .prd-page-link:hover {
+            background: var(--light-yellow);
+            border-color: var(--yellow);
+            transform: translateY(-1px);
+        }
+
+        .prd-page-link.is-active {
+            background: var(--black);
+            border-color: var(--black);
+            color: var(--yellow);
+        }
+
+        .prd-page-link.is-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
         @media (max-width: 900px) {
             .prd-wrap { padding: 0 12px; margin: 16px auto; }
-            .prd-title { font-size: 1.4rem; }
-            .prd-table { font-size: 0.8rem; }
-            .prd-table thead th,
-            .prd-table tbody td { padding: 10px 10px; }
-            .prd-search-input { min-width: 150px; }
+            .prd-title { font-size: 1.45rem; }
+            .prd-topbar { padding: 16px; }
+
+            .prd-controls {
+                padding: 12px;
+            }
+            .prd-controls-left,
+            .prd-controls-right {
+                justify-content: flex-start;
+            }
+            .prd-select { min-width: 0; width: 100%; }
+            .btn-search { width: 100%; }
+            .btn-export { width: 100%; }
+            .filter-select-wrap { width: 100%; min-width: 0; }
+            .prd-controls form { flex-wrap: wrap; width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            .prd-table,
+            .prd-table thead,
+            .prd-table tbody,
+            .prd-table tr,
+            .prd-table th,
+            .prd-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .prd-table thead { display: none; }
+
+            .prd-table tbody tr {
+                border-bottom: 1px solid var(--border);
+                padding: 12px 12px 6px;
+            }
+
+            .prd-table tbody td {
+                border-bottom: 0;
+                padding: 10px 6px;
+                display: flex;
+                justify-content: space-between;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .prd-table tbody td::before {
+                content: attr(data-label);
+                flex: 0 0 42%;
+                color: var(--muted);
+                font-size: 0.72rem;
+                font-weight: 900;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .prd-name { max-width: none; }
+            .prd-actions {
+                width: 100%;
+                min-width: 0;
+                grid-template-columns: 1fr;
+            }
+            .prd-actions .prd-btn:nth-child(3) { grid-column: auto; }
         }
     </style>
 </head>
@@ -331,7 +773,10 @@ if (!$result) {
 
     <!-- Top Bar -->
     <div class="prd-topbar">
-        <h2 class="prd-title">Manage Products</h2>
+        <div>
+            <h2 class="prd-title">Manage Products</h2>
+            <div class="prd-subtitle">Manage and organize your store inventory</div>
+        </div>
         <a href="add-product.php" class="btn-add">+ Add New Product</a>
     </div>
 
@@ -339,35 +784,69 @@ if (!$result) {
     <div class="prd-controls">
 
         <!-- Status Filter -->
-        <form method="GET">
-            <label for="status">Filter:</label>
-            <select name="status" id="status" class="prd-select" onchange="this.form.submit()">
-                <option value="all"      <?= ($status_filter === 'all')      ? 'selected' : '' ?>>All</option>
-                <option value="active"   <?= ($status_filter === 'active')   ? 'selected' : '' ?>>Active</option>
-                <option value="inactive" <?= ($status_filter === 'inactive') ? 'selected' : '' ?>>Inactive</option>
+        <div class="prd-controls-left">
+            <form method="GET">
+                <label for="status">Filter:</label>
+                <select name="status" id="status" class="native-filter-select">
+                    <option value="all"      <?= ($status_filter === 'all')      ? 'selected' : '' ?>>All</option>
+                    <option value="active"   <?= ($status_filter === 'active')   ? 'selected' : '' ?>>Active</option>
+                    <option value="inactive" <?= ($status_filter === 'inactive') ? 'selected' : '' ?>>Inactive</option>
+                </select>
+                <div class="filter-select-wrap" data-filter-select>
+                    <button type="button" class="filter-display" data-filter-display>
+                        <?= $status_filter === 'all' ? 'All' : htmlspecialchars(ucfirst($status_filter)) ?>
+                    </button>
+                    <ul class="filter-options" data-filter-options>
+                        <li><button type="button" class="filter-option <?= $status_filter === 'all' ? 'is-selected' : '' ?>" data-value="all">All</button></li>
+                        <li><button type="button" class="filter-option <?= $status_filter === 'active' ? 'is-selected' : '' ?>" data-value="active">Active</button></li>
+                        <li><button type="button" class="filter-option <?= $status_filter === 'inactive' ? 'is-selected' : '' ?>" data-value="inactive">Inactive</button></li>
+                    </ul>
+                </div>
+                <?php if (!empty($search_query)): ?>
+                    <input type="hidden" name="search" value="<?= htmlspecialchars($search_query) ?>">
+                <?php endif; ?>
+            </form>
+
+            <select id="prdPerPage" class="native-filter-select">
+                <option value="20">20 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
             </select>
-            <?php if (!empty($search_query)): ?>
-                <input type="hidden" name="search" value="<?= htmlspecialchars($search_query) ?>">
-            <?php endif; ?>
-        </form>
+            <div class="filter-select-wrap" data-per-page-select>
+                <button type="button" class="filter-display" data-per-page-display>20 / page</button>
+                <ul class="filter-options" data-per-page-options>
+                    <li><button type="button" class="filter-option is-selected" data-value="20">20 / page</button></li>
+                    <li><button type="button" class="filter-option" data-value="50">50 / page</button></li>
+                    <li><button type="button" class="filter-option" data-value="100">100 / page</button></li>
+                </ul>
+            </div>
+
+            <button type="button" class="btn-export" id="prdExportBtn">Export CSV</button>
+        </div>
 
         <!-- Search -->
-        <form method="GET">
-            <input type="text" name="search" class="prd-search-input"
-                   placeholder="Search products..."
-                   value="<?= htmlspecialchars($search_query) ?>">
-            <button type="submit" class="btn-search">Search</button>
-            <input type="hidden" name="status" value="<?= htmlspecialchars($status_filter) ?>">
-        </form>
+        <div class="prd-controls-right">
+            <form method="GET" id="prdSearchForm">
+                <input type="text" name="search" class="prd-search-input"
+                       placeholder="Search products..."
+                       value="<?= htmlspecialchars($search_query) ?>">
+                <input type="hidden" name="status" value="<?= htmlspecialchars($status_filter) ?>">
+                <button type="submit" class="btn-search">Search</button>
+            </form>
+        </div>
 
     </div>
 
     <!-- Count -->
-    <p class="prd-count"><strong><?= $productCount ?></strong> product<?= $productCount !== 1 ? 's' : '' ?> found</p>
+    <div class="prd-count-pill" aria-live="polite">
+        <span class="prd-count-dot" aria-hidden="true"></span>
+        <strong id="prdTotalCount"><?= (int)$productCount ?></strong>
+        <span>Products Found</span>
+    </div>
 
     <!-- Table -->
     <div class="prd-table-wrap">
-        <table class="prd-table">
+        <table class="prd-table" id="prdTable">
             <thead>
                 <tr>
                     <th>Image</th>
@@ -379,7 +858,7 @@ if (!$result) {
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="prdTbody">
                 <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
                 <?php
                     $stock = (int)$row['stock_quantity'];
@@ -387,31 +866,81 @@ if (!$result) {
                     $stockLabel = $stock > 0 ? $stock : 'Out';
                 ?>
                 <tr>
-                    <td>
-                        <?php if (!empty($row['image_url'])): ?>
-                            <img src="<?= htmlspecialchars($row['image_url']) ?>"
-                                 alt="<?= htmlspecialchars($row['alt_text'] ?? 'Product Image') ?>"
-                                 class="prd-img">
-                        <?php else: ?>
-                            <img src="../public/uploads/default.jpg" alt="No Image" class="prd-img">
-                        <?php endif; ?>
+                    <td data-label="Image">
+                        <?php
+                            $rawImg = trim((string)($row['image_url'] ?? ''));
+                            $normalized = str_replace('\\', '/', $rawImg);
+                            $defaultImg = '../public/uploads/default.jpg';
+                            $candidates = [];
+                            if ($normalized !== '') {
+                                if (preg_match('#^(https?:)?//#i', $normalized)) {
+                                    $candidates[] = $normalized;
+                                } elseif (preg_match('/^[A-Za-z]:\//', $normalized)) {
+                                    // Convert local Windows file paths under htdocs to web paths.
+                                    $lower = strtolower($normalized);
+                                    $docRootMarker = '/xampp/htdocs/';
+                                    $projectMarker = '/xampp/htdocs/phonesdukan/';
+                                    if (strpos($lower, $projectMarker) !== false) {
+                                        $pos = strpos($lower, $projectMarker);
+                                        $relative = substr($normalized, $pos + strlen($projectMarker));
+                                        $relative = ltrim(str_replace('\\', '/', $relative), '/');
+                                        $candidates[] = '/phonesdukan/' . $relative;
+                                        $candidates[] = '/' . $relative;
+                                    } elseif (strpos($lower, $docRootMarker) !== false) {
+                                        $pos = strpos($lower, $docRootMarker);
+                                        $relative = substr($normalized, $pos + strlen($docRootMarker));
+                                        $relative = ltrim(str_replace('\\', '/', $relative), '/');
+                                        $candidates[] = '/' . $relative;
+                                    }
+                                } else {
+                                    $trimmed = ltrim($normalized, './');
+                                    $candidates[] = $normalized;
+                                    $candidates[] = '../' . $trimmed;
+                                    $candidates[] = '/' . $trimmed;
+                                    $candidates[] = '/phonesdukan/' . $trimmed;
+                                    $candidates[] = '/public/' . ltrim($trimmed, '/');
+                                    $candidates[] = '/phonesdukan/public/' . ltrim($trimmed, '/');
+                                    if (strpos($trimmed, 'uploads/') !== false) {
+                                        $uploadsPart = substr($trimmed, strpos($trimmed, 'uploads/'));
+                                        $candidates[] = '/' . $uploadsPart;
+                                        $candidates[] = '/phonesdukan/' . $uploadsPart;
+                                        $candidates[] = '/public/' . $uploadsPart;
+                                        $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+                                    }
+                                }
+                            }
+                            $candidates[] = $defaultImg;
+                            $candidates = array_values(array_unique(array_filter($candidates)));
+                            $imgSrc = $candidates[0] ?? $defaultImg;
+                            $imgCandidatesAttr = htmlspecialchars(json_encode($candidates), ENT_QUOTES, 'UTF-8');
+                        ?>
+                        <div class="prd-imgbox">
+                            <img class="prd-img prd-image"
+                                 src="<?= htmlspecialchars($imgSrc); ?>"
+                                 data-candidates="<?= $imgCandidatesAttr; ?>"
+                                 data-candidate-index="0"
+                                 alt="<?= htmlspecialchars($row['alt_text'] ?? 'Product Image') ?>">
+                            <span class="prd-img-placeholder" aria-hidden="true">No image</span>
+                        </div>
                     </td>
-                    <td class="prd-name"><?= htmlspecialchars($row['product_name']) ?></td>
-                    <td class="prd-price">Rs. <?= number_format((float)($row['sale_price'] ?? $row['regular_price']), 0) ?></td>
-                    <td><span class="stock-badge <?= $stockClass ?>"><?= $stockLabel ?></span></td>
-                    <td>
+                    <td class="prd-name" data-label="Name"><?= htmlspecialchars($row['product_name']) ?></td>
+                    <td class="prd-price" data-label="Price">Rs. <?= number_format((float)($row['sale_price'] ?? $row['regular_price']), 0) ?></td>
+                    <td data-label="Stock"><span class="stock-badge <?= $stockClass ?>"><?= $stockLabel ?></span></td>
+                    <td data-label="Status">
                         <span class="status-badge <?= $row['product_status'] ? 'status-active' : 'status-inactive' ?>">
                             <?= $row['product_status'] ? 'Active' : 'Inactive' ?>
                         </span>
                     </td>
-                    <td><?= date('d M Y', strtotime($row['created_at'])) ?></td>
-                    <td>
-                        <a href="edit-product.php?id=<?= $row['product_id'] ?>" class="prd-btn prd-btn-edit">Edit</a>
-                        <a href="delete_product.php?id=<?= $row['product_id'] ?>"
-                           class="prd-btn prd-btn-delete"
-                           onclick="return confirm('Are you sure you want to delete this product and all associated data?')">Delete</a>
-                        <a href="/<?= htmlspecialchars($row['category_slug'] . '/' . $row['brand_slug'] . '/' . $row['product_slug']) ?>"
-                           class="prd-btn prd-btn-view" target="_blank">View</a>
+                    <td data-label="Date"><?= date('d M Y', strtotime($row['created_at'])) ?></td>
+                    <td data-label="Actions">
+                        <div class="prd-actions">
+                            <a href="edit-product.php?id=<?= $row['product_id'] ?>" class="prd-btn prd-btn-edit">Edit</a>
+                            <a href="delete_product.php?id=<?= $row['product_id'] ?>"
+                               class="prd-btn prd-btn-delete"
+                               onclick="return confirm('Are you sure you want to delete this product and all associated data?')">Delete</a>
+                            <a href="/<?= htmlspecialchars($row['category_slug'] . '/' . $row['brand_slug'] . '/' . $row['product_slug']) ?>"
+                               class="prd-btn prd-btn-view" target="_blank">View</a>
+                        </div>
                     </td>
                 </tr>
                 <?php endwhile; ?>
@@ -419,6 +948,206 @@ if (!$result) {
         </table>
     </div>
 
+    <div class="prd-pagination">
+        <div class="prd-page-info" id="prdPageInfo"></div>
+        <div class="prd-page-links" id="prdPageLinks"></div>
+    </div>
+
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const perPageEl = document.getElementById('prdPerPage');
+    const exportBtn = document.getElementById('prdExportBtn');
+    const tbody = document.getElementById('prdTbody');
+    const pageInfoEl = document.getElementById('prdPageInfo');
+    const pageLinksEl = document.getElementById('prdPageLinks');
+
+    if (!perPageEl || !tbody || !pageInfoEl || !pageLinksEl) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    let currentPage = 1;
+
+    function renderPagination(totalPages) {
+        pageLinksEl.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        function makeBtn(label, page, disabled, active) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'prd-page-link' + (disabled ? ' is-disabled' : '') + (active ? ' is-active' : '');
+            btn.textContent = label;
+            btn.addEventListener('click', function () {
+                if (disabled) return;
+                currentPage = page;
+                applyPagination();
+            });
+            return btn;
+        }
+
+        pageLinksEl.appendChild(makeBtn('Previous', Math.max(1, currentPage - 1), currentPage === 1, false));
+
+        const windowSize = 2;
+        const start = Math.max(1, currentPage - windowSize);
+        const end = Math.min(totalPages, currentPage + windowSize);
+
+        for (let p = start; p <= end; p++) {
+            pageLinksEl.appendChild(makeBtn(String(p), p, false, p === currentPage));
+        }
+
+        pageLinksEl.appendChild(makeBtn('Next', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false));
+    }
+
+    function applyPagination() {
+        const perPage = parseInt(perPageEl.value || '20', 10) || 20;
+        const total = rows.length;
+        const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        rows.forEach(function (row) { row.style.display = 'none'; });
+        const start = (currentPage - 1) * perPage;
+        const end = start + perPage;
+        rows.slice(start, end).forEach(function (row) { row.style.display = ''; });
+
+        pageInfoEl.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+        renderPagination(totalPages);
+    }
+
+    perPageEl.addEventListener('change', function () {
+        currentPage = 1;
+        applyPagination();
+    });
+
+    document.querySelectorAll('[data-filter-select]').forEach(function (wrap) {
+        const display = wrap.querySelector('[data-filter-display]');
+        const options = Array.from(wrap.querySelectorAll('.filter-option'));
+        const nativeSelect = document.getElementById('status');
+        if (!display || !nativeSelect) return;
+
+        function setValue(value, submit) {
+            nativeSelect.value = value;
+            const selected = options.find(function (opt) { return opt.dataset.value === value; });
+            display.textContent = selected ? selected.textContent.trim() : value;
+            options.forEach(function (opt) {
+                opt.classList.toggle('is-selected', opt.dataset.value === value);
+            });
+            if (submit) {
+                nativeSelect.form?.submit();
+            }
+        }
+
+        display.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
+                if (openWrap !== wrap) openWrap.classList.remove('is-open');
+            });
+            wrap.classList.toggle('is-open');
+        });
+
+        options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                setValue(this.dataset.value || 'all', true);
+                wrap.classList.remove('is-open');
+            });
+        });
+
+        setValue(nativeSelect.value || 'all', false);
+    });
+
+    document.querySelectorAll('[data-per-page-select]').forEach(function (wrap) {
+        const display = wrap.querySelector('[data-per-page-display]');
+        const options = Array.from(wrap.querySelectorAll('.filter-option'));
+        if (!display || !perPageEl) return;
+
+        function setValue(value) {
+            perPageEl.value = value;
+            const selected = options.find(function (opt) { return opt.dataset.value === value; });
+            display.textContent = selected ? selected.textContent.trim() : value;
+            options.forEach(function (opt) {
+                opt.classList.toggle('is-selected', opt.dataset.value === value);
+            });
+            currentPage = 1;
+            applyPagination();
+        }
+
+        display.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
+                if (openWrap !== wrap) openWrap.classList.remove('is-open');
+            });
+            wrap.classList.toggle('is-open');
+        });
+
+        options.forEach(function (opt) {
+            opt.addEventListener('click', function () {
+                setValue(this.dataset.value || '20');
+                wrap.classList.remove('is-open');
+            });
+        });
+
+        setValue(perPageEl.value || '20');
+    });
+
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
+            openWrap.classList.remove('is-open');
+        });
+    });
+
+    applyPagination();
+
+    // Image fallback resolver for inconsistent stored paths.
+    document.querySelectorAll('.prd-image').forEach(function (img) {
+        if (!img.getAttribute('src')) {
+            img.closest('.prd-imgbox')?.classList.add('is-placeholder');
+        }
+        img.addEventListener('error', function () {
+            let candidates = [];
+            try {
+                candidates = JSON.parse(this.dataset.candidates || '[]');
+            } catch (e) {
+                candidates = [];
+            }
+            let idx = parseInt(this.dataset.candidateIndex || '0', 10);
+            idx += 1;
+            if (idx < candidates.length) {
+                this.dataset.candidateIndex = String(idx);
+                this.src = candidates[idx];
+            } else {
+                this.closest('.prd-imgbox')?.classList.add('is-placeholder');
+                this.onerror = null;
+            }
+        });
+    });
+
+    exportBtn?.addEventListener('click', function () {
+        const headers = ['Name', 'Price', 'Stock', 'Status', 'Date'];
+        const lines = [headers.join(',')];
+        rows.forEach(function (row) {
+            if (row.style.display === 'none') return;
+            const name = (row.querySelector('.prd-name')?.textContent || '').trim();
+            const price = (row.querySelector('.prd-price')?.textContent || '').trim();
+            const stock = (row.querySelector('.stock-badge')?.textContent || '').trim();
+            const status = (row.querySelector('.status-badge')?.textContent || '').trim();
+            const date = (row.querySelector('td[data-label="Date"]')?.textContent || '').trim();
+            const values = [name, price, stock, status, date].map(function (v) {
+                return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+            });
+            lines.push(values.join(','));
+        });
+        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'manage-products-export.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    });
+});
+</script>
 </body>
 </html>
