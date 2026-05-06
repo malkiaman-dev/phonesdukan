@@ -193,6 +193,12 @@ include __DIR__ . '/admin_header.php';
         .set-btn:hover {
             color: var(--yellow);
             transform: translateY(-1px);
+            text-decoration: none !important;
+        }
+        .set-btn:focus,
+        .set-btn:active,
+        .set-btn:visited {
+            text-decoration: none !important;
         }
         .set-btn-outline {
             background: #fff;

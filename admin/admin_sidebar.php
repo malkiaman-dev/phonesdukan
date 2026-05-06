@@ -87,6 +87,11 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link <?= ($current_page == 'manage-users.php') ? 'active' : '' ?>" href="<?= url('admin/manage-users.php'); ?>">
+                <i class="fas fa-user-cog"></i> Manage Users
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link <?= ($current_page == 'manage-reviews.php') ? 'active' : '' ?>" href="<?= url('admin/manage-reviews.php'); ?>">
                 <i class="fas fa-star"></i> Reviews
                 <?php if ($pending_reviews_count > 0): ?>
