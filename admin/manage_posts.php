@@ -101,6 +101,12 @@ include __DIR__ . '/admin_header.php';
             border: 1px solid var(--black);
             line-height: 1.2;
         }
+        .custom-btn:link,
+        .custom-btn:visited,
+        .custom-btn:active {
+            color: var(--white) !important;
+            text-decoration: none;
+        }
 
         .custom-btn:hover {
             color: var(--yellow);
@@ -344,6 +350,11 @@ include __DIR__ . '/admin_header.php';
             flex-wrap: wrap;
             gap: 6px;
         }
+        .action-buttons a:link,
+        .action-buttons a:visited,
+        .action-buttons a:active {
+            color: var(--white) !important;
+        }
 
         .pagination-wrap {
             display: flex;
@@ -491,21 +502,34 @@ include __DIR__ . '/admin_header.php';
                         <td>
                             <?php
                                 $rawImg = trim((string)($post['image_url'] ?? ''));
-                                if ($rawImg === '') {
-                                    $imgSrc = '../public/uploads/default.jpg';
-                                } elseif (preg_match('#^(https?:)?//#i', $rawImg) || strpos($rawImg, '/') === 0) {
-                                    $imgSrc = $rawImg;
-                                } else {
-                                    $imgSrc = '../' . ltrim($rawImg, './');
+                                $normalized = str_replace('\\', '/', $rawImg);
+                                $defaultImg = '../public/uploads/default.jpg';
+                                $candidates = [];
+                                if ($normalized !== '') {
+                                    if (preg_match('#^(https?:)?//#i', $normalized)) {
+                                        $candidates[] = $normalized;
+                                    } elseif (preg_match('/^[A-Za-z]:\//', $normalized)) {
+                                        // Windows filesystem path is not web-accessible; skip to fallbacks.
+                                    } else {
+                                        $trimmed = ltrim($normalized, './');
+                                        $candidates[] = $normalized;
+                                        $candidates[] = '../' . $trimmed;
+                                        $candidates[] = '/' . $trimmed;
+                                        $candidates[] = '/phonesdukan/' . $trimmed;
+                                    }
                                 }
+                                $candidates[] = $defaultImg;
+                                $candidates = array_values(array_unique(array_filter($candidates)));
+                                $imgSrc = $candidates[0] ?? $defaultImg;
+                                $imgCandidatesAttr = htmlspecialchars(json_encode($candidates), ENT_QUOTES, 'UTF-8');
                             ?>
                             <?php if (!empty($post['image_url'])): ?>
-                                <img class="post-thumb" src="<?php echo htmlspecialchars($imgSrc); ?>" 
+                                <img class="post-thumb post-image" src="<?php echo htmlspecialchars($imgSrc); ?>" 
+                                     data-candidates="<?php echo $imgCandidatesAttr; ?>" data-candidate-index="0"
                                      alt="<?php echo htmlspecialchars($post['alt_text'] ?? 'Post Image'); ?>" 
-                                     onerror="this.onerror=null;this.src='../public/uploads/default.jpg';"
                                      width="50">
                             <?php else: ?>
-                                <img class="post-thumb" src="../public/uploads/default.jpg" alt="No Image" onerror="this.onerror=null;this.style.display='none';" width="50">
+                                <img class="post-thumb post-image" src="../public/uploads/default.jpg" alt="No Image" width="50">
                             <?php endif; ?>
                         </td>
                         <td><div class="post-title"><?php echo htmlspecialchars($post['title']); ?></div></td>
@@ -596,6 +620,27 @@ include __DIR__ . '/admin_header.php';
         document.addEventListener('click', function () {
             document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
                 openWrap.classList.remove('is-open');
+            });
+        });
+
+        // Image fallback resolver for inconsistent stored paths.
+        document.querySelectorAll('.post-image').forEach(function (img) {
+            img.addEventListener('error', function () {
+                let candidates = [];
+                try {
+                    candidates = JSON.parse(this.dataset.candidates || '[]');
+                } catch (e) {
+                    candidates = [];
+                }
+                let idx = parseInt(this.dataset.candidateIndex || '0', 10);
+                idx += 1;
+                if (idx < candidates.length) {
+                    this.dataset.candidateIndex = String(idx);
+                    this.src = candidates[idx];
+                } else {
+                    this.onerror = null;
+                    this.src = '../public/uploads/default.jpg';
+                }
             });
         });
     });
