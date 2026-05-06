@@ -323,6 +323,9 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
         background: var(--light-yellow);
         box-shadow: 0 10px 22px rgba(17, 17, 17, 0.05);
     }
+    .upload-box:hover span {
+        color: var(--yellow) !important;
+    }
 
     .upload-icon {
         width: 40px;

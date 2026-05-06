@@ -435,7 +435,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
 
         .ord-btn.ghost:hover {
             background: var(--brand-yellow-light);
-            color: var(--brand-black);
+            color: var(--brand-yellow);
             border-color: var(--brand-yellow);
             box-shadow: 0 12px 24px rgba(17, 17, 17, 0.14);
             transform: translateY(-1px);

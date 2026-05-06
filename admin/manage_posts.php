@@ -109,7 +109,7 @@ include __DIR__ . '/admin_header.php';
         }
 
         .custom-btn:hover {
-            color: var(--yellow);
+            color: var(--yellow) !important;
             background: var(--black);
             border-color: var(--black);
             transform: translateY(-1px);
@@ -355,6 +355,11 @@ include __DIR__ . '/admin_header.php';
         .action-buttons a:active {
             color: var(--white) !important;
         }
+        .action-buttons a:hover,
+        .action-buttons a:hover:visited,
+        .action-buttons .custom-btn:hover {
+            color: var(--yellow) !important;
+        }
 
         .pagination-wrap {
             display: flex;
@@ -395,6 +400,7 @@ include __DIR__ . '/admin_header.php';
         .page-link:hover {
             border-color: var(--yellow);
             background: var(--light-yellow);
+            color: var(--yellow);
         }
 
         .page-link.active {
