@@ -423,6 +423,7 @@ include __DIR__ . '/admin_header.php';
             <div class="rep-error">Report data issue: <?php echo htmlspecialchars($reportError); ?></div>
         <?php endif; ?>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-rep-select]').forEach(function (wrap) {
@@ -465,60 +466,89 @@ include __DIR__ . '/admin_header.php';
         const pdfBtn = document.getElementById('repDownloadPdf');
         if (pdfBtn) {
             pdfBtn.addEventListener('click', function () {
-                const stats = Array.from(document.querySelectorAll('.rep-stat')).map(function (card) {
-                    const label = card.querySelector('.rep-stat-label')?.textContent?.trim() || '';
-                    const value = card.querySelector('.rep-stat-value')?.textContent?.trim() || '';
-                    return '<tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:700;">' + label + '</td><td style="padding:8px;border:1px solid #e5e7eb;">' + value + '</td></tr>';
-                }).join('');
+                const jsPDFLib = window.jspdf && window.jspdf.jsPDF;
+                if (!jsPDFLib) return;
 
-                const productRows = Array.from(document.querySelectorAll('.rep-table tbody tr')).map(function (row) {
-                    const cols = Array.from(row.querySelectorAll('td')).map(function (td) {
-                        return '<td style="padding:8px;border:1px solid #e5e7eb;">' + (td.textContent || '').trim() + '</td>';
-                    }).join('');
-                    return '<tr>' + cols + '</tr>';
-                }).join('');
+                const doc = new jsPDFLib({ orientation: 'p', unit: 'pt', format: 'a4' });
+                const marginX = 40;
+                let y = 48;
 
                 const title = document.querySelector('.rep-title')?.textContent?.trim() || 'Reports';
                 const subtitle = document.querySelector('.rep-subtitle')?.textContent?.trim() || '';
                 const generatedAt = new Date().toLocaleString();
 
-                const html = `
-                    <!doctype html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <title>${title}</title>
-                        <style>
-                            body{font-family:Arial,sans-serif;padding:24px;color:#111;}
-                            h1{margin:0 0 6px;font-size:24px;}
-                            p{margin:0 0 12px;color:#555;}
-                            table{width:100%;border-collapse:collapse;margin-bottom:18px;}
-                            th,td{font-size:12px;text-align:left;vertical-align:top;}
-                            th{background:#f9fafb;padding:8px;border:1px solid #e5e7eb;}
-                            .meta{font-size:12px;color:#6b7280;margin-bottom:12px;}
-                        </style>
-                    </head>
-                    <body>
-                        <h1>${title}</h1>
-                        <p>${subtitle}</p>
-                        <div class="meta">Generated: ${generatedAt}</div>
-                        <h3>Summary</h3>
-                        <table><tbody>${stats}</tbody></table>
-                        <h3>Recent Products Snapshot</h3>
-                        <table>
-                            <thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th></tr></thead>
-                            <tbody>${productRows}</tbody>
-                        </table>
-                        <script>window.onload=function(){window.print();};<\/script>
-                    </body>
-                    </html>
-                `;
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.text(title, marginX, y);
+                y += 22;
 
-                const win = window.open('', '_blank');
-                if (!win) return;
-                win.document.open();
-                win.document.write(html);
-                win.document.close();
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(11);
+                doc.text(subtitle, marginX, y);
+                y += 16;
+                doc.setTextColor(107, 114, 128);
+                doc.text('Generated: ' + generatedAt, marginX, y);
+                doc.setTextColor(17, 17, 17);
+                y += 20;
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.text('Summary', marginX, y);
+                y += 14;
+
+                const stats = Array.from(document.querySelectorAll('.rep-stat')).map(function (card) {
+                    const label = card.querySelector('.rep-stat-label')?.textContent?.trim() || '';
+                    const value = card.querySelector('.rep-stat-value')?.textContent?.trim() || '';
+                    return [label, value];
+                });
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                stats.forEach(function (row) {
+                    doc.text(row[0] + ':', marginX, y);
+                    doc.text(row[1], marginX + 180, y);
+                    y += 14;
+                });
+
+                y += 10;
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.text('Recent Products Snapshot', marginX, y);
+                y += 16;
+
+                const headers = ['Product', 'Price', 'Stock', 'Status'];
+                const rows = Array.from(document.querySelectorAll('.rep-table tbody tr')).map(function (tr) {
+                    return Array.from(tr.querySelectorAll('td')).map(function (td) {
+                        return (td.textContent || '').trim().replace(/\s+/g, ' ');
+                    });
+                }).filter(function (r) { return r.length === 4; });
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.text(headers[0], marginX, y);
+                doc.text(headers[1], marginX + 250, y);
+                doc.text(headers[2], marginX + 340, y);
+                doc.text(headers[3], marginX + 400, y);
+                y += 10;
+                doc.setLineWidth(0.6);
+                doc.line(marginX, y, 555, y);
+                y += 12;
+
+                doc.setFont('helvetica', 'normal');
+                rows.forEach(function (r) {
+                    if (y > 780) {
+                        doc.addPage();
+                        y = 48;
+                    }
+                    doc.text(String(r[0] || '').slice(0, 42), marginX, y);
+                    doc.text(String(r[1] || ''), marginX + 250, y);
+                    doc.text(String(r[2] || ''), marginX + 340, y);
+                    doc.text(String(r[3] || ''), marginX + 400, y);
+                    y += 14;
+                });
+
+                const filename = 'reports-' + new Date().toISOString().slice(0, 10) + '.pdf';
+                doc.save(filename);
             });
         }
     });
