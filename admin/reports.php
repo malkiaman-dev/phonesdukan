@@ -220,6 +220,17 @@ include __DIR__ . '/admin_header.php';
         }
         .rep-btn:hover { color: var(--yellow) !important; }
 
+        .rep-btn-outline {
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--black) !important;
+        }
+        .rep-btn-outline:hover {
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px rgba(250,204,21,0.18);
+            color: var(--black) !important;
+        }
+
         .rep-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -339,6 +350,7 @@ include __DIR__ . '/admin_header.php';
                     </div>
                 </div>
                 <button type="submit" class="rep-btn">Apply</button>
+                <button type="button" class="rep-btn rep-btn-outline" id="repDownloadPdf">Download PDF</button>
             </form>
         </div>
 
@@ -449,6 +461,66 @@ include __DIR__ . '/admin_header.php';
                 wrap.classList.remove('is-open');
             });
         });
+
+        const pdfBtn = document.getElementById('repDownloadPdf');
+        if (pdfBtn) {
+            pdfBtn.addEventListener('click', function () {
+                const stats = Array.from(document.querySelectorAll('.rep-stat')).map(function (card) {
+                    const label = card.querySelector('.rep-stat-label')?.textContent?.trim() || '';
+                    const value = card.querySelector('.rep-stat-value')?.textContent?.trim() || '';
+                    return '<tr><td style="padding:8px;border:1px solid #e5e7eb;font-weight:700;">' + label + '</td><td style="padding:8px;border:1px solid #e5e7eb;">' + value + '</td></tr>';
+                }).join('');
+
+                const productRows = Array.from(document.querySelectorAll('.rep-table tbody tr')).map(function (row) {
+                    const cols = Array.from(row.querySelectorAll('td')).map(function (td) {
+                        return '<td style="padding:8px;border:1px solid #e5e7eb;">' + (td.textContent || '').trim() + '</td>';
+                    }).join('');
+                    return '<tr>' + cols + '</tr>';
+                }).join('');
+
+                const title = document.querySelector('.rep-title')?.textContent?.trim() || 'Reports';
+                const subtitle = document.querySelector('.rep-subtitle')?.textContent?.trim() || '';
+                const generatedAt = new Date().toLocaleString();
+
+                const html = `
+                    <!doctype html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>${title}</title>
+                        <style>
+                            body{font-family:Arial,sans-serif;padding:24px;color:#111;}
+                            h1{margin:0 0 6px;font-size:24px;}
+                            p{margin:0 0 12px;color:#555;}
+                            table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+                            th,td{font-size:12px;text-align:left;vertical-align:top;}
+                            th{background:#f9fafb;padding:8px;border:1px solid #e5e7eb;}
+                            .meta{font-size:12px;color:#6b7280;margin-bottom:12px;}
+                        </style>
+                    </head>
+                    <body>
+                        <h1>${title}</h1>
+                        <p>${subtitle}</p>
+                        <div class="meta">Generated: ${generatedAt}</div>
+                        <h3>Summary</h3>
+                        <table><tbody>${stats}</tbody></table>
+                        <h3>Recent Products Snapshot</h3>
+                        <table>
+                            <thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th></tr></thead>
+                            <tbody>${productRows}</tbody>
+                        </table>
+                        <script>window.onload=function(){window.print();};<\/script>
+                    </body>
+                    </html>
+                `;
+
+                const win = window.open('', '_blank');
+                if (!win) return;
+                win.document.open();
+                win.document.write(html);
+                win.document.close();
+            });
+        }
     });
     </script>
 </body>
