@@ -255,6 +255,115 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
         color: var(--black) !important;
     }
     .note { font-size: 0.86rem; color: var(--muted); }
+    .file-input-wrap {
+        display: inline-block;
+        width: 100%;
+    }
+    .form-group input.file-input-native {
+        position: absolute !important;
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+        overflow: hidden !important;
+    }
+    .file-input-btn {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 14px 14px;
+        width: 100%;
+        border-radius: 14px;
+        border: 1px dashed var(--border);
+        background: #f9fafb;
+        color: var(--black) !important;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+        line-height: 1.2;
+        text-decoration: none;
+    }
+    .file-input-btn:hover {
+        border-color: var(--yellow);
+        background: var(--light-yellow);
+    }
+    .file-input-name {
+        color: var(--muted) !important;
+        font-size: 0.84rem;
+        font-weight: 600;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        margin-top: 4px;
+    }
+
+    /* Upload box (match add-product.php UI) */
+    .upload-box {
+        display: grid;
+        gap: 6px;
+        padding: 20px;
+        border: 1px dashed #e5e7eb;
+        border-radius: 14px;
+        background: #ffffff;
+        cursor: pointer;
+        user-select: none;
+        transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .upload-box:hover {
+        border-color: var(--yellow);
+        background: var(--light-yellow);
+        box-shadow: 0 10px 22px rgba(17, 17, 17, 0.05);
+    }
+
+    .upload-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: var(--yellow);
+        color: var(--black);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+
+    .upload-title {
+        font-weight: 700;
+        color: var(--black);
+        font-size: 14px;
+    }
+
+    .upload-help {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .upload-box span {
+        /* Reset the global red pill span styling inside upload box */
+        background: transparent !important;
+        background-color: transparent !important;
+        color: var(--black) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .upload-filename {
+        font-size: 12px;
+        opacity: 0.85;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     .update-btn {
         display: inline-flex;
         align-items: center;
@@ -358,8 +467,16 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
             <h3>Media Library</h3>
             <div class="form-group">
                 <label for="images">Images Upload</label>
-                <input type="file" name="images[]" id="images" multiple accept="image/jpeg,image/webp,image/png,image/gif">
-                <p class="note">Select multiple images (JPG, JPEG, PNG, GIF, max 5MB each).</p>
+                <div class="file-input-wrap">
+                    <input class="file-input-native file-input" type="file" name="images[]" id="images" multiple accept="image/jpeg,image/webp,image/png,image/gif">
+                    <label for="images" class="upload-box">
+                        <span class="upload-icon" aria-hidden="true"><i class="fas fa-upload"></i></span>
+                        <span class="upload-title">Click to upload images</span>
+                        <span class="upload-help">PNG, JPG, WEBP up to 5MB</span>
+                        <span class="upload-filename" data-for="images">No file selected</span>
+                    </label>
+                </div>
+                <p class="note">You can select multiple images at once.</p>
             </div>
             <div class="image-grid">
                 <?php foreach ($images as $index => $image): ?>
@@ -474,6 +591,16 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
 
 document.getElementById('images').addEventListener('change', function(e) {
     let files = e.target.files;
+    const fileNameEl = document.querySelector('.upload-filename[data-for="images"]');
+    if (fileNameEl) {
+        if (!files || files.length === 0) {
+            fileNameEl.textContent = 'No file selected';
+        } else if (files.length === 1) {
+            fileNameEl.textContent = files[0].name;
+        } else {
+            fileNameEl.textContent = files.length + ' files selected';
+        }
+    }
     let grid = document.querySelector('.image-grid');
     for (let i = 0; i < files.length; i++) {
         let file = files[i];
