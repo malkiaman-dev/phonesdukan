@@ -538,7 +538,7 @@ include __DIR__ . '/admin_header.php';
                             <a href="<?php echo htmlspecialchars(url('admin/edit-post/' . (int)$post['id'])); ?>" class="custom-btn custom-btn-warning">Edit</a>
                             <a href="delete_post.php?id=<?php echo $post['id']; ?>" class="custom-btn custom-btn-danger" onclick="return confirm('Are you sure you want to delete this post and all associated data?')">Delete</a>
                             <a href="<?php echo htmlspecialchars(url('blog/' . $post['category_slug'] . '/' . $post['slug'])); ?>" 
-                               class="custom-btn custom-btn-primary" target="_blank">View</a>
+                               class="custom-btn custom-btn-primary">View</a>
                         </td>
                         <td><span class="status-pill"><?php echo htmlspecialchars(ucfirst($post['status'])); ?></span></td>
                         <td><?php echo date('d M Y', strtotime($post['updated_at'])); ?></td>

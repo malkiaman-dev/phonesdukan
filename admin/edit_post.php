@@ -1,49 +1,49 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-require_once dirname(__DIR__, 1) . '/database/db.php';
-require_once dirname(__DIR__, 1) . '/app/Controllers/AdminEditPostController.php';
+require_once dirname(__DIR__, 1) . '/includes/functions.php';
 
-// Check if admin is logged in
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header("Location: /admin/login.php");
+if (!isset($GLOBALS['__EDIT_POST_RENDER__'])) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        header("Location: " . url('admin/login.php'));
+        exit();
+    }
+
+    $matches = [];
+    preg_match('#^admin/edit-post/(\d+)$#', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'), $matches);
+    $post_id = isset($_GET['id']) ? (int)$_GET['id'] : (isset($matches[1]) ? (int)$matches[1] : null);
+    if (!$post_id) {
+        header("HTTP/1.0 404 Not Found");
+        echo "<h1>404 - Post Not Found</h1>";
+        exit();
+    }
+
+    $target = url('admin/edit-post/' . $post_id);
+    $query = [];
+    if (isset($_GET['action'])) {
+        $query['action'] = (string)$_GET['action'];
+    }
+    if (isset($_GET['success'])) {
+        $query['success'] = (string)$_GET['success'];
+    }
+    if (isset($_GET['error'])) {
+        $query['error'] = (string)$_GET['error'];
+    }
+    if (!empty($query)) {
+        $target .= '?' . http_build_query($query);
+    }
+    header('Location: ' . $target);
     exit();
 }
 
-// Get post ID from URL
-$matches = [];
-preg_match('#^admin/edit-post/(\d+)$#', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'), $matches);
-$post_id = $matches[1] ?? null;
-
-if (!$post_id) {
-    header("HTTP/1.0 404 Not Found");
-    echo "<h1>404 - Post Not Found</h1>";
-    exit();
-}
-
-// Handle AJAX image deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'delete_image') {
-    $controller = new AdminEditPostController();
-    $controller->deleteImage($post_id, $_POST['image_id']);
-    exit();
-}
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'update') {
-    $controller = new AdminEditPostController();
-    $controller->update($post_id);
-    exit();
-}
-
-// Load post data
-$controller = new AdminEditPostController();
-$controller->index($post_id);
-
-// Get categories for checkboxes
-$database = new Database();
-$conn = $database->getConnection();
-$categories_query = "SELECT id, category_name FROM post_categories WHERE status = 1 ORDER BY category_name";
-$categories_result = $conn->query($categories_query);
+$post_id = isset($post_id) ? (int)$post_id : (int)($post['id'] ?? 0);
+$post = is_array($post ?? null) ? $post : [];
+$categories = is_array($categories ?? null) ? $categories : [];
+$post_categories = is_array($post_categories ?? null) ? $post_categories : [];
+$images = is_array($images ?? null) ? $images : [];
 
 // Get main image
 $main_image = null;
@@ -89,7 +89,7 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
     <?php if (isset($error) || isset($_GET['error'])): ?>
         <p class="error"><?php echo htmlspecialchars($error ?? $_GET['error']); ?></p>
     <?php endif; ?>
-    <form method="POST" action="/admin/edit-post/<?php echo htmlspecialchars($post['id']); ?>?action=update" enctype="multipart/form-data" id="edit-post-form">
+    <form method="POST" action="<?= htmlspecialchars(url('admin/edit_post.php?id=' . (int)$post['id'] . '&action=update')); ?>" enctype="multipart/form-data" id="edit-post-form">
         <div class="form-group">
             <label for="title">Title *</label>
             <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
@@ -121,13 +121,13 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
         <div class="form-group">
             <label>Categories</label>
             <div class="category-checkboxes">
-                <?php while ($category = $categories_result->fetch(PDO::FETCH_ASSOC)): ?>
+                <?php foreach ($categories as $category): ?>
                     <label>
                         <input type="checkbox" name="categories[]" value="<?php echo $category['id']; ?>" 
                                <?php echo in_array($category['id'], array_column($post_categories, 'id')) ? 'checked' : ''; ?>>
                         <?php echo htmlspecialchars($category['category_name']); ?>
                     </label>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </div>
         </div>
         <div class="form-group">
@@ -178,12 +178,12 @@ tinymce.init({
     selector: '#content',
     plugins: 'image code',
     toolbar: 'undo redo | bold italic | alignleft aligncenter alignright | image code',
-    images_upload_url: '/admin/upload_post_image.php',
+    images_upload_url: '<?= htmlspecialchars(url('admin/upload_post_image.php')); ?>',
     images_upload_handler: async (blobInfo, progress) => {
         let formData = new FormData();
         formData.append('file', blobInfo.blob(), blobInfo.filename());
         try {
-            let response = await fetch('/admin/upload_post_image.php', {
+            let response = await fetch('<?= htmlspecialchars(url('admin/upload_post_image.php')); ?>', {
                 method: 'POST',
                 body: formData
             });
@@ -235,7 +235,7 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
         e.preventDefault();
         if (confirm('Are you sure you want to delete this image?')) {
             let imageId = this.dataset.imageId;
-            let response = await fetch(`/admin/edit-post/<?php echo $post_id; ?>?action=delete_image`, {
+            let response = await fetch(`<?= htmlspecialchars(url('admin/edit_post.php?id=' . (int)$post_id . '&action=delete_image')); ?>`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `image_id=${imageId}`
