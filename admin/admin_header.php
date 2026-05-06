@@ -18,10 +18,13 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars(url('public/assets/css/admin/admin.css')); ?>">
     <?php emitCss('public/assets/css/admin/admin.css'); ?>
     <style>
         /* Critical shell styles to prevent FOUC */
-        html.admin-loading body { visibility: hidden; }
+        html.admin-loading body {
+            opacity: 0;
+        }
         html, body {
             background: #f8fafc;
             margin: 0;
@@ -32,6 +35,8 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
             padding-left: 248px;
             padding-top: 56px;
             color: #111111;
+            opacity: 1;
+            transition: opacity 0.15s ease;
         }
         .navbar {
             position: fixed;
@@ -56,12 +61,16 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
             overflow-x: visible;
         }
         #sidebar .nav,
-        #sidebar ul {
+        #sidebar ul,
+        .admin-sidebar ul,
+        .sidebar ul {
             list-style: none;
             margin: 0;
             padding: 0;
         }
-        #sidebar a {
+        #sidebar a,
+        .admin-sidebar a,
+        .sidebar a {
             text-decoration: none !important;
             color: #e5e7eb;
         }
@@ -107,7 +116,7 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
     </div>
 </nav>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('DOMContentLoaded', function () {
     document.documentElement.classList.remove('admin-loading');
     var toggleBtn = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');

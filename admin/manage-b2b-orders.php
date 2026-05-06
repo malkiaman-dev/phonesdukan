@@ -31,15 +31,9 @@ $bulkInquiryModel = new BulkInquiryModel();
 $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage B2B Orders - Phones Dukan</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
@@ -704,8 +698,6 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             }
         }
     </style>
-</head>
-<body>
 
 <div class="ord-wrap">
     <div class="orders-head">
@@ -1197,6 +1189,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-
-</body>
-</html>

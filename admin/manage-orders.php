@@ -69,15 +69,9 @@ $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Orders - Phones Dukan</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
         :root{
             --primary:#111111;
             --accent:#facc15;
@@ -805,8 +799,6 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             .ord-status-form{ width: 100%; justify-content: flex-start; }
         }
     </style>
-</head>
-<body>
 
 <div class="ord-wrap">
     <div class="orders-head">
@@ -1317,6 +1309,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 </script>
-
-</body>
-</html>

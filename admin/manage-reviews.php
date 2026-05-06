@@ -59,9 +59,6 @@ include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Reviews</title>
@@ -428,8 +425,6 @@ include __DIR__ . '/admin_header.php';
             .rev-search-group { width: 100%; }
         }
     </style>
-</head>
-<body>
     <div class="rev-wrap">
         <div class="rev-header">
             <div>
@@ -793,5 +788,3 @@ include __DIR__ . '/admin_header.php';
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) closeModal(); });
     });
     </script>
-</body>
-</html>

@@ -25,9 +25,6 @@ $stmt = $conn->query($query);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Contact Messages - Phones Dukan</title>
@@ -309,8 +306,6 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             .msg-search-group { width: 100%; }
         }
     </style>
-</head>
-<body>
     <!-- Main Content -->
     <div class="msg-wrap">
         <div class="msg-header">
@@ -643,5 +638,3 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         applyFiltersAndPagination();
     });
     </script>
-</body>
-</html>

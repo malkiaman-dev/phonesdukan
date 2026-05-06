@@ -96,9 +96,6 @@ try {
 include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - Phones Dukan</title>
@@ -327,8 +324,6 @@ include __DIR__ . '/admin_header.php';
             .rep-grid { grid-template-columns: 1fr; }
         }
     </style>
-</head>
-<body>
     <div class="rep-wrap">
         <div class="rep-header">
             <div>
@@ -553,5 +548,3 @@ include __DIR__ . '/admin_header.php';
         }
     });
     </script>
-</body>
-</html>

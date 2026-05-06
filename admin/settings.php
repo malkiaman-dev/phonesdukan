@@ -76,9 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
 ?>
-<!doctype html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Settings</title>
@@ -238,8 +235,6 @@ include __DIR__ . '/admin_header.php';
             }
         }
     </style>
-</head>
-<body>
 <div class="set-wrap">
     <div class="set-head">
         <h2 class="set-title">Site Settings</h2>
@@ -313,5 +308,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 3200);
 });
 </script>
-</body>
-</html>

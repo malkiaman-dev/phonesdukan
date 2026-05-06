@@ -53,15 +53,11 @@ $query = "SELECT
           ORDER BY p.created_at DESC";
 
 $result       = $conn->query($query);
-$productCount = $result->rowCount();
 
 if (!$result) {
     die('Error fetching products: ' . $conn->errorInfo()[2]);
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Products - Phones Dukan</title>
@@ -763,8 +759,6 @@ if (!$result) {
             .prd-actions .prd-btn:nth-child(3) { grid-column: auto; }
         }
     </style>
-</head>
-<body>
 
 <?php if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']): ?>
     <?php include __DIR__ . '/admin_sidebar.php'; ?>
@@ -839,12 +833,6 @@ if (!$result) {
     </div>
 
     <!-- Count -->
-    <div class="prd-count-pill" aria-live="polite">
-        <span class="prd-count-dot" aria-hidden="true"></span>
-        <strong id="prdTotalCount"><?= (int)$productCount ?></strong>
-        <span>Products Found</span>
-    </div>
-
     <!-- Table -->
     <div class="prd-table-wrap">
         <table class="prd-table" id="prdTable">
@@ -1161,5 +1149,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-</body>
-</html>

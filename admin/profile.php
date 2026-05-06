@@ -67,9 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
 ?>
-<!doctype html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Profile</title>
@@ -213,8 +210,6 @@ include __DIR__ . '/admin_header.php';
             .pro-grid { grid-template-columns: 1fr; }
         }
     </style>
-</head>
-<body>
 <div class="pro-wrap">
     <div class="pro-header">
         <h2 class="pro-title">Admin Profile</h2>
@@ -265,5 +260,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-</body>
-</html>
