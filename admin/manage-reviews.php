@@ -110,9 +110,13 @@ include __DIR__ . '/admin_header.php';
             flex-wrap: wrap;
             padding: 14px 16px;
             margin-bottom: 14px;
+            overflow: visible;
+            position: relative;
+            z-index: 5;
         }
 
         .rev-left, .rev-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .rev-left { justify-content: flex-start; }
         .rev-right { justify-content: flex-end; }
 
         .rev-input {
@@ -127,6 +131,13 @@ include __DIR__ . '/admin_header.php';
             color: var(--black);
         }
         .rev-input:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(250,204,21,0.18); }
+
+        .rev-search-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
 
         .rev-btn {
             height: 44px;
@@ -147,14 +158,19 @@ include __DIR__ . '/admin_header.php';
             border: 1px solid var(--border);
             background: #fff;
             color: var(--black) !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         .rev-btn-outline:hover {
             border-color: var(--yellow);
-            box-shadow: 0 0 0 3px rgba(250,204,21,0.18);
+            background: var(--light-yellow);
             color: var(--black) !important;
         }
 
         .rev-card { overflow: hidden; }
+        .rev-card.rev-toolbar { overflow: visible; }
         .rev-table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th, td { border: 0; padding: 14px; text-align: left; background: transparent; vertical-align: top; }
@@ -215,6 +231,8 @@ include __DIR__ . '/admin_header.php';
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            justify-content: flex-end;
+            margin-left: auto;
         }
 
         .rev-page-btn {
@@ -250,22 +268,34 @@ include __DIR__ . '/admin_header.php';
             font-size: 0.85rem;
             font-weight: 700;
         }
-        .rev-actions-row {
-            display: flex;
+        .rev-status-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
         }
-
-        .rev-actions-row > * { margin: 0; }
-        .rev-actions-row .rev-select-wrap { flex: 1 1 150px; }
-        .rev-actions-row .rev-btn { flex: 0 0 auto; white-space: nowrap; }
-        .rev-actions-row.rev-actions-tight .rev-btn,
-        .rev-actions-row.rev-actions-tight .rev-btn-outline {
-            flex: 1 1 0;
-            min-width: 92px;
+        .rev-status-form .rev-select-wrap { grid-column: 1 / -1; }
+        .rev-status-form .rev-btn {
+            grid-column: 1 / -1;
+            width: 100%;
             justify-content: center;
         }
+        .rev-actions-bottom {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            align-items: stretch;
+        }
+        .rev-actions-bottom > * { margin: 0; }
+        .rev-actions-bottom .rev-btn,
+        .rev-actions-bottom .rev-btn-outline {
+            width: 100%;
+            justify-content: center;
+        }
+        .rev-delete-form {
+            width: 100%;
+            margin: 0;
+        }
+        .rev-delete-form .rev-btn { width: 100%; }
 
         .rev-native-select {
             position: absolute !important;
@@ -312,7 +342,7 @@ include __DIR__ . '/admin_header.php';
             left: 0;
             right: 0;
             top: calc(100% + 6px);
-            z-index: 120;
+            z-index: 9999;
             background: #fff;
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -391,6 +421,7 @@ include __DIR__ . '/admin_header.php';
         @media (max-width: 900px) {
             .rev-actions { min-width: 0; }
             .rev-input { width: 100%; }
+            .rev-search-group { width: 100%; }
         }
     </style>
 </head>
@@ -405,9 +436,21 @@ include __DIR__ . '/admin_header.php';
 
         <div class="rev-card rev-toolbar">
             <div class="rev-left">
-                <input type="search" id="revSearch" class="rev-input" placeholder="Search by product, author, email or content...">
-            </div>
-            <div class="rev-right">
+                <div class="rev-select-wrap" data-rev-select data-rev-toolbar-status>
+                    <select id="revStatusFilter" class="rev-native-select">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="spam">Spam</option>
+                    </select>
+                    <button type="button" class="rev-select-display" data-rev-display>All Status</button>
+                    <div class="rev-select-options">
+                        <button type="button" class="rev-select-option" data-value="">All Status</button>
+                        <button type="button" class="rev-select-option" data-value="pending">Pending</button>
+                        <button type="button" class="rev-select-option" data-value="approved">Approved</button>
+                        <button type="button" class="rev-select-option" data-value="spam">Spam</button>
+                    </div>
+                </div>
                 <div class="rev-select-wrap" data-rev-select data-rev-perpage>
                     <select id="revPerPage" class="rev-native-select">
                         <option value="20">20 / page</option>
@@ -422,7 +465,12 @@ include __DIR__ . '/admin_header.php';
                     </div>
                 </div>
                 <button type="button" class="rev-btn rev-btn-outline" id="revExportCsv">Export CSV</button>
-                <button type="button" class="rev-btn rev-btn-outline" id="revClear">Clear</button>
+            </div>
+            <div class="rev-right">
+                <div class="rev-search-group">
+                    <input type="search" id="revSearch" class="rev-input" placeholder="Search by product, author, email or content...">
+                    <button type="button" class="rev-btn" id="revSearchBtn">Search</button>
+                </div>
             </div>
         </div>
 
@@ -453,7 +501,7 @@ include __DIR__ . '/admin_header.php';
                                     $content = (string)($review['content'] ?? '');
                                     $productId = (string)($review['product_id'] ?? '');
                                 ?>
-                                <tr data-search="<?= htmlspecialchars(strtolower(($review['product_name'] ?? '') . ' ' . ($review['author'] ?? '') . ' ' . ($review['email'] ?? '') . ' ' . $content), ENT_QUOTES, 'UTF-8'); ?>">
+                                <tr data-status="<?= htmlspecialchars(strtolower($status), ENT_QUOTES, 'UTF-8'); ?>" data-search="<?= htmlspecialchars(strtolower(($review['product_name'] ?? '') . ' ' . ($review['author'] ?? '') . ' ' . ($review['email'] ?? '') . ' ' . $content), ENT_QUOTES, 'UTF-8'); ?>">
                                     <td><?php echo htmlspecialchars($review['id']); ?></td>
                                     <td><?php echo htmlspecialchars($productId !== '' ? $productId : '-'); ?></td>
                                     <td><?php echo htmlspecialchars($review['product_name'] ?? 'Unknown Product'); ?></td>
@@ -479,7 +527,7 @@ include __DIR__ . '/admin_header.php';
                                     <td><?php echo !empty($review['is_guest']) ? 'Yes' : 'No'; ?></td>
                                     <td>
                                         <div class="rev-actions">
-                                            <form method="POST" action="manage-reviews.php" class="rev-actions-row" data-status-form>
+                                            <form method="POST" action="manage-reviews.php" class="rev-status-form" data-status-form>
                                                 <input type="hidden" name="action" value="update_status">
                                                 <input type="hidden" name="review_id" value="<?php echo $review['id']; ?>">
 
@@ -500,9 +548,9 @@ include __DIR__ . '/admin_header.php';
                                                 <button type="submit" class="rev-btn">Update</button>
                                             </form>
 
-                                            <div class="rev-actions-row rev-actions-tight">
+                                            <div class="rev-actions-bottom">
                                                 <a class="rev-btn rev-btn-outline" href="edit-review.php?action=edit&id=<?php echo $review['id']; ?>">Edit</a>
-                                                <form id="delete-form-<?php echo $review['id']; ?>" method="POST" action="manage-reviews.php" style="display:inline;">
+                                                <form id="delete-form-<?php echo $review['id']; ?>" method="POST" action="manage-reviews.php" class="rev-delete-form">
                                                     <input type="hidden" name="action" value="delete_review">
                                                     <input type="hidden" name="review_id" value="<?php echo $review['id']; ?>">
                                                     <button type="button" class="rev-btn" data-delete-review="<?php echo $review['id']; ?>">Delete</button>
@@ -551,8 +599,9 @@ include __DIR__ . '/admin_header.php';
         }
 
         const search = document.getElementById('revSearch');
-        const clear = document.getElementById('revClear');
+        const searchBtn = document.getElementById('revSearchBtn');
         const table = document.getElementById('revTable');
+        const statusFilterEl = document.getElementById('revStatusFilter');
         const perPageEl = document.getElementById('revPerPage');
         const exportBtn = document.getElementById('revExportCsv');
         const paginationEl = document.getElementById('revPagination');
@@ -560,14 +609,18 @@ include __DIR__ . '/admin_header.php';
         let currentPage = 1;
         let visibleRows = [];
 
-        if (search && clear && table) {
+        if (search && searchBtn && table && statusFilterEl) {
             const rows = Array.from(table.querySelectorAll('tbody tr'));
             function applySearch() {
                 const q = (search.value || '').trim().toLowerCase();
+                const statusVal = (statusFilterEl.value || '').toLowerCase();
                 visibleRows = [];
                 rows.forEach((tr) => {
                     const hay = (tr.dataset.search || '');
-                    const show = (q === '' || hay.includes(q));
+                    const rowStatus = (tr.dataset.status || '').toLowerCase();
+                    const searchMatch = (q === '' || hay.includes(q));
+                    const statusMatch = (statusVal === '' || rowStatus === statusVal);
+                    const show = searchMatch && statusMatch;
                     tr.dataset._match = show ? '1' : '0';
                     if (show) visibleRows.push(tr);
                 });
@@ -575,13 +628,12 @@ include __DIR__ . '/admin_header.php';
                 applyPagination();
             }
             search.addEventListener('input', applySearch);
-            clear.addEventListener('click', function () {
-                search.value = '';
-                applySearch();
-            });
+            searchBtn.addEventListener('click', applySearch);
+            statusFilterEl.addEventListener('change', applySearch);
             // Initialize match flags
             rows.forEach((tr) => tr.dataset._match = '1');
             visibleRows = rows.slice();
+            applySearch();
         }
 
         // Custom select (status)
