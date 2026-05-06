@@ -195,6 +195,86 @@ foreach ($latest_posts_raw as $post) {
         </div>
     </div>
 </section>
+<script>
+(function () {
+    var viewport = document.querySelector('.cat-viewport');
+    var track = document.getElementById('cat-track');
+    var prevBtn = document.querySelector('.cat-prev');
+    var nextBtn = document.querySelector('.cat-next');
+    if (!viewport || !track) return;
+
+    var cards = track.querySelectorAll('.cat-card');
+    if (!cards.length) return;
+
+    function getStepWidth() {
+        var card = cards[0];
+        if (!card) return 240;
+        var styles = window.getComputedStyle(track);
+        var gap = parseInt(styles.columnGap || styles.gap || '0', 10) || 0;
+        return card.offsetWidth + gap;
+    }
+
+    function scrollNext() {
+        var maxLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+        var step = getStepWidth();
+        if (viewport.scrollLeft >= maxLeft - 4) {
+            viewport.scrollTo({ left: 0, behavior: 'smooth' });
+            return;
+        }
+        viewport.scrollBy({ left: step, behavior: 'smooth' });
+    }
+
+    function scrollPrev() {
+        var step = getStepWidth();
+        if (viewport.scrollLeft <= 4) {
+            var maxLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+            viewport.scrollTo({ left: maxLeft, behavior: 'smooth' });
+            return;
+        }
+        viewport.scrollBy({ left: -step, behavior: 'smooth' });
+    }
+
+    var autoTimer = null;
+    var resumeTimer = null;
+
+    function stopAuto() {
+        clearInterval(autoTimer);
+        autoTimer = null;
+    }
+
+    function startAuto() {
+        stopAuto();
+        autoTimer = setInterval(scrollNext, 2800);
+    }
+
+    function pauseThenResume() {
+        stopAuto();
+        clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(startAuto, 4200);
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            scrollNext();
+            pauseThenResume();
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+            scrollPrev();
+            pauseThenResume();
+        });
+    }
+
+    viewport.addEventListener('mouseenter', stopAuto);
+    viewport.addEventListener('mouseleave', startAuto);
+    viewport.addEventListener('touchstart', pauseThenResume, { passive: true });
+    viewport.addEventListener('wheel', pauseThenResume, { passive: true });
+
+    startAuto();
+})();
+</script>
 
 <section class="na-section">
     <div class="na-inner">
