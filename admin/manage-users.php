@@ -101,10 +101,11 @@ include __DIR__ . '/admin_header.php';
     }
 
     .mu-toolbar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        display: flex;
         align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: nowrap;
         margin-bottom: 14px;
     }
 
@@ -113,7 +114,11 @@ include __DIR__ . '/admin_header.php';
         display: flex;
         align-items: center;
         gap: 10px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+    }
+
+    .mu-toolbar-right {
+        margin-left: auto;
     }
 
     .mu-search-group {
@@ -124,7 +129,7 @@ include __DIR__ . '/admin_header.php';
     }
 
     .mu-search {
-        width: 320px;
+        width: 250px;
         height: 46px;
         border: 1px solid var(--mu-border);
         border-radius: 12px;
@@ -455,7 +460,13 @@ include __DIR__ . '/admin_header.php';
 
     @media (max-width: 900px) {
         .mu-toolbar {
-            grid-template-columns: 1fr;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .mu-toolbar-left,
+        .mu-toolbar-right {
+            flex-wrap: wrap;
         }
 
         .mu-search {
@@ -463,6 +474,11 @@ include __DIR__ . '/admin_header.php';
         }
 
         .mu-search-group {
+            width: 100%;
+        }
+
+        .mu-toolbar-right {
+            margin-left: 0;
             width: 100%;
         }
     }
