@@ -514,14 +514,50 @@ include __DIR__ . '/admin_header.php';
                                 if ($normalized !== '') {
                                     if (preg_match('#^(https?:)?//#i', $normalized)) {
                                         $candidates[] = $normalized;
+                                        $parsed = parse_url($normalized);
+                                        $path = isset($parsed['path']) ? (string)$parsed['path'] : '';
+                                        if ($path !== '') {
+                                            $trimmedPath = ltrim($path, '/');
+                                            $candidates[] = '/' . $trimmedPath;
+                                            $candidates[] = '/phonesdukan/' . $trimmedPath;
+                                            if (strpos($trimmedPath, 'uploads/') !== false) {
+                                                $uploadsPart = substr($trimmedPath, strpos($trimmedPath, 'uploads/'));
+                                                $candidates[] = '/public/' . $uploadsPart;
+                                                $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+                                            }
+                                        }
                                     } elseif (preg_match('/^[A-Za-z]:\//', $normalized)) {
-                                        // Windows filesystem path is not web-accessible; skip to fallbacks.
+                                        // Convert Windows local path to web path candidates.
+                                        $lower = strtolower($normalized);
+                                        $projectMarker = '/xampp/htdocs/phonesdukan/';
+                                        $docRootMarker = '/xampp/htdocs/';
+                                        if (strpos($lower, $projectMarker) !== false) {
+                                            $pos = strpos($lower, $projectMarker);
+                                            $relative = substr($normalized, $pos + strlen($projectMarker));
+                                            $relative = ltrim(str_replace('\\', '/', $relative), '/');
+                                            $candidates[] = '/phonesdukan/' . $relative;
+                                            $candidates[] = '/' . $relative;
+                                        } elseif (strpos($lower, $docRootMarker) !== false) {
+                                            $pos = strpos($lower, $docRootMarker);
+                                            $relative = substr($normalized, $pos + strlen($docRootMarker));
+                                            $relative = ltrim(str_replace('\\', '/', $relative), '/');
+                                            $candidates[] = '/' . $relative;
+                                        }
                                     } else {
                                         $trimmed = ltrim($normalized, './');
                                         $candidates[] = $normalized;
                                         $candidates[] = '../' . $trimmed;
                                         $candidates[] = '/' . $trimmed;
                                         $candidates[] = '/phonesdukan/' . $trimmed;
+                                        $candidates[] = '/public/' . ltrim($trimmed, '/');
+                                        $candidates[] = '/phonesdukan/public/' . ltrim($trimmed, '/');
+                                        if (strpos($trimmed, 'uploads/') !== false) {
+                                            $uploadsPart = substr($trimmed, strpos($trimmed, 'uploads/'));
+                                            $candidates[] = '/' . $uploadsPart;
+                                            $candidates[] = '/phonesdukan/' . $uploadsPart;
+                                            $candidates[] = '/public/' . $uploadsPart;
+                                            $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+                                        }
                                     }
                                 }
                                 $candidates[] = $defaultImg;
@@ -532,19 +568,22 @@ include __DIR__ . '/admin_header.php';
                             <?php if (!empty($post['image_url'])): ?>
                                 <img class="post-thumb post-image" src="<?php echo htmlspecialchars($imgSrc); ?>" 
                                      data-candidates="<?php echo $imgCandidatesAttr; ?>" data-candidate-index="0"
+                                     onerror="handlePostImageFallback(this)"
                                      alt="<?php echo htmlspecialchars($post['alt_text'] ?? 'Post Image'); ?>" 
                                      width="50">
                             <?php else: ?>
-                                <img class="post-thumb post-image" src="../public/uploads/default.jpg" alt="No Image" width="50">
+                                <img class="post-thumb post-image" src="../public/uploads/default.jpg"
+                                     onerror="this.onerror=null; this.src='/phonesdukan/public/uploads/default.jpg';"
+                                     alt="No Image" width="50">
                             <?php endif; ?>
                         </td>
                         <td><div class="post-title"><?php echo htmlspecialchars($post['title']); ?></div></td>
                         <td><span class="category-badge"><?php echo htmlspecialchars($post['categories']); ?></span></td>
                         <td class="action-buttons">
                             <a href="<?php echo htmlspecialchars(url('admin/edit-post/' . (int)$post['id'])); ?>" class="custom-btn custom-btn-warning">Edit</a>
-                            <a href="delete_post.php?id=<?php echo $post['id']; ?>" class="custom-btn custom-btn-danger" onclick="return confirm('Are you sure you want to delete this post and all associated data?')">Delete</a>
                             <a href="<?php echo htmlspecialchars(url('blog/' . $post['category_slug'] . '/' . $post['slug'])); ?>" 
                                class="custom-btn custom-btn-primary">View</a>
+                            <a href="delete_post.php?id=<?php echo $post['id']; ?>" class="custom-btn custom-btn-danger" onclick="return confirm('Are you sure you want to delete this post and all associated data?')">Delete</a>
                         </td>
                         <td><span class="status-pill"><?php echo htmlspecialchars(ucfirst($post['status'])); ?></span></td>
                         <td><?php echo date('d M Y', strtotime($post['updated_at'])); ?></td>
@@ -586,6 +625,28 @@ include __DIR__ . '/admin_header.php';
         </div>
     </div>
     <script>
+    function handlePostImageFallback(img) {
+        let candidates = [];
+        try {
+            candidates = JSON.parse(img.dataset.candidates || '[]');
+        } catch (e) {
+            candidates = [];
+        }
+        let idx = parseInt(img.dataset.candidateIndex || '0', 10);
+        idx += 1;
+        if (idx < candidates.length) {
+            img.dataset.candidateIndex = String(idx);
+            img.src = candidates[idx];
+        } else {
+            img.onerror = null;
+            img.src = '../public/uploads/default.jpg';
+            img.onerror = function () {
+                this.onerror = null;
+                this.src = '/phonesdukan/public/uploads/default.jpg';
+            };
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-filter-select]').forEach(function (wrap) {
             const display = wrap.querySelector('[data-filter-display]');
@@ -632,21 +693,7 @@ include __DIR__ . '/admin_header.php';
         // Image fallback resolver for inconsistent stored paths.
         document.querySelectorAll('.post-image').forEach(function (img) {
             img.addEventListener('error', function () {
-                let candidates = [];
-                try {
-                    candidates = JSON.parse(this.dataset.candidates || '[]');
-                } catch (e) {
-                    candidates = [];
-                }
-                let idx = parseInt(this.dataset.candidateIndex || '0', 10);
-                idx += 1;
-                if (idx < candidates.length) {
-                    this.dataset.candidateIndex = String(idx);
-                    this.src = candidates[idx];
-                } else {
-                    this.onerror = null;
-                    this.src = '../public/uploads/default.jpg';
-                }
+                handlePostImageFallback(this);
             });
         });
     });
