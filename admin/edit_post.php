@@ -59,37 +59,228 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
 ?>
 
 <style>
-    .admin-page-wrapper { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
-    .form-group textarea { resize: vertical; }
-    .success { color: green; font-weight: bold; }
-    .error { color: red; font-weight: bold; }
-    .category-checkboxes label { display: block; margin-bottom: 5px; }
-    .media-library { margin-top: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 4px; }
-    .media-library h3 { margin-top: 0; }
-    .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-    .image-item { position: relative; border: 1px solid #ddd; padding: 10px; border-radius: 4px; }
-    .image-item img { max-width: 100%; height: auto; }
-    .image-item .actions { margin-top: 5px; }
-    .image-item .delete-btn { color: red; cursor: pointer; }
-    .image-item .set-main-btn { color: blue; cursor: pointer; }
-    .image-item .set-main-btn.main { color: green; font-weight: bold; }
-    .image-item input, .image-item textarea { margin-top: 5px; }
-    .image-item .image-id { font-size: 0.9em; color: #666; margin-top: 5px; display: block; }
-    .note { font-size: 0.9em; color: #666; }
+    :root {
+        --black: #111111;
+        --white: #ffffff;
+        --yellow: #facc15;
+        --light-yellow: #fffbeb;
+        --bg: #f8fafc;
+        --border: #e5e7eb;
+        --muted: #6b7280;
+    }
+    .admin-page-wrapper {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: 20px;
+        background: var(--bg);
+    }
+    .edit-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
+        padding: 18px;
+    }
+    .admin-page-wrapper h1 {
+        font-size: 2rem;
+        color: var(--black);
+        margin-bottom: 16px;
+        letter-spacing: -0.02em;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--black);
+        font-size: 0.95rem;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.92rem;
+        background: #fff;
+        outline: none;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: var(--yellow);
+        box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.25);
+    }
+    .form-group textarea { resize: vertical; min-height: 92px; }
+    .success { color: #166534; font-weight: 700; margin-bottom: 10px; }
+    .error { color: #991b1b; font-weight: 700; margin-bottom: 10px; }
+    .category-checkboxes {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px;
+    }
+    .category-checkboxes label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0;
+        background: #f9fafb;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-weight: 600;
+    }
+    .category-checkboxes label input {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        margin: 0;
+        box-shadow: none;
+        cursor: pointer;
+        position: relative;
+        transition: border-color .15s ease, background .15s ease;
+    }
+    .category-checkboxes label input:checked {
+        background: var(--yellow);
+        border-color: var(--yellow);
+    }
+    .category-checkboxes label input:checked::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 1px;
+        width: 5px;
+        height: 9px;
+        border: solid var(--black);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+    .category-checkboxes label input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.25);
+    }
+    .media-library {
+        margin-top: 20px;
+        border: 1px solid var(--border);
+        padding: 14px;
+        border-radius: 12px;
+        background: #fcfcfd;
+    }
+    .media-library h3 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        color: var(--black);
+    }
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 10px;
+    }
+    .image-item {
+        position: relative;
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 10px;
+        background: #fff;
+    }
+    .image-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+    .image-item .actions {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.85rem;
+    }
+    .image-item .delete-btn {
+        color: var(--white);
+        background: var(--black);
+        border: 1px solid var(--black);
+        border-radius: 999px;
+        padding: 3px 8px;
+        cursor: pointer;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .image-item .set-main-btn {
+        color: var(--white);
+        background: var(--black);
+        border: 1px solid var(--black);
+        border-radius: 999px;
+        padding: 3px 8px;
+        cursor: pointer;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .image-item .set-main-btn.main {
+        color: var(--black);
+        background: var(--yellow);
+        border-color: var(--yellow);
+    }
+    .image-item input,
+    .image-item textarea { margin-top: 6px; }
+    .image-item .image-id {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 6px;
+        display: block;
+    }
+    .note { font-size: 0.86rem; color: var(--muted); }
+    .update-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--black);
+        background: var(--black);
+        color: var(--white);
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .update-btn:hover {
+        color: var(--yellow);
+        transform: translateY(-1px);
+    }
+    input[type="date"],
+    input[type="datetime-local"] {
+        color-scheme: light;
+        background: #fff;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 2px;
+        filter: brightness(0);
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover,
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+        background: var(--light-yellow);
+    }
 </style>
 
 <div class="admin-page-wrapper">
-    <h1>Edit Post</h1>
-    <?php if (isset($success)): ?>
-        <p class="success"><?php echo htmlspecialchars($success); ?></p>
-    <?php endif; ?>
-    <?php if (isset($error) || isset($_GET['error'])): ?>
-        <p class="error"><?php echo htmlspecialchars($error ?? $_GET['error']); ?></p>
-    <?php endif; ?>
-    <form method="POST" action="<?= htmlspecialchars(url('admin/edit_post.php?id=' . (int)$post['id'] . '&action=update')); ?>" enctype="multipart/form-data" id="edit-post-form">
+    <div class="edit-card">
+        <h1>Edit Post</h1>
+        <?php if (isset($success)): ?>
+            <p class="success"><?php echo htmlspecialchars($success); ?></p>
+        <?php endif; ?>
+        <?php if (isset($error) || isset($_GET['error'])): ?>
+            <p class="error"><?php echo htmlspecialchars($error ?? $_GET['error']); ?></p>
+        <?php endif; ?>
+        <form method="POST" action="<?= htmlspecialchars(url('admin/edit_post.php?id=' . (int)$post['id'] . '&action=update')); ?>" enctype="multipart/form-data" id="edit-post-form">
         <div class="form-group">
             <label for="title">Title *</label>
             <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
@@ -168,8 +359,9 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
             </div>
         </div>
         <input type="hidden" name="main_image_id" id="main_image_id" value="<?php echo $main_image ? $main_image['id'] : ''; ?>">
-        <button type="submit">Update Post</button>
-    </form>
+            <button type="submit" class="update-btn">Update Post</button>
+        </form>
+    </div>
 </div>
 
 <script src="https://cdn.tiny.cloud/1/your-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
@@ -209,14 +401,18 @@ function updateMainImage(imageId) {
     document.querySelectorAll('.set-main-btn').forEach(btn => {
         btn.textContent = 'Set as Main';
         btn.classList.remove('main');
-        btn.style.color = 'blue';
-        btn.style.fontWeight = 'normal';
+        btn.style.color = '#ffffff';
+        btn.style.background = '#111111';
+        btn.style.borderColor = '#111111';
+        btn.style.fontWeight = '700';
     });
     const clickedBtn = document.querySelector(`.set-main-btn[data-image-id="${imageId}"]`);
     if (clickedBtn) {
         clickedBtn.textContent = 'Main Image';
         clickedBtn.classList.add('main');
-        clickedBtn.style.color = 'green';
+        clickedBtn.style.color = '#111111';
+        clickedBtn.style.background = '#facc15';
+        clickedBtn.style.borderColor = '#facc15';
         clickedBtn.style.fontWeight = 'bold';
     }
     document.getElementById('main_image_id').value = imageId;
