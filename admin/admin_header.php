@@ -10,7 +10,7 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html class="admin-loading" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +18,69 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <?php emitCss('public/assets/css/admin/admin.css'); ?>
+    <style>
+        /* Critical shell styles to prevent FOUC */
+        html.admin-loading body { visibility: hidden; }
+        html, body {
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100%;
+            padding-left: 248px;
+            padding-top: 56px;
+            color: #111111;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            z-index: 1000;
+            background: #111111;
+            color: #fff;
+            border-bottom: 1px solid rgba(250, 204, 21, 0.35);
+        }
+        #sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 248px;
+            height: calc(100vh - 56px);
+            z-index: 1200;
+            background: #161616;
+            overflow-y: auto;
+            overflow-x: visible;
+        }
+        #sidebar .nav,
+        #sidebar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        #sidebar a {
+            text-decoration: none !important;
+            color: #e5e7eb;
+        }
+        .content,
+        .dashboard-content {
+            position: relative;
+            z-index: 1;
+            overflow: visible;
+        }
+        @media (max-width: 992px) {
+            body { padding-left: 0; }
+            #sidebar { left: -270px; }
+            #sidebar.is-open { left: 0; }
+        }
+    </style>
     <?php loadCSS(); ?>
     <?php loadJS(); ?>
-    <body>
+</head>
+<body>
 <!-- Navbar -->
 <nav class="navbar">
     <div class="container">
@@ -48,6 +108,7 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
 </nav>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    document.documentElement.classList.remove('admin-loading');
     var toggleBtn = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');
     if (!toggleBtn || !sidebar) {
