@@ -129,7 +129,7 @@ include __DIR__ . '/admin_header.php';
     }
 
     .mu-search {
-        width: 250px;
+        width: 285px;
         height: 46px;
         border: 1px solid var(--mu-border);
         border-radius: 12px;
