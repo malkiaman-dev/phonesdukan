@@ -149,6 +149,13 @@ include __DIR__ . '/admin_header.php';
     .ml-title { margin: 0; font-size: 1.8rem; letter-spacing: -0.02em; color: var(--black); }
     .ml-subtitle { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
 
+    .ml-header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
     .ml-btn {
         height: 44px;
         padding: 0 14px;
@@ -166,6 +173,75 @@ include __DIR__ . '/admin_header.php';
         justify-content: center;
     }
     .ml-btn:hover { color: var(--yellow) !important; transform: translateY(-1px); }
+
+    .ml-native-select {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
+    }
+    .ml-select-wrap { position: relative; min-width: 145px; }
+    .ml-select-display {
+        width: 100%;
+        height: 44px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fff;
+        color: var(--black);
+        padding: 0 36px 0 12px;
+        font-size: 0.86rem;
+        font-weight: 800;
+        text-align: left;
+        cursor: pointer;
+        position: relative;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .ml-select-display::after {
+        content: "";
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid var(--black);
+        border-bottom: 2px solid var(--black);
+        transform: translateY(-65%) rotate(45deg);
+    }
+    .ml-select-display:hover,
+    .ml-select-wrap.is-open .ml-select-display {
+        border-color: var(--yellow);
+        box-shadow: 0 0 0 3px rgba(250,204,21,0.18);
+    }
+    .ml-select-options {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        box-shadow: 0 14px 28px rgba(17,17,17,0.12);
+        padding: 6px;
+        display: none;
+    }
+    .ml-select-wrap.is-open .ml-select-options { display: block; }
+    .ml-select-option {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        border-radius: 8px;
+        text-align: left;
+        padding: 8px 10px;
+        font-size: 0.86rem;
+        font-weight: 800;
+        color: var(--black);
+        cursor: pointer;
+    }
+    .ml-select-option:hover { background: var(--light-yellow); }
+    .ml-select-option.is-selected { background: var(--yellow); }
 
     .ml-card { padding: 16px; }
     .ml-grid {
@@ -231,6 +307,36 @@ include __DIR__ . '/admin_header.php';
         font-weight: 700;
         padding: 18px;
     }
+
+    .ml-pagebar {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .ml-page-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+    .ml-page-btn {
+        min-width: 38px;
+        height: 38px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--black);
+        font-size: 0.84rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .ml-page-btn:hover { border-color: var(--yellow); background: var(--light-yellow); }
+    .ml-page-btn.is-active { border-color: var(--yellow); background: var(--yellow); color: var(--black); }
+    .ml-page-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .ml-page-meta { color: var(--muted); font-size: 0.85rem; font-weight: 700; }
 
     .modal {
         display: none;
@@ -364,7 +470,22 @@ window.handleMediaImageFallback = function (img) {
             <h2 class="ml-title">Media Library</h2>
             <p class="ml-subtitle">Manage uploaded product images and metadata.</p>
         </div>
-        <button id="openUploadModal" class="ml-btn" type="button">Upload New Image</button>
+        <div class="ml-header-right">
+            <div class="ml-select-wrap" data-ml-select>
+                <select id="mlPerPage" class="ml-native-select">
+                    <option value="20">20 / page</option>
+                    <option value="50">50 / page</option>
+                    <option value="100">100 / page</option>
+                </select>
+                <button type="button" class="ml-select-display" data-ml-display>20 / page</button>
+                <div class="ml-select-options">
+                    <button type="button" class="ml-select-option" data-value="20">20 / page</button>
+                    <button type="button" class="ml-select-option" data-value="50">50 / page</button>
+                    <button type="button" class="ml-select-option" data-value="100">100 / page</button>
+                </div>
+            </div>
+            <button id="openUploadModal" class="ml-btn" type="button">Upload New Image</button>
+        </div>
     </div>
 
     <div class="ml-card">
@@ -405,6 +526,10 @@ window.handleMediaImageFallback = function (img) {
         <?php else: ?>
             <p class="ml-empty">No media items found.</p>
         <?php endif; ?>
+    </div>
+    <div class="ml-pagebar">
+        <div class="ml-page-controls" id="mlPagination"></div>
+        <div class="ml-page-meta" id="mlPageMeta">Page 1 of 1</div>
     </div>
 </div>
 
@@ -529,6 +654,95 @@ function deleteImageMetadata(imageId) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    const perPageEl = document.getElementById('mlPerPage');
+    const paginationEl = document.getElementById('mlPagination');
+    const pageMetaEl = document.getElementById('mlPageMeta');
+    let currentPage = 1;
+
+    document.querySelectorAll('[data-ml-select]').forEach((wrap) => {
+        const nativeSelect = wrap.querySelector('select');
+        const display = wrap.querySelector('[data-ml-display]');
+        const options = Array.from(wrap.querySelectorAll('.ml-select-option'));
+        if (!nativeSelect || !display || options.length === 0) return;
+
+        function sync() {
+            const selected = options.find(opt => opt.dataset.value === nativeSelect.value);
+            display.textContent = selected ? selected.textContent.trim() : (nativeSelect.options[nativeSelect.selectedIndex]?.text || 'Select');
+            options.forEach(opt => opt.classList.toggle('is-selected', opt.dataset.value === nativeSelect.value));
+        }
+
+        display.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.ml-select-wrap.is-open').forEach((o) => {
+                if (o !== wrap) o.classList.remove('is-open');
+            });
+            wrap.classList.toggle('is-open');
+        });
+
+        options.forEach((opt) => {
+            opt.addEventListener('click', function () {
+                nativeSelect.value = this.dataset.value;
+                nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                sync();
+                wrap.classList.remove('is-open');
+                currentPage = 1;
+                applyPagination();
+            });
+        });
+        sync();
+    });
+
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.ml-select-wrap.is-open').forEach((wrap) => wrap.classList.remove('is-open'));
+    });
+
+    function renderPagination(totalPages) {
+        if (!paginationEl) return;
+        paginationEl.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        function makeBtn(label, page, disabled, active) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ml-page-btn' + (active ? ' is-active' : '');
+            btn.textContent = label;
+            btn.disabled = !!disabled;
+            btn.addEventListener('click', function () {
+                if (disabled) return;
+                currentPage = page;
+                applyPagination();
+            });
+            return btn;
+        }
+
+        paginationEl.appendChild(makeBtn('Prev', Math.max(1, currentPage - 1), currentPage === 1, false));
+        const windowSize = 2;
+        const start = Math.max(1, currentPage - windowSize);
+        const end = Math.min(totalPages, currentPage + windowSize);
+        for (let p = start; p <= end; p++) {
+            paginationEl.appendChild(makeBtn(String(p), p, false, p === currentPage));
+        }
+        paginationEl.appendChild(makeBtn('Next', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false));
+    }
+
+    function applyPagination() {
+        const items = Array.from(document.querySelectorAll('.ml-grid .ml-item'));
+        if (!items.length || !perPageEl) return;
+        const perPage = parseInt(perPageEl.value || '20', 10) || 20;
+        const total = items.length;
+        const totalPages = Math.max(1, Math.ceil(total / perPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        items.forEach((item) => item.style.display = 'none');
+        const start = (currentPage - 1) * perPage;
+        items.slice(start, start + perPage).forEach((item) => item.style.display = '');
+
+        if (pageMetaEl) pageMetaEl.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+        renderPagination(totalPages);
+    }
+
+    applyPagination();
+
     const deleteBtn = document.getElementById('deleteImageBtn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', function () {
