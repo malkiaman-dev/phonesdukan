@@ -133,38 +133,39 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
         font-weight: 600;
     }
     .category-checkboxes label input {
-        -webkit-appearance: none;
-        appearance: none;
+        -webkit-appearance: none !important;
+        appearance: none !important;
         width: 16px;
         height: 16px;
         min-width: 16px;
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        background: #fff;
+        border: 1px solid var(--border) !important;
+        border-radius: 4px !important;
+        background: #fff !important;
         margin: 0;
-        box-shadow: none;
+        box-shadow: none !important;
         cursor: pointer;
         position: relative;
         transition: border-color .15s ease, background .15s ease;
+        vertical-align: middle;
     }
     .category-checkboxes label input:checked {
-        background: var(--yellow);
-        border-color: var(--yellow);
+        background: var(--yellow) !important;
+        border-color: var(--yellow) !important;
     }
     .category-checkboxes label input:checked::after {
         content: "";
         position: absolute;
-        left: 4px;
-        top: 1px;
+        left: 50%;
+        top: 50%;
         width: 5px;
         height: 9px;
         border: solid var(--black);
         border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
+        transform: translate(-50%, -58%) rotate(45deg);
     }
     .category-checkboxes label input:focus {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.25);
+        box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.25) !important;
     }
     .media-library {
         margin-top: 20px;
@@ -201,39 +202,57 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
         margin-top: 6px;
         color: var(--muted);
         font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
     }
     .image-item .delete-btn {
-        color: var(--white);
-        background: var(--black);
-        border: 1px solid var(--black);
-        border-radius: 999px;
-        padding: 3px 8px;
+        color: var(--white) !important;
+        background: var(--black) !important;
+        border: 1px solid var(--black) !important;
+        border-radius: 999px !important;
+        padding: 3px 8px !important;
         cursor: pointer;
         font-weight: 700;
         display: inline-block;
+        line-height: 1.1;
     }
     .image-item .set-main-btn {
-        color: var(--white);
-        background: var(--black);
-        border: 1px solid var(--black);
-        border-radius: 999px;
-        padding: 3px 8px;
+        color: var(--white) !important;
+        background: var(--black) !important;
+        border: 1px solid var(--black) !important;
+        border-radius: 999px !important;
+        padding: 3px 8px !important;
         cursor: pointer;
         font-weight: 700;
         display: inline-block;
+        line-height: 1.1;
     }
     .image-item .set-main-btn.main {
-        color: var(--black);
-        background: var(--yellow);
-        border-color: var(--yellow);
+        color: var(--black) !important;
+        background: var(--yellow) !important;
+        border-color: var(--yellow) !important;
     }
     .image-item input,
     .image-item textarea { margin-top: 6px; }
     .image-item .image-id {
         font-size: 0.8rem;
-        color: var(--muted);
+        color: var(--muted) !important;
         margin-top: 6px;
         display: block;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+    .image-item .actions .delete-btn:hover,
+    .image-item .actions .set-main-btn:hover {
+        color: var(--yellow) !important;
+    }
+    .image-item .actions .set-main-btn.main:hover {
+        color: var(--black) !important;
     }
     .note { font-size: 0.86rem; color: var(--muted); }
     .update-btn {
@@ -263,7 +282,9 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
         cursor: pointer;
         border-radius: 6px;
         padding: 2px;
-        filter: brightness(0);
+        filter: none;
+        opacity: .85;
+        background: transparent;
     }
     input[type="date"]::-webkit-calendar-picker-indicator:hover,
     input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
