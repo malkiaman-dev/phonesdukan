@@ -257,13 +257,22 @@ include __DIR__ . '/admin_header.php';
     .close {
         position: absolute;
         right: 12px;
-        top: 8px;
+        top: 10px;
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        background: var(--black) !important;
+        border: 1px solid var(--black);
         font-size: 1.7rem;
         line-height: 1;
-        color: var(--muted);
+        color: #ffffff !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        transition: color .15s ease;
     }
-    .close:hover { color: var(--black); }
+    .close:hover { color: var(--yellow) !important; }
 
     .ml-form-grid {
         display: grid;
