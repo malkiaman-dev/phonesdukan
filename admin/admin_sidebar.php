@@ -58,7 +58,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= ($current_page == 'categories.php') ? 'active' : '' ?>" href="<?= url('admin/categories'); ?>">
+                    <a class="nav-link <?= ($current_page == 'categories.php') ? 'active' : '' ?>" href="<?= url('admin/categories.php'); ?>">
                         Manage Categories
                     </a>
                 </li>
