@@ -894,6 +894,13 @@ if (!$result) {
                                     }
                                 } else {
                                     $trimmed = ltrim($normalized, './');
+                                    // Prioritize base-path-safe URLs first for localhost subfolder setups.
+                                    if (strpos($trimmed, 'public/') === 0) {
+                                        $candidates[] = '/phonesdukan/' . $trimmed;
+                                    } elseif (strpos($trimmed, 'uploads/') === 0) {
+                                        $candidates[] = '/phonesdukan/public/' . $trimmed;
+                                        $candidates[] = '/phonesdukan/' . $trimmed;
+                                    }
                                     $candidates[] = $normalized;
                                     $candidates[] = '../' . $trimmed;
                                     $candidates[] = '/' . $trimmed;
