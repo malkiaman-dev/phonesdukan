@@ -247,17 +247,7 @@ function epImageCandidates($rawPath)
         box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.18);
     }
 
-    .ep-field select {
-        appearance: none;
-        -webkit-appearance: none;
-        padding-right: 38px;
-        background:
-            #fff
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-            no-repeat right 14px center;
-    }
-
-    .ep-native-status-select {
+    .ep-native-dropdown {
         position: absolute !important;
         width: 1px !important;
         height: 1px !important;
@@ -266,96 +256,126 @@ function epImageCandidates($rawPath)
         overflow: hidden !important;
     }
 
-    .ep-status-select {
+    .ep-dropdown {
         position: relative;
     }
 
-    .ep-status-display {
+    .ep-dropdown-display {
         width: 100%;
-        height: 48px;
+        height: 52px;
         border: 1px solid var(--border);
-        border-radius: 10px;
+        border-radius: 14px;
         background: #fff;
         color: var(--black);
-        padding: 0 40px 0 14px;
+        padding: 0 44px 0 16px;
         text-align: left;
-        font-size: 0.92rem;
-        font-weight: 600;
+        font-size: 0.95rem;
+        font-weight: 700;
         cursor: pointer;
         position: relative;
+        transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
     }
 
-    .ep-status-display::after {
+    .ep-dropdown-display::after {
         content: "";
         position: absolute;
-        right: 14px;
+        right: 16px;
         top: 50%;
-        width: 12px;
+        width: 8px;
         height: 8px;
         transform: translateY(-50%);
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center center;
+        border-right: 2px solid var(--black);
+        border-bottom: 2px solid var(--black);
+        transform: translateY(-65%) rotate(45deg);
     }
 
-    .ep-status-display:focus-visible {
+    .ep-dropdown-display:focus-visible {
         outline: none;
-        border-color: var(--yellow);
-        box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.18);
     }
 
-    .ep-status-options {
+    .ep-dropdown-display:hover,
+    .ep-dropdown.is-open .ep-dropdown-display {
+        border-color: var(--yellow);
+        box-shadow: 0 0 0 4px rgba(250,204,21,0.18);
+        background: #fff;
+    }
+
+    .ep-dropdown-options {
         position: absolute;
         top: calc(100% + 6px);
         left: 0;
         right: 0;
         background: #fff;
         border: 1px solid var(--border);
-        border-radius: 10px;
+        border-radius: 14px;
         box-shadow: 0 12px 24px rgba(17, 17, 17, 0.12);
-        z-index: 20;
+        z-index: 90;
         padding: 6px;
         max-height: 220px;
         overflow: auto;
         display: none;
     }
 
-    .ep-status-select.is-open .ep-status-options {
+    .ep-dropdown-options::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .ep-dropdown-options::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 999px;
+    }
+
+    .ep-dropdown.is-open .ep-dropdown-options {
         display: block;
     }
 
-    .ep-status-option {
+    .ep-dropdown-option {
         width: 100%;
         border: none;
         background: #fff;
         color: var(--black);
-        border-radius: 8px;
-        padding: 9px 10px;
+        border-radius: 14px;
+        padding: 10px 12px;
         text-align: left;
         cursor: pointer;
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 0.94rem;
+        font-weight: 700;
     }
 
-    .ep-status-option:hover,
-    .ep-status-option.is-active {
+    .ep-dropdown-option:hover {
         background: var(--light-yellow);
         color: var(--black);
     }
 
-    .ep-check-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-height: 48px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: #f9fafb;
-        padding: 0 12px;
-        font-size: 0.9rem;
-        font-weight: 700;
+    .ep-dropdown-option.is-active {
+        background: var(--yellow);
         color: var(--black);
     }
 
-    .ep-check-row input[type="checkbox"],
+    .ep-check-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-start;
+        gap: 14px;
+        min-height: 60px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: #ffffff;
+        padding: 18px 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--black);
+        cursor: pointer;
+        transition: border-color .2s ease, background-color .2s ease;
+    }
+
+    .ep-check-row:hover {
+        border-color: var(--yellow);
+        background: var(--light-yellow);
+    }
+
     .ep-images-wrap input[type="radio"] {
         accent-color: var(--yellow);
     }
@@ -369,16 +389,30 @@ function epImageCandidates($rawPath)
     }
 
     .ep-check-custom {
+        min-width: 24px;
         width: 24px;
         height: 24px;
-        min-width: 24px;
-        border: 1px solid var(--border);
+        border: 1px solid var(--yellow);
         border-radius: 6px;
         background: #fff;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        position: relative;
+        flex-shrink: 0;
+        margin: 0;
         transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+    }
+
+    .ep-check-custom::after {
+        content: "";
+        position: absolute;
+        width: 11px;
+        height: 7px;
+        border-left: 2.8px solid #111111;
+        border-bottom: 2.8px solid #111111;
+        transform: rotate(-45deg) translate(1px, -1px);
+        opacity: 0;
     }
 
     .ep-checkbox:checked + .ep-check-custom {
@@ -386,12 +420,21 @@ function epImageCandidates($rawPath)
         background-color: var(--yellow);
     }
 
-    .ep-check-custom::after {
-        content: "";
-        width: 14px;
-        height: 14px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 7.2l2.2 2.2L11 3.8' stroke='%23111111' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center center;
-        opacity: 0;
+    .ep-check-icon {
+        display: none;
+    }
+
+    .ep-check-label {
+        color: var(--black) !important;
+        font-weight: 700;
+        font-size: 0.95rem;
+        line-height: 24px;
+        margin: 0;
+        background: transparent !important;
+        display: inline-block !important;
+        min-height: 24px;
+        padding: 0;
+        white-space: nowrap;
     }
 
     .ep-checkbox:checked + .ep-check-custom::after {
@@ -638,7 +681,7 @@ function epImageCandidates($rawPath)
                 </div>
                 <div class="ep-field">
                     <label>Category</label>
-                    <select name="category_id" required>
+                    <select name="category_id" required data-ep-custom-dropdown>
                         <?php foreach ($categories as $row): ?>
                             <option value="<?= $row['category_id'] ?>" <?= $product['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($row['category_name']) ?>
@@ -648,7 +691,7 @@ function epImageCandidates($rawPath)
                 </div>
                 <div class="ep-field">
                     <label>Brand</label>
-                    <select name="brand_id" required>
+                    <select name="brand_id" required data-ep-custom-dropdown>
                         <?php foreach ($brands as $row): ?>
                             <option value="<?= $row['brand_id'] ?>" <?= $product['brand_id'] == $row['brand_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($row['brand_name']) ?>
@@ -658,24 +701,21 @@ function epImageCandidates($rawPath)
                 </div>
                 <div class="ep-field">
                     <label>Product Status</label>
-                    <div class="ep-status-select" data-status-select>
-                        <select name="product_status" id="product_status" class="ep-native-status-select" required>
-                            <option value="1" <?= $product['product_status'] == '1' ? 'selected' : '' ?>>Active</option>
-                            <option value="0" <?= $product['product_status'] == '0' ? 'selected' : '' ?>>Inactive</option>
-                        </select>
-                        <button type="button" class="ep-status-display" data-status-display>Active</button>
-                        <div class="ep-status-options">
-                            <button type="button" class="ep-status-option" data-value="1">Active</button>
-                            <button type="button" class="ep-status-option" data-value="0">Inactive</button>
-                        </div>
-                    </div>
+                    <select name="product_status" required data-ep-custom-dropdown>
+                        <option value="1" <?= $product['product_status'] == '1' ? 'selected' : '' ?>>Active</option>
+                        <option value="0" <?= $product['product_status'] == '0' ? 'selected' : '' ?>>Inactive</option>
+                    </select>
                 </div>
                 <div class="ep-field">
                     <label>B2B Available</label>
                     <label class="ep-check-row">
                         <input class="ep-checkbox" type="checkbox" name="is_b2b_available" value="1" <?= $product['is_b2b_available'] ? 'checked' : '' ?>>
-                        <span class="ep-check-custom" aria-hidden="true"></span>
-                        Enable B2B pricing
+                        <span class="ep-check-custom" aria-hidden="true">
+                            <svg class="ep-check-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 8.3L6.2 11.2L13 4.5" stroke="#111111" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <span class="ep-check-label">Enable B2B pricing</span>
                     </label>
                 </div>
                 <div class="ep-field" id="b2b-price-section" style="display: <?= $product['is_b2b_available'] ? 'block' : 'none' ?>;">
@@ -841,7 +881,7 @@ function epImageCandidates($rawPath)
                     <div class="attribute" data-attribute-id="<?= $attribute['attribute_id'] ?>" data-value-id="<?= $attribute['value_id'] ?>">
                         <div>
                             <label><?= htmlspecialchars($attribute['attribute_name']) ?></label>
-                            <select name="attributes[<?= $index ?>][attribute_id]" required>
+                            <select name="attributes[<?= $index ?>][attribute_id]" required data-ep-custom-dropdown>
                                 <?php foreach ($allAttributes as $attr): ?>
                                     <option value="<?= $attr['attribute_id'] ?>" <?= $attribute['attribute_id'] == $attr['attribute_id'] ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($attr['attribute_name']) ?>
@@ -851,7 +891,7 @@ function epImageCandidates($rawPath)
                         </div>
                         <div>
                             <label>Value</label>
-                            <select name="attributes[<?= $index ?>][value_id]" required>
+                            <select name="attributes[<?= $index ?>][value_id]" required data-ep-custom-dropdown>
                                 <?php if (isset($attributeValues[$attribute['attribute_id']])): ?>
                                     <?php foreach ($attributeValues[$attribute['attribute_id']] as $value): ?>
                                         <option value="<?= $value['value_id'] ?>" <?= $value['value_id'] == $attribute['value_id'] ? 'selected' : '' ?>>
@@ -919,45 +959,79 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    initStatusSelect();
+    initCustomDropdowns(document);
 });
 
-function initStatusSelect() {
-    const wrap = document.querySelector('[data-status-select]');
-    if (!wrap) return;
+function initCustomDropdowns(scope) {
+    const selects = scope.querySelectorAll('select[data-ep-custom-dropdown]');
+    selects.forEach((select) => {
+        if (select.dataset.epCustomReady === '1') return;
+        select.dataset.epCustomReady = '1';
+        select.classList.add('ep-native-dropdown');
 
-    const select = wrap.querySelector('#product_status');
-    const display = wrap.querySelector('[data-status-display]');
-    const options = Array.from(wrap.querySelectorAll('.ep-status-option'));
-    if (!select || !display || !options.length) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'ep-dropdown';
+        select.parentNode.insertBefore(wrap, select);
+        wrap.appendChild(select);
 
-    function sync() {
-        const selected = options.find((btn) => btn.dataset.value === String(select.value));
-        display.textContent = selected ? selected.textContent.trim() : (select.options[select.selectedIndex]?.text || 'Select');
-        options.forEach((btn) => btn.classList.toggle('is-active', btn.dataset.value === String(select.value)));
-    }
+        const display = document.createElement('button');
+        display.type = 'button';
+        display.className = 'ep-dropdown-display';
+        wrap.appendChild(display);
 
-    display.addEventListener('click', function (e) {
-        e.stopPropagation();
-        wrap.classList.toggle('is-open');
-    });
+        const menu = document.createElement('div');
+        menu.className = 'ep-dropdown-options';
+        wrap.appendChild(menu);
 
-    options.forEach((btn) => {
-        btn.addEventListener('click', function () {
-            select.value = this.dataset.value;
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            sync();
-            wrap.classList.remove('is-open');
-        });
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!wrap.contains(e.target)) {
-            wrap.classList.remove('is-open');
+        function renderOptions() {
+            menu.innerHTML = '';
+            Array.from(select.options).forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'ep-dropdown-option' + (idx === select.selectedIndex ? ' is-active' : '');
+                btn.textContent = opt.text;
+                btn.dataset.value = opt.value;
+                btn.addEventListener('click', function () {
+                    select.value = this.dataset.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    syncDisplay();
+                    renderOptions();
+                    wrap.classList.remove('is-open');
+                });
+                menu.appendChild(btn);
+            });
         }
+
+        function syncDisplay() {
+            const selected = select.options[select.selectedIndex];
+            display.textContent = selected ? selected.text : 'Select';
+        }
+
+        display.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.ep-dropdown.is-open').forEach((node) => {
+                if (node !== wrap) node.classList.remove('is-open');
+            });
+            wrap.classList.toggle('is-open');
+        });
+
+        select.addEventListener('change', function () {
+            syncDisplay();
+            renderOptions();
+        });
+
+        syncDisplay();
+        renderOptions();
     });
 
-    sync();
+    if (!window.epDropdownCloseBound) {
+        window.epDropdownCloseBound = true;
+        document.addEventListener('click', function (e) {
+            document.querySelectorAll('.ep-dropdown.is-open').forEach((node) => {
+                if (!node.contains(e.target)) node.classList.remove('is-open');
+            });
+        });
+    }
 }
 
 function epHandleImageFallback(img) {
@@ -1008,14 +1082,14 @@ function addNewAttribute() {
     newAttributeDiv.innerHTML = `
         <div>
             <label>Attribute</label>
-            <select name="attributes[${attributeIndex}][attribute_id]" onchange="loadAttributeValues(this)" required>
+            <select name="attributes[${attributeIndex}][attribute_id]" onchange="loadAttributeValues(this)" required data-ep-custom-dropdown>
                 <option value="">Select Attribute</option>
                 ${attributeOptions}
             </select>
         </div>
         <div>
             <label>Value</label>
-            <select name="attributes[${attributeIndex}][value_id]" required>
+            <select name="attributes[${attributeIndex}][value_id]" required data-ep-custom-dropdown>
                 <option value="">Select Value</option>
             </select>
         </div>
@@ -1030,6 +1104,7 @@ function addNewAttribute() {
         <button type="button" class="ep-btn remove-attribute-btn" data-index="${attributeIndex}" data-attribute-id="0" data-value-id="0">Remove Attribute Value</button>
     `;
     document.getElementById('product-attributes').appendChild(newAttributeDiv);
+    initCustomDropdowns(newAttributeDiv);
     // Attach event listener to the new button
     const newButton = newAttributeDiv.querySelector('.remove-attribute-btn');
     newButton.addEventListener('click', function() {
@@ -1075,7 +1150,11 @@ function removeAttribute(index, element, attributeId, valueId) {
 
 async function loadAttributeValues(selectElement) {
     let attributeId = selectElement.value;
-    let valueSelect = selectElement.parentElement.querySelector('select[name$="[value_id]"]');
+    const attributeBlock = selectElement.closest('.attribute');
+    let valueSelect = attributeBlock ? attributeBlock.querySelector('select[name$="[value_id]"]') : null;
+    if (!valueSelect) {
+        return;
+    }
     valueSelect.innerHTML = '<option value="">Select Value</option>';
 
     if (attributeId) {
