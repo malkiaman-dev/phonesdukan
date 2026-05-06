@@ -116,7 +116,9 @@ html, body {
 /* Sidebar Styling */
 #sidebar {
     position: fixed;
+    z-index: 1200;
     overflow: visible;
+    overflow-x: visible !important;
     top: 32px;
     left: 0;
     width: 160px;
@@ -171,6 +173,7 @@ html, body {
 /* Sidebar Submenu Hover Effect */
 .nav-item.has-submenu {
     position: relative;
+    overflow: visible;
 }
 
 .submenu {
@@ -181,11 +184,19 @@ html, body {
     background: #212529;
     border: 1px solid #ddd;
     min-width: 200px;
-    z-index: 2000;
+    z-index: 1400;
     list-style: none;
     padding: 0;
     margin: 0;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure content never overlays sidebar submenu */
+.content,
+.dashboard-content {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
 }
 
 .nav-item.has-submenu:hover .submenu {
