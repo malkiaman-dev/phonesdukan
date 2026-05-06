@@ -150,9 +150,12 @@ include __DIR__ . '/admin_header.php';
             font-size: 0.88rem;
             cursor: pointer;
             text-decoration: none !important;
-            transition: color .15s ease;
+            transition: color .15s ease, transform .15s ease;
         }
-        .rev-btn:hover { color: var(--yellow) !important; }
+        .rev-btn:hover {
+            color: var(--yellow) !important;
+            transform: translateY(-1px);
+        }
 
         .rev-btn-outline {
             border: 1px solid var(--border);
@@ -167,6 +170,7 @@ include __DIR__ . '/admin_header.php';
             border-color: var(--yellow);
             background: var(--light-yellow);
             color: var(--black) !important;
+            transform: translateY(-1px);
         }
 
         .rev-card { overflow: hidden; }
