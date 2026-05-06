@@ -281,10 +281,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .btn:hover {
             color: var(--yellow);
+            transform: translateY(-1px);
+            box-shadow: 0 16px 32px rgba(17, 17, 17, 0.34);
         }
 
         .btn:active {
-            transform: translateY(1px);
+            transform: translateY(1px) scale(0.995);
+            box-shadow: 0 10px 20px rgba(17, 17, 17, 0.24);
         }
 
         .btn:focus-visible {
@@ -295,6 +298,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn[disabled] {
             opacity: 0.86;
             cursor: not-allowed;
+            transform: none;
         }
 
         .spinner {
