@@ -434,6 +434,22 @@ body {
     color: var(--ad-yellow);
 }
 
+.admin-logo {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 8px 0 0;
+    text-decoration: none !important;
+}
+
+.admin-logo img {
+    height: 40px;
+    max-height: 44px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
 .admin-name {
     display: inline-flex;
     align-items: center;
@@ -1177,6 +1193,11 @@ body {
 
     .quick-actions-grid {
         grid-template-columns: 1fr;
+    }
+
+    .admin-logo img {
+        height: 34px;
+        max-height: 38px;
     }
 }
 

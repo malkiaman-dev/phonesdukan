@@ -88,8 +88,8 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
             <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
                 <i class="fas fa-bars"></i>
             </button>
-            <a class="navbar-brand" href="<?= url(); ?>">
-                <i class="fas fa-chart-line"></i> Visit Website
+            <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage">
+                <img src="<?= htmlspecialchars(url('public/assets/images/phonesdukan_logo.png')); ?>" alt="PhonesDukan Logo">
             </a>
         </div>
 
