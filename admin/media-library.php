@@ -48,8 +48,32 @@ function mediaImageCandidates($rawPath)
             $trimmedPath = ltrim($path, '/');
             $candidates[] = '/' . $trimmedPath;
             $candidates[] = '/phonesdukan/' . $trimmedPath;
+            if (strpos($trimmedPath, 'uploads/') !== false) {
+                $uploadsPart = substr($trimmedPath, strpos($trimmedPath, 'uploads/'));
+                $candidates[] = '/public/' . $uploadsPart;
+                $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+            }
         }
     } else {
+        // Handle local filesystem paths like C:/xampp/htdocs/phonesdukan/public/uploads/...
+        if (preg_match('/^[A-Za-z]:\//', $normalized)) {
+            $lower = strtolower($normalized);
+            $projectMarker = '/xampp/htdocs/phonesdukan/';
+            $docRootMarker = '/xampp/htdocs/';
+            if (strpos($lower, $projectMarker) !== false) {
+                $pos = strpos($lower, $projectMarker);
+                $relative = substr($normalized, $pos + strlen($projectMarker));
+                $relative = ltrim(str_replace('\\', '/', $relative), '/');
+                $candidates[] = '/phonesdukan/' . $relative;
+                $candidates[] = '/' . $relative;
+            } elseif (strpos($lower, $docRootMarker) !== false) {
+                $pos = strpos($lower, $docRootMarker);
+                $relative = substr($normalized, $pos + strlen($docRootMarker));
+                $relative = ltrim(str_replace('\\', '/', $relative), '/');
+                $candidates[] = '/' . $relative;
+            }
+        }
+
         $trimmed = ltrim($normalized, './');
         $trimmed = ltrim($trimmed, '/');
         if ($trimmed !== '') {
@@ -302,6 +326,28 @@ include __DIR__ . '/admin_header.php';
     }
     .ml-toast.is-show { opacity: 1; transform: translateY(0); }
 </style>
+<script>
+// Define early so <img onerror> always has handler available.
+window.handleMediaImageFallback = function (img) {
+    let candidates = [];
+    try {
+        candidates = JSON.parse(img.getAttribute('data-candidates') || '[]');
+    } catch (e) {
+        candidates = [];
+    }
+    let idx = parseInt(img.getAttribute('data-candidate-index') || '0', 10);
+    if (Number.isNaN(idx)) idx = 0;
+    const next = idx + 1;
+    if (next < candidates.length) {
+        img.setAttribute('data-candidate-index', String(next));
+        img.src = candidates[next];
+        return;
+    }
+    img.style.display = 'none';
+    const placeholder = img.parentElement ? img.parentElement.querySelector('.ml-placeholder') : null;
+    if (placeholder) placeholder.style.display = 'block';
+};
+</script>
 
 <div class="ml-wrap">
     <div class="ml-header">
@@ -404,26 +450,6 @@ function showMediaToast(message) {
     toast.textContent = message || '';
     toast.classList.add('is-show');
     setTimeout(() => toast.classList.remove('is-show'), 2600);
-}
-
-function handleMediaImageFallback(img) {
-    let candidates = [];
-    try {
-        candidates = JSON.parse(img.getAttribute('data-candidates') || '[]');
-    } catch (e) {
-        candidates = [];
-    }
-    let idx = parseInt(img.getAttribute('data-candidate-index') || '0', 10);
-    if (Number.isNaN(idx)) idx = 0;
-    const next = idx + 1;
-    if (next < candidates.length) {
-        img.setAttribute('data-candidate-index', String(next));
-        img.src = candidates[next];
-        return;
-    }
-    img.style.display = 'none';
-    const placeholder = img.parentElement ? img.parentElement.querySelector('.ml-placeholder') : null;
-    if (placeholder) placeholder.style.display = 'block';
 }
 
 function openEditModal(imageId, title, altText, caption, description) {

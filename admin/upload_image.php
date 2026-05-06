@@ -3,6 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../database/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 $database = new Database();
 $conn = $database->getConnection();
 
@@ -25,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     }
 
     $filePath = $uploadDir . $fileName;
-    $fileUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/public/uploads/' . $fileName;
+    $fileUrl = url('public/uploads/' . $fileName);
 
     if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
         $stmt = $conn->prepare("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (NULL, ?, 0)");
