@@ -154,6 +154,89 @@ function sanitizeInput(input) {
     return input.replace(/[^a-zA-Z0-9\s]/g, ''); // Removes anything except letters, numbers, and spaces
 }
 
+function uniqueValues(values) {
+    const seen = new Set();
+    return values.filter((item) => {
+        if (!item || seen.has(item)) return false;
+        seen.add(item);
+        return true;
+    });
+}
+
+function resolveSearchImageCandidates(rawUrl) {
+    const placeholder = window.pdWithBase('/public/assets/images/phonesdukan_logo.webp');
+    if (!rawUrl) return [placeholder];
+
+    const candidates = [];
+    const pushCandidate = (value) => {
+        if (typeof value !== 'string') return;
+        const v = value.trim();
+        if (!v) return;
+        candidates.push(v);
+    };
+
+    let normalized = String(rawUrl).trim().replace(/\\/g, '/');
+    normalized = normalized.replace(/^file:\/\/\/?/i, '');
+    normalized = normalized.replace(/^[A-Za-z]:\/xampp\/htdocs\/phonesdukan\//i, '');
+    normalized = normalized.replace(/^\.\/+/, '');
+
+    if (/^https?:\/\//i.test(normalized)) {
+        pushCandidate(normalized);
+    }
+
+    if (normalized.startsWith('/')) {
+        pushCandidate(normalized);
+        pushCandidate(window.pdWithBase(normalized));
+    } else {
+        pushCandidate('/' + normalized);
+        pushCandidate(window.pdWithBase('/' + normalized));
+    }
+
+    const withoutBase = normalized.replace(/^\/?phonesdukan\//i, '');
+    if (withoutBase !== normalized) {
+        pushCandidate('/' + withoutBase);
+        pushCandidate(window.pdWithBase('/' + withoutBase));
+    }
+
+    const publicUploadsIdx = normalized.toLowerCase().indexOf('public/uploads/');
+    if (publicUploadsIdx >= 0) {
+        const publicPath = normalized.slice(publicUploadsIdx);
+        pushCandidate('/' + publicPath.replace(/^\/+/, ''));
+        pushCandidate(window.pdWithBase('/' + publicPath.replace(/^\/+/, '')));
+    }
+
+    if (/^uploads\//i.test(normalized)) {
+        pushCandidate(window.pdWithBase('/public/' + normalized));
+    }
+
+    if (/^public\//i.test(normalized)) {
+        pushCandidate(window.pdWithBase('/' + normalized));
+    }
+
+    pushCandidate(placeholder);
+    return uniqueValues(candidates);
+}
+
+function createSearchImage(product) {
+    const img = document.createElement('img');
+    img.alt = product.product_name || 'Product';
+    img.className = 'search-img';
+
+    const candidates = resolveSearchImageCandidates(product.image_url || '');
+    let candidateIndex = 0;
+    img.src = candidates[candidateIndex];
+    img.onerror = function () {
+        candidateIndex += 1;
+        if (candidateIndex < candidates.length) {
+            img.src = candidates[candidateIndex];
+            return;
+        }
+        img.onerror = null;
+    };
+
+    return img;
+}
+
 // Live search on mobile
 if (mobileSearchInput && mobileSearchResults) {
 mobileSearchInput.addEventListener("input", function () {
@@ -183,12 +266,14 @@ mobileSearchInput.addEventListener("input", function () {
                     const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
                     const resultItem = document.createElement("div");
                     resultItem.classList.add("search-item");
-                    resultItem.innerHTML = `
-                        <a href="${productUrl}">
-                            <img src="${product.image_url.replace(/\\/g, '')}" alt="${product.product_name}" class="search-img">
-                            <span class="search-text">${product.product_name}</span>
-                        </a>
-                    `;
+                    const link = document.createElement('a');
+                    link.href = productUrl;
+                    link.appendChild(createSearchImage(product));
+                    const text = document.createElement('span');
+                    text.className = 'search-text';
+                    text.textContent = product.product_name || '';
+                    link.appendChild(text);
+                    resultItem.appendChild(link);
                     mobileSearchResults.appendChild(resultItem);
                 });
             } else {
@@ -251,12 +336,15 @@ mobileSearchInput.addEventListener("keypress", function (event) {
                     data.forEach(product => {
                         const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
                         const li = document.createElement("li");
-                        li.innerHTML = `
-                            <a href="${productUrl}" class="search-item">
-                                <img src="${product.image_url.replace(/\\/g, '')}" alt="${product.product_name}" class="search-img">
-                                <span class="search-text">${product.product_name}</span>
-                            </a>
-                        `;
+                        const link = document.createElement('a');
+                        link.href = productUrl;
+                        link.className = 'search-item';
+                        link.appendChild(createSearchImage(product));
+                        const text = document.createElement('span');
+                        text.className = 'search-text';
+                        text.textContent = product.product_name || '';
+                        link.appendChild(text);
+                        li.appendChild(link);
                         searchResults.appendChild(li);
                     });
                 } else {
