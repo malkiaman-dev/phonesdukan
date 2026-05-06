@@ -129,11 +129,26 @@ function epImageCandidates($rawPath)
         --muted: #6b7280;
     }
 
+    html, body {
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .content,
+    .dashboard-content,
+    .admin-page-wrapper {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
     .ep-wrap {
         max-width: 1280px;
         margin: 0 auto;
         padding: 20px;
         background: var(--bg);
+        overflow: visible !important;
     }
 
     .ep-wrap span,
