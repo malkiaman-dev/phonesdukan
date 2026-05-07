@@ -167,15 +167,23 @@
 .na-name a {
   color: #111111;
   text-decoration: none;
+  display: inline-block;
+  transition: color 180ms ease, transform 180ms ease;
 }
 
 .na-name a:hover,
+.na-name a:focus-visible {
+  color: #2a2a2a;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
 .na-name a:focus,
-.na-name a:focus-visible,
 .na-name a:active,
 .na-name a:visited {
   color: #111111;
   text-decoration: none;
+  transform: none;
 }
 
 .na-price {
