@@ -34,6 +34,11 @@ require_once dirname(__DIR__, 3) . '/includes/blog_header.php';
                     <?php
                     $post_url = "/" . htmlspecialchars($post['category_slug']) . "/" . htmlspecialchars($post['slug']);
                     $post_image = !empty($post['image_url']) ? $post['image_url'] : 'default-image.jpg';
+                    $postCategoryLabel = trim((string) ($post['category_name'] ?? ''));
+                    if ($postCategoryLabel === '') {
+                        $postCategoryLabel = ucwords(str_replace('-', ' ', (string) ($post['category_slug'] ?? 'news')));
+                    }
+                    $publishedLabel = !empty($post['published_at']) ? date('M j, Y', strtotime($post['published_at'])) : '';
                     $excerptText = trim((string) ($post['excerpt'] ?? ''));
                     if ($excerptText === '') {
                         $fallbackSource = trim(strip_tags((string) ($post['content'] ?? '')));
@@ -50,6 +55,13 @@ require_once dirname(__DIR__, 3) . '/includes/blog_header.php';
                                 </div>
                             </div>
                         </a>
+                        <div class="post-meta-row">
+                            <span class="post-meta-item post-meta-cat"><?php echo htmlspecialchars($postCategoryLabel); ?></span>
+                            <?php if ($publishedLabel !== ''): ?>
+                                <span class="post-meta-sep">&bull;</span>
+                                <span class="post-meta-item post-meta-date"><?php echo htmlspecialchars($publishedLabel); ?></span>
+                            <?php endif; ?>
+                        </div>
                         <h3 class="post-title">
                             <a href="<?php echo $post_url; ?>">
                                 <?php echo htmlspecialchars($post['title']); ?>
@@ -58,9 +70,7 @@ require_once dirname(__DIR__, 3) . '/includes/blog_header.php';
                         <div class="post-excerpt">
                             <p><?php echo htmlspecialchars($excerptText); ?></p>
                         </div>
-                        <div class="post-date">
-                            <span><?php echo date('F j, Y', strtotime($post['published_at'])); ?></span>
-                        </div>
+                        <a class="post-readmore" href="<?php echo $post_url; ?>">READ MORE →</a>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

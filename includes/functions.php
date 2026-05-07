@@ -196,6 +196,12 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/post-category.css');
         }
 
+        // News category listing page lives at /news (not /blog/news)
+        if ($uri === '/news') {
+            emitCss('public/assets/css/frontend/blog.css');
+            emitCss('public/assets/css/frontend/post-category.css');
+        }
+
         if (preg_match('#^/mobiles/[^/]+$#', $uri)) {
             emitCss('public/assets/css/frontend/mobile_brands.css');
         }
