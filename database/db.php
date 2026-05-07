@@ -73,10 +73,6 @@ class Database {
             return $_ENV[$key];
         }
 
-        if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
-            return $_SERVER[$key];
-        }
-
         return $default;
     }
 
