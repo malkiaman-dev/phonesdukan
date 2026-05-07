@@ -389,11 +389,25 @@ body.dimmed {
 .search-text {
   font-family: "Inter", Arial, sans-serif;
   font-size: 14px;
-  font-weight: 600;
-  line-height: 1.45;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
   color: var(--mi-soft-black);
   margin: 0;
   white-space: normal;
+  text-decoration: none;
+  display: inline-block;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.search-item:hover .search-text,
+.search-item:focus-visible .search-text,
+#search-results li a:hover .search-text,
+#search-results li a:focus-visible .search-text {
+  color: #2a2a2a;
+  transform: translateY(-1px);
+  text-decoration: none;
 }
 
 .n-found {
@@ -864,6 +878,28 @@ body.dimmed {
     margin: 0;
     width: 100%;
     color: #111;
+  }
+
+  #mobile-search-results .search-text {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: 0.01em;
+    line-height: 1.35;
+    color: #111;
+    margin: 0;
+    white-space: normal;
+    text-decoration: none;
+    display: inline-block;
+    transition: color 180ms ease, transform 180ms ease;
+  }
+
+  #mobile-search-results a:hover .search-text,
+  #mobile-search-results a:focus-visible .search-text {
+    color: #2a2a2a;
+    transform: translateY(-1px);
+    text-decoration: none;
   }
 
   .pd-announcement-track {
