@@ -146,6 +146,31 @@
   width: 20px;
   height: auto;
   margin-right: 10px;
+  filter: none;
+}
+
+.footer-locations .footer-block {
+  align-items: center;
+}
+
+.footer-locations .footer-icon {
+  margin-top: 0;
+  align-self: center;
+  display: block;
+}
+
+/* Location row is multi-line: keep icon at top/start */
+.footer-locations .footer-block:first-child {
+  align-items: flex-start;
+}
+
+.footer-locations .footer-block:first-child .footer-icon {
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+.footer-locations .footer-icon {
+  /* Match the same accent color used in the section underline bar */
   filter: brightness(0) saturate(100%) invert(88%) sepia(77%) saturate(930%) hue-rotate(357deg) brightness(102%) contrast(104%);
 }
 
