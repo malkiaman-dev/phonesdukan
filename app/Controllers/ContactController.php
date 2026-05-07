@@ -68,9 +68,10 @@ class ContactController {
                             error_log("Contact form mail notification failed for {$email} (subject: {$subject}).");
                         }
 
-                        // Set success message in session and redirect to avoid duplicate form submission.
+                        // Set success message and redirect (PRG) with explicit sent flag for reliable display.
                         $_SESSION['success'] = "Your message has been sent successfully.";
-                        header('Location: ' . $_SERVER['REQUEST_URI']);
+                        $requestPath = parse_url((string)($_SERVER['REQUEST_URI'] ?? '/contact-us/'), PHP_URL_PATH) ?: '/contact-us/';
+                        header('Location: ' . $requestPath . '?sent=1');
                         exit();
                     } else {
                         $this->error = "Failed to save message in database.";

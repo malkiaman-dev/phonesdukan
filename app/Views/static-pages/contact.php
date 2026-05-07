@@ -78,6 +78,9 @@ $controller->handleFormSubmission();
                 <?php endif; ?>
 
                 <?php
+                if (isset($_GET['sent']) && $_GET['sent'] === '1') {
+                    echo '<div class="pd-alert pd-alert-success" role="alert">Your message has been sent successfully.</div>';
+                }
                 if (isset($_SESSION['success'])) {
                     echo '<div class="pd-alert pd-alert-success" role="alert">' . htmlspecialchars($_SESSION['success']) . '</div>';
                     unset($_SESSION['success']);
@@ -193,7 +196,7 @@ $controller->handleFormSubmission();
 .pd-contact-btn:hover{background:#e8b900;transform:translateY(-1px);box-shadow:0 10px 22px rgba(232,185,0,.32)}
 .pd-contact-btn:active{transform:translateY(0)}
 .pd-contact-status{min-height:20px;color:#4b5563;font-size:13px}
-.pd-contact-status.is-sending{margin-top:2px;padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827;font-weight:600}
+#form-status-message.pd-contact-status.is-sending{margin-top:2px;padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827 !important;font-weight:600}
 @media (max-width:991px){.pd-contact-page{padding:24px 12px 40px}.pd-contact-info{grid-template-columns:1fr}.pd-contact-main{grid-template-columns:1fr}.pd-contact-hero,.pd-contact-info-card,.pd-contact-map-card,.pd-contact-form-card{border-radius:14px;padding:20px}.pd-contact-map-wrap iframe{min-height:320px}}
 </style>
 
@@ -208,6 +211,12 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function () {
         statusDiv.classList.add('is-sending');
         statusDiv.textContent = 'Sending your message. Please wait...';
+        statusDiv.style.color = '#111827';
+        statusDiv.style.background = '#fffbeb';
+        statusDiv.style.border = '1px solid #facc15';
+        statusDiv.style.padding = '8px 10px';
+        statusDiv.style.borderRadius = '8px';
+        statusDiv.style.fontWeight = '600';
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.85';
