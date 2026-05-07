@@ -76,8 +76,8 @@ $totalBrands   = count($brandList);
 <section class="mob-hero">
     <div class="mob-hero-inner">
         <p class="mob-hero-eyebrow">Pakistan's Trusted Mobile Store</p>
-        <h1 class="mob-hero-title"><span>Mobiles</span> in Pakistan</h1>
-        <p class="mob-hero-sub">Latest smartphones from top brands — competitive prices, verified specs, updated <?= date('F Y') ?>.</p>
+        <h1 class="mob-hero-title"><span>Latest Smartphones </span> in Pakistan</h1>
+        <p class="mob-hero-sub">Explore the latest smartphones from top mobile brands with PTA-approved devices, competitive prices, verified specifications, and fast delivery across Pakistan.</p>
     </div>
 </section>
 

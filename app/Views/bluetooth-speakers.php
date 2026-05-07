@@ -72,8 +72,8 @@ foreach ($rawProducts as $product) {
 <section class="bs-hero">
     <div class="bs-container bs-hero-inner">
         <p class="bs-hero-eyebrow">PHONES DUKAN AUDIO COLLECTION</p>
-        <h1 class="bs-hero-title"><span>Bluetooth Speakers</span> Prices in Pakistan</h1>
-        <p class="bs-hero-sub">Discover powerful wireless speakers with deep bass, long battery life, and premium sound quality for home, travel, and outdoor use.</p>
+        <h1 class="bs-hero-title"><span>Latest Bluetooth Speakers</span> Prices in Pakistan</h1>
+        <p class="bs-hero-sub">Explore the latest Bluetooth speakers in Pakistan with deep bass, portable designs, RGB lighting, waterproof builds, and long battery life from trusted audio brands.</p>
     </div>
 </section>
 

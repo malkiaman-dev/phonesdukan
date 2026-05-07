@@ -72,8 +72,8 @@ foreach ($rawProducts as $product) {
 <section class="ma-hero">
     <div class="ma-container ma-hero-inner">
         <p class="ma-hero-eyebrow">PHONES DUKAN ACCESSORIES COLLECTION</p>
-        <h1 class="ma-hero-title"><span>Mobile Accessories</span> Prices in Pakistan</h1>
-        <p class="ma-hero-sub">Explore trusted mobile accessories with updated pricing in Pakistan, from daily essentials to premium performance gear for your smartphone.</p>
+        <h1 class="ma-hero-title"><span>Latest Mobile Accessories</span> Prices in Pakistan</h1>
+        <p class="ma-hero-sub">Shop the latest mobile accessories in Pakistan including fast chargers, Type-C cables, gaming accessories, power banks, ring lights, and premium smartphone essentials from trusted brands.</p>
     </div>
 </section>
 

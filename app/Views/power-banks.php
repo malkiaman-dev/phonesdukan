@@ -72,8 +72,8 @@ foreach ($rawProducts as $product) {
 <section class="pb-hero">
     <div class="pb-container pb-hero-inner">
         <p class="pb-hero-eyebrow">PHONES DUKAN POWER BANK COLLECTION</p>
-        <h1 class="pb-hero-title"><span>Power Banks</span> Prices in Pakistan</h1>
-        <p class="pb-hero-sub">Compare trusted power banks with updated prices, stronger backup capacities, and reliable fast-charging options for everyday and travel use.</p>
+        <h1 class="pb-hero-title"><span>Latest Power Banks</span> Prices in Pakistan</h1>
+        <p class="pb-hero-sub">Explore the latest power banks in Pakistan with fast charging support, high-capacity battery backup, Type-C connectivity, and portable designs from trusted tech brands.</p>
     </div>
 </section>
 

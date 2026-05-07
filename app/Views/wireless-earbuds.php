@@ -72,8 +72,8 @@ foreach ($rawProducts as $product) {
 <section class="we-hero">
     <div class="we-container we-hero-inner">
         <p class="we-hero-eyebrow">PHONES DUKAN EARBUDS COLLECTION</p>
-        <h1 class="we-hero-title"><span>Wireless Earbuds</span> Prices in Pakistan</h1>
-        <p class="we-hero-sub">Find the latest earbuds with clear calling, premium bass, and long battery life. Compare trusted models across every budget range in Pakistan.</p>
+        <h1 class="we-hero-title"><span>Latest Wireless Earbuds</span> Prices in Pakistan</h1>
+        <p class="we-hero-sub">Explore the latest wireless earbuds in Pakistan with deep bass, ANC noise cancellation, low latency gaming mode, and long battery life from trusted audio brands.</p>
     </div>
 </section>
 

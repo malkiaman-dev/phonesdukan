@@ -71,8 +71,8 @@ foreach ($rawProducts as $product) {
 
 <section class="sw-hero">
     <div class="sw-container sw-hero-inner">
-        <h1 class="sw-hero-title"><span>Smart Watch</span> Prices in Pakistan</h1>
-        <p class="sw-hero-sub">Explore the latest smartwatch deals in Pakistan with trusted pricing, premium models, and budget-friendly options for every lifestyle.</p>
+        <h1 class="sw-hero-title"><span>Latest Smart Watch</span> Prices in Pakistan</h1>
+        <p class="sw-hero-sub">Discover the latest smart watches in Pakistan with Bluetooth calling, fitness tracking, AMOLED displays, and premium features from trusted brands at competitive prices.</p>
     </div>
 </section>
 
