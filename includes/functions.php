@@ -39,7 +39,10 @@ if (!function_exists('getBasePath')) {
         }
 
         $segments = array_values(array_filter(explode('/', trim($scriptName, '/'))));
-        $basePath = isset($segments[0]) ? '/' . $segments[0] : '';
+        $firstSegment = $segments[0] ?? '';
+        $basePath = (strpos($firstSegment, '.php') !== false || $firstSegment === '')
+            ? ''
+            : '/' . $firstSegment;
         return $basePath;
     }
 }

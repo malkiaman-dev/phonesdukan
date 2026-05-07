@@ -8,6 +8,9 @@ if (!function_exists('getBaseURL')) {
 
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
         $basePath = rtrim(str_replace('/index.php', '', $scriptName), '/');
+        if ($basePath === '/index.php') {
+            $basePath = '';
+        }
         $basePath = ($basePath === '' || $basePath === '.') ? '' : $basePath;
 
         return ($basePath === '' ? '/' : $basePath . '/');

@@ -26,7 +26,10 @@ if (!defined('BASE_PATH') || !defined('BASE_URL')) {
 
     if ($basePath === '' && $scriptName !== '') {
         $segments = array_values(array_filter(explode('/', trim($scriptName, '/'))));
-        $basePath = isset($segments[0]) ? '/' . $segments[0] : '';
+        $firstSegment = $segments[0] ?? '';
+        $basePath = (strpos($firstSegment, '.php') !== false || $firstSegment === '')
+            ? ''
+            : '/' . $firstSegment;
     }
 
     if (!defined('BASE_PATH')) {
