@@ -203,54 +203,100 @@ foreach ($latest_posts_raw as $post) {
     var nextBtn = document.querySelector('.cat-next');
     if (!viewport || !track) return;
 
-    var cards = track.querySelectorAll('.cat-card');
-    if (!cards.length) return;
+    /* ── 1) Clone cards for infinite loop ── */
+    var originals = Array.from(track.querySelectorAll('.cat-card'));
+    if (!originals.length) return;
+    originals.forEach(function (card) {
+        var clone = card.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        clone.tabIndex = -1;
+        track.appendChild(clone);
+    });
+
+    function getCards() { return track.querySelectorAll('.cat-card'); }
 
     function getStepWidth() {
-        var card = cards[0];
+        var card = getCards()[0];
         if (!card) return 240;
         var styles = window.getComputedStyle(track);
         var gap = parseInt(styles.columnGap || styles.gap || '0', 10) || 0;
         return card.offsetWidth + gap;
     }
 
-    function scrollNext() {
-        var maxLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-        var step = getStepWidth();
-        if (viewport.scrollLeft >= maxLeft - 4) {
-            viewport.scrollTo({ left: 0, behavior: 'smooth' });
-            return;
+    function getOrigWidth() {
+        return getStepWidth() * originals.length;
+    }
+
+    /* Start in the middle so user can go left/right infinitely */
+    requestAnimationFrame(function () {
+        viewport.scrollLeft = getOrigWidth();
+    });
+
+    /* ── 2) Seamless reset when entering clone zones ── */
+    var resetting = false;
+    viewport.addEventListener('scroll', function () {
+        if (resetting) return;
+        var origWidth = getOrigWidth();
+        if (!origWidth) return;
+
+        if (viewport.scrollLeft >= origWidth * 2) {
+            resetting = true;
+            viewport.style.scrollBehavior = 'auto';
+            viewport.scrollLeft -= origWidth;
+            requestAnimationFrame(function () {
+                viewport.style.scrollBehavior = '';
+                resetting = false;
+            });
+        } else if (viewport.scrollLeft <= 0) {
+            resetting = true;
+            viewport.style.scrollBehavior = 'auto';
+            viewport.scrollLeft += origWidth;
+            requestAnimationFrame(function () {
+                viewport.style.scrollBehavior = '';
+                resetting = false;
+            });
         }
-        viewport.scrollBy({ left: step, behavior: 'smooth' });
+    }, { passive: true });
+
+    function scrollNext() {
+        viewport.scrollBy({ left: getStepWidth(), behavior: 'smooth' });
     }
 
     function scrollPrev() {
-        var step = getStepWidth();
-        if (viewport.scrollLeft <= 4) {
-            var maxLeft = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-            viewport.scrollTo({ left: maxLeft, behavior: 'smooth' });
-            return;
-        }
-        viewport.scrollBy({ left: -step, behavior: 'smooth' });
+        viewport.scrollBy({ left: -getStepWidth(), behavior: 'smooth' });
     }
 
-    var autoTimer = null;
+    /* ── 3) Continuous auto-scroll (marquee-style) ── */
+    var paused = false;
     var resumeTimer = null;
+    var lastT = 0;
+    var speedPxPerSec = 34; /* subtle continuous speed */
 
-    function stopAuto() {
-        clearInterval(autoTimer);
-        autoTimer = null;
+    function wrapIfNeeded() {
+        var origWidth = getOrigWidth();
+        if (!origWidth) return;
+        if (viewport.scrollLeft >= origWidth * 2) viewport.scrollLeft -= origWidth;
+        if (viewport.scrollLeft <= 0) viewport.scrollLeft += origWidth;
     }
 
-    function startAuto() {
-        stopAuto();
-        autoTimer = setInterval(scrollNext, 2800);
+    function tick(t) {
+        if (!lastT) lastT = t;
+        var dt = Math.min(48, t - lastT); /* cap to reduce jumps on tab switch */
+        lastT = t;
+
+        if (!paused) {
+            viewport.scrollLeft += (speedPxPerSec * dt) / 1000;
+            wrapIfNeeded();
+        }
+        requestAnimationFrame(tick);
     }
+
+    requestAnimationFrame(tick);
 
     function pauseThenResume() {
-        stopAuto();
+        paused = true;
         clearTimeout(resumeTimer);
-        resumeTimer = setTimeout(startAuto, 4200);
+        resumeTimer = setTimeout(function () { paused = false; }, 4200);
     }
 
     if (nextBtn) {
@@ -267,12 +313,10 @@ foreach ($latest_posts_raw as $post) {
         });
     }
 
-    viewport.addEventListener('mouseenter', stopAuto);
-    viewport.addEventListener('mouseleave', startAuto);
+    viewport.addEventListener('mouseenter', function () { paused = true; });
+    viewport.addEventListener('mouseleave', function () { paused = false; });
     viewport.addEventListener('touchstart', pauseThenResume, { passive: true });
     viewport.addEventListener('wheel', pauseThenResume, { passive: true });
-
-    startAuto();
 })();
 </script>
 
