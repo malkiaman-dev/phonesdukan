@@ -69,8 +69,8 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <h1>Premium Mobile Experience<br><span>Built for Pakistan</span></h1>
-                    <p>Explore genuine smartphones, accessories, and wearables with trusted after-sales support.</p>
+                    <h1>Pakistan’s Premium Store for<br><span>Smartphones & Smart Gadgets</span></h1>
+                    <p>Shop PTA-approved mobiles, wireless earbuds, smart watches, and genuine accessories with fast nationwide delivery and trusted support.</p>
                     <div class="pd-hero-cta-wrap">
                         <a href="/shop" class="pd-hero-btn pd-hero-btn-primary">Shop Now</a>
                         <a href="/mobiles" class="pd-hero-btn pd-hero-btn-secondary">View Mobiles</a>
@@ -85,8 +85,8 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <h2>Exclusive Offers<br><span>Up to 40% OFF</span></h2>
-                    <p>Catch this week’s best deals on smart watches, earbuds, and top mobile accessories.</p>
+                    <h2>Authentic Tech, <br>Fast Delivery,<br><span>Trusted Warranty</span></h2>
+                    <p>Get genuine mobile phones and accessories with secure ordering, replacement support, and reliable delivery across Pakistan.</p>
                     <div class="pd-hero-cta-wrap">
                         <a href="/smart-watches" class="pd-hero-btn pd-hero-btn-primary">Shop Watches</a>
                         <a href="/wireless-earbuds" class="pd-hero-btn pd-hero-btn-secondary">Shop Earbuds</a>
@@ -101,8 +101,8 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <h2>Fast Delivery +<br><span>Warranty Promise</span></h2>
-                    <p>Enjoy fast shipping, 7-day replacement, and reliable nationwide support on every order.</p>
+                    <h2>Upgrade Your Everyday <br><span>Tech Experience</span></h2>
+                    <p>Discover premium earbuds, smart watches, chargers, power banks, and mobile accessories built for modern lifestyles.</p>
                     <div class="pd-hero-cta-wrap">
                         <a href="/contact-us/" class="pd-hero-btn pd-hero-btn-primary">Contact Us</a>
                         <a href="/return-policy/" class="pd-hero-btn pd-hero-btn-secondary">Return Policy</a>
@@ -147,7 +147,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="cat-section">
     <div class="cat-inner">
         <div class="cat-header">
-            <h2 class="cat-title">Shop by <span>Categories</span></h2>
+            <h2 class="cat-title">Discover Mobile Accessories & <span>Gadgets</span></h2>
         </div>
         <div class="cat-track-wrap">
             <button class="cat-arrow cat-prev" aria-label="Previous categories">&#8249;</button>
@@ -163,7 +163,7 @@ foreach ($latest_posts_raw as $post) {
                     <div class="cat-img-box">
                         <img src="/public/assets/images/smartwatches_category.webp" alt="Smartwatches">
                     </div>
-                    <p class="cat-label">Smartwatches</p>
+                    <p class="cat-label">Smart Watches</p>
                 </a>
                 <a href="/wireless-earbuds" class="cat-card" style="--cat-bg:#ede9fe;">
                     <div class="cat-img-box">
@@ -175,19 +175,19 @@ foreach ($latest_posts_raw as $post) {
                     <div class="cat-img-box">
                         <img src="/public/assets/images/mobile_accessories.webp" alt="Accessories">
                     </div>
-                    <p class="cat-label">Accessories</p>
+                    <p class="cat-label">Mobile Accessories</p>
                 </a>
                 <a href="/power-banks" class="cat-card" style="--cat-bg:#fef9c3;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/power-banks.webp" alt="Power Banks">
                     </div>
-                    <p class="cat-label">Power Banks</p>
+                    <p class="cat-label">Fast Charging Power Banks</p>
                 </a>
                 <a href="/bluetooth-speakers" class="cat-card" style="--cat-bg:#fce7f3;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/bluetooth-speakers.webp" alt="Bluetooth Speakers">
                     </div>
-                    <p class="cat-label">Bluetooth Speakers</p>
+                    <p class="cat-label">Portable Bluetooth Speakers</p>
                 </a>
             </div>
             </div><!-- /cat-viewport -->
@@ -279,7 +279,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">New <span>Arrivals</span></h2>
+            <h2 class="na-title">New Tech <span>Arrivals</span></h2>
             <a href="/shop" class="na-view-all">Explore All</a>
         </div>
 
@@ -572,7 +572,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section earbuds-na-section">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Latest <span>wireless Earbuds</span></h2>
+            <h2 class="na-title">Latest <span>Wireless Earbuds</span></h2>
             <a href="/wireless-earbuds" class="na-view-all">Explore All</a>
         </div>
 
@@ -724,7 +724,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section mob-na-section">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Latest <span>Mobiles</span></h2>
+            <h2 class="na-title">Latest <span>Smartphones</span></h2>
             <a href="/mobiles" class="na-view-all">Explore All</a>
         </div>
 
@@ -930,7 +930,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section pb-na-section">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Latest <span>Power Banks</span></h2>
+            <h2 class="na-title">Fast Charging <span>Power Banks</span></h2>
             <a href="/power-banks" class="na-view-all">Explore All</a>
         </div>
 
@@ -1023,7 +1023,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section spk-na-section">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Latest <span>Bluetooth Speakers</span></h2>
+            <h2 class="na-title">Portable <span>Bluetooth Speakers</span></h2>
             <a href="/bluetooth-speakers" class="na-view-all">Explore All</a>
         </div>
 
@@ -1111,7 +1111,7 @@ foreach ($latest_posts_raw as $post) {
 <section id="shopByUniqueBrands" class="shopByUniqueBrandsSection pd-bottom">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Shop By <span>Brand</span></h2>
+            <h2 class="na-title">Shop Top Mobile <span>Brands</span></h2>
         </div>
     </div>
     <div class="brand-marquee-outer">
@@ -1201,7 +1201,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section home-latest-blogs">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Latest <span>Blogs</span></h2>
+            <h2 class="na-title">Latest Tech Blogs & <span>Mobile Updates</span></h2>
             <a href="/blog" class="na-view-all">Explore All</a>
         </div>
 
@@ -1278,7 +1278,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="testimonials">
     <div class="testimonials-inner">
         <div class="category-header testimonials-header">
-            <h2>Customer <span>Testimonials</span></h2>
+            <h2>Customer Reviews & <span>Testimonials</span></h2>
         </div>
         <div class="testimonials-carousel">
             <div class="testimonial-box">
