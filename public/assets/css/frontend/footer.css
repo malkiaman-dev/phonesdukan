@@ -160,13 +160,13 @@
 }
 
 /* Location row is multi-line: keep icon at top/start */
-.footer-locations .footer-block:first-child {
-  align-items: flex-start;
+#footer .footer-locations .footer-block:first-of-type {
+  align-items: flex-start !important;
 }
 
-.footer-locations .footer-block:first-child .footer-icon {
-  align-self: flex-start;
-  margin-top: 3px;
+#footer .footer-locations .footer-block:first-of-type .footer-icon {
+  align-self: flex-start !important;
+  margin-top: 4px !important;
 }
 
 .footer-locations .footer-icon {
