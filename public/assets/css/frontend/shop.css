@@ -517,13 +517,30 @@
   border-color: #d9d9d9;
 }
 
+.shop-btn-reset:visited {
+  color: var(--shop-black);
+}
+
 .shop-btn-apply:hover {
   background: #252525;
 }
 
 .shop-btn-reset:hover {
+  color: var(--shop-black);
   border-color: var(--shop-yellow);
   background: #fffbe6;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+.shop-btn-reset:focus,
+.shop-btn-reset:focus-visible,
+.shop-btn-reset:active {
+  color: var(--shop-black);
+  border-color: #d9d9d9;
+  background: #fff;
+  box-shadow: none;
+  outline: none;
 }
 
 .shop-drawer-backdrop {
