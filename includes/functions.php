@@ -71,7 +71,16 @@ if (!function_exists('url')) {
             return $path;
         }
 
-        return getBaseURL() . ltrim($path, '/');
+        $base = getBaseURL();
+        $normalizedPath = ltrim($path, '/');
+        $trimmedBase = rtrim($base, '/');
+
+        // Prevent duplicated admin segment like /admin/admin/dashboard.php
+        if ($trimmedBase === '/admin' && strpos($normalizedPath, 'admin/') === 0) {
+            $normalizedPath = substr($normalizedPath, strlen('admin/'));
+        }
+
+        return $base . $normalizedPath;
     }
 }
 
