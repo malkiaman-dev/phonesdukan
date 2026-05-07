@@ -4,6 +4,9 @@
     Options -MultiViews
     DirectoryIndex index.php index.html
 
+    # Fix accidental admin-relative asset URLs like /admin/public/assets/...
+    RewriteRule ^admin/public/(.*)$ public/$1 [L,NC]
+
     # Allow existing files and directories
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d

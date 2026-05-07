@@ -7,6 +7,10 @@ if (!isset($_SESSION['admin_logged_in'])) {
 }
 
 $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
+$currentAdminPage = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+$adminPageCssMap = [
+    'add-product.php' => '/public/assets/css/admin/add-product.css',
+];
 ?>
 
 <!DOCTYPE html>
@@ -21,6 +25,9 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
     <link rel="stylesheet" href="/public/assets/css/admin/admin.css">
     <link rel="stylesheet" href="/public/assets/css/style.css">
     <link rel="stylesheet" href="/public/assets/css/frontend/ui-controls.css">
+    <?php if (isset($adminPageCssMap[$currentAdminPage])): ?>
+        <link rel="stylesheet" href="<?= htmlspecialchars($adminPageCssMap[$currentAdminPage], ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endif; ?>
     <style>
         /* Critical shell styles to prevent FOUC */
         html.admin-loading body {
