@@ -15,7 +15,7 @@ function scrollThumbnails(direction) {
 }
 
 var withBase = window.pdWithBase || function (path) {
-    var localBasePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
+    var localBasePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
     if (!path) return localBasePath + '/';
     if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
     if (path.startsWith(localBasePath + '/')) return path;

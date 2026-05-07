@@ -11,8 +11,7 @@
     'use strict';
 
     const withBase = window.pdWithBase || function (path) {
-        var basePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan')
-            ? '/phonesdukan' : '';
+        var basePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
         if (!path) return basePath + '/';
         if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
         if (path.startsWith(basePath + '/')) return path;

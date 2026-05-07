@@ -182,7 +182,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const withBase = window.pdWithBase || function (path) {
-        const basePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
+        const basePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
         if (!path) return basePath + '/';
         if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
         if (path.startsWith(basePath + '/')) return path;

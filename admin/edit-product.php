@@ -84,6 +84,7 @@ $allAttributes = $data['productAttributes'];
 
 function epImageCandidates($rawPath)
 {
+    $basePath = defined('BASE_PATH') ? BASE_PATH : '';
     $raw = trim((string) $rawPath);
     if ($raw === '') {
         return [];
@@ -100,16 +101,16 @@ function epImageCandidates($rawPath)
     $trimmed = ltrim($trimmed, '/');
     if ($trimmed !== '') {
         $candidates[] = '/' . $trimmed;
-        $candidates[] = '/phonesdukan/' . $trimmed;
+        $candidates[] = ($basePath === '' ? '' : $basePath) . '/' . $trimmed;
         $candidates[] = '/public/' . $trimmed;
-        $candidates[] = '/phonesdukan/public/' . $trimmed;
+        $candidates[] = ($basePath === '' ? '' : $basePath) . '/public/' . $trimmed;
 
         if (strpos($trimmed, 'uploads/') !== false) {
             $uploadsPart = substr($trimmed, strpos($trimmed, 'uploads/'));
             $candidates[] = '/' . $uploadsPart;
-            $candidates[] = '/phonesdukan/' . $uploadsPart;
+            $candidates[] = ($basePath === '' ? '' : $basePath) . '/' . $uploadsPart;
             $candidates[] = '/public/' . $uploadsPart;
-            $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+            $candidates[] = ($basePath === '' ? '' : $basePath) . '/public/' . $uploadsPart;
         }
     }
 
@@ -1187,7 +1188,7 @@ function removeAttribute(index, element, attributeId, valueId) {
         element.remove();
     }
     if (attributeId && attributeId !== '0' && valueId && valueId !== '0') {
-        fetch('/admin/remove-attribute.php', {
+        fetch('<?= htmlspecialchars(url('admin/remove-attribute.php')) ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -1221,7 +1222,7 @@ async function loadAttributeValues(selectElement) {
 
     if (attributeId) {
         try {
-            let response = await fetch(`/admin/get-attribute-values.php?attribute_id=${attributeId}`);
+            let response = await fetch(`<?= htmlspecialchars(url('admin/get-attribute-values.php')) ?>?attribute_id=${attributeId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

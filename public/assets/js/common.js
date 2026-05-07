@@ -1,4 +1,4 @@
-const pdBasePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
+const pdBasePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
 window.pdWithBase = window.pdWithBase || function (path) {
     const baseUrl = pdBasePath + '/';
     if (!path) return baseUrl;

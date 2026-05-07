@@ -2,7 +2,7 @@
     'use strict';
 
     var withBase = window.pdWithBase || function (path) {
-        var base = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
+        var base = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
         if (!path) return base + '/';
         if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
         return base + (path.startsWith('/') ? path : '/' + path);

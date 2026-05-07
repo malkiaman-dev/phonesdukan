@@ -10,6 +10,7 @@ require_once dirname(__DIR__, 1) . '/app/Models/AdminPostModel.php';
 $database = new Database();
 $conn = $database->getConnection();
 $postModel = new AdminPostModel();
+$basePath = defined('BASE_PATH') ? BASE_PATH : '';
 
 if (!$conn) {
     die('Database connection failed: ' . $conn->errorInfo()[2]);
@@ -519,11 +520,11 @@ include __DIR__ . '/admin_header.php';
                                         if ($path !== '') {
                                             $trimmedPath = ltrim($path, '/');
                                             $candidates[] = '/' . $trimmedPath;
-                                            $candidates[] = '/phonesdukan/' . $trimmedPath;
+                                            $candidates[] = ($basePath === '' ? '' : $basePath) . '/' . $trimmedPath;
                                             if (strpos($trimmedPath, 'uploads/') !== false) {
                                                 $uploadsPart = substr($trimmedPath, strpos($trimmedPath, 'uploads/'));
                                                 $candidates[] = '/public/' . $uploadsPart;
-                                                $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+                                                $candidates[] = ($basePath === '' ? '' : $basePath) . '/public/' . $uploadsPart;
                                             }
                                         }
                                     } elseif (preg_match('/^[A-Za-z]:\//', $normalized)) {
@@ -535,7 +536,7 @@ include __DIR__ . '/admin_header.php';
                                             $pos = strpos($lower, $projectMarker);
                                             $relative = substr($normalized, $pos + strlen($projectMarker));
                                             $relative = ltrim(str_replace('\\', '/', $relative), '/');
-                                            $candidates[] = '/phonesdukan/' . $relative;
+                                            $candidates[] = ($basePath === '' ? '' : $basePath) . '/' . $relative;
                                             $candidates[] = '/' . $relative;
                                         } elseif (strpos($lower, $docRootMarker) !== false) {
                                             $pos = strpos($lower, $docRootMarker);
@@ -548,15 +549,15 @@ include __DIR__ . '/admin_header.php';
                                         $candidates[] = $normalized;
                                         $candidates[] = '../' . $trimmed;
                                         $candidates[] = '/' . $trimmed;
-                                        $candidates[] = '/phonesdukan/' . $trimmed;
+                                        $candidates[] = ($basePath === '' ? '' : $basePath) . '/' . $trimmed;
                                         $candidates[] = '/public/' . ltrim($trimmed, '/');
-                                        $candidates[] = '/phonesdukan/public/' . ltrim($trimmed, '/');
+                                        $candidates[] = ($basePath === '' ? '' : $basePath) . '/public/' . ltrim($trimmed, '/');
                                         if (strpos($trimmed, 'uploads/') !== false) {
                                             $uploadsPart = substr($trimmed, strpos($trimmed, 'uploads/'));
                                             $candidates[] = '/' . $uploadsPart;
-                                            $candidates[] = '/phonesdukan/' . $uploadsPart;
+                                            $candidates[] = ($basePath === '' ? '' : $basePath) . '/' . $uploadsPart;
                                             $candidates[] = '/public/' . $uploadsPart;
-                                            $candidates[] = '/phonesdukan/public/' . $uploadsPart;
+                                            $candidates[] = ($basePath === '' ? '' : $basePath) . '/public/' . $uploadsPart;
                                         }
                                     }
                                 }
@@ -573,7 +574,7 @@ include __DIR__ . '/admin_header.php';
                                      width="50">
                             <?php else: ?>
                                 <img class="post-thumb post-image" src="../public/uploads/default.jpg"
-                                     onerror="this.onerror=null; this.src='/phonesdukan/public/uploads/default.jpg';"
+                                     onerror="this.onerror=null; this.src='<?= htmlspecialchars(url('public/uploads/default.jpg')); ?>';"
                                      alt="No Image" width="50">
                             <?php endif; ?>
                         </td>
@@ -642,7 +643,7 @@ include __DIR__ . '/admin_header.php';
             img.src = '../public/uploads/default.jpg';
             img.onerror = function () {
                 this.onerror = null;
-                this.src = '/phonesdukan/public/uploads/default.jpg';
+                this.src = '<?= htmlspecialchars(url('public/uploads/default.jpg')); ?>';
             };
         }
     }

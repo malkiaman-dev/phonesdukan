@@ -80,6 +80,9 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
 <!-- Author & Theme -->
 <meta name="author" content="Phones Dukan">
 <meta name="theme-color" content="#F7D117">
+<script>
+window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
+</script>
 
 <?php if (isset($product) && is_array($product)): ?>
 <!-- Enhanced Open Graph -->
