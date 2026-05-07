@@ -1142,11 +1142,13 @@ foreach ($latest_posts_raw as $post) {
 (function () {
     var track = document.getElementById('brandMarqueeTrack');
     if (!track) return;
+    var outer = track.parentElement;
 
     var pos      = 0;
     var speed    = 0.55;       /* px per frame — adjust for faster/slower */
     var dragging = false;
     var lastX    = 0;
+    var paused   = false;
 
     function hw() { return track.scrollWidth / 2; }
 
@@ -1158,13 +1160,17 @@ foreach ($latest_posts_raw as $post) {
     }
 
     function tick() {
-        if (!dragging) pos -= speed;
+        if (!dragging && !paused) pos -= speed;
         pos = clamp(pos);
         track.style.transform = 'translateX(' + pos + 'px)';
         requestAnimationFrame(tick);
     }
 
     requestAnimationFrame(tick);
+
+    /* ── Pause on hover ── */
+    (outer || track).addEventListener('mouseenter', function () { paused = true; });
+    (outer || track).addEventListener('mouseleave', function () { paused = false; });
 
     /* ── Mouse drag ── */
     track.addEventListener('mousedown', function (e) {

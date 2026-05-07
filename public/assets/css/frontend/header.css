@@ -86,6 +86,11 @@ body.dimmed {
   animation: pdTicker 24s linear infinite;
 }
 
+.pd-announcement-bar:hover .pd-announcement-track,
+.pd-announcement-bar:focus-within .pd-announcement-track {
+  animation-play-state: paused;
+}
+
 .pd-announcement-track span {
   margin: 0;
   white-space: nowrap;
