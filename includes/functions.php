@@ -40,9 +40,16 @@ if (!function_exists('getBasePath')) {
 
         $segments = array_values(array_filter(explode('/', trim($scriptName, '/'))));
         $firstSegment = $segments[0] ?? '';
-        $basePath = (strpos($firstSegment, '.php') !== false || $firstSegment === '')
-            ? ''
-            : '/' . $firstSegment;
+        $secondSegment = $segments[1] ?? '';
+
+        // When running root admin scripts like /admin/dashboard.php,
+        // treat base path as root so assets resolve as /public/... not /admin/public/...
+        if (strtolower($firstSegment) === 'admin' && strpos($secondSegment, '.php') !== false) {
+            $basePath = '';
+            return $basePath;
+        }
+
+        $basePath = (strpos($firstSegment, '.php') !== false || $firstSegment === '') ? '' : '/' . $firstSegment;
         return $basePath;
     }
 }
