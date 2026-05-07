@@ -381,6 +381,10 @@ switch (true) {
             case ($request_uri === 'blog/news'):
                 $redirectTo('/news', 301);
                 break;
+
+            case ($request_uri === 'blog/mobile-reviews'):
+                $redirectTo('/blog/mobile-tips', 301);
+                break;
                 
     // Blog Category Routes (e.g., /blog/category-slug)
     case (preg_match('#^blog/([^/]+)$#', $request_uri, $matches) && in_array($matches[1], $blogCategories)):

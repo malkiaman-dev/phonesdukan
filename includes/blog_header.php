@@ -92,7 +92,7 @@ $ogImage = getBaseURL() . "public/assets/images/Phones_dukan_favicon.png"; // De
                     <li class="category-item"><a href="<?= getBaseURL(); ?>blog/news">News</a></li>
                     <li class="category-item"><a href="<?= getBaseURL(); ?>blog/mobile-tips">Mobile Tips</a></li>
                     <li class="category-item"><a href="<?= getBaseURL(); ?>blog/mobile-packages">Mobile Packages</a></li>
-                    <li class="category-item"><a href="<?= getBaseURL(); ?>blog/mobile-reviews">Mobile Reviews</a></li>
+                    <li class="category-item"><a href="<?= getBaseURL(); ?>blog/mobile-tips">Mobile Reviews</a></li>
                 </ul>
             </nav>
         </div>

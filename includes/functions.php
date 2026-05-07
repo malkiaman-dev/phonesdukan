@@ -190,6 +190,12 @@ if (!function_exists('loadCSS')) {
             }
         }
 
+        // Blog category listing pages: /blog/{category}
+        // Do not apply to blog homepage (/blog) or post detail pages (/blog/{category}/{post}).
+        if (preg_match('#^/blog/[^/]+$#', $uri)) {
+            emitCss('public/assets/css/frontend/post-category.css');
+        }
+
         if (preg_match('#^/mobiles/[^/]+$#', $uri)) {
             emitCss('public/assets/css/frontend/mobile_brands.css');
         }

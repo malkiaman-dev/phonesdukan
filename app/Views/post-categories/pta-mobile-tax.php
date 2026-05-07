@@ -28,6 +28,13 @@ require_once dirname(__DIR__, 3) . '/includes/blog_header.php';
                     <?php
                     $post_url = "/blog/" . htmlspecialchars($post['category_slug']) . "/" . htmlspecialchars($post['slug']);
                     $post_image = !empty($post['image_url']) ? $post['image_url'] : 'default-image.jpg';
+                    $excerptText = trim((string) ($post['excerpt'] ?? ''));
+                    if ($excerptText === '') {
+                        $fallbackSource = trim(strip_tags((string) ($post['content'] ?? '')));
+                        if ($fallbackSource !== '') {
+                            $excerptText = mb_substr($fallbackSource, 0, 130) . (mb_strlen($fallbackSource) > 130 ? '...' : '');
+                        }
+                    }
                     ?>
                     <div class="post-card">
                         <a href="<?php echo $post_url; ?>">
@@ -43,7 +50,7 @@ require_once dirname(__DIR__, 3) . '/includes/blog_header.php';
                             </a>
                         </h3>
                         <div class="post-excerpt">
-                            <p><?php echo htmlspecialchars($post['excerpt']); ?></p>
+                            <p><?php echo htmlspecialchars($excerptText); ?></p>
                         </div>
                         <div class="post-date">
                             <span><?php echo date('F j, Y', strtotime($post['published_at'])); ?></span>
