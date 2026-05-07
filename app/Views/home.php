@@ -685,8 +685,8 @@ foreach ($latest_posts_raw as $post) {
                             
                             <div class="eb-colors">
                                 <span class="eb-color-label">Colors:</span>
-                                <span class="eb-color-circle" style="background: url('/public/assets/images/eb-white.png') center/cover, #f0f0f0;"></span>
-                                <span class="eb-color-circle" style="background: url('/public/assets/images/eb-black.png') center/cover, #222;"></span>
+                                <span class="eb-color-circle" style="background: #f0f0f0;"></span>
+                                <span class="eb-color-circle" style="background: #222;"></span>
                             </div>
 
                             <div class="na-price">

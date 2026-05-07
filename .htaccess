@@ -1,5 +1,8 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
+    Options -MultiViews
+    DirectoryIndex index.php index.html
 
     # Allow existing files and directories
     RewriteCond %{REQUEST_FILENAME} -f [OR]
