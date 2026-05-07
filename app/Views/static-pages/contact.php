@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/app/Controllers/ContactController.php';
 $controller = new ContactController();
@@ -196,6 +193,7 @@ $controller->handleFormSubmission();
 .pd-contact-btn:hover{background:#e8b900;transform:translateY(-1px);box-shadow:0 10px 22px rgba(232,185,0,.32)}
 .pd-contact-btn:active{transform:translateY(0)}
 .pd-contact-status{min-height:20px;color:#4b5563;font-size:13px}
+.pd-contact-status.is-sending{margin-top:2px;padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827;font-weight:600}
 @media (max-width:991px){.pd-contact-page{padding:24px 12px 40px}.pd-contact-info{grid-template-columns:1fr}.pd-contact-main{grid-template-columns:1fr}.pd-contact-hero,.pd-contact-info-card,.pd-contact-map-card,.pd-contact-form-card{border-radius:14px;padding:20px}.pd-contact-map-wrap iframe{min-height:320px}}
 </style>
 
@@ -203,11 +201,18 @@ $controller->handleFormSubmission();
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('.pd-contact-form');
     const statusDiv = document.getElementById('form-status-message');
+    const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
 
     if (!form || !statusDiv) return;
 
     form.addEventListener('submit', function () {
+        statusDiv.classList.add('is-sending');
         statusDiv.textContent = 'Sending your message. Please wait...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.85';
+            submitBtn.style.cursor = 'not-allowed';
+        }
     });
 });
 </script>
