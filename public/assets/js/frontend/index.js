@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentIndex < 0) currentIndex = 0;
 
         let autoplayTimer = null;
-        const autoplayDelay = 5000;
+        const autoplayDelay = 3000;
         let touchStartX = 0;
         let touchEndX = 0;
 
@@ -57,15 +57,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const stopAutoplay = () => {
             if (autoplayTimer) {
-                clearInterval(autoplayTimer);
+                clearTimeout(autoplayTimer);
                 autoplayTimer = null;
             }
         };
 
+        const queueNextAutoplay = () => {
+            stopAutoplay();
+            autoplayTimer = setTimeout(() => {
+                goNext();
+                queueNextAutoplay();
+            }, autoplayDelay);
+        };
+
         const startAutoplay = () => {
             if (slides.length < 2) return;
-            stopAutoplay();
-            autoplayTimer = setInterval(goNext, autoplayDelay);
+            queueNextAutoplay();
         };
 
         if (prevBtn) {
@@ -96,6 +103,14 @@ document.addEventListener("DOMContentLoaded", function () {
         heroSlider.addEventListener("mouseleave", startAutoplay);
         heroSlider.addEventListener("focusin", stopAutoplay);
         heroSlider.addEventListener("focusout", startAutoplay);
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                stopAutoplay();
+            } else {
+                startAutoplay();
+            }
+        });
+        window.addEventListener("pageshow", startAutoplay);
 
         heroSlider.addEventListener("keydown", (event) => {
             if (event.key === "ArrowRight") {

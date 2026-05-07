@@ -3,10 +3,14 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/app/Controllers/ContactController.php';
 $controller = new ContactController();
 $controller->handleFormSubmission();
-$showSuccessPopup = (isset($_GET['sent']) && $_GET['sent'] === '1')
-    || !empty($controller->success)
-    || isset($_SESSION['success']);
-$showSuccessPopupAttr = $showSuccessPopup ? '1' : '0';
+$formSuccessMessage = '';
+if (!empty($controller->success)) {
+    $formSuccessMessage = $controller->success;
+} elseif (isset($_SESSION['success'])) {
+    $formSuccessMessage = (string)$_SESSION['success'];
+} elseif (isset($_GET['sent']) && $_GET['sent'] === '1') {
+    $formSuccessMessage = 'Message sent successfully. Thank you for contacting PhonesDukan.';
+}
 ?>
 
 <section class="pd-contact-page">
@@ -77,17 +81,7 @@ $showSuccessPopupAttr = $showSuccessPopup ? '1' : '0';
                     <div class="pd-alert pd-alert-danger" role="alert"><?= htmlspecialchars($controller->error) ?></div>
                 <?php endif; ?>
 
-                <?php if (!empty($controller->success)) : ?>
-                    <div class="pd-alert pd-alert-success" role="alert"><?= htmlspecialchars($controller->success) ?></div>
-                <?php endif; ?>
-
                 <?php
-                if (isset($_GET['sent']) && $_GET['sent'] === '1') {
-                    echo '<div class="pd-alert pd-alert-success" role="alert">Thank you for contacting us. We will reply shortly.</div>';
-                }
-                if (isset($_SESSION['success'])) {
-                    unset($_SESSION['success']);
-                }
                 if (isset($_SESSION['error'])) {
                     echo '<div class="pd-alert pd-alert-danger" role="alert">' . htmlspecialchars($_SESSION['error']) . '</div>';
                     unset($_SESSION['error']);
@@ -149,6 +143,14 @@ $showSuccessPopupAttr = $showSuccessPopup ? '1' : '0';
                     </div>
 
                     <button type="submit" name="submit" class="pd-contact-btn">Send Message</button>
+
+                    <?php if ($formSuccessMessage !== '') : ?>
+                    <div class="pd-contact-sent" role="status">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="#111827" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span><?= htmlspecialchars($formSuccessMessage) ?></span>
+                    </div>
+                    <?php endif; ?>
+
                     <div id="form-status-message" class="pd-contact-status" aria-live="polite"></div>
                 </form>
             </div>
@@ -156,12 +158,6 @@ $showSuccessPopupAttr = $showSuccessPopup ? '1' : '0';
     </div>
 </section>
 
-<div id="pd-contact-success-modal" class="pd-success-popup-wrap<?= $showSuccessPopup ? '' : ' is-hidden' ?>" role="status" aria-live="polite" data-show-popup="<?= htmlspecialchars($showSuccessPopupAttr, ENT_QUOTES, 'UTF-8') ?>">
-    <div class="pd-success-popup-card" style="opacity:1;">
-        <span class="pd-success-popup-icon" aria-hidden="true">✓</span>
-        <span class="pd-success-popup-text">Thank you for contacting us. We will reply shortly.</span>
-    </div>
-</div>
 
 <style>
 .pd-contact-page{background:linear-gradient(170deg,#f7f8fb 0%,#ffffff 58%,#f9fafb 100%);padding:34px 14px 56px}
@@ -207,50 +203,23 @@ $showSuccessPopupAttr = $showSuccessPopup ? '1' : '0';
 .pd-contact-btn:active{transform:translateY(0)}
 .pd-contact-status{min-height:20px;color:#4b5563;font-size:13px}
 #form-status-message.pd-contact-status.is-sending{margin-top:2px;padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827 !important;font-weight:600}
-.pd-success-popup-wrap{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.28);padding:16px;opacity:1;transition:opacity .22s ease}
-.pd-success-popup-wrap.is-hidden{opacity:0;pointer-events:none}
-.pd-success-popup-card{max-width:460px;width:min(92vw,460px);display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:14px;border:1px solid #facc15;background:#fffbeb;color:#111827;box-shadow:0 18px 34px rgba(17,24,39,.22)}
-.pd-success-popup-icon{width:24px;height:24px;border-radius:999px;background:#facc15;color:#111827;display:inline-flex;align-items:center;justify-content:center;font-weight:700;line-height:1}
-.pd-success-popup-text{font-size:14px;font-weight:600;line-height:1.3}
+.pd-contact-sent{display:flex;align-items:flex-start;gap:10px;margin-top:10px;padding:12px 14px;border-radius:10px;border:1px solid #facc15;background:#fffbeb;color:#111827;font-size:14px;line-height:1.55}
+.pd-contact-sent svg{flex-shrink:0;margin-top:2px;width:18px;height:18px;background:#facc15;border-radius:50%;padding:2px}
 @media (max-width:991px){.pd-contact-page{padding:24px 12px 40px}.pd-contact-info{grid-template-columns:1fr}.pd-contact-main{grid-template-columns:1fr}.pd-contact-hero,.pd-contact-info-card,.pd-contact-map-card,.pd-contact-form-card{border-radius:14px;padding:20px}.pd-contact-map-wrap iframe{min-height:320px}}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('.pd-contact-form');
-    const statusDiv = document.getElementById('form-status-message');
-    const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
-    const successToast = document.getElementById('pd-contact-success-modal');
-    const sentInUrl = new URLSearchParams(window.location.search).get('sent') === '1';
-
-    if (successToast) {
-        const shouldShow = successToast.getAttribute('data-show-popup') === '1' || sentInUrl;
-        if (shouldShow) {
-            successToast.classList.remove('is-hidden');
-            setTimeout(function () {
-                successToast.classList.add('is-hidden');
-                setTimeout(function () {
-                    if (successToast && successToast.parentNode) {
-                        successToast.parentNode.removeChild(successToast);
-                    }
-                }, 250);
-            }, 5000);
-        }
-    }
-
-    if (!form || !statusDiv) return;
-
+    var form      = document.querySelector('.pd-contact-form');
+    var submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+    if (!form || !submitBtn) return;
     form.addEventListener('submit', function () {
-        statusDiv.classList.remove('is-sending');
-        statusDiv.textContent = '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.85';
-            submitBtn.style.cursor = 'not-allowed';
-        }
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.75';
+        submitBtn.style.cursor = 'not-allowed';
     });
-
 });
 </script>
 
 <?php require_once dirname(__DIR__, 3) . '/includes/footer.php'; ?>
+<?php if (isset($_SESSION['success'])) { unset($_SESSION['success']); } ?>
