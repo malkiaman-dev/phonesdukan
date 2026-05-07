@@ -233,7 +233,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-form-column {
-    order: 1;
+    order: 2;
     display: flex;
     flex-direction: column;
     gap: 18px;
@@ -241,7 +241,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-content-column {
-    order: 2;
+    order: 1;
     perspective: 1200px;
     height: 100%;
 }
