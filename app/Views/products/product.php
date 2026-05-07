@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__DIR__, 3) . '/includes/functions.php';
+
 $pageTitle = $seo['seo_title'] ?? $product['product_name'];
 $metaDescription = $seo['seo_description'] ?? $product['product_description'];
 $metaKeywords = $seo['focus_keyword'] ?? '';

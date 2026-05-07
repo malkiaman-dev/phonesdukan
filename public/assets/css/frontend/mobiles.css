@@ -87,7 +87,15 @@
   font-weight: 700;
   margin: 0;
 }
-.na-name a:hover { color: #111; text-decoration: none; }
+
+.na-name a:hover,
+.na-name a:focus,
+.na-name a:focus-visible,
+.na-name a:active,
+.na-name a:visited {
+  color: #111;
+  text-decoration: none;
+}
 .na-price {
   display: flex;
   align-items: center;
