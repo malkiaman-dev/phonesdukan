@@ -201,8 +201,10 @@ if (!empty($controller->success)) {
 .pd-contact-btn{width:100%;height:50px;border:none;border-radius:10px;background:#facc15;color:#111827;font-size:16px;font-weight:700;cursor:pointer;transition:background-color .2s ease,transform .2s ease,box-shadow .2s ease}
 .pd-contact-btn:hover{background:#e8b900;transform:translateY(-1px);box-shadow:0 10px 22px rgba(232,185,0,.32)}
 .pd-contact-btn:active{transform:translateY(0)}
-.pd-contact-status{min-height:20px;color:#4b5563;font-size:13px}
-#form-status-message.pd-contact-status.is-sending{margin-top:2px;padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827 !important;font-weight:600}
+#form-status-message.pd-contact-status{margin-top:2px;min-height:20px;color:#4b5563 !important;font-size:13px}
+#form-status-message.pd-contact-status.is-sending{padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827 !important;font-weight:600}
+#form-status-message.pd-contact-status.is-success{padding:10px 12px;border-radius:10px;border:1px solid #facc15;background:#fffbeb;color:#111827 !important;font-weight:600;line-height:1.45}
+#form-status-message.pd-contact-status.is-error{padding:10px 12px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c !important;font-weight:600;line-height:1.45}
 .pd-contact-sent{display:flex;align-items:flex-start;gap:10px;margin-top:10px;padding:12px 14px;border-radius:10px;border:1px solid #facc15;background:#fffbeb;color:#111827;font-size:14px;line-height:1.55}
 .pd-contact-sent svg{flex-shrink:0;margin-top:2px;width:18px;height:18px;background:#facc15;border-radius:50%;padding:2px}
 @media (max-width:991px){.pd-contact-page{padding:24px 12px 40px}.pd-contact-info{grid-template-columns:1fr}.pd-contact-main{grid-template-columns:1fr}.pd-contact-hero,.pd-contact-info-card,.pd-contact-map-card,.pd-contact-form-card{border-radius:14px;padding:20px}.pd-contact-map-wrap iframe{min-height:320px}}
@@ -212,11 +214,54 @@ if (!empty($controller->success)) {
 document.addEventListener('DOMContentLoaded', function () {
     var form      = document.querySelector('.pd-contact-form');
     var submitBtn = form ? form.querySelector('button[type="submit"]') : null;
-    if (!form || !submitBtn) return;
-    form.addEventListener('submit', function () {
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.75';
-        submitBtn.style.cursor = 'not-allowed';
+    var statusBox = document.getElementById('form-status-message');
+    if (!form || !submitBtn || !statusBox) return;
+
+    function setStatus(kind, message) {
+        statusBox.classList.remove('is-sending', 'is-success', 'is-error');
+        if (kind) statusBox.classList.add(kind);
+        statusBox.textContent = message || '';
+    }
+
+    function setBusy(isBusy) {
+        submitBtn.disabled = !!isBusy;
+        submitBtn.style.opacity = isBusy ? '0.75' : '1';
+        submitBtn.style.cursor = isBusy ? 'not-allowed' : 'pointer';
+    }
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        setBusy(true);
+        setStatus('is-sending', 'Sending your message...');
+
+        try {
+            var formData = new FormData(form);
+            if (!formData.has('submit')) formData.append('submit', '1');
+
+            var response = await fetch(form.getAttribute('action') || window.location.href, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                redirect: 'follow'
+            });
+
+            var responseText = await response.text();
+            var looksSuccessful = response.url.indexOf('sent=1') !== -1
+                || responseText.indexOf('Your message has been sent successfully.') !== -1
+                || responseText.indexOf('Message sent successfully') !== -1;
+
+            if (response.ok && looksSuccessful) {
+                setStatus('is-success', 'Message sent successfully. Thank you for contacting us.');
+                form.reset();
+            } else {
+                setStatus('is-error', 'Unable to send message right now. Please try again.');
+            }
+        } catch (e) {
+            setStatus('is-error', 'Network error. Please check your connection and try again.');
+        } finally {
+            setBusy(false);
+        }
     });
 });
 </script>
