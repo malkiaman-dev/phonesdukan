@@ -3,6 +3,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/app/Controllers/ContactController.php';
 $controller = new ContactController();
 $controller->handleFormSubmission();
+$showSuccessPopup = (isset($_GET['sent']) && $_GET['sent'] === '1')
+    || !empty($controller->success)
+    || isset($_SESSION['success']);
+$showSuccessPopupAttr = $showSuccessPopup ? '1' : '0';
 ?>
 
 <section class="pd-contact-page">
@@ -79,10 +83,9 @@ $controller->handleFormSubmission();
 
                 <?php
                 if (isset($_GET['sent']) && $_GET['sent'] === '1') {
-                    echo '<div class="pd-alert pd-alert-success" role="alert">Your message has been sent successfully.</div>';
+                    echo '<div class="pd-alert pd-alert-success" role="alert">Thank you for contacting us. We will reply shortly.</div>';
                 }
                 if (isset($_SESSION['success'])) {
-                    echo '<div class="pd-alert pd-alert-success" role="alert">' . htmlspecialchars($_SESSION['success']) . '</div>';
                     unset($_SESSION['success']);
                 }
                 if (isset($_SESSION['error'])) {
@@ -153,6 +156,13 @@ $controller->handleFormSubmission();
     </div>
 </section>
 
+<div id="pd-contact-success-modal" class="pd-success-popup-wrap<?= $showSuccessPopup ? '' : ' is-hidden' ?>" role="status" aria-live="polite" data-show-popup="<?= htmlspecialchars($showSuccessPopupAttr, ENT_QUOTES, 'UTF-8') ?>">
+    <div class="pd-success-popup-card" style="opacity:1;">
+        <span class="pd-success-popup-icon" aria-hidden="true">✓</span>
+        <span class="pd-success-popup-text">Thank you for contacting us. We will reply shortly.</span>
+    </div>
+</div>
+
 <style>
 .pd-contact-page{background:linear-gradient(170deg,#f7f8fb 0%,#ffffff 58%,#f9fafb 100%);padding:34px 14px 56px}
 .pd-contact-container{max-width:1160px;margin:0 auto;display:grid;gap:24px}
@@ -197,6 +207,11 @@ $controller->handleFormSubmission();
 .pd-contact-btn:active{transform:translateY(0)}
 .pd-contact-status{min-height:20px;color:#4b5563;font-size:13px}
 #form-status-message.pd-contact-status.is-sending{margin-top:2px;padding:8px 10px;border-radius:8px;border:1px solid #facc15;background:#fffbeb;color:#111827 !important;font-weight:600}
+.pd-success-popup-wrap{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.28);padding:16px;opacity:1;transition:opacity .22s ease}
+.pd-success-popup-wrap.is-hidden{opacity:0;pointer-events:none}
+.pd-success-popup-card{max-width:460px;width:min(92vw,460px);display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:14px;border:1px solid #facc15;background:#fffbeb;color:#111827;box-shadow:0 18px 34px rgba(17,24,39,.22)}
+.pd-success-popup-icon{width:24px;height:24px;border-radius:999px;background:#facc15;color:#111827;display:inline-flex;align-items:center;justify-content:center;font-weight:700;line-height:1}
+.pd-success-popup-text{font-size:14px;font-weight:600;line-height:1.3}
 @media (max-width:991px){.pd-contact-page{padding:24px 12px 40px}.pd-contact-info{grid-template-columns:1fr}.pd-contact-main{grid-template-columns:1fr}.pd-contact-hero,.pd-contact-info-card,.pd-contact-map-card,.pd-contact-form-card{border-radius:14px;padding:20px}.pd-contact-map-wrap iframe{min-height:320px}}
 </style>
 
@@ -205,24 +220,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('.pd-contact-form');
     const statusDiv = document.getElementById('form-status-message');
     const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+    const successToast = document.getElementById('pd-contact-success-modal');
+    const sentInUrl = new URLSearchParams(window.location.search).get('sent') === '1';
+
+    if (successToast) {
+        const shouldShow = successToast.getAttribute('data-show-popup') === '1' || sentInUrl;
+        if (shouldShow) {
+            successToast.classList.remove('is-hidden');
+            setTimeout(function () {
+                successToast.classList.add('is-hidden');
+                setTimeout(function () {
+                    if (successToast && successToast.parentNode) {
+                        successToast.parentNode.removeChild(successToast);
+                    }
+                }, 250);
+            }, 5000);
+        }
+    }
 
     if (!form || !statusDiv) return;
 
     form.addEventListener('submit', function () {
-        statusDiv.classList.add('is-sending');
-        statusDiv.textContent = 'Sending your message. Please wait...';
-        statusDiv.style.color = '#111827';
-        statusDiv.style.background = '#fffbeb';
-        statusDiv.style.border = '1px solid #facc15';
-        statusDiv.style.padding = '8px 10px';
-        statusDiv.style.borderRadius = '8px';
-        statusDiv.style.fontWeight = '600';
+        statusDiv.classList.remove('is-sending');
+        statusDiv.textContent = '';
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.85';
             submitBtn.style.cursor = 'not-allowed';
         }
     });
+
 });
 </script>
 
