@@ -379,7 +379,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="login-container">
 
             <div class="brand-area">
-                <img class="brand-logo" src="<?= htmlspecialchars(url('public/assets/images/phonesdukan_logo.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Phones Dukan Logo">
+                <img class="brand-logo" src="/public/assets/images/phonesdukan_logo.png" alt="Phones Dukan Logo">
             </div>
 
             <h1>Admin Login</h1>

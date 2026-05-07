@@ -18,8 +18,9 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="<?= htmlspecialchars(url('public/assets/css/admin/admin.css')); ?>">
-    <?php emitCss('public/assets/css/admin/admin.css'); ?>
+    <link rel="stylesheet" href="/public/assets/css/admin/admin.css">
+    <link rel="stylesheet" href="/public/assets/css/style.css">
+    <link rel="stylesheet" href="/public/assets/css/frontend/ui-controls.css">
     <style>
         /* Critical shell styles to prevent FOUC */
         html.admin-loading body {
@@ -86,8 +87,8 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
             #sidebar.is-open { left: 0; }
         }
     </style>
-    <?php loadCSS(); ?>
-    <?php loadJS(); ?>
+    <script src="/public/assets/js/common.js" defer></script>
+    <script src="/public/assets/js/faqs.js" defer></script>
 </head>
 <body>
 <!-- Navbar -->
@@ -98,7 +99,7 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
                 <i class="fas fa-bars"></i>
             </button>
             <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage">
-                <img src="<?= htmlspecialchars(url('public/assets/images/phonesdukan_logo.png')); ?>" alt="PhonesDukan Logo">
+                <img src="/public/assets/images/phonesdukan_logo.png" alt="PhonesDukan Logo">
             </a>
         </div>
 

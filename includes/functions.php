@@ -73,7 +73,8 @@ if (!function_exists('url')) {
     {
         $path = (string) $path;
         if ($path === '') {
-            return getBaseURL();
+            $base = getBaseURL();
+            return '/' . ltrim($base, '/');
         }
 
         if (preg_match('#^https?://#i', $path) || strpos($path, '//') === 0) {
@@ -89,7 +90,8 @@ if (!function_exists('url')) {
             $normalizedPath = substr($normalizedPath, strlen('admin/'));
         }
 
-        return $base . $normalizedPath;
+        $fullPath = $base . $normalizedPath;
+        return '/' . ltrim($fullPath, '/');
     }
 }
 
