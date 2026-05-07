@@ -72,6 +72,74 @@ if (!function_exists('url')) {
     }
 }
 
+if (!function_exists('encodeUrlPath')) {
+    function encodeUrlPath(string $path): string
+    {
+        $path = str_replace('�', '-', $path);
+        $hasLeadingSlash = isset($path[0]) && $path[0] === '/';
+        $segments = explode('/', trim($path, '/'));
+        $encoded = [];
+        foreach ($segments as $segment) {
+            if ($segment === '') {
+                continue;
+            }
+            $encoded[] = rawurlencode($segment);
+        }
+        $joined = implode('/', $encoded);
+        return $hasLeadingSlash ? '/' . $joined : $joined;
+    }
+}
+
+if (!function_exists('buildProductPath')) {
+    function buildProductPath(string $categorySlug, string $brandSlug, string $productSlug): string
+    {
+        return '/' . implode('/', [
+            rawurlencode(trim($categorySlug, '/')),
+            rawurlencode(trim($brandSlug, '/')),
+            rawurlencode(str_replace('�', '-', trim($productSlug, '/'))),
+        ]);
+    }
+}
+
+if (!function_exists('normalizeMediaUrl')) {
+    function normalizeMediaUrl(string $mediaUrl): string
+    {
+        $mediaUrl = trim(str_replace('�', '-', $mediaUrl));
+        if ($mediaUrl === '') {
+            return $mediaUrl;
+        }
+
+        if (preg_match('#^https?://#i', $mediaUrl)) {
+            $parts = parse_url($mediaUrl);
+            if (!is_array($parts)) {
+                return $mediaUrl;
+            }
+            $scheme = $parts['scheme'] ?? 'https';
+            $host = $parts['host'] ?? '';
+            $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+            $path = isset($parts['path']) ? encodeUrlPath($parts['path']) : '';
+            $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+            $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+            return $scheme . '://' . $host . $port . $path . $query . $fragment;
+        }
+
+        $query = '';
+        $fragment = '';
+        $pathOnly = $mediaUrl;
+        $hashPos = strpos($pathOnly, '#');
+        if ($hashPos !== false) {
+            $fragment = substr($pathOnly, $hashPos);
+            $pathOnly = substr($pathOnly, 0, $hashPos);
+        }
+        $queryPos = strpos($pathOnly, '?');
+        if ($queryPos !== false) {
+            $query = substr($pathOnly, $queryPos);
+            $pathOnly = substr($pathOnly, 0, $queryPos);
+        }
+        return encodeUrlPath($pathOnly) . $query . $fragment;
+    }
+}
+
 if (!function_exists('redirectTo')) {
     function redirectTo($path, $status = 302)
     {

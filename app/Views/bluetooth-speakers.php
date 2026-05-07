@@ -54,10 +54,10 @@ foreach ($rawProducts as $product) {
 
     $products[] = [
         'product_id' => (int)$product['product_id'],
-        'product_url' => "/" . htmlspecialchars($product['category_slug']) . "/" . htmlspecialchars($product['brand_slug']) . "/" . htmlspecialchars($product['product_slug']),
+        'product_url' => buildProductPath((string)($product['category_slug'] ?? ''), (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? '')),
         'product_name' => htmlspecialchars($product['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8'),
         'product_image' => !empty($product['image_url'])
-            ? htmlspecialchars($product['image_url'], ENT_QUOTES, 'UTF-8')
+            ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']), ENT_QUOTES, 'UTF-8')
             : '/public/assets/images/Phones_dukan_favicon.png',
         'regular_price' => $regularPrice,
         'sale_price' => $salePrice,

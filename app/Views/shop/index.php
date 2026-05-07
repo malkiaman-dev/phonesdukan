@@ -127,13 +127,15 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
                     <div class="product-grid-wrapper">
                         <?php foreach ($products as $product): ?>
                             <?php
-                                $productUrl = "/" . htmlspecialchars($product['category_slug']) . "/" .
-                                    htmlspecialchars($product['brand_slug']) . "/" .
-                                    htmlspecialchars($product['product_slug']);
+                                $productUrl = buildProductPath(
+                                    (string) ($product['category_slug'] ?? ''),
+                                    (string) ($product['brand_slug'] ?? ''),
+                                    (string) ($product['product_slug'] ?? '')
+                                );
 
                                 $productName = htmlspecialchars($product['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8');
                                 $productImage = !empty($product['image_url'])
-                                    ? htmlspecialchars($product['image_url'], ENT_QUOTES, 'UTF-8')
+                                    ? htmlspecialchars(normalizeMediaUrl((string) $product['image_url']), ENT_QUOTES, 'UTF-8')
                                     : '/public/assets/images/Phones_dukan_favicon.png';
 
                                 $regularPrice = (float) ($product['regular_price'] ?? 0);

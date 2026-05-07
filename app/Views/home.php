@@ -291,8 +291,8 @@ foreach ($latest_posts_raw as $post) {
                 $category_slug  = !empty($product['category_slug'])  ? htmlspecialchars($product['category_slug'])  : 'unknown-category';
                 $brand_slug     = !empty($product['brand_slug'])     ? htmlspecialchars($product['brand_slug'])     : 'unknown-brand';
                 $product_slug   = !empty($product['product_slug'])   ? htmlspecialchars($product['product_slug'])   : 'unknown-product';
-                $product_image  = !empty($product['image_url'])      ? htmlspecialchars($product['image_url'])      : '/public/assets/images/Phones_dukan_favicon.png';
-                $product_url    = '/' . $category_slug . '/' . $brand_slug . '/' . $product_slug;
+                $product_image  = !empty($product['image_url']) ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url'])) : '/public/assets/images/Phones_dukan_favicon.png';
+                $product_url    = buildProductPath((string)($product['category_slug'] ?? ''), (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? ''));
 
                 $has_sale  = !empty($product['sale_price']) && !empty($product['regular_price']);
                 $unit_price = $has_sale ? $product['sale_price'] : ($product['regular_price'] ?? 0);
@@ -407,7 +407,11 @@ foreach ($latest_posts_raw as $post) {
 
     if (!empty($products)):
         foreach ($products as $product):
-            $product_url = '/' . htmlspecialchars($product['category_slug']) . '/' . htmlspecialchars($product['brand_slug']) . '/' . htmlspecialchars($product['product_slug']);
+            $product_url = buildProductPath(
+                (string)($product['category_slug'] ?? ''),
+                (string)($product['brand_slug'] ?? ''),
+                (string)($product['product_slug'] ?? '')
+            );
             $product_price = ($product['sale_price']) ? '<del>' . htmlspecialchars($product['regular_price']) . '</del> ' . htmlspecialchars($product['sale_price']) : htmlspecialchars($product['regular_price']);
             ?>
 
@@ -421,7 +425,7 @@ foreach ($latest_posts_raw as $post) {
                 <a href="<?php echo $product_url; ?>">
                     <div class="product-img-wrapper">
                         <div class="product-img">
-                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
+                            <img src="<?php echo htmlspecialchars(normalizeMediaUrl((string) $product['image_url'])); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
                         </div>
                     </div>
                 </a>
@@ -484,10 +488,10 @@ foreach ($latest_posts_raw as $post) {
                         : 'unknown-product';
 
                     $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars($product['image_url'])
+                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
                         : '/public/assets/images/Phones_dukan_favicon.png';
 
-                    $product_url = '/smart-watches/' . $brand_slug . '/' . $product_slug;
+                    $product_url = buildProductPath('smart-watches', (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? ''));
 
                     $has_sale = !empty($product['sale_price']) && !empty($product['regular_price']);
 
@@ -596,10 +600,10 @@ foreach ($latest_posts_raw as $post) {
                         : 'unknown-product';
 
                     $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars($product['image_url'])
+                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
                         : '/public/assets/images/Phones_dukan_favicon.png';
 
-                    $product_url = '/' . $category_slug . '/' . $brand_slug . '/' . $product_slug;
+                    $product_url = buildProductPath((string)($product['category_slug'] ?? ''), (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? ''));
 
                     $has_sale = !empty($product['sale_price']) && !empty($product['regular_price']);
 
@@ -730,9 +734,11 @@ foreach ($latest_posts_raw as $post) {
 
             if (!empty($products)):
                 foreach ($products as $product):
-                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                        . htmlspecialchars($product['brand_slug']) . '/'
-                        . htmlspecialchars($product['product_slug']);
+                    $product_url = buildProductPath(
+                        (string)($product['category_slug'] ?? ''),
+                        (string)($product['brand_slug'] ?? ''),
+                        (string)($product['product_slug'] ?? '')
+                    );
 
                     $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
                     $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
@@ -742,7 +748,7 @@ foreach ($latest_posts_raw as $post) {
                     $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
                     $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
                     $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars($product['image_url'])
+                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
                         : '/public/assets/images/Phones_dukan_favicon.png';
                     ?>
 
@@ -840,9 +846,11 @@ foreach ($latest_posts_raw as $post) {
 
             if (!empty($products)):
                 foreach ($products as $product):
-                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                        . htmlspecialchars($product['brand_slug']) . '/'
-                        . htmlspecialchars($product['product_slug']);
+                    $product_url = buildProductPath(
+                        (string)($product['category_slug'] ?? ''),
+                        (string)($product['brand_slug'] ?? ''),
+                        (string)($product['product_slug'] ?? '')
+                    );
 
                     $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
                     $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
@@ -852,7 +860,7 @@ foreach ($latest_posts_raw as $post) {
                     $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
                     $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
                     $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars($product['image_url'])
+                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
                         : '/public/assets/images/Phones_dukan_favicon.png';
                     ?>
 
@@ -932,9 +940,11 @@ foreach ($latest_posts_raw as $post) {
 
             if (!empty($products)):
                 foreach ($products as $product):
-                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                        . htmlspecialchars($product['brand_slug']) . '/'
-                        . htmlspecialchars($product['product_slug']);
+                    $product_url = buildProductPath(
+                        (string)($product['category_slug'] ?? ''),
+                        (string)($product['brand_slug'] ?? ''),
+                        (string)($product['product_slug'] ?? '')
+                    );
 
                     $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
                     $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
@@ -944,7 +954,7 @@ foreach ($latest_posts_raw as $post) {
                     $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
                     $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
                     $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars($product['image_url'])
+                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
                         : '/public/assets/images/Phones_dukan_favicon.png';
                     ?>
 
@@ -1023,9 +1033,11 @@ foreach ($latest_posts_raw as $post) {
 
             if (!empty($products)):
                 foreach ($products as $product):
-                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                        . htmlspecialchars($product['brand_slug']) . '/'
-                        . htmlspecialchars($product['product_slug']);
+                    $product_url = buildProductPath(
+                        (string)($product['category_slug'] ?? ''),
+                        (string)($product['brand_slug'] ?? ''),
+                        (string)($product['product_slug'] ?? '')
+                    );
 
                     $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
                     $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
@@ -1035,7 +1047,7 @@ foreach ($latest_posts_raw as $post) {
                     $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
                     $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
                     $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars($product['image_url'])
+                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
                         : '/public/assets/images/Phones_dukan_favicon.png';
                     ?>
 

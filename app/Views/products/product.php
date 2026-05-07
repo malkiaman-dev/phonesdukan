@@ -3,8 +3,11 @@ $pageTitle = $seo['seo_title'] ?? $product['product_name'];
 $metaDescription = $seo['seo_description'] ?? $product['product_description'];
 $metaKeywords = $seo['focus_keyword'] ?? '';
 $metaRobots = ($product['product_status'] == 1) ? 'index, follow' : 'noindex';
-$pageUrl = rtrim(getBaseURL(), '/') . '/'
-    . ltrim(($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? ''), '/');
+$pageUrl = rtrim(getBaseURL(), '/') . buildProductPath(
+    (string) ($product['category_slug'] ?? ''),
+    (string) ($product['brand_slug'] ?? ''),
+    (string) ($product['product_slug'] ?? '')
+);
 
 // Use regular_price and sale_price instead of product_price
 $productPrice = isset($product['sale_price']) && is_numeric($product['sale_price']) && $product['sale_price'] > 0 ? $product['sale_price'] : (isset($product['regular_price']) && is_numeric($product['regular_price']) ? $product['regular_price'] : 0);
@@ -39,7 +42,9 @@ if (isset($isComingSoon) && $isComingSoon === true) {
 error_log("Availability Decision - Product ID: {$product['product_id']}, Availability: $productAvailability, Stock Quantity: $stockQuantity, Status: $productStatus, Coming Soon: " . (isset($isComingSoon) ? ($isComingSoon ? 'true' : 'false') : 'unset'));
 
 // Set the product image URL (fallback to default favicon image if no image is available)
-$productImage = $images[0]['image_url'] ?? getBaseURL() . 'public/assets/images/Phones_dukan_favicon.png';
+$productImage = !empty($images[0]['image_url'])
+    ? normalizeMediaUrl((string) $images[0]['image_url'])
+    : getBaseURL() . 'public/assets/images/Phones_dukan_favicon.png';
 $productImageAlt = $product['product_name'];
 
 $productAttributes = $productModel->getProductAttributes($product['product_id']);  // Ensure you have initialized $productModel properly
@@ -65,7 +70,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         <span>
             <a href="<?php echo getBaseURL(); ?>">Home</a> > 
             <?php if (isset($product['category_slug']) && !empty($product['category_slug'])): ?>
-                <a href="<?php echo getBaseURL() . htmlspecialchars($product['category_slug']); ?>">
+                <a href="<?php echo getBaseURL() . encodeUrlPath((string) ($product['category_slug'] ?? '')); ?>">
                     <?php 
                     $categoryDisplay = !empty($product['category_name']) ? $product['category_name'] : ucwords(str_replace('-', ' ', $product['category_slug']));
                     echo htmlspecialchars($categoryDisplay);
@@ -73,11 +78,11 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                 </a> > 
             <?php endif; ?>
             <?php if (isset($product['brand_slug']) && !empty($product['brand_slug'])): ?>
-                <a href="<?php echo getBaseURL() . htmlspecialchars($product['category_slug']) . '/' . htmlspecialchars($product['brand_slug']); ?>">
+                <a href="<?php echo getBaseURL() . buildProductPath((string) ($product['category_slug'] ?? ''), (string) ($product['brand_slug'] ?? ''), ''); ?>">
                     <?php echo htmlspecialchars($product['brand_name'] ?? ucwords(str_replace('-', ' ', $product['brand_slug']))); ?>
                 </a> > 
             <?php endif; ?>
-            <a href="<?php echo getBaseURL() . htmlspecialchars($product['category_slug']) . '/' . htmlspecialchars($product['brand_slug']) . '/' . htmlspecialchars($product['product_slug']); ?>">
+            <a href="<?php echo getBaseURL() . buildProductPath((string) ($product['category_slug'] ?? ''), (string) ($product['brand_slug'] ?? ''), (string) ($product['product_slug'] ?? '')); ?>">
                 <?php echo htmlspecialchars($product['product_name']); ?>
             </a>
         </span>
@@ -115,7 +120,7 @@ foreach ($paragraphs as $index => $para) {
                     <?php
                     $seenUrls = [];
                     $mainImage = $images[0];
-                    $mainImageUrl = $mainImage['image_url'];
+                    $mainImageUrl = normalizeMediaUrl((string) ($mainImage['image_url'] ?? ''));
                     $seenUrls[] = $mainImageUrl;
                     ?>
 
@@ -135,7 +140,7 @@ foreach ($paragraphs as $index => $para) {
 
                         <div class="thumbnail-gallery">
                             <!-- Main Image as First Thumbnail -->
-                            <img src="<?= htmlspecialchars($mainImage['image_url'] ?? '') ?>" 
+                            <img src="<?= htmlspecialchars(normalizeMediaUrl((string) ($mainImage['image_url'] ?? '')) ) ?>" 
                                  alt="<?= htmlspecialchars($mainImage['alt_text'] ?? '') ?>" 
                                  title="<?= htmlspecialchars($mainImage['title'] ?? '') ?>"
                                  data-description="<?= htmlspecialchars($mainImage['description'] ?? '') ?>"
@@ -146,12 +151,13 @@ foreach ($paragraphs as $index => $para) {
                             <!-- Gallery Images -->
                             <?php
                             foreach ($images as $img):
-                                if (in_array($img['image_url'], $seenUrls)) {
+                                $imageUrl = normalizeMediaUrl((string) ($img['image_url'] ?? ''));
+                                if (in_array($imageUrl, $seenUrls, true)) {
                                     continue;
                                 }
-                                $seenUrls[] = $img['image_url'];
+                                $seenUrls[] = $imageUrl;
                                 ?>
-                                <img src="<?= htmlspecialchars($img['image_url'] ?? '') ?>" 
+                                <img src="<?= htmlspecialchars($imageUrl) ?>" 
                                      alt="<?= htmlspecialchars($img['alt_text'] ?? '') ?>" 
                                      title="<?= htmlspecialchars($img['title'] ?? '') ?>"
                                      data-description="<?= htmlspecialchars($img['description'] ?? '') ?>"
