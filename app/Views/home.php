@@ -752,7 +752,7 @@ foreach ($latest_posts_raw as $post) {
                 <span class="eb-cat-label">Mobiles</span>
             </a>
             <a href="/bluetooth-speakers" class="eb-cat-item">
-                <img src="/public/assets/images/speakers.png" alt="speakers">
+                <img src="/public/assets/images/Speakers.png" alt="speakers">
                 <span class="eb-cat-label">speakers</span>
             </a>
         </div>
