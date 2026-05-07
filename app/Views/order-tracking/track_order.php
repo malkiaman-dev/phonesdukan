@@ -248,6 +248,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 
 .track-flip-inner {
     display: grid;
+    position: relative;
     transform-style: preserve-3d;
     transition: transform 0.5s ease;
     height: 100%;
@@ -271,12 +272,27 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 }
 
 .track-card-front {
+    position: relative;
+    z-index: 2;
     transform: rotateY(0deg);
 }
 
 .track-card-back {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
     transform: rotateY(180deg);
     overflow: hidden;
+}
+
+.track-content-column.is-flipped .track-card-front {
+    position: absolute;
+    inset: 0;
+}
+
+.track-content-column.is-flipped .track-card-back {
+    position: relative;
+    inset: auto;
 }
 
 .track-kicker {
