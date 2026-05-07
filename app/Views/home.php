@@ -155,7 +155,7 @@ foreach ($latest_posts_raw as $post) {
             <div class="cat-track" id="cat-track">
                 <a href="/mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
                     <div class="cat-img-box">
-                        <img src="/public/assets/images/mobile_category.webp" alt="Mobiles">
+                        <img src="/public/assets/images/mobile_category.png" alt="Mobiles">
                     </div>
                     <p class="cat-label">Mobiles</p>
                 </a>
