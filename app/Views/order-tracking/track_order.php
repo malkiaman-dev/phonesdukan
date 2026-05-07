@@ -72,91 +72,119 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                 </div>
             </div>
 
-            <?php if (isset($order) && $order) : ?>
-                <div class="track-success-card" id="trackResult">
-                    <div class="track-success-head">
-                        <span class="track-success-badge">Order Found</span>
-                        <h3 class="track-success-title">Order Details</h3>
-                    </div>
-
-                    <ul class="order-details">
-                        <li><strong>Status:</strong> <span class="track-status-badge"><?= htmlspecialchars($order['order_status']) ?></span></li>
-                        <li><strong>Created At:</strong> <span><?= htmlspecialchars($order['created_at']) ?></span></li>
-                        <li><strong>Total Price:</strong> <span><?= htmlspecialchars($order['total_price']) . ' ' . htmlspecialchars($order['currency']) ?></span></li>
-                        <li><strong>Customer Name:</strong> <span><?= htmlspecialchars($order['customer_name']) ?></span></li>
-                        <li><strong>Email:</strong> <span><?= htmlspecialchars($order['customer_email']) ?></span></li>
-                        <li>
-                            <strong>Shipping:</strong>
-                            <span>
-                                <?= htmlspecialchars($order['shipping_address']) ?>,
-                                <?= htmlspecialchars($order['shipping_city']) ?>,
-                                <?= htmlspecialchars($order['shipping_country']) ?>
-                            </span>
-                        </li>
-                        <li><strong>Payment Method:</strong> <span><?= htmlspecialchars($order['payment_method_title']) ?></span></li>
-                        <li><strong>Ordered Products:</strong> <span><pre><?= htmlspecialchars($order['ordered_product']) ?></pre></span></li>
-                    </ul>
-                </div>
-            <?php endif; ?>
         </section>
 
-        <section class="track-content-column" aria-label="Order tracking guidance">
-            <h1 class="track-heading"><span>Track</span> Your Order Easily</h1>
-            <p class="track-subtext">
-                Enter your email and order ID to check real-time order status, shipping updates, and delivery progress.
-            </p>
+        <section class="track-content-column <?= (isset($order) && $order) ? 'is-flipped' : '' ?>" id="trackInfoCard" aria-label="Order tracking guidance">
+            <div class="track-flip-inner">
+                <div class="track-card-face track-card-front">
+                    <h1 class="track-heading"><span>Track</span> Your Order Easily</h1>
+                    <p class="track-subtext">
+                        Enter your email and order ID to check real-time order status, shipping updates, and delivery progress.
+                    </p>
 
-            <div class="track-visual" aria-hidden="true">
-                <svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" role="img">
-                    <defs>
-                        <linearGradient id="roadGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stop-color="#fde68a" />
-                            <stop offset="100%" stop-color="#facc15" />
-                        </linearGradient>
-                    </defs>
-                    <rect x="40" y="38" width="540" height="220" rx="26" fill="#ffffff" stroke="#e9edf3" />
-                    <circle cx="120" cy="95" r="30" fill="#fef3c7" />
-                    <circle cx="505" cy="195" r="38" fill="#fff7cc" />
-                    <path d="M80 188c65-38 138-54 220-44 76 10 137 32 220 15" stroke="url(#roadGradient)" stroke-width="12" fill="none" stroke-linecap="round"/>
-                    <circle cx="96" cy="180" r="12" fill="#facc15" />
-                    <circle cx="508" cy="162" r="12" fill="#facc15" />
-                    <rect x="254" y="128" width="96" height="55" rx="8" fill="#111827" />
-                    <rect x="287" y="108" width="45" height="25" rx="4" fill="#374151" />
-                    <circle cx="280" cy="188" r="11" fill="#111827" />
-                    <circle cx="335" cy="188" r="11" fill="#111827" />
-                    <rect x="136" y="94" width="70" height="50" rx="6" fill="#facc15" stroke="#d4a700" />
-                    <path d="M148 110h46M148 122h32" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
-                </svg>
+                    <div class="track-visual" aria-hidden="true">
+                        <svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" role="img">
+                            <defs>
+                                <linearGradient id="roadGradient" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#fde68a" />
+                                    <stop offset="100%" stop-color="#facc15" />
+                                </linearGradient>
+                            </defs>
+                            <rect x="40" y="38" width="540" height="220" rx="26" fill="#ffffff" stroke="#e9edf3" />
+                            <circle cx="120" cy="95" r="30" fill="#fef3c7" />
+                            <circle cx="505" cy="195" r="38" fill="#fff7cc" />
+                            <path d="M80 188c65-38 138-54 220-44 76 10 137 32 220 15" stroke="url(#roadGradient)" stroke-width="12" fill="none" stroke-linecap="round"/>
+                            <circle cx="96" cy="180" r="12" fill="#facc15" />
+                            <circle cx="508" cy="162" r="12" fill="#facc15" />
+                            <rect x="254" y="128" width="96" height="55" rx="8" fill="#111827" />
+                            <rect x="287" y="108" width="45" height="25" rx="4" fill="#374151" />
+                            <circle cx="280" cy="188" r="11" fill="#111827" />
+                            <circle cx="335" cy="188" r="11" fill="#111827" />
+                            <rect x="136" y="94" width="70" height="50" rx="6" fill="#facc15" stroke="#d4a700" />
+                            <path d="M148 110h46M148 122h32" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+
+                    <ul class="track-feature-list">
+                        <li>
+                            <span class="track-feature-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>Real-time order tracking</span>
+                        </li>
+                        <li>
+                            <span class="track-feature-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>Fast delivery updates</span>
+                        </li>
+                        <li>
+                            <span class="track-feature-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>Secure order lookup</span>
+                        </li>
+                        <li>
+                            <span class="track-feature-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span>Works for all orders</span>
+                        </li>
+                    </ul>
+
+                    <p class="track-trust">Trusted by 10,000+ customers across Pakistan</p>
+                </div>
+
+                <div class="track-card-face track-card-back" id="trackResult" aria-live="polite">
+                    <?php if (isset($order) && $order) : ?>
+                        <?php
+                            $rawStatus = strtolower((string) ($order['order_status'] ?? 'pending'));
+                            $statusClass = 'track-status-neutral';
+                            if (in_array($rawStatus, ['delivered', 'complete', 'completed'], true)) {
+                                $statusClass = 'track-status-highlight';
+                            } elseif (in_array($rawStatus, ['cancelled', 'canceled', 'failed', 'returned'], true)) {
+                                $statusClass = 'track-status-muted';
+                            }
+                        ?>
+                        <div class="track-success-head">
+                            <span class="track-success-badge">Order Found</span>
+                            <h3 class="track-success-title">Order Details</h3>
+                        </div>
+
+                        <ul class="order-details">
+                            <li><strong>Status:</strong> <span class="track-status-badge <?= $statusClass ?>"><?= htmlspecialchars($order['order_status']) ?></span></li>
+                            <li><strong>Created At:</strong> <span><?= htmlspecialchars($order['created_at']) ?></span></li>
+                            <li><strong>Total Price:</strong> <span><?= htmlspecialchars($order['total_price']) . ' ' . htmlspecialchars($order['currency']) ?></span></li>
+                            <li><strong>Customer Name:</strong> <span><?= htmlspecialchars($order['customer_name']) ?></span></li>
+                            <li><strong>Email:</strong> <span><?= htmlspecialchars($order['customer_email']) ?></span></li>
+                            <li>
+                                <strong>Shipping:</strong>
+                                <span>
+                                    <?= htmlspecialchars($order['shipping_address']) ?>,
+                                    <?= htmlspecialchars($order['shipping_city']) ?>,
+                                    <?= htmlspecialchars($order['shipping_country']) ?>
+                                </span>
+                            </li>
+                            <li><strong>Payment Method:</strong> <span><?= htmlspecialchars($order['payment_method_title']) ?></span></li>
+                            <li><strong>Ordered Products:</strong> <span><pre><?= htmlspecialchars($order['ordered_product']) ?></pre></span></li>
+                        </ul>
+
+                        <?php if (!empty($order['tracking_timeline'])) : ?>
+                            <div class="track-timeline-wrap">
+                                <h4 class="track-timeline-title">Timeline</h4>
+                                <div class="track-timeline-content"><?= nl2br(htmlspecialchars($order['tracking_timeline'])) ?></div>
+                            </div>
+                        <?php endif; ?>
+                    <?php else : ?>
+                        <div class="track-empty-state">
+                            <h3 class="track-success-title">No tracked order yet</h3>
+                            <p>Submit your email and Order ID from the right panel to view details here.</p>
+                        </div>
+                    <?php endif; ?>
+
+                    <button type="button" class="track-back-btn" id="trackBackBtn">Check another order</button>
+                </div>
             </div>
-
-            <ul class="track-feature-list">
-                <li>
-                    <span class="track-feature-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span>Real-time order tracking</span>
-                </li>
-                <li>
-                    <span class="track-feature-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span>Fast delivery updates</span>
-                </li>
-                <li>
-                    <span class="track-feature-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span>Secure order lookup</span>
-                </li>
-                <li>
-                    <span class="track-feature-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                    <span>Works for all orders</span>
-                </li>
-            </ul>
-
-            <p class="track-trust">Trusted by 10,000+ customers across Pakistan</p>
         </section>
     </div>
 </div>
@@ -209,16 +237,46 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     display: flex;
     flex-direction: column;
     gap: 18px;
+    height: 100%;
 }
 
 .track-content-column {
     order: 2;
+    perspective: 1200px;
+    height: 100%;
+}
+
+.track-flip-inner {
+    display: grid;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    height: 100%;
+}
+
+.track-content-column.is-flipped .track-flip-inner {
+    transform: rotateY(180deg);
+}
+
+.track-card-face {
+    grid-area: 1 / 1;
     padding: 22px 24px 18px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.85);
     box-shadow: 0 18px 45px rgba(17, 24, 39, 0.13);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    height: 100%;
+}
+
+.track-card-front {
+    transform: rotateY(0deg);
+}
+
+.track-card-back {
+    transform: rotateY(180deg);
+    overflow: hidden;
 }
 
 .track-kicker {
@@ -318,6 +376,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     box-shadow: 0 18px 45px rgba(17, 24, 39, 0.13);
     padding: 30px;
     border: 1px solid #edf0f5;
+    height: 100%;
 }
 
 .track-form-title {
@@ -486,14 +545,6 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     text-decoration: underline;
 }
 
-.track-success-card {
-    background: #ffffff;
-    border: 1px solid #eceff4;
-    border-radius: 16px;
-    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
-    padding: 22px;
-}
-
 .track-success-head {
     display: flex;
     align-items: center;
@@ -562,9 +613,75 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     align-items: center;
     padding: 4px 10px;
     border-radius: 999px;
-    background: #fef9c3;
-    border: 1px solid #fde68a;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
     font-weight: 600;
+}
+
+.track-status-highlight {
+    background: #fef9c3;
+    border-color: #fde68a;
+}
+
+.track-status-neutral {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.track-status-muted {
+    background: #e5e7eb;
+    border-color: #cbd5e1;
+}
+
+.track-back-btn {
+    margin-top: 16px;
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    background: #ffd700;
+    color: #111111;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.track-back-btn:hover {
+    background: #e9c300;
+    transform: scale(1.015);
+    box-shadow: 0 10px 24px rgba(201, 161, 7, 0.35);
+}
+
+.track-back-btn:active {
+    transform: scale(0.99);
+}
+
+.track-empty-state p {
+    margin: 8px 0 0;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.track-timeline-wrap {
+    margin-top: 12px;
+    border-top: 1px dashed #d1d5db;
+    padding-top: 12px;
+}
+
+.track-timeline-title {
+    margin: 0 0 6px;
+    color: #111827;
+    font-size: 14px;
+}
+
+.track-timeline-content {
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 @keyframes track-spin {
@@ -577,12 +694,11 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     .track-shell {
         grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
         gap: 28px;
-        align-items: start;
+        align-items: stretch;
     }
 
     .track-content-column {
         order: 1;
-        padding: 22px 24px 18px;
     }
 
     .track-form-column {
@@ -595,11 +711,11 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         padding: 26px 12px 34px;
     }
 
-    .track-content-column,
-    .track-form-card,
-    .track-success-card {
+    .track-card-face,
+    .track-form-card {
         padding: 20px;
         border-radius: 14px;
+        height: auto;
     }
 
     .track-visual svg {
@@ -627,6 +743,20 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         grid-template-columns: 1fr;
         gap: 6px;
     }
+
+    .track-flip-inner {
+        transform-origin: center center;
+    }
+
+    .track-card-back {
+        overflow: visible;
+    }
+
+    .track-form-column,
+    .track-content-column,
+    .track-flip-inner {
+        height: auto;
+    }
 }
 </style>
 
@@ -643,8 +773,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     const emailError = document.getElementById('trackEmailError');
     const orderIdError = document.getElementById('trackOrderIdError');
     const submitBtn = document.getElementById('trackSubmitBtn');
+    const infoCard = document.getElementById('trackInfoCard');
+    const backBtn = document.getElementById('trackBackBtn');
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (infoCard && backBtn) {
+        backBtn.addEventListener('click', function () {
+            infoCard.classList.remove('is-flipped');
+            if (emailInput) {
+                emailInput.focus();
+            }
+        });
+    }
 
     function setFieldError(input, slot, message) {
         input.classList.add('is-invalid');
@@ -691,6 +832,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         submitBtn.classList.add('is-loading');
         submitBtn.setAttribute('aria-busy', 'true');
         submitBtn.disabled = true;
+
+        if (infoCard) {
+            infoCard.classList.remove('is-flipped');
+        }
     });
 })();
 </script>
