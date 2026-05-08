@@ -553,6 +553,15 @@ body {
     background: #161616;
     border-right: 1px solid #252525;
     box-shadow: 16px 0 40px rgba(0, 0, 0, 0.22);
+    z-index: 5000;
+    overflow: visible !important;
+    isolation: isolate;
+}
+
+#sidebar .nav {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
 }
 
 #sidebar .nav-item {
@@ -618,6 +627,11 @@ body {
     background: #1b1b1b;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    z-index: 7000;
+}
+
+.nav-item.has-submenu:hover {
+    z-index: 6500;
 }
 
 .submenu .nav-link {

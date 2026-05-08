@@ -63,10 +63,21 @@ $adminPageCssMap = [
             left: 0;
             width: 248px;
             height: calc(100vh - 56px);
-            z-index: 1200;
+            z-index: 5000;
             background: #161616;
-            overflow-y: auto;
-            overflow-x: visible;
+            overflow: visible;
+            isolation: isolate;
+        }
+        #sidebar .nav {
+            position: relative;
+            z-index: 1;
+            overflow: visible;
+        }
+        #sidebar .nav-item.has-submenu:hover {
+            z-index: 6500;
+        }
+        #sidebar .submenu {
+            z-index: 7000;
         }
         #sidebar .nav,
         #sidebar ul,

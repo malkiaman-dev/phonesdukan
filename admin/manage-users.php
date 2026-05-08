@@ -78,25 +78,26 @@ include __DIR__ . '/admin_header.php';
     }
 
     .mu-header {
-        background: linear-gradient(120deg, #0f0f10 0%, #1a1a1f 100%);
-        color: var(--mu-white);
-        border: 1px solid #1f1f24;
+        background: var(--mu-white);
+        color: var(--mu-black);
+        border: 1px solid var(--mu-border);
         border-radius: 18px;
         padding: 22px 24px;
         margin-bottom: 16px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
     }
 
     .mu-title {
         margin: 0;
         font-size: 1.7rem;
         font-weight: 800;
-        color: #ffffff !important;
+        color: var(--mu-black) !important;
         letter-spacing: -0.02em;
     }
 
     .mu-subtitle {
         margin: 6px 0 0;
-        color: rgba(255, 255, 255, 0.82);
+        color: var(--mu-muted);
         font-size: 0.93rem;
     }
 
