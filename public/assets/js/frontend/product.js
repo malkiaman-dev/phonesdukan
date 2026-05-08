@@ -421,9 +421,19 @@ document.addEventListener("DOMContentLoaded", function () {
                             text: "Your product has been added. What would you like to do next?",
                             icon: "success",
                             showCancelButton: true,
-                            confirmButtonText: "View Cart 🛒",
-                            cancelButtonText: "Continue Shopping 🛍️",
-                            reverseButtons: true
+                            confirmButtonText: "View Cart",
+                            cancelButtonText: "Continue Shopping",
+                            reverseButtons: true,
+                            customClass: {
+                                popup: "pd-cart-popup",
+                                icon: "pd-cart-popup__icon",
+                                title: "pd-cart-popup__title",
+                                htmlContainer: "pd-cart-popup__text",
+                                confirmButton: "pd-cart-popup__btn pd-cart-popup__btn--primary",
+                                cancelButton: "pd-cart-popup__btn pd-cart-popup__btn--secondary",
+                                actions: "pd-cart-popup__actions"
+                            },
+                            buttonsStyling: false
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = withBase("/cart");
