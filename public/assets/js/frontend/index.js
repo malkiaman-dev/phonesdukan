@@ -15,8 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let touchStartX = 0;
         let touchEndX = 0;
 
-        const setActiveSlide = (index) => {
+        const setActiveSlide = (index, direction) => {
             if (!slides.length) return;
+            if (direction === undefined) direction = 1;
 
             const safeIndex = (index + slides.length) % slides.length;
             if (safeIndex === currentIndex) return;
@@ -24,15 +25,44 @@ document.addEventListener("DOMContentLoaded", function () {
             const outgoing = slides[currentIndex];
             const incoming = slides[safeIndex];
 
-            // Exit current slide to the left
-            outgoing.classList.remove("is-active");
-            outgoing.classList.add("is-exiting");
-            outgoing.setAttribute("aria-hidden", "true");
+            if (direction >= 0) {
+                // Forward: outgoing exits left, incoming enters from right
+                outgoing.classList.remove("is-active");
+                outgoing.classList.add("is-exiting");
+                outgoing.setAttribute("aria-hidden", "true");
 
-            // Bring new slide in from the right
-            incoming.classList.remove("is-exiting");
-            incoming.classList.add("is-active");
-            incoming.setAttribute("aria-hidden", "false");
+                incoming.classList.remove("is-exiting");
+                incoming.classList.add("is-active");
+                incoming.setAttribute("aria-hidden", "false");
+
+                const done = outgoing;
+                setTimeout(() => {
+                    done.style.transition = "none";
+                    done.classList.remove("is-exiting");
+                    void done.offsetWidth;
+                    done.style.transition = "";
+                }, 700);
+            } else {
+                // Backward: outgoing exits right, incoming enters from left
+                incoming.classList.add("is-entering-left");
+                void incoming.offsetWidth; // commit start position before animating
+
+                outgoing.classList.remove("is-active");
+                outgoing.classList.add("is-exiting-right");
+                outgoing.setAttribute("aria-hidden", "true");
+
+                incoming.classList.remove("is-entering-left");
+                incoming.classList.add("is-active");
+                incoming.setAttribute("aria-hidden", "false");
+
+                const doneOut = outgoing;
+                setTimeout(() => {
+                    doneOut.style.transition = "none";
+                    doneOut.classList.remove("is-exiting-right");
+                    void doneOut.offsetWidth;
+                    doneOut.style.transition = "";
+                }, 700);
+            }
 
             currentIndex = safeIndex;
 
@@ -41,19 +71,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 dot.classList.toggle("is-active", isActive);
                 dot.setAttribute("aria-selected", isActive ? "true" : "false");
             });
-
-            // After transition, snap outgoing back off-screen (no animation)
-            const done = outgoing;
-            setTimeout(() => {
-                done.style.transition = "none";
-                done.classList.remove("is-exiting");
-                void done.offsetWidth;
-                done.style.transition = "";
-            }, 700);
         };
 
-        const goNext = () => setActiveSlide(currentIndex + 1);
-        const goPrev = () => setActiveSlide(currentIndex - 1);
+        const goNext = () => setActiveSlide(currentIndex + 1, 1);
+        const goPrev = () => setActiveSlide(currentIndex - 1, -1);
 
         const stopAutoplay = () => {
             if (autoplayTimer) {
@@ -93,7 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
             dot.addEventListener("click", () => {
                 const index = Number(dot.getAttribute("data-pd-hero-dot"));
                 if (!Number.isNaN(index)) {
-                    setActiveSlide(index);
+                    const dir = index >= currentIndex ? 1 : -1;
+                    setActiveSlide(index, dir);
                     startAutoplay();
                 }
             });
@@ -124,6 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         heroSlider.addEventListener("touchstart", (event) => {
             touchStartX = event.changedTouches[0].screenX;
+            stopAutoplay();
         }, { passive: true });
 
         heroSlider.addEventListener("touchend", (event) => {
@@ -136,8 +159,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     goPrev();
                 }
-                startAutoplay();
             }
+            startAutoplay();
         }, { passive: true });
 
         setActiveSlide(currentIndex);
