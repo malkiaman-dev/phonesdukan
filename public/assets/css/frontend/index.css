@@ -349,19 +349,31 @@ img {vertical-align: middle;}
 /* Viewport clips the track — only the visible cards show */
 .cat-viewport {
   flex: 1;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cat-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .cat-track {
   display: flex;
   gap: 18px;
-  will-change: transform;
-  /* width/transform managed by JS */
+  width: max-content;
 }
 
 .cat-card {
-  flex: 0 0 var(--cat-card-w, 160px);
-  width: var(--cat-card-w, 160px);
+  flex: 0 0 clamp(150px, 22vw, 210px);
+  width: clamp(150px, 22vw, 210px);
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   align-items: center;

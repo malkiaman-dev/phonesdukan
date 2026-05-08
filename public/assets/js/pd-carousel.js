@@ -1,120 +1,271 @@
 /**
  * pd-carousel.js — PhonesDukan reusable infinite carousel
  *
- * Usage: add data-carousel to any scroll container.
- * Cards are cloned for seamless infinite loop.
- * Autoplay, drag, touch-pause all handled here.
+ * Usage:
+ *  - Add data-carousel to any horizontal scroll container.
+ *  - Optional:
+ *      data-carousel-content="#selector" (inner element holding items)
+ *      data-carousel-item=".item"        (item selector inside content)
+ *      data-carousel-prev=".prev-btn"    (manual previous button)
+ *      data-carousel-next=".next-btn"    (manual next button)
  */
 (function () {
   'use strict';
 
-  var AUTOPLAY_INTERVAL = 3500;   // ms between slides
-  var RESUME_DELAY      = 5000;   // ms after user interaction before resuming
+  var AUTOPLAY_INTERVAL = 2800;
+  var RESUME_DELAY = 2500;
 
-  function initCarousel(track) {
-    /* ── 1. Clone original items for infinite loop ── */
-    var originals = Array.from(track.children);
-    if (originals.length === 0) return;
+  function parseGap(element) {
+    var styles = getComputedStyle(element);
+    return parseInt(styles.columnGap || styles.gap || '0', 10) || 0;
+  }
 
-    originals.forEach(function (item) {
-      var clone = item.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      track.appendChild(clone);
+  function initCarousel(scroller) {
+    if (scroller.dataset.carouselReady === '1') return;
+    scroller.dataset.carouselReady = '1';
+
+    var contentSelector = scroller.getAttribute('data-carousel-content');
+    var content = contentSelector ? document.querySelector(contentSelector) : scroller;
+    if (!content) return;
+
+    var itemSelector = scroller.getAttribute('data-carousel-item');
+    var itemQuery = itemSelector ? ':scope > ' + itemSelector : ':scope > *';
+    var mode = scroller.getAttribute('data-carousel-mode') || 'step';
+    var continuousSpeed = parseFloat(scroller.getAttribute('data-carousel-speed') || '34');
+    var shouldClone = scroller.getAttribute('data-carousel-clone') !== 'false';
+    var originals = Array.from(content.querySelectorAll(itemQuery)).filter(function (item) {
+      return !item.hasAttribute('data-carousel-clone');
     });
+    if (originals.length < 1) return;
 
-    /* ── 2. Step width = first card's outer width + gap ── */
-    function getStepWidth() {
-      var first = track.querySelector(':scope > *');
-      if (!first) return 200;
-      var gap = parseInt(getComputedStyle(track).columnGap) || 20;
-      return first.offsetWidth + gap;
+    if (shouldClone) {
+      originals.forEach(function (item) {
+        var clone = item.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        clone.setAttribute('tabindex', '-1');
+        clone.setAttribute('data-carousel-clone', '1');
+        content.appendChild(clone);
+      });
     }
 
-    /* ── 3. Seamless reset when scrolled into clone zone ── */
+    var autoTimer = null;
+    var autoRaf = null;
+    var resumeTimer = null;
+    var snapTimer = null;
+    var isDraggingMouse = false;
+    var isTouching = false;
+    var isHorizontalTouch = false;
+    var moved = false;
+    var startX = 0;
+    var startY = 0;
+    var startLeft = 0;
     var resetting = false;
-    track.addEventListener('scroll', function () {
+    var lastFrameTs = 0;
+
+    function getItems() {
+      return Array.from(content.querySelectorAll(itemQuery));
+    }
+
+    function getStepWidth() {
+      var first = getItems()[0];
+      if (!first) return 200;
+      return first.offsetWidth + parseGap(content);
+    }
+
+    function getOriginalWidth() {
+      return getStepWidth() * originals.length;
+    }
+
+    function normalizeLoopPosition() {
+      if (!shouldClone) return;
       if (resetting) return;
-      var origWidth = getStepWidth() * originals.length;
-      if (track.scrollLeft >= origWidth) {
+      var origWidth = getOriginalWidth();
+      if (!origWidth) return;
+
+      if (scroller.scrollLeft >= origWidth) {
         resetting = true;
-        track.style.scrollBehavior = 'auto';
-        track.scrollLeft -= origWidth;
+        scroller.style.scrollBehavior = 'auto';
+        scroller.scrollLeft -= origWidth;
         requestAnimationFrame(function () {
-          track.style.scrollBehavior = '';
+          scroller.style.scrollBehavior = 'smooth';
           resetting = false;
         });
       }
-    }, { passive: true });
-
-    /* ── 4. Autoplay ── */
-    var autoTimer  = null;
-    var pauseTimer = null;
-
-    function advance() {
-      track.scrollLeft += getStepWidth();
     }
 
-    function startAutoplay() {
-      clearInterval(autoTimer);
-      autoTimer = setInterval(advance, AUTOPLAY_INTERVAL);
+    function snapToNearest() {
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(function () {
+        var step = getStepWidth();
+        if (!step) return;
+        var target = Math.round(scroller.scrollLeft / step) * step;
+        scroller.scrollTo({ left: target, behavior: 'smooth' });
+      }, 40);
     }
 
     function stopAutoplay() {
-      clearInterval(autoTimer);
-      autoTimer = null;
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+      if (autoRaf) {
+        cancelAnimationFrame(autoRaf);
+        autoRaf = null;
+      }
+      lastFrameTs = 0;
+    }
+
+    function advanceOneStep() {
+      if (isDraggingMouse || isTouching || resetting) return;
+      var step = getStepWidth();
+      if (!step) return;
+
+      if (!shouldClone) {
+        var maxLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+        var nextLeft = scroller.scrollLeft + step;
+        if (nextLeft > maxLeft - 2) {
+          scroller.scrollTo({ left: 0, behavior: 'smooth' });
+          return;
+        }
+      }
+
+      scroller.scrollTo({ left: scroller.scrollLeft + step, behavior: 'smooth' });
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      if (mode === 'continuous' || mode === 'marquee') {
+        var tick = function (ts) {
+          if (isDraggingMouse || isTouching || resetting) {
+            lastFrameTs = ts;
+            autoRaf = requestAnimationFrame(tick);
+            return;
+          }
+
+          if (!lastFrameTs) lastFrameTs = ts;
+          var dt = Math.min(48, ts - lastFrameTs);
+          lastFrameTs = ts;
+
+          scroller.scrollLeft += (continuousSpeed * dt) / 1000;
+          normalizeLoopPosition();
+          autoRaf = requestAnimationFrame(tick);
+        };
+        autoRaf = requestAnimationFrame(tick);
+        return;
+      }
+
+      autoTimer = setInterval(advanceOneStep, AUTOPLAY_INTERVAL);
     }
 
     function pauseThenResume() {
       stopAutoplay();
-      clearTimeout(pauseTimer);
-      pauseTimer = setTimeout(startAutoplay, RESUME_DELAY);
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(startAutoplay, RESUME_DELAY);
     }
 
-    /* ── 5. Mouse drag ── */
-    var dragging  = false;
-    var startX    = 0;
-    var startLeft = 0;
-    var moved     = false;
+    scroller.addEventListener('scroll', normalizeLoopPosition, { passive: true });
 
-    track.addEventListener('mousedown', function (e) {
+    scroller.addEventListener('mousedown', function (e) {
       if (e.button !== 0) return;
-      dragging  = true;
-      moved     = false;
-      startX    = e.clientX;
-      startLeft = track.scrollLeft;
-      track.classList.add('is-dragging');
-      track.style.scrollSnapType = 'none'; /* disable snap mid-drag */
+      isDraggingMouse = true;
+      moved = false;
+      startX = e.clientX;
+      startLeft = scroller.scrollLeft;
+      scroller.classList.add('is-dragging');
+      scroller.style.scrollSnapType = 'none';
+      scroller.style.scrollBehavior = 'auto';
       pauseThenResume();
       e.preventDefault();
     });
 
     document.addEventListener('mousemove', function (e) {
-      if (!dragging) return;
+      if (!isDraggingMouse) return;
       var dx = e.clientX - startX;
       if (Math.abs(dx) > 4) moved = true;
-      track.scrollLeft = startLeft - dx;
+      scroller.scrollLeft = startLeft - dx;
     });
 
     document.addEventListener('mouseup', function () {
-      if (!dragging) return;
-      dragging = false;
-      track.classList.remove('is-dragging');
-      track.style.scrollSnapType = ''; /* restore CSS snap so release snaps cleanly */
+      if (!isDraggingMouse) return;
+      isDraggingMouse = false;
+      scroller.classList.remove('is-dragging');
+      scroller.style.scrollSnapType = '';
+      scroller.style.scrollBehavior = 'smooth';
+      if (mode !== 'continuous') {
+        snapToNearest();
+      }
+      pauseThenResume();
     });
 
-    /* Prevent link/button clicks from firing after a drag */
-    track.addEventListener('click', function (e) {
+    scroller.addEventListener('touchstart', function (e) {
+      if (!e.touches || !e.touches.length) return;
+      var touch = e.touches[0];
+      isTouching = true;
+      isHorizontalTouch = false;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      pauseThenResume();
+    }, { passive: true });
+
+    scroller.addEventListener('touchmove', function (e) {
+      if (!isTouching || !e.touches || !e.touches.length) return;
+      var touch = e.touches[0];
+      var diffX = Math.abs(touch.clientX - startX);
+      var diffY = Math.abs(touch.clientY - startY);
+      isHorizontalTouch = diffX > diffY;
+      if (isHorizontalTouch && diffX > 4) {
+        moved = true;
+      }
+    }, { passive: true });
+
+    scroller.addEventListener('touchend', function () {
+      if (!isTouching) return;
+      isTouching = false;
+      if (mode !== 'continuous') {
+        snapToNearest();
+      }
+      pauseThenResume();
+    }, { passive: true });
+
+    scroller.addEventListener('touchcancel', function () {
+      isTouching = false;
+      pauseThenResume();
+    }, { passive: true });
+
+    scroller.addEventListener('click', function (e) {
       if (moved) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        moved = false;
       }
+      moved = false;
     }, true);
 
-    /* ── 6. Touch: CSS handles swipe; just pause autoplay ── */
-    track.addEventListener('touchstart', pauseThenResume, { passive: true });
+    var prevSelector = scroller.getAttribute('data-carousel-prev');
+    var nextSelector = scroller.getAttribute('data-carousel-next');
+    if (prevSelector) {
+      var prevBtn = document.querySelector(prevSelector);
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+          scroller.scrollTo({ left: scroller.scrollLeft - getStepWidth(), behavior: 'smooth' });
+          pauseThenResume();
+        });
+      }
+    }
+    if (nextSelector) {
+      var nextBtn = document.querySelector(nextSelector);
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+          scroller.scrollTo({ left: scroller.scrollLeft + getStepWidth(), behavior: 'smooth' });
+          pauseThenResume();
+        });
+      }
+    }
 
-    /* ── 7. Start ── */
+    scroller.addEventListener('mouseenter', stopAutoplay);
+    scroller.addEventListener('mouseleave', pauseThenResume);
+    scroller.addEventListener('wheel', pauseThenResume, { passive: true });
+
+    scroller.style.scrollBehavior = 'smooth';
     startAutoplay();
   }
 

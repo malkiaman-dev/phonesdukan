@@ -151,7 +151,7 @@ foreach ($latest_posts_raw as $post) {
         </div>
         <div class="cat-track-wrap">
             <button class="cat-arrow cat-prev" aria-label="Previous categories">&#8249;</button>
-            <div class="cat-viewport">
+            <div class="cat-viewport" data-carousel data-carousel-mode="marquee" data-carousel-speed="42" data-carousel-content="#cat-track" data-carousel-item=".cat-card" data-carousel-prev=".cat-prev" data-carousel-next=".cat-next">
             <div class="cat-track" id="cat-track">
                 <a href="/mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
                     <div class="cat-img-box">
@@ -195,130 +195,6 @@ foreach ($latest_posts_raw as $post) {
         </div>
     </div>
 </section>
-<script>
-(function () {
-    var viewport = document.querySelector('.cat-viewport');
-    var track = document.getElementById('cat-track');
-    var prevBtn = document.querySelector('.cat-prev');
-    var nextBtn = document.querySelector('.cat-next');
-    if (!viewport || !track) return;
-
-    /* ── 1) Clone cards for infinite loop ── */
-    var originals = Array.from(track.querySelectorAll('.cat-card'));
-    if (!originals.length) return;
-    originals.forEach(function (card) {
-        var clone = card.cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true');
-        clone.tabIndex = -1;
-        track.appendChild(clone);
-    });
-
-    function getCards() { return track.querySelectorAll('.cat-card'); }
-
-    function getStepWidth() {
-        var card = getCards()[0];
-        if (!card) return 240;
-        var styles = window.getComputedStyle(track);
-        var gap = parseInt(styles.columnGap || styles.gap || '0', 10) || 0;
-        return card.offsetWidth + gap;
-    }
-
-    function getOrigWidth() {
-        return getStepWidth() * originals.length;
-    }
-
-    /* Start in the middle so user can go left/right infinitely */
-    requestAnimationFrame(function () {
-        viewport.scrollLeft = getOrigWidth();
-    });
-
-    /* ── 2) Seamless reset when entering clone zones ── */
-    var resetting = false;
-    viewport.addEventListener('scroll', function () {
-        if (resetting) return;
-        var origWidth = getOrigWidth();
-        if (!origWidth) return;
-
-        if (viewport.scrollLeft >= origWidth * 2) {
-            resetting = true;
-            viewport.style.scrollBehavior = 'auto';
-            viewport.scrollLeft -= origWidth;
-            requestAnimationFrame(function () {
-                viewport.style.scrollBehavior = '';
-                resetting = false;
-            });
-        } else if (viewport.scrollLeft <= 0) {
-            resetting = true;
-            viewport.style.scrollBehavior = 'auto';
-            viewport.scrollLeft += origWidth;
-            requestAnimationFrame(function () {
-                viewport.style.scrollBehavior = '';
-                resetting = false;
-            });
-        }
-    }, { passive: true });
-
-    function scrollNext() {
-        viewport.scrollBy({ left: getStepWidth(), behavior: 'smooth' });
-    }
-
-    function scrollPrev() {
-        viewport.scrollBy({ left: -getStepWidth(), behavior: 'smooth' });
-    }
-
-    /* ── 3) Continuous auto-scroll (marquee-style) ── */
-    var paused = false;
-    var resumeTimer = null;
-    var lastT = 0;
-    var speedPxPerSec = 34; /* subtle continuous speed */
-
-    function wrapIfNeeded() {
-        var origWidth = getOrigWidth();
-        if (!origWidth) return;
-        if (viewport.scrollLeft >= origWidth * 2) viewport.scrollLeft -= origWidth;
-        if (viewport.scrollLeft <= 0) viewport.scrollLeft += origWidth;
-    }
-
-    function tick(t) {
-        if (!lastT) lastT = t;
-        var dt = Math.min(48, t - lastT); /* cap to reduce jumps on tab switch */
-        lastT = t;
-
-        if (!paused) {
-            viewport.scrollLeft += (speedPxPerSec * dt) / 1000;
-            wrapIfNeeded();
-        }
-        requestAnimationFrame(tick);
-    }
-
-    requestAnimationFrame(tick);
-
-    function pauseThenResume() {
-        paused = true;
-        clearTimeout(resumeTimer);
-        resumeTimer = setTimeout(function () { paused = false; }, 4200);
-    }
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function () {
-            scrollNext();
-            pauseThenResume();
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function () {
-            scrollPrev();
-            pauseThenResume();
-        });
-    }
-
-    viewport.addEventListener('mouseenter', function () { paused = true; });
-    viewport.addEventListener('mouseleave', function () { paused = false; });
-    viewport.addEventListener('touchstart', pauseThenResume, { passive: true });
-    viewport.addEventListener('wheel', pauseThenResume, { passive: true });
-})();
-</script>
 
 <section class="na-section">
     <div class="na-inner">
@@ -1324,7 +1200,7 @@ foreach ($latest_posts_raw as $post) {
         <div class="category-header testimonials-header">
             <h2>Customer Reviews & <span>Testimonials</span></h2>
         </div>
-        <div class="testimonials-carousel">
+        <div class="testimonials-carousel" data-carousel data-carousel-item=".testimonial-box">
             <div class="testimonial-box">
                 <div class="testimonial-rating">
                     <span class="star">&#9733;</span>
@@ -1372,120 +1248,5 @@ foreach ($latest_posts_raw as $post) {
         </div>
     </div>
 </section>
-<script>
-(function () {
-    var carousel = document.querySelector('.testimonials-carousel');
-    if (!carousel) return;
-
-    /* ── 1. Clone cards so the loop appears infinite ───────────────────
-       We append duplicates of every card. The scroll track now holds
-       [orig1, orig2, orig3, orig4, clone1, clone2, clone3, clone4].
-       When we reach the clone zone we instantly teleport back to the
-       identical-looking original zone — the user never sees a jump.   */
-    var originals = Array.from(carousel.querySelectorAll('.testimonial-box'));
-    originals.forEach(function (card) {
-        var clone = card.cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true');
-        carousel.appendChild(clone);
-    });
-
-    /* ── 2. Step width = one card width + gap ───────────────────────── */
-    function getStepWidth() {
-        var box = carousel.querySelector('.testimonial-box');
-        if (!box) return 300;
-        var gap = parseInt(getComputedStyle(carousel).columnGap) || 24;
-        return box.offsetWidth + gap;
-    }
-
-    /* ── 3. Seamless reset when scrolled into the clone zone ────────── */
-    var resetting = false;
-    carousel.addEventListener('scroll', function () {
-        if (resetting) return;
-        var origWidth = getStepWidth() * originals.length;
-        if (carousel.scrollLeft >= origWidth) {
-            resetting = true;
-            carousel.style.scrollBehavior = 'auto';  /* instant jump */
-            carousel.scrollLeft -= origWidth;         /* same visual  */
-            requestAnimationFrame(function () {
-                carousel.style.scrollBehavior = '';   /* restore smooth */
-                resetting = false;
-            });
-        }
-    }, { passive: true });
-
-    /* ── 4. Autoplay ────────────────────────────────────────────────── */
-    var autoTimer  = null;
-    var pauseTimer = null;
-
-    function advance() {
-        /* CSS scroll-behavior:smooth does the animation for us */
-        carousel.scrollLeft += getStepWidth();
-    }
-
-    function startAutoplay() {
-        clearInterval(autoTimer);
-        autoTimer = setInterval(advance, 3500);
-    }
-
-    function stopAutoplay() {
-        clearInterval(autoTimer);
-        autoTimer = null;
-    }
-
-    /* Pause when user interacts, then resume after 5 s */
-    function pauseThenResume() {
-        stopAutoplay();
-        clearTimeout(pauseTimer);
-        pauseTimer = setTimeout(startAutoplay, 5000);
-    }
-
-    /* ── 5. Mouse drag ──────────────────────────────────────────────── */
-    var dragging  = false;
-    var startX    = 0;
-    var startLeft = 0;
-    var moved     = false;
-
-    carousel.addEventListener('mousedown', function (e) {
-        if (e.button !== 0) return;
-        dragging  = true;
-        moved     = false;
-        startX    = e.clientX;
-        startLeft = carousel.scrollLeft;
-        carousel.classList.add('is-dragging');
-        carousel.style.scrollSnapType = 'none';
-        pauseThenResume();
-        e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', function (e) {
-        if (!dragging) return;
-        var dx = e.clientX - startX;
-        if (Math.abs(dx) > 4) moved = true;
-        carousel.scrollLeft = startLeft - dx;
-    });
-
-    document.addEventListener('mouseup', function () {
-        if (!dragging) return;
-        dragging = false;
-        carousel.classList.remove('is-dragging');
-        carousel.style.scrollSnapType = '';
-    });
-
-    /* Prevent a drag-release from firing a card link */
-    carousel.addEventListener('click', function (e) {
-        if (moved) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            moved = false;
-        }
-    }, true);
-
-    /* ── 6. Touch swipe — CSS handles the scroll; we just pause ─────── */
-    carousel.addEventListener('touchstart', pauseThenResume, { passive: true });
-
-    /* ── 7. Go ──────────────────────────────────────────────────────── */
-    startAutoplay();
-})();
-</script>
 <script src="/public/assets/js/pd-carousel.js"></script>
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>
