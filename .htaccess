@@ -4,6 +4,10 @@
     Options -MultiViews
     DirectoryIndex index.php index.html
 
+    # Force non-www to www (needed for OneSignal domain match)
+    RewriteCond %{HTTP_HOST} ^phonesdukan\.com$ [NC]
+    RewriteRule ^ https://www.phonesdukan.com%{REQUEST_URI} [L,R=301,NE]
+
     # Fix accidental admin-relative asset URLs like /admin/public/assets/...
     RewriteRule ^admin/public/(.*)$ public/$1 [L,NC]
 
