@@ -13,7 +13,7 @@
   'use strict';
 
   var AUTOPLAY_INTERVAL = 2800;
-  var RESUME_DELAY = 0;
+  var RESUME_DELAY = 900;
 
   function parseGap(element) {
     var styles = getComputedStyle(element);
@@ -55,7 +55,6 @@
     var snapTimer = null;
     var isDraggingMouse = false;
     var isTouching = false;
-    var isHorizontalTouch = false;
     var moved = false;
     var startX = 0;
     var startY = 0;
@@ -212,44 +211,35 @@
       if (!e.touches || !e.touches.length) return;
       var touch = e.touches[0];
       isTouching = true;
-      isHorizontalTouch = false;
       moved = false;
       startX = touch.clientX;
       startY = touch.clientY;
-      startLeft = scroller.scrollLeft;
       scroller.style.scrollBehavior = 'auto';
-      pauseThenResume();
+      stopAutoplay();
     }, { passive: true });
 
+    // Passive touchmove — only tracks movement for click suppression.
+    // Horizontal scrolling is handled natively by the browser (touch-action: pan-y pan-x).
     scroller.addEventListener('touchmove', function (e) {
       if (!isTouching || !e.touches || !e.touches.length) return;
       var touch = e.touches[0];
-      var rawDx = touch.clientX - startX;
-      var diffX = Math.abs(rawDx);
-      var diffY = Math.abs(touch.clientY - startY);
-      isHorizontalTouch = diffX > diffY;
-      if (isHorizontalTouch && diffX > 4) {
+      if (Math.abs(touch.clientX - startX) > Math.abs(touch.clientY - startY) + 4) {
         moved = true;
-        scroller.scrollLeft = startLeft - rawDx;
-        normalizeLoopPosition();
-        if (e.cancelable) e.preventDefault();
       }
-    }, { passive: false });
+    }, { passive: true });
 
     scroller.addEventListener('touchend', function () {
       if (!isTouching) return;
       isTouching = false;
       scroller.style.scrollBehavior = 'smooth';
-      if (!isContinuousMode) {
-        snapToNearest();
-      }
-      pauseThenResume();
+      // CSS scroll-snap-type handles snapping; no JS snap needed.
+      scheduleResume(RESUME_DELAY);
     }, { passive: true });
 
     scroller.addEventListener('touchcancel', function () {
       isTouching = false;
       scroller.style.scrollBehavior = 'smooth';
-      pauseThenResume();
+      scheduleResume(RESUME_DELAY);
     }, { passive: true });
 
     scroller.addEventListener('click', function (e) {
