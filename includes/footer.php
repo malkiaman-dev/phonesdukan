@@ -124,7 +124,12 @@
 </div>
 <div id="pdPushPrompt" class="pd-push-prompt" aria-live="polite" aria-hidden="true" style="opacity:0;visibility:hidden;pointer-events:none">
     <div class="pd-push-card">
-        <div class="pd-push-icon" aria-hidden="true">🔔</div>
+        <div class="pd-push-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+        </div>
         <div class="pd-push-content">
             <h4>Stay Updated</h4>
             <p>Subscribe to our notifications for latest products, offers, and updates.</p>
@@ -343,6 +348,7 @@
 
   function showPrompt() {
     if (!shouldShowPrompt()) return;
+    promptEl.removeAttribute('style');
     promptEl.classList.add('is-visible');
     promptEl.setAttribute('aria-hidden', 'false');
     localStorage.setItem(SHOWN_ONCE_KEY, '1');
