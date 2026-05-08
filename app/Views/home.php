@@ -153,37 +153,37 @@ foreach ($latest_posts_raw as $post) {
             <button class="cat-arrow cat-prev" aria-label="Previous categories">&#8249;</button>
             <div class="cat-viewport" data-carousel data-carousel-mode="marquee" data-carousel-speed="42" data-carousel-content="#cat-track" data-carousel-item=".cat-card" data-carousel-prev=".cat-prev" data-carousel-next=".cat-next">
             <div class="cat-track" id="cat-track">
-                <a href="<?= url('mobiles'); ?>" class="cat-card" style="--cat-bg:#dbeafe;">
+                <a href="mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/mobile_category.png" alt="Mobiles">
                     </div>
                     <p class="cat-label">Mobiles</p>
                 </a>
-                <a href="<?= url('smart-watches'); ?>" class="cat-card" style="--cat-bg:#d1fae5;">
+                <a href="smart-watches" class="cat-card" style="--cat-bg:#d1fae5;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/smartwatches_category.webp" alt="Smartwatches">
                     </div>
                     <p class="cat-label">Smart Watches</p>
                 </a>
-                <a href="<?= url('wireless-earbuds'); ?>" class="cat-card" style="--cat-bg:#ede9fe;">
+                <a href="wireless-earbuds" class="cat-card" style="--cat-bg:#ede9fe;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/wireless_earbuds.webp" alt="Wireless Earbuds">
                     </div>
                     <p class="cat-label">Wireless Earbuds</p>
                 </a>
-                <a href="<?= url('mobile-accessories'); ?>" class="cat-card" style="--cat-bg:#fde8d8;">
+                <a href="mobile-accessories" class="cat-card" style="--cat-bg:#fde8d8;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/mobile_accessories.webp" alt="Accessories">
                     </div>
                     <p class="cat-label">Mobile Accessories</p>
                 </a>
-                <a href="<?= url('power-banks'); ?>" class="cat-card" style="--cat-bg:#fef9c3;">
+                <a href="power-banks" class="cat-card" style="--cat-bg:#fef9c3;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/power-banks.webp" alt="Power Banks">
                     </div>
                     <p class="cat-label">Fast Charging Power Banks</p>
                 </a>
-                <a href="<?= url('bluetooth-speakers'); ?>" class="cat-card" style="--cat-bg:#fce7f3;">
+                <a href="bluetooth-speakers" class="cat-card" style="--cat-bg:#fce7f3;">
                     <div class="cat-img-box">
                         <img src="/public/assets/images/bluetooth-speakers.webp" alt="Bluetooth Speakers">
                     </div>

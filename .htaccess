@@ -1,10 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /
     Options -MultiViews
     DirectoryIndex index.php index.html
 
-    # Force non-www to www (needed for OneSignal domain match)
+    # Force non-www to www on production domain only
     RewriteCond %{HTTP_HOST} ^phonesdukan\.com$ [NC]
     RewriteRule ^ https://www.phonesdukan.com%{REQUEST_URI} [L,R=301,NE]
 
