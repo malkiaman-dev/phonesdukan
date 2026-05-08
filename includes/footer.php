@@ -122,7 +122,7 @@
         <button id="accept-popup" class="popup-button">Accept</button>
     </div>
 </div>
-<div id="pdPushPrompt" class="pd-push-prompt" aria-live="polite" aria-hidden="true">
+<div id="pdPushPrompt" class="pd-push-prompt" aria-live="polite" aria-hidden="true" style="opacity:0;visibility:hidden;pointer-events:none">
     <div class="pd-push-card">
         <div class="pd-push-icon" aria-hidden="true">🔔</div>
         <div class="pd-push-content">
