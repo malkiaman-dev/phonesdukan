@@ -122,6 +122,19 @@
         <button id="accept-popup" class="popup-button">Accept</button>
     </div>
 </div>
+<div id="pdPushPrompt" class="pd-push-prompt" aria-live="polite" aria-hidden="true">
+    <div class="pd-push-card">
+        <div class="pd-push-icon" aria-hidden="true">🔔</div>
+        <div class="pd-push-content">
+            <h4>Stay Updated</h4>
+            <p>Subscribe to our notifications for latest products, offers, and updates.</p>
+        </div>
+        <div class="pd-push-actions">
+            <button type="button" id="pdPushDismiss" class="pd-push-btn pd-push-btn-ghost">No Thanks</button>
+            <button type="button" id="pdPushAllow" class="pd-push-btn pd-push-btn-primary">Allow</button>
+        </div>
+    </div>
+</div>
 <?php loadJS(); // Dynamically load JS ?>
 <?php if (isset($schema) && !empty($schema)) : ?>
 <script type="application/ld+json">
@@ -140,109 +153,205 @@
 </script>
 
 <style>
-  /* ── OneSignal slidedown — PhonesDukan brand theme ── */
-  #onesignal-slidedown-dialog,
-  .onesignal-slidedown-dialog {
-    background: #111111 !important;
-    border: 1px solid rgba(250,204,21,.35) !important;
-    border-radius: 14px !important;
-    box-shadow: 0 24px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) !important;
-    overflow: hidden !important;
-    position: relative !important;
+  .pd-push-prompt {
+    position: fixed;
+    left: 20px;
+    right: auto;
+    bottom: 20px;
+    width: min(360px, calc(100vw - 40px));
+    z-index: 2147483001;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(16px);
+    transition: opacity .25s ease, transform .25s ease, visibility .25s ease;
   }
-  /* Yellow top accent bar */
-  #onesignal-slidedown-dialog::before,
-  .onesignal-slidedown-dialog::before {
-    content: '' !important;
-    display: block !important;
-    position: absolute !important;
-    top: 0 !important; left: 0 !important; right: 0 !important;
-    height: 3px !important;
-    background: linear-gradient(90deg, #facc15 0%, #f59e0b 100%) !important;
-    border-radius: 14px 14px 0 0 !important;
-    z-index: 1 !important;
+  .pd-push-prompt.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
   }
-  .onesignal-slidedown-dialog .slidedown-body-message-author {
-    color: #ffffff !important;
-    font-weight: 700 !important;
+  .pd-push-card {
+    width: 100%;
+    margin: 0;
+    background: #111111;
+    color: #ffffff;
+    border: 1px solid rgba(250, 204, 21, .38);
+    border-radius: 16px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, .28);
+    padding: 14px 14px 12px;
   }
-  .onesignal-slidedown-dialog .slidedown-body-message-body {
-    color: #9ca3af !important;
-    font-size: .86rem !important;
-    line-height: 1.5 !important;
+  .pd-push-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(250, 204, 21, .16);
+    border: 1px solid rgba(250, 204, 21, .45);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 10px;
   }
-  .onesignal-slidedown-dialog .slidedown-body-icon img {
-    border-radius: 10px !important;
-    padding: 4px !important;
-    background: rgba(250,204,21,.12) !important;
-    border: 1px solid rgba(250,204,21,.4) !important;
+  .pd-push-content h4 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
   }
-  /* Allow — yellow CTA */
-  .onesignal-slidedown-dialog .primary-slidedown-button {
-    background: #facc15 !important;
-    border-color: #facc15 !important;
-    color: #111111 !important;
-    font-weight: 700 !important;
-    border-radius: 9px !important;
+  .pd-push-content p {
+    margin: 0;
+    color: #d1d5db;
+    font-size: .9rem;
+    line-height: 1.45;
   }
-  .onesignal-slidedown-dialog .primary-slidedown-button:hover {
-    background: #fde047 !important;
-    border-color: #fde047 !important;
+  .pd-push-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
-  /* No Thanks — ghost */
-  .onesignal-slidedown-dialog .secondary-slidedown-button {
-    background: rgba(255,255,255,.06) !important;
-    border: 1px solid rgba(255,255,255,.12) !important;
-    color: #9ca3af !important;
-    font-weight: 600 !important;
-    border-radius: 9px !important;
+  .pd-push-btn {
+    min-width: 110px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: .86rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: color .15s ease, border-color .15s ease;
   }
-  .onesignal-slidedown-dialog .secondary-slidedown-button:hover {
-    background: rgba(255,255,255,.10) !important;
-    border-color: rgba(255,255,255,.2) !important;
-    color: #ffffff !important;
+  .pd-push-btn-primary {
+    background: #111111;
+    border-color: #111111;
+    color: #ffffff;
+  }
+  .pd-push-btn-primary:hover { color: #facc15; }
+  .pd-push-btn-ghost {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    color: #111111;
+  }
+  .pd-push-btn-ghost:hover {
+    border-color: #facc15;
+    color: #111111;
+  }
+  @media (max-width: 768px) {
+    .pd-push-prompt {
+      left: 10px;
+      right: 10px;
+      bottom: 12px;
+      width: auto;
+    }
+    .pd-push-card {
+      border-radius: 14px;
+      padding: 12px 12px 10px;
+    }
+    .pd-push-actions {
+      justify-content: stretch;
+    }
+    .pd-push-btn { flex: 1 1 auto; min-width: 0; }
   }
 </style>
-
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "9b0a0b38-8dba-4ad8-8f5e-fa7531e4f27c",
-      safari_web_id: "web.onesignal.auto.521cdcf4-43b8-4659-a2e2-fd037f95e0d5",
-      notifyButton: {
-        enable: false, // Hide the bell
-      },
-      promptOptions: {
-        slidedown: {
-          enabled: true,
-          autoPrompt: false, // VERY IMPORTANT: Don't auto show immediately
-          prompts: [
-            {
-              type: "push",
-              text: {
-                actionMessage: "Subscribe to our notifications for the latest news and updates.",
-                acceptButton: "Allow",
-                cancelButton: "No Thanks"
-              },
-              acceptButtonText: "Allow",
-              cancelButtonText: "No Thanks"
-            }
-          ]
-        }
-      },
-      welcomeNotification: {
-        title: "Thanks for Subscribing!",
-        message: "You’ll now receive our latest updates."
-      }
-    });
+  window.pdRequestPushPermission = (function () {
+    var sdkLoadingPromise = null;
+    var initialized = false;
 
-    // Now delay showing the subscribe popup
-    setTimeout(function() {
-      OneSignal.Slidedown.promptPush(); // This manually shows the popup after 5s
-    }, 5000); // 5000 milliseconds = 5 seconds
+    function loadSdk() {
+      if (window.OneSignal) return Promise.resolve(window.OneSignal);
+      if (sdkLoadingPromise) return sdkLoadingPromise;
+      sdkLoadingPromise = new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+        script.async = true;
+        script.onload = function () { resolve(window.OneSignal); };
+        script.onerror = function () { reject(new Error('OneSignal SDK failed to load')); };
+        document.head.appendChild(script);
+      });
+      return sdkLoadingPromise;
+    }
+
+    async function initIfNeeded(OneSignal) {
+      if (initialized) return;
+      await OneSignal.init({
+        appId: "9b0a0b38-8dba-4ad8-8f5e-fa7531e4f27c",
+        safari_web_id: "web.onesignal.auto.521cdcf4-43b8-4659-a2e2-fd037f95e0d5",
+        notifyButton: { enable: false },
+        autoResubscribe: false,
+        promptOptions: { slidedown: { enabled: false, autoPrompt: false } },
+        welcomeNotification: {
+          title: "Thanks for Subscribing!",
+          message: "You’ll now receive our latest updates."
+        }
+      });
+      initialized = true;
+    }
+
+    return async function () {
+      try {
+        var OneSignal = await loadSdk();
+        if (!OneSignal) throw new Error('OneSignal unavailable');
+        await initIfNeeded(OneSignal);
+        if (OneSignal.Notifications && typeof OneSignal.Notifications.requestPermission === 'function') {
+          await OneSignal.Notifications.requestPermission();
+        } else if (typeof Notification !== 'undefined' && typeof Notification.requestPermission === 'function') {
+          await Notification.requestPermission();
+        }
+      } catch (err) {
+        console.error('OneSignal permission request failed:', err);
+      }
+    };
+  })();
+</script>
+<script>
+(function () {
+  var promptEl = document.getElementById('pdPushPrompt');
+  var allowBtn = document.getElementById('pdPushAllow');
+  var dismissBtn = document.getElementById('pdPushDismiss');
+  if (!promptEl || !allowBtn || !dismissBtn) return;
+
+  var HIDE_KEY = 'pd_push_prompt_hidden_until';
+  var SHOWN_ONCE_KEY = 'pd_push_prompt_shown_once';
+  var HIDE_FOR_MS = 24 * 60 * 60 * 1000;
+
+  function isHomePage() {
+    var path = (window.location.pathname || '/').toLowerCase();
+    path = path.replace(/\/+$/, '');
+    return path === '' || path === '/' || path === '/phonesdukan' || path === '/phonesdukan/index.php';
+  }
+
+  function shouldShowPrompt() {
+    if (!isHomePage()) return false;
+    if (Notification && Notification.permission === 'granted') return false;
+    if (localStorage.getItem(SHOWN_ONCE_KEY) === '1') return false;
+    var hiddenUntil = parseInt(localStorage.getItem(HIDE_KEY) || '0', 10);
+    return isNaN(hiddenUntil) || Date.now() >= hiddenUntil;
+  }
+
+  function hidePrompt(storeDelay) {
+    promptEl.classList.remove('is-visible');
+    promptEl.setAttribute('aria-hidden', 'true');
+    if (storeDelay) localStorage.setItem(HIDE_KEY, String(Date.now() + HIDE_FOR_MS));
+  }
+
+  function showPrompt() {
+    if (!shouldShowPrompt()) return;
+    promptEl.classList.add('is-visible');
+    promptEl.setAttribute('aria-hidden', 'false');
+    localStorage.setItem(SHOWN_ONCE_KEY, '1');
+  }
+
+  dismissBtn.addEventListener('click', function () { hidePrompt(true); });
+  allowBtn.addEventListener('click', async function () {
+    hidePrompt(true);
+    if (typeof window.pdRequestPushPermission === 'function') await window.pdRequestPushPermission();
   });
+
+  window.addEventListener('load', function () { setTimeout(showPrompt, 2600); });
+})();
 </script>
 
 <script>
