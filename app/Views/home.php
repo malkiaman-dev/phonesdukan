@@ -69,7 +69,7 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
-                    <h1>Pakistan’s Premium Store for<br><span>Smartphones & Smart Gadgets</span></h1>
+                    <h1>Premium <br><span>Gadgets & More</span></h1>
                     <p>Shop PTA-approved mobiles, wireless earbuds, smart watches, and genuine accessories with fast nationwide delivery and trusted support.</p>
                     <div class="pd-hero-cta-wrap">
                         <a href="/shop" class="pd-hero-btn pd-hero-btn-primary">Shop Now</a>
@@ -1245,7 +1245,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="na-section home-latest-blogs">
     <div class="na-inner">
         <div class="na-header">
-            <h2 class="na-title">Latest Tech Blogs & <span>Mobile Updates</span></h2>
+            <h2 class="na-title">Latest <span>Tech News</span></h2>
             <a href="/blog" class="na-view-all">Explore All</a>
         </div>
 

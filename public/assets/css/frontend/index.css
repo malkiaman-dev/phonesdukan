@@ -758,7 +758,9 @@ h3.product-title {
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  touch-action: pan-x;
+  touch-action: pan-y pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   cursor: grab;
   padding-bottom: 8px;
 }
@@ -1446,7 +1448,9 @@ a.view-all-btn {
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  touch-action: pan-x;
+  touch-action: pan-y pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   cursor: grab;
   padding: 8px 2px 20px;
 }
@@ -2013,9 +2017,23 @@ a.brandItem {
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  touch-action: pan-x;
+  touch-action: pan-y pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   cursor: grab;
   padding-bottom: 8px;
+}
+
+/* Mobile-first touch behavior for all homepage carousel tracks */
+.home-carousel,
+.product-carousel,
+.carousel-track,
+.swiper,
+.slick-slider,
+[data-carousel] {
+  touch-action: pan-y pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
 }
 .home-blog-grid::-webkit-scrollbar { display: none; }
 .home-blog-grid.is-dragging {
