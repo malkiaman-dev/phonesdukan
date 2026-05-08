@@ -13,7 +13,7 @@
   'use strict';
 
   var AUTOPLAY_INTERVAL = 2800;
-  var RESUME_DELAY = 2500;
+  var RESUME_DELAY = 0;
 
   function parseGap(element) {
     var styles = getComputedStyle(element);
@@ -31,6 +31,7 @@
     var itemSelector = scroller.getAttribute('data-carousel-item');
     var itemQuery = itemSelector ? ':scope > ' + itemSelector : ':scope > *';
     var mode = scroller.getAttribute('data-carousel-mode') || 'step';
+    var isContinuousMode = mode === 'continuous' || mode === 'marquee';
     var continuousSpeed = parseFloat(scroller.getAttribute('data-carousel-speed') || '34');
     var shouldClone = scroller.getAttribute('data-carousel-clone') !== 'false';
     var originals = Array.from(content.querySelectorAll(itemQuery)).filter(function (item) {
@@ -134,7 +135,9 @@
 
     function startAutoplay() {
       stopAutoplay();
-      if (mode === 'continuous' || mode === 'marquee') {
+      if (isContinuousMode) {
+        scroller.style.scrollSnapType = 'none';
+        scroller.style.scrollBehavior = 'auto';
         var tick = function (ts) {
           if (isDraggingMouse || isTouching || resetting) {
             lastFrameTs = ts;
@@ -158,9 +161,17 @@
     }
 
     function pauseThenResume() {
+      scheduleResume(RESUME_DELAY);
+    }
+
+    function scheduleResume(delayMs) {
       stopAutoplay();
       clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(startAutoplay, RESUME_DELAY);
+      if (!delayMs || delayMs <= 0) {
+        startAutoplay();
+        return;
+      }
+      resumeTimer = setTimeout(startAutoplay, delayMs);
     }
 
     scroller.addEventListener('scroll', normalizeLoopPosition, { passive: true });
@@ -191,7 +202,7 @@
       scroller.classList.remove('is-dragging');
       scroller.style.scrollSnapType = '';
       scroller.style.scrollBehavior = 'smooth';
-      if (mode !== 'continuous') {
+      if (!isContinuousMode) {
         snapToNearest();
       }
       pauseThenResume();
@@ -202,26 +213,34 @@
       var touch = e.touches[0];
       isTouching = true;
       isHorizontalTouch = false;
+      moved = false;
       startX = touch.clientX;
       startY = touch.clientY;
+      startLeft = scroller.scrollLeft;
+      scroller.style.scrollBehavior = 'auto';
       pauseThenResume();
     }, { passive: true });
 
     scroller.addEventListener('touchmove', function (e) {
       if (!isTouching || !e.touches || !e.touches.length) return;
       var touch = e.touches[0];
-      var diffX = Math.abs(touch.clientX - startX);
+      var rawDx = touch.clientX - startX;
+      var diffX = Math.abs(rawDx);
       var diffY = Math.abs(touch.clientY - startY);
       isHorizontalTouch = diffX > diffY;
       if (isHorizontalTouch && diffX > 4) {
         moved = true;
+        scroller.scrollLeft = startLeft - rawDx;
+        normalizeLoopPosition();
+        if (e.cancelable) e.preventDefault();
       }
-    }, { passive: true });
+    }, { passive: false });
 
     scroller.addEventListener('touchend', function () {
       if (!isTouching) return;
       isTouching = false;
-      if (mode !== 'continuous') {
+      scroller.style.scrollBehavior = 'smooth';
+      if (!isContinuousMode) {
         snapToNearest();
       }
       pauseThenResume();
@@ -229,6 +248,7 @@
 
     scroller.addEventListener('touchcancel', function () {
       isTouching = false;
+      scroller.style.scrollBehavior = 'smooth';
       pauseThenResume();
     }, { passive: true });
 
@@ -246,8 +266,25 @@
       var prevBtn = document.querySelector(prevSelector);
       if (prevBtn) {
         prevBtn.addEventListener('click', function () {
+          if (shouldClone) {
+            var originalWidth = getOriginalWidth();
+            if (originalWidth && scroller.scrollLeft <= 1) {
+              scroller.style.scrollBehavior = 'auto';
+              scroller.scrollLeft += originalWidth;
+              requestAnimationFrame(function () {
+                scroller.style.scrollBehavior = 'smooth';
+              });
+            }
+          }
           scroller.scrollTo({ left: scroller.scrollLeft - getStepWidth(), behavior: 'smooth' });
-          pauseThenResume();
+          if (isContinuousMode) {
+            setTimeout(function () {
+              scroller.style.scrollBehavior = 'auto';
+            }, 450);
+            scheduleResume(450);
+            return;
+          }
+          scheduleResume(0);
         });
       }
     }
@@ -256,16 +293,28 @@
       if (nextBtn) {
         nextBtn.addEventListener('click', function () {
           scroller.scrollTo({ left: scroller.scrollLeft + getStepWidth(), behavior: 'smooth' });
-          pauseThenResume();
+          if (isContinuousMode) {
+            setTimeout(function () {
+              scroller.style.scrollBehavior = 'auto';
+            }, 450);
+            scheduleResume(450);
+            return;
+          }
+          scheduleResume(0);
         });
       }
     }
 
-    scroller.addEventListener('mouseenter', stopAutoplay);
-    scroller.addEventListener('mouseleave', pauseThenResume);
+    var hoverTarget = scroller.closest('.cat-track-wrap') || scroller;
+    hoverTarget.addEventListener('mouseenter', stopAutoplay);
+    hoverTarget.addEventListener('mouseleave', pauseThenResume);
     scroller.addEventListener('wheel', pauseThenResume, { passive: true });
 
     scroller.style.scrollBehavior = 'smooth';
+    if (isContinuousMode) {
+      scroller.style.scrollSnapType = 'none';
+      scroller.style.scrollBehavior = 'auto';
+    }
     startAutoplay();
   }
 
