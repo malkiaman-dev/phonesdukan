@@ -519,17 +519,23 @@ body.dimmed {
 }
 
 #sidebar {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
+  bottom: 0;
   width: min(360px, 92vw);
-  height: 100vh;
   background: linear-gradient(180deg, #141414 0%, #0c0c0c 100%);
   transform: translateX(-103%);
   transition: transform 0.32s ease;
-  overflow-y: auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   border-right: 1px solid rgba(247, 209, 23, 0.26);
-  padding-bottom: 20px;
+  padding-bottom: max(env(safe-area-inset-bottom), 24px);
+  box-sizing: border-box;
+  z-index: 11001;
 }
 
 #sidebar.open {
