@@ -139,6 +139,71 @@
     })(window, document, "clarity", "script", "rbu44uocrv");
 </script>
 
+<style>
+  /* ── OneSignal slidedown — PhonesDukan brand theme ── */
+  #onesignal-slidedown-dialog,
+  .onesignal-slidedown-dialog {
+    background: #111111 !important;
+    border: 1px solid rgba(250,204,21,.35) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 24px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  /* Yellow top accent bar */
+  #onesignal-slidedown-dialog::before,
+  .onesignal-slidedown-dialog::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important; left: 0 !important; right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, #facc15 0%, #f59e0b 100%) !important;
+    border-radius: 14px 14px 0 0 !important;
+    z-index: 1 !important;
+  }
+  .onesignal-slidedown-dialog .slidedown-body-message-author {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+  .onesignal-slidedown-dialog .slidedown-body-message-body {
+    color: #9ca3af !important;
+    font-size: .86rem !important;
+    line-height: 1.5 !important;
+  }
+  .onesignal-slidedown-dialog .slidedown-body-icon img {
+    border-radius: 10px !important;
+    padding: 4px !important;
+    background: rgba(250,204,21,.12) !important;
+    border: 1px solid rgba(250,204,21,.4) !important;
+  }
+  /* Allow — yellow CTA */
+  .onesignal-slidedown-dialog .primary-slidedown-button {
+    background: #facc15 !important;
+    border-color: #facc15 !important;
+    color: #111111 !important;
+    font-weight: 700 !important;
+    border-radius: 9px !important;
+  }
+  .onesignal-slidedown-dialog .primary-slidedown-button:hover {
+    background: #fde047 !important;
+    border-color: #fde047 !important;
+  }
+  /* No Thanks — ghost */
+  .onesignal-slidedown-dialog .secondary-slidedown-button {
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    color: #9ca3af !important;
+    font-weight: 600 !important;
+    border-radius: 9px !important;
+  }
+  .onesignal-slidedown-dialog .secondary-slidedown-button:hover {
+    background: rgba(255,255,255,.10) !important;
+    border-color: rgba(255,255,255,.2) !important;
+    color: #ffffff !important;
+  }
+</style>
+
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
