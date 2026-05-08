@@ -224,11 +224,15 @@
     transition: color .15s ease, border-color .15s ease;
   }
   .pd-push-btn-primary {
-    background: #111111;
-    border-color: #111111;
-    color: #ffffff;
+    background: #facc15;
+    border-color: #facc15;
+    color: #111111;
   }
-  .pd-push-btn-primary:hover { color: #facc15; }
+  .pd-push-btn-primary:hover {
+    background: #fde047;
+    border-color: #fde047;
+    color: #111111;
+  }
   .pd-push-btn-ghost {
     background: #ffffff;
     border-color: #e5e7eb;
