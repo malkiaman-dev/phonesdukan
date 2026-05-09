@@ -261,18 +261,41 @@
 /* ── Mobile ──────────────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
     #pd-chatbot-toggle {
-        bottom: 70px;
+        bottom: 16px;
         right: 16px;
         width: 48px;
         height: 48px;
     }
+
     #pd-chatbot-win {
-        right: 10px;
+        position: fixed;
+        top: 8px;
+        bottom: 72px;
         left: 10px;
-        bottom: 128px;
+        right: 10px;
         width: auto;
         height: auto;
-        /* 128px bottom offset + 16px top margin = cap at remaining viewport space */
-        max-height: calc(100vh - 144px);
+        max-height: none;
+        border-radius: 14px;
+    }
+
+    /* Header stays fixed inside the window */
+    .pd-chat-header {
+        flex-shrink: 0;
+        border-radius: 14px 14px 0 0;
+    }
+
+    /* Messages fill remaining height and scroll */
+    .pd-chat-messages {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Input bar stays pinned at bottom */
+    .pd-chat-footer {
+        flex-shrink: 0;
+        border-radius: 0 0 14px 14px;
     }
 }

@@ -15,13 +15,47 @@ document.addEventListener('DOMContentLoaded', function () {
     var isOpen   = false;
     var isBusy   = false;
 
+    // ── Mobile keyboard: reposition window when keyboard opens/closes ───────────
+    function isMobile() { return window.innerWidth <= 480; }
+
+    function applyMobileViewport() {
+        if (!isMobile() || !isOpen) return;
+        var vv  = window.visualViewport;
+        var vvh = vv ? vv.height   : window.innerHeight;
+        var vvt = vv ? vv.offsetTop : 0;
+
+        // Pin window between 8px below viewport top and 8px above keyboard
+        chatWin.style.top    = (vvt + 8) + 'px';
+        chatWin.style.bottom = 'auto';
+        chatWin.style.height = (vvh - 72) + 'px'; // 64px toggle area + 8px gap
+        chatWin.style.maxHeight = 'none';
+
+        // Scroll latest message into view
+        setTimeout(function () { msgBox.scrollTop = msgBox.scrollHeight; }, 80);
+    }
+
+    function resetMobileViewport() {
+        chatWin.style.top = '';
+        chatWin.style.bottom = '';
+        chatWin.style.height = '';
+        chatWin.style.maxHeight = '';
+    }
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', applyMobileViewport);
+        window.visualViewport.addEventListener('scroll', applyMobileViewport);
+    }
+
     // ── Toggle open/close ───────────────────────────────────────────────────────
     toggle.addEventListener('click', function () {
         isOpen = !isOpen;
         chatWin.classList.toggle('pd-chat-open', isOpen);
         if (isOpen) {
+            applyMobileViewport();
             input.focus();
             msgBox.scrollTop = msgBox.scrollHeight;
+        } else {
+            resetMobileViewport();
         }
     });
 
@@ -29,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
         closeBtn.addEventListener('click', function () {
             isOpen = false;
             chatWin.classList.remove('pd-chat-open');
+            resetMobileViewport();
         });
     }
 
@@ -37,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Escape' && isOpen) {
             isOpen = false;
             chatWin.classList.remove('pd-chat-open');
+            resetMobileViewport();
         }
     });
 

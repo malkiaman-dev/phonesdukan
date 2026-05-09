@@ -12,6 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/../../app/config/chatbot_config.php';
 require_once __DIR__ . '/../../database/db.php';
 
+if (empty(CHATBOT_API_KEY)) {
+    error_log('[Chatbot] API key is not configured (chatbot_config.local.php missing or empty)');
+    echo json_encode(['error' => 'We are a little busy right now. Please try again in a moment, or visit phonesdukan.com for help.']);
+    exit;
+}
+
 // ── Input ─────────────────────────────────────────────────────────────────────
 $raw   = file_get_contents('php://input');
 $input = json_decode($raw, true);
@@ -225,7 +231,7 @@ $messages[] = ['role' => 'user', 'content' => $message];
 $payload = json_encode([
     'model'       => CHATBOT_MODEL,
     'messages'    => $messages,
-    'max_tokens'  => 400,
+    'max_tokens'  => 800,
     'temperature' => 0.7,
 ]);
 
@@ -341,11 +347,15 @@ if (isset($data['error'])) {
     exit;
 }
 
-$reply = $data['choices'][0]['message']['content'] ?? null;
+$message_data = $data['choices'][0]['message'] ?? [];
+// Some reasoning models put output in 'content', others finish reasoning first
+$reply = $message_data['content'] ?? null;
 
+// Fallback: reasoning-only models may produce content on a second pass;
+// if content is still null after a full response, surface a friendly retry
 if (empty($reply)) {
-    error_log('[Chatbot] Empty choices. Full response: ' . $response);
-    echo json_encode(['error' => $errorMessage]);
+    error_log('[Chatbot] Empty content. finish_reason=' . ($data['choices'][0]['finish_reason'] ?? '?') . ' Full: ' . substr($response, 0, 500));
+    echo json_encode(['error' => 'Our assistant is thinking but ran out of space. Please try again with a shorter question.']);
     exit;
 }
 
