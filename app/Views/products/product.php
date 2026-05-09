@@ -309,7 +309,7 @@ if ($cartFormCondition): ?>
             <!-- Payment Method Selection -->
     <div class="payment-method-selection">
         <button type="button" class="payment-btn cod active" data-method="cod">COD</button>
-        <button type="button" class="payment-btn prepaid" data-method="prepaid">Prepaid · Save 6%</button>
+        <button type="button" class="payment-btn prepaid" data-method="prepaid">Prepaid · Save 4%</button>
     </div>
 
     <!-- Desktop Cart Form -->

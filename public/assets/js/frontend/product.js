@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Apply payment discount and update display/buttons
     function applyPaymentDiscount() {
-        const discountFactor = currentPaymentMethod === 'prepaid' ? 0.94 : 1.0;  // 6% off = *0.94
+        const discountFactor = currentPaymentMethod === 'prepaid' ? 0.96 : 1.0;  // 4% off = *0.96
         const basePrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
         const displayPrice = basePrice * discountFactor;
         const formattedDisplay = formatPrice(displayPrice);
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // No original sale, but prepaid discount
             showDiscount = true;
             oldPrice = originalRegularPrice;
-            totalDiscount = 6;
+            totalDiscount = 4;
         }
 
         if (showDiscount) {
