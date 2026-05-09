@@ -17,7 +17,11 @@ if (!defined('BASE_PATH') || !defined('BASE_URL')) {
         if ($relativeDirFs !== '') {
             $suffix = '/' . $relativeDirFs;
             if (substr($scriptDirUrl, -strlen($suffix)) === $suffix) {
+                // e.g. URL dir "phonesdukan/admin", FS dir "admin" → base is "phonesdukan"
                 $scriptDirUrl = substr($scriptDirUrl, 0, -strlen($suffix));
+            } elseif ($scriptDirUrl === $relativeDirFs) {
+                // URL dir equals FS dir exactly (e.g. both "admin") — site is at web root
+                $scriptDirUrl = '';
             }
         }
 
