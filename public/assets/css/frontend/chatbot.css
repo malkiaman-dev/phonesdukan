@@ -1,0 +1,278 @@
+/* ── Chatbot Widget ─────────────────────────────────────────────────────────── */
+#pd-chatbot-toggle {
+    position: fixed;
+    bottom: 80px;
+    right: 24px;
+    z-index: 10000;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #ffd400;
+    color: #111;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+#pd-chatbot-toggle:hover {
+    background: #ffe033;
+    transform: scale(1.06);
+}
+#pd-chatbot-toggle svg {
+    flex-shrink: 0;
+}
+
+/* ── Chat window ─────────────────────────────────────────────────────────────── */
+#pd-chatbot-win {
+    position: fixed;
+    bottom: 144px;
+    right: 24px;
+    z-index: 10000;
+    width: 360px;
+    /* Never taller than the space above the toggle button, with 16px top breathing room */
+    max-height: calc(100vh - 160px);
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.97);
+    transform-origin: bottom right;
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+}
+#pd-chatbot-win.pd-chat-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────────── */
+.pd-chat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #111;
+    flex-shrink: 0;
+}
+.pd-chat-header-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #ffd400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.pd-chat-header-icon svg {
+    width: 18px;
+    height: 18px;
+}
+.pd-chat-header-info {
+    flex: 1;
+    min-width: 0;
+}
+.pd-chat-header-info h4 {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+.pd-chat-header-info span {
+    font-size: 0.75rem;
+    color: #a3a3a3;
+}
+.pd-chat-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.15s ease;
+    flex-shrink: 0;
+}
+.pd-chat-close:hover {
+    color: #fff;
+}
+
+/* ── Messages area ───────────────────────────────────────────────────────────── */
+.pd-chat-messages {
+    flex: 1;
+    min-height: 0; /* lets flex child shrink and scroll instead of overflowing */
+    overflow-y: auto;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8f9fa;
+    scroll-behavior: smooth;
+}
+.pd-chat-messages::-webkit-scrollbar {
+    width: 4px;
+}
+.pd-chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+.pd-chat-messages::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+/* ── Message bubbles ─────────────────────────────────────────────────────────── */
+.pd-chat-msg {
+    max-width: 82%;
+    padding: 9px 12px;
+    border-radius: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+.pd-chat-msg--user {
+    align-self: flex-end;
+    background: #ffd400;
+    color: #111;
+    border-bottom-right-radius: 4px;
+}
+.pd-chat-msg--assistant {
+    align-self: flex-start;
+    background: #fff;
+    color: #111;
+    border: 1px solid #e5e7eb;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* ── Links inside assistant bubbles ─────────────────────────────────────────── */
+.pd-chat-msg--assistant a {
+    color: #111;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-all;
+}
+.pd-chat-msg--assistant a:hover {
+    color: #b48a00;
+}
+
+/* ── Typing indicator ────────────────────────────────────────────────────────── */
+.pd-chat-typing {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 14px;
+}
+.pd-chat-typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #9ca3af;
+    display: inline-block;
+    animation: pd-bounce 1.3s infinite ease-in-out;
+}
+.pd-chat-typing span:nth-child(2) { animation-delay: 0.18s; }
+.pd-chat-typing span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes pd-bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40%            { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Input area ──────────────────────────────────────────────────────────────── */
+.pd-chat-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+    flex-shrink: 0;
+}
+.pd-chat-input {
+    flex: 1;
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    padding: 9px 14px;
+    font-size: 0.875rem;
+    outline: none;
+    background: #f8f9fa;
+    color: #111;
+    transition: border-color 0.15s ease;
+    resize: none;
+}
+.pd-chat-input:focus {
+    border-color: #ffd400;
+    background: #fff;
+    outline: none;
+    box-shadow: none;
+}
+.pd-chat-input::placeholder {
+    color: #9ca3af;
+}
+.pd-chat-send {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #ffd400;
+    color: #111;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+.pd-chat-send:hover {
+    background: #ffe033;
+    transform: scale(1.07);
+}
+.pd-chat-send:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Welcome message ─────────────────────────────────────────────────────────── */
+.pd-chat-welcome {
+    text-align: center;
+    padding: 6px 4px 4px;
+}
+.pd-chat-welcome p {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    #pd-chatbot-toggle {
+        bottom: 70px;
+        right: 16px;
+        width: 48px;
+        height: 48px;
+    }
+    #pd-chatbot-win {
+        right: 10px;
+        left: 10px;
+        bottom: 128px;
+        width: auto;
+        height: auto;
+        /* 128px bottom offset + 16px top margin = cap at remaining viewport space */
+        max-height: calc(100vh - 144px);
+    }
+}

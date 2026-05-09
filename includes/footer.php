@@ -546,6 +546,55 @@
 })();
 </script>
 
+<!-- ── Chatbot Widget ───────────────────────────────────────────────────────── -->
+<button id="pd-chatbot-toggle" aria-label="Open chat assistant" title="Chat with us">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+</button>
+
+<div id="pd-chatbot-win" role="dialog" aria-label="Phones Dukan Chat Assistant">
+    <div class="pd-chat-header">
+        <div class="pd-chat-header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <div class="pd-chat-header-info">
+            <h4>Phones Dukan Assistant</h4>
+            <span>Ask me anything about our products</span>
+        </div>
+        <button id="pd-chatbot-close" class="pd-chat-close" aria-label="Close chat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+
+    <div id="pd-chatbot-messages" class="pd-chat-messages">
+        <div class="pd-chat-welcome">
+            <p>Hi! Ask me about prices, products, or anything about Phones Dukan.</p>
+        </div>
+    </div>
+
+    <form id="pd-chatbot-form" class="pd-chat-footer" autocomplete="off">
+        <input id="pd-chatbot-input" class="pd-chat-input" type="text"
+               placeholder="Type your question..." maxlength="500" autocomplete="off">
+        <button id="pd-chatbot-send" class="pd-chat-send" type="submit" aria-label="Send">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+        </button>
+    </form>
+</div>
+<!-- ── /Chatbot Widget ─────────────────────────────────────────────────────── -->
+
 </div> <!-- Close site-wrapper -->
 </body>
 </html>
