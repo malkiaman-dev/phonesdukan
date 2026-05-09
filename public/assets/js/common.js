@@ -388,3 +388,19 @@ mobileSearchInput.addEventListener("keypress", function (event) {
         });
     }
 });
+
+// Pre-loader: hide once everything is loaded + short delay
+(function () {
+    function hidePreloader() {
+        setTimeout(function () {
+            var el = document.getElementById('pd-preloader');
+            if (el) el.classList.add('pd-preloader-hidden');
+        }, 1200);
+    }
+    if (document.readyState === 'complete') {
+        hidePreloader();
+    } else {
+        window.addEventListener('load', hidePreloader);
+    }
+    setTimeout(hidePreloader, 6000);
+})();

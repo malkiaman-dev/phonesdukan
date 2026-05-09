@@ -1,4 +1,5 @@
 <?php
+$showPreloader = true;
 $pageTitle = 'Best Mobile Deals &amp; Prices in Pakistan - Phones Dukan';
 $metaDescription = 'Shop top-rated mobiles, smartwatches, and accessories at Phones Dukan – Pakistan’s trusted store. Best prices, quality, and fast delivery. Explore now!';
 $metaRobots = 'index, follow';  // Optional; default is good
