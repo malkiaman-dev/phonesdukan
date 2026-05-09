@@ -3,14 +3,7 @@
 // Fill in your OpenRouter API key below, then save.
 // Get your key at: https://openrouter.ai/keys
 
-// API key lives in chatbot_config.local.php (gitignored — never committed)
-// On the live server, create that file manually with: define('CHATBOT_API_KEY', 'your-key');
-if (file_exists(__DIR__ . '/chatbot_config.local.php')) {
-    require_once __DIR__ . '/chatbot_config.local.php';
-}
-if (!defined('CHATBOT_API_KEY')) {
-    define('CHATBOT_API_KEY', '');
-}
+define('CHATBOT_API_KEY', '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');
 define('CHATBOT_MODEL',   'gpt-oss-120b');
 define('CHATBOT_API_URL', 'https://openrouter.ai/api/v1/chat/completions');
 define('CHATBOT_SITE_URL', 'https://phonesdukan.com');
