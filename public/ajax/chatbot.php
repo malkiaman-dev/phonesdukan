@@ -41,17 +41,31 @@ try {
     $db = $database->getConnection();
 
     if ($db) {
-        $lowerMsg = strtolower($message);
+        // Build a search context from the current message + last 6 history turns
+        // so budget/category mentioned earlier in the conversation are not lost
+        $historyText = '';
+        foreach (array_slice($history, -6) as $turn) {
+            if (isset($turn['role'], $turn['content']) && $turn['role'] === 'user') {
+                $historyText .= ' ' . $turn['content'];
+            }
+        }
+        $searchContext = strtolower($historyText . ' ' . $message);
+        $lowerMsg      = strtolower($message);
 
-        // Extract budget (e.g. 50000, 50,000, 50k, PKR 50000, Rs 50000)
+        // Extract budget — check current message first, fall back to history
         $budget = null;
-        if (preg_match('/\b(\d[\d,]*)\s*k\b/i', $lowerMsg, $m)) {
-            $budget = (float) str_replace(',', '', $m[1]) * 1000;
-        } elseif (preg_match('/(?:pkr|rs\.?|rupees?)?\s*(\d[\d,]{3,})/i', $lowerMsg, $m)) {
-            $budget = (float) str_replace(',', '', $m[1]);
+        foreach ([$lowerMsg, $searchContext] as $src) {
+            if (preg_match('/\b(\d[\d,]*)\s*k\b/i', $src, $m)) {
+                $budget = (float) str_replace(',', '', $m[1]) * 1000;
+                break;
+            }
+            if (preg_match('/(?:pkr|rs\.?|rupees?)?\s*(\d[\d,]{3,})/i', $src, $m)) {
+                $budget = (float) str_replace(',', '', $m[1]);
+                break;
+            }
         }
 
-        // Detect product category from message keywords
+        // Detect product category — check current message first, fall back to history
         $categorySlug = null;
         $categoryMap  = [
             'mobiles'            => ['phone', 'mobile', 'smartphone', 'android', 'iphone', 'samsung', 'xiaomi', 'realme', 'oppo', 'vivo', 'tecno', 'infinix', 'itel', 'nokia', 'motorola', 'huawei', 'poco', 'redmi', 'oneplus'],
@@ -61,13 +75,16 @@ try {
             'power-banks'        => ['powerbank', 'power bank', 'portable charger'],
             'mobile-accessories' => ['accessory', 'accessories', 'case', 'cover', 'screen protector', 'cable'],
         ];
-        foreach ($categoryMap as $slug => $keywords) {
-            foreach ($keywords as $kw) {
-                if (strpos($lowerMsg, $kw) !== false) {
-                    $categorySlug = $slug;
-                    break 2;
+        foreach ([$lowerMsg, $searchContext] as $src) {
+            foreach ($categoryMap as $slug => $keywords) {
+                foreach ($keywords as $kw) {
+                    if (strpos($src, $kw) !== false) {
+                        $categorySlug = $slug;
+                        break 3;
+                    }
                 }
             }
+            if ($categorySlug) break;
         }
 
         $results = [];
