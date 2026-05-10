@@ -528,9 +528,13 @@ span.bulk-cta-price {
   text-transform: uppercase;
   color: #fff !important;
   background: #111 !important;
-  margin-top: 6px;
+  margin-top: auto;
   letter-spacing: 0.5px;
   box-shadow: none;
+}
+
+.bulk-cta-item.bulk-inquiry .bulk-cta-price {
+  font-size: 11px;
 }
 
 /* ---- PAYMENT TOGGLE ---- */

@@ -294,8 +294,9 @@ foreach ($paragraphs as $index => $para) {
                             <span class="bulk-cta-badge">BEST VALUE</span>
                         </div>
                         <div class="bulk-cta-item bulk-inquiry">
-                            <span class="bulk-cta-info">Corporate Deal</span>
-                            <span class="bulk-cta-value">Click to Enquire</span>
+                            <span class="bulk-cta-info">Corporate Deal items</span>
+                            <span class="bulk-cta-value">Get Quote</span>
+                            <span class="bulk-cta-price"><strong>Best bulk offers</strong></span>
                             <span class="bulk-cta-badge">BULK ORDER</span>
                         </div>
                     </div>
