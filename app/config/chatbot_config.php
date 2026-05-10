@@ -3,7 +3,7 @@
 // Fill in your OpenRouter API key below, then save.
 // Get your key at: https://openrouter.ai/keys
 
-define('CHATBOT_API_KEY', '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');
+define('CHATBOT_API_KEY', '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');
 define('CHATBOT_MODEL',   'gpt-oss-120b');
 define('CHATBOT_API_URL', 'https://openrouter.ai/api/v1/chat/completions');
 define('CHATBOT_SITE_URL', 'https://phonesdukan.com');
