@@ -123,10 +123,33 @@ class OrderController
             // ✅ Insert into order_items table
             foreach ($cartItems as $item) {
                 error_log("🛠️ DEBUG: Inserting into order_items - Order ID: $orderId, Product ID: " . $item['product_id']);
-    
-                $stmt = $this->db->prepare('INSERT INTO order_items (order_id, product_id, quantity, subtotal_price) VALUES (?, ?, ?, ?)');
-                $result = $stmt->execute([$orderId, $item['product_id'], $item['quantity'], $item['subtotal']]);
-    
+
+                $variation_id         = isset($item['variation_id']) && $item['variation_id'] ? (int)$item['variation_id'] : null;
+                $variation_attributes = $item['variation_attributes'] ?? null;
+                $variation_sku        = null;
+
+                // Fetch variation SKU if we have a variation_id
+                if ($variation_id) {
+                    $vSkuStmt = $this->db->prepare("SELECT sku FROM product_variations WHERE id=?");
+                    $vSkuStmt->execute([$variation_id]);
+                    $vRow = $vSkuStmt->fetch(PDO::FETCH_ASSOC);
+                    $variation_sku = $vRow ? $vRow['sku'] : null;
+                }
+
+                $stmt = $this->db->prepare(
+                    'INSERT INTO order_items (order_id, product_id, quantity, subtotal_price, variation_id, variation_sku, variation_attributes)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)'
+                );
+                $result = $stmt->execute([
+                    $orderId,
+                    $item['product_id'],
+                    $item['quantity'],
+                    $item['subtotal'],
+                    $variation_id,
+                    $variation_sku,
+                    $variation_attributes,
+                ]);
+
                 if (!$result) {
                     error_log('❌ ERROR: Failed to insert into order_items. SQL Error: ' . json_encode($stmt->errorInfo()));
                     $this->db->rollBack();

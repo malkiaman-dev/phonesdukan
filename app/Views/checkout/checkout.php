@@ -19,12 +19,16 @@ $cartItems = [];
 $orderResult = null;
 
 try {
-    $stmt = $conn->prepare('SELECT cart.product_id, cart.quantity, cart.subtotal, cart.payment_method, products.product_name, product_images.image_url
-                            FROM cart
-                            JOIN products ON cart.product_id = products.product_id
-                            LEFT JOIN product_images ON cart.product_id = product_images.product_id AND product_images.is_primary = 1
-                            WHERE cart.session_id = ?');
-    $stmt->execute([$session_id]);
+    $stmt = $conn->prepare(
+        'SELECT cart.product_id, cart.quantity, cart.unit_price, (cart.unit_price * cart.quantity) AS subtotal,
+                cart.payment_method, products.product_name, product_images.image_url,
+                cart.variation_id, cart.variation_attributes
+         FROM cart
+         JOIN products ON cart.product_id = products.product_id
+         LEFT JOIN product_images ON cart.product_id = product_images.product_id AND product_images.is_primary = 1
+         WHERE cart.session_id = ? OR (cart.user_id IS NOT NULL AND cart.user_id = ?)');
+    $userId = $_SESSION['user_id'] ?? null;
+    $stmt->execute([$session_id, $userId]);
     $cartItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage(), 3, __DIR__ . '/../../../logs/orders.log');
@@ -457,6 +461,14 @@ $totalPriceWithDelivery = $totalCartValue + $deliveryCharge;
                                     class="co-summary-img">
                                 <div class="co-summary-info">
                                     <p class="co-summary-name"><?php echo htmlspecialchars($item['product_name']); ?></p>
+                                    <?php if (!empty($item['variation_attributes'])): ?>
+                                    <p class="co-summary-meta" style="margin-top:3px">
+                                        <?php foreach (explode(',', $item['variation_attributes']) as $attr):
+                                            $attr = trim($attr); if (!$attr) continue; ?>
+                                        <span style="display:inline-block;padding:1px 7px;background:#fffbeb;border:1px solid #facc15;border-radius:999px;font-size:.72rem;font-weight:700;color:#111;margin:1px"><?= htmlspecialchars($attr) ?></span>
+                                        <?php endforeach; ?>
+                                    </p>
+                                    <?php endif; ?>
                                     <p class="co-summary-meta">Qty: <?php echo htmlspecialchars($item['quantity']); ?></p>
                                 </div>
                                 <span class="co-summary-price">Rs. <?php echo number_format($item['subtotal'], 2); ?></span>

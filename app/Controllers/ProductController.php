@@ -3,6 +3,7 @@ require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/helpers.php';
 require_once __DIR__ . '/../Models/ProductModel.php';
 require_once __DIR__ . '/../Models/ReviewModel.php';
+require_once __DIR__ . '/../Models/VariationModel.php';
 
 class ProductController
 {
@@ -14,16 +15,47 @@ class ProductController
         $productModel = new ProductModel();
         $reviewModel = new ReviewModel();
 
-        // Fetch the product by its slug
+        // Primary lookup: all three slugs must match
         $product = $productModel->getProductBySlug($category_slug, $brand_slug, $product_slug);
+
+        // Fallback: match only by product_slug. If found, the category/brand
+        // part of the URL is wrong — redirect to the canonical URL (301).
+        if (!$product) {
+            $product = $productModel->getProductByProductSlugOnly($product_slug);
+            if ($product) {
+                $correctCat   = (string)($product['category_slug'] ?? '');
+                $correctBrand = (string)($product['brand_slug']   ?? '');
+                $correctSlug  = (string)($product['product_slug'] ?? $product_slug);
+                $baseUrl = rtrim(getBaseURL(), '/');
+                header('Location: ' . $baseUrl . '/' . ltrim($correctCat . '/' . $correctBrand . '/' . $correctSlug, '/'), true, 301);
+                exit();
+            }
+            // Also try case-insensitive match on product_slug
+            $product = $productModel->getProductBySlugCaseInsensitive($category_slug, $brand_slug, $product_slug);
+        }
 
         if ($product) {
             // Get product images, reviews, and attributes
             $images = $productModel->getProductImages($product['product_id']);
             $isComingSoon = !empty($product['product_tag']) && stripos($product['product_tag'], 'coming_soon') !== false;
 
-            // Fetch product attributes
+            // Fetch product attributes (legacy system)
             $productAttributes = $productModel->getProductAttributes($product['product_id']);
+
+            // Fetch new variation system data — wrapped so any DB error never kills the page
+            $productVariations = [];
+            $variationTypes    = [];
+            $isVariableProduct = false;
+            try {
+                $variationModel    = new VariationModel();
+                $productVariations = $variationModel->getProductVariationsForFrontend($product['product_id']);
+                $variationTypes    = $variationModel->getVariationTypesWithValues();
+                $isVariableProduct = !empty($product['product_type'])
+                    && $product['product_type'] === 'variable'
+                    && !empty($productVariations);
+            } catch (\Throwable $e) {
+                error_log('ProductController variation load error: ' . $e->getMessage());
+            }
 
             // Fetch SEO data
             $stmt = $db->prepare('SELECT * FROM product_seo WHERE product_id = :product_id LIMIT 1');

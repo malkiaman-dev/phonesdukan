@@ -369,9 +369,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const quantityInput = quantityInputs[buttonType];
         if (!addToCartButton || !quantityInput) return;
         const productId = addToCartButton.getAttribute('data-product-id');
-        const unitPrice = parseFloat(addToCartButton.getAttribute('data-unit-price') || 0);  // Already discounted
+        const unitPrice = parseFloat(addToCartButton.getAttribute('data-unit-price') || 0);
         const attributeValue = addToCartButton.getAttribute('data-attribute-value') || null;
         const paymentMethod = addToCartButton.getAttribute('data-payment-method') || 'cod';
+        const variationId = addToCartButton.getAttribute('data-variation-id') || null;
+        const variationIdHidden = document.getElementById('selectedVariationId');
+        const resolvedVariationId = variationId || (variationIdHidden ? variationIdHidden.value : null) || null;
         const quantity = parseInt(quantityInput.value) || 1;
         if (!productId || quantity < 1) {
             Swal.fire({
@@ -391,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             return;
         }
-        console.log(`Sending to Cart - Product ID: ${productId}, Quantity: ${quantity}, Unit Price: ${unitPrice} (discounted), Attribute: ${attributeValue}, Payment: ${paymentMethod}`);
+        console.log(`Sending to Cart - Product ID: ${productId}, Quantity: ${quantity}, Unit Price: ${unitPrice} (discounted), Attribute: ${attributeValue}, Payment: ${paymentMethod}, VariationId: ${resolvedVariationId}`);
         $.ajax({
             url: withBase("/app/Controllers/CartController.php"),
             type: "POST",
@@ -399,8 +402,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 product_id: productId,
                 quantity: quantity,
                 attribute_value: attributeValue,
-                unit_price: unitPrice,  // Send discounted price
-                payment_method: paymentMethod  // New field
+                unit_price: unitPrice,
+                payment_method: paymentMethod,
+                variation_id: resolvedVariationId ? parseInt(resolvedVariationId) : null,
             }),
             contentType: "application/json",
             dataType: "json",

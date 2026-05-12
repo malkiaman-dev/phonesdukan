@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/AddProductModel.php';
+require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 
 class ProductController
 {
@@ -28,9 +29,10 @@ class ProductController
 
             try {
                 // Collect POST data (product data)
+                $product_type = in_array($_POST['product_type'] ?? 'simple', ['simple','variable']) ? ($_POST['product_type'] ?? 'simple') : 'simple';
                 $productData = [
                     'product_name' => $_POST['product_name'],
-                    'product_slug' => $_POST['product_slug'],
+                    'product_slug' => trim(preg_replace('/-+/', '-', str_replace(' ', '-', trim($_POST['product_slug']))), '-'),
                     'category_id' => $_POST['category_id'],
                     'brand_id' => $_POST['brand_id'],
                     'product_description' => $_POST['product_description'],
@@ -39,7 +41,7 @@ class ProductController
                     'stock_quantity' => $_POST['stock_quantity'],
                     'regular_price' => $_POST['regular_price'],
                     'sale_price' => $_POST['sale_price'],
-                    'product_sku' => !empty($_POST['product_sku']) ? $_POST['product_sku'] : NULL, // Set to NULL if SKU is empty
+                    'product_sku' => !empty($_POST['product_sku']) ? $_POST['product_sku'] : NULL,
                     'weight_kg' => !empty($_POST['weight_kg']) ? $_POST['weight_kg'] : NULL,
                     'length_cm' => !empty($_POST['length_cm']) ? $_POST['length_cm'] : NULL,
                     'width_cm' => !empty($_POST['width_cm']) ? $_POST['width_cm'] : NULL,
@@ -49,12 +51,13 @@ class ProductController
                 ];
 
                 // Insert the product into the database
-                $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description, 
-                                                short_description, product_status, stock_quantity, regular_price, sale_price, 
-                                                product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag)
-                          VALUES (:product_name, :product_slug, :category_id, :brand_id, :product_description, 
-                                  :short_description, :product_status, :stock_quantity, :regular_price, :sale_price, 
-                                  :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag)';
+                $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description,
+                                                short_description, product_status, stock_quantity, regular_price, sale_price,
+                                                product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag, product_type)
+                          VALUES (:product_name, :product_slug, :category_id, :brand_id, :product_description,
+                                  :short_description, :product_status, :stock_quantity, :regular_price, :sale_price,
+                                  :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag, :product_type)';
+                $productData['product_type'] = $product_type;
                 $stmt = $this->db->prepare($query);
                 $stmt->execute($productData);
                 $productId = $this->db->lastInsertId();  // Get the last inserted product ID
@@ -200,6 +203,16 @@ class ProductController
                             $this->db->rollBack();
                             return false;
                         }
+                    }
+                }
+
+                // Save product variations if variable
+                if ($product_type === 'variable' && !empty($_POST['variations_json'])) {
+                    $variationsJson = $_POST['variations_json'];
+                    $variations = json_decode($variationsJson, true);
+                    if (is_array($variations) && !empty($variations)) {
+                        $varModel = new VariationModel();
+                        $varModel->saveProductVariations($productId, $variations);
                     }
                 }
 

@@ -4,6 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/EditProductModel.php';
+require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 
 class ProductController
 {
@@ -101,7 +102,26 @@ class ProductController
             error_log('Attributes to remove for product_id ' . $id . ': ' . print_r($removeAttributes, true));
         
             $this->updateAssignedProductAttributes($id, $attributes, $removeAttributes);
-        
+
+            // Save product_type and variations
+            $product_type = in_array($_POST['product_type'] ?? 'simple', ['simple','variable'])
+                ? ($_POST['product_type'] ?? 'simple') : 'simple';
+            $db = (new Database())->getConnection();
+            $db->prepare("UPDATE products SET product_type=? WHERE product_id=?")->execute([$product_type, $id]);
+
+            if ($product_type === 'variable' && isset($_POST['variations_json'])) {
+                $variations = json_decode($_POST['variations_json'], true);
+                if (is_array($variations)) {
+                    $varModel = new VariationModel();
+                    $varModel->saveProductVariations($id, $variations);
+                }
+            } elseif ($product_type === 'simple') {
+                // Clear existing variations when switching back to simple
+                $db->prepare(
+                    "DELETE pv FROM product_variations pv WHERE pv.product_id = ?"
+                )->execute([$id]);
+            }
+
             session_start();
             $_SESSION['message'] = 'Product updated successfully!';
             $_SESSION['message_type'] = 'success';

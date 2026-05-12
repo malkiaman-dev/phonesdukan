@@ -28,8 +28,9 @@ try {
 
     // Fetch ordered items along with product details
     $stmt = $conn->prepare('
-        SELECT oi.product_id, oi.quantity, oi.subtotal_price, p.product_name, 
-               p.regular_price, p.sale_price, pi.image_url
+        SELECT oi.product_id, oi.quantity, oi.subtotal_price, p.product_name,
+               p.regular_price, p.sale_price, pi.image_url,
+               oi.variation_id, oi.variation_sku, oi.variation_attributes
         FROM order_items oi
         JOIN products p ON oi.product_id = p.product_id
         LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
@@ -523,6 +524,17 @@ $totalPriceWithDelivery = $totalPrice + $deliveryCharge;
                     <img class="ty-product-img" src="<?php echo htmlspecialchars($item['image_url'] ?? '/public/assets/images/default.jpg'); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
                     <div class="ty-product-details">
                         <h3 class="ty-product-name"><?php echo htmlspecialchars($item['product_name']); ?></h3>
+                        <?php if (!empty($item['variation_attributes'])): ?>
+                        <p class="ty-product-meta" style="margin-top:4px">
+                            <?php foreach (explode(',', $item['variation_attributes']) as $attr):
+                                $attr = trim($attr); if (!$attr) continue; ?>
+                            <span style="display:inline-block;padding:1px 8px;background:#fffbeb;border:1px solid #facc15;border-radius:999px;font-size:.75rem;font-weight:700;color:#111;margin:2px"><?= htmlspecialchars($attr) ?></span>
+                            <?php endforeach; ?>
+                        </p>
+                        <?php endif; ?>
+                        <?php if (!empty($item['variation_sku'])): ?>
+                        <p class="ty-product-meta" style="font-size:.78rem;color:#6b7280">SKU: <?= htmlspecialchars($item['variation_sku']) ?></p>
+                        <?php endif; ?>
                         <p class="ty-product-meta">Rs. <?php echo number_format(($item['quantity'] > 0 ? ($item['subtotal_price'] / $item['quantity']) : 0), 2); ?> each</p>
                     </div>
                     <div class="ty-product-price">

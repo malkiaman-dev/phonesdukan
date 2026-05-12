@@ -59,10 +59,17 @@ if (!empty($cartItems)) {
                             <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
                             <div class="product-info">
                                 <p class="product-name-text"><?php echo htmlspecialchars($item['product_name']); ?></p>
-                                <?php if (!empty($item['attribute_value'])): ?>
+                                <?php if (!empty($item['variation_attributes'])): ?>
+                                <div class="cart-var-pills" id="attribute_<?php echo $item['product_id']; ?>">
+                                    <?php foreach (explode(',', $item['variation_attributes']) as $attr):
+                                        $attr = trim($attr); if (!$attr) continue;
+                                        $val = trim(strpos($attr, ':') !== false ? substr($attr, strpos($attr, ':') + 1) : $attr);
+                                    ?>
+                                    <span class="cart-var-pill"><?= htmlspecialchars($val) ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php elseif (!empty($item['attribute_value'])): ?>
                                 <p class="attribute" id="attribute_<?php echo $item['product_id']; ?>"><?php echo htmlspecialchars($item['attribute_value']); ?></p>
-                                <?php else: ?>
-                                <p class="attribute" id="attribute_<?php echo $item['product_id']; ?>" style="display:none;">No attribute available</p>
                                 <?php endif; ?>
                             </div>
                         </td>

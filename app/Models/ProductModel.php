@@ -26,20 +26,75 @@ class ProductModel
      * @param string $product_slug
      * @return array<string,mixed>|null
      */
+    private static function normalizeSlug(string $slug): string
+    {
+        // Replace spaces and multiple hyphens with a single hyphen, trim edges
+        return trim(preg_replace('/-+/', '-', str_replace(' ', '-', $slug)), '-');
+    }
+
     public function getProductBySlug(string $category_slug, string $brand_slug, string $product_slug): ?array
     {
+        // Normalize: spaces → hyphens so URL and DB slugs always match
+        $product_slug  = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug    = self::normalizeSlug($brand_slug);
+
         $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
                   FROM products p
                   INNER JOIN categories c ON p.category_id = c.category_id
                   INNER JOIN brands b ON p.brand_id = b.brand_id
-                  WHERE c.slug = :category_slug
-                  AND b.slug = :brand_slug
-                  AND p.product_slug = :product_slug
+                  WHERE REPLACE(c.slug, " ", "-") = :category_slug
+                  AND REPLACE(b.slug, " ", "-") = :brand_slug
+                  AND REPLACE(p.product_slug, " ", "-") = :product_slug
                   LIMIT 1';
 
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
         $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Case-insensitive fallback: useful when URL uses wrong casing.
+     */
+    public function getProductBySlugCaseInsensitive(string $category_slug, string $brand_slug, string $product_slug): ?array
+    {
+        $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
+                  FROM products p
+                  INNER JOIN categories c ON p.category_id = c.category_id
+                  INNER JOIN brands b ON p.brand_id = b.brand_id
+                  WHERE LOWER(c.slug) = LOWER(:category_slug)
+                  AND LOWER(b.slug) = LOWER(:brand_slug)
+                  AND LOWER(p.product_slug) = LOWER(:product_slug)
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /**
+     * Last-resort fallback: find a product by product_slug alone.
+     * Used to detect URL/slug mismatches and issue a 301 redirect.
+     */
+    public function getProductByProductSlugOnly(string $product_slug): ?array
+    {
+        $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
+                  FROM products p
+                  INNER JOIN categories c ON p.category_id = c.category_id
+                  INNER JOIN brands b ON p.brand_id = b.brand_id
+                  WHERE p.product_slug = :product_slug
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
         $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
         $stmt->execute();
 
@@ -631,6 +686,45 @@ class ProductModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
+    /**
+     * For product listing cards: if the product is variable, return the lowest
+     * active variation price with a "from_variation" flag so the template can
+     * render "From Rs. X". Falls back to the regular product price otherwise.
+     */
+    public function getDisplayPrice(int $product_id, string $product_type, float $regular_price, ?float $sale_price): array
+    {
+        if ($product_type !== 'variable') {
+            return [
+                'from_variation' => false,
+                'regular_price'  => $regular_price,
+                'sale_price'     => $sale_price,
+            ];
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT MIN(IFNULL(sale_price, regular_price)) AS lowest
+             FROM product_variations
+             WHERE product_id = ? AND status = 1 AND stock_quantity > 0"
+        );
+        $stmt->execute([$product_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $lowest = $row['lowest'] !== null ? (float)$row['lowest'] : null;
+        if ($lowest !== null) {
+            return [
+                'from_variation' => true,
+                'regular_price'  => $lowest,
+                'sale_price'     => null,
+            ];
+        }
+
+        return [
+            'from_variation' => false,
+            'regular_price'  => $regular_price,
+            'sale_price'     => $sale_price,
+        ];
+    }
+
 }
 ?>

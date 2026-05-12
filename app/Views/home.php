@@ -1241,11 +1241,12 @@ foreach ($latest_posts_raw as $post) {
                     <span class="star">&#9733;</span>
                     <span class="star">&#9733;</span>
                     <span class="star">&#9733;</span>
-                    <span class="star star--empty">&#9734;</span>
+                    <span class="star">&#9733;</span>
                 </div>
                 <p>I like this place. It's not only a walk-in customer shop, but also an online store. That's why I give them 5 stars!</p>
                 <h3 class="testimonial-name">Shadab Hussain</h3>
             </div>
+            
         </div>
     </div>
 </section>

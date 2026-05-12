@@ -65,13 +65,18 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             </ul>
         </li>
         <li class="nav-item has-submenu">
-            <a class="nav-link <?= in_array($current_page, ['manage-products.php', 'manage-attributes.php']) ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
+            <a class="nav-link <?= in_array($current_page, ['manage-products.php', 'manage-attributes.php', 'manage-variations.php']) ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
                 <i class="fas fa-box"></i> Products
             </a>
             <ul class="submenu">
                 <li class="nav-item">
                     <a class="nav-link <?= ($current_page == 'manage-products.php') ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
                         Manage Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page == 'manage-variations.php') ? 'active' : '' ?>" href="<?= url('admin/manage-variations.php'); ?>">
+                        Manage Variations
                     </a>
                 </li>
                 <li class="nav-item">

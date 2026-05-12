@@ -29,7 +29,8 @@ if (!$order) {
 }
 
 $product_query = "
-    SELECT oi.quantity, oi.subtotal_price, p.product_name 
+    SELECT oi.quantity, oi.subtotal_price, p.product_name,
+           oi.variation_id, oi.variation_sku, oi.variation_attributes
     FROM order_items oi
     LEFT JOIN products p ON oi.product_id = p.product_id
     WHERE oi.order_id = ?";
@@ -257,7 +258,19 @@ if ($deliveryCharges < 0) {
                                 $unitPrice = $qty > 0 ? ($lineSubtotal / $qty) : 0;
                             ?>
                             <tr>
-                                <td><?= htmlspecialchars($product['product_name'] ?? 'Unknown Product') ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($product['product_name'] ?? 'Unknown Product') ?></strong>
+                                    <?php if (!empty($product['variation_attributes'])): ?>
+                                    <div style="margin-top:4px">
+                                        <?php foreach (explode(',', $product['variation_attributes']) as $attr): ?>
+                                            <span style="display:inline-block;padding:2px 8px;background:#fffbeb;border:1px solid #facc15;border-radius:999px;font-size:.75rem;font-weight:700;color:#111;margin:2px 2px 0 0"><?= htmlspecialchars(trim($attr)) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($product['variation_sku'])): ?>
+                                    <div style="font-size:.75rem;color:#6b7280;margin-top:3px">SKU: <?= htmlspecialchars($product['variation_sku']) ?></div>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="odm-right"><?= (int)$qty ?></td>
                                 <td class="odm-right">PKR <?= number_format($unitPrice, 2) ?></td>
                                 <td class="odm-right">PKR <?= number_format($lineSubtotal, 2) ?></td>

@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_act
     error_log('POST data: ' . print_r($_POST, true));
     $productData = [
         'product_name' => $_POST['product_name'] ?? '',
-        'product_slug' => $_POST['product_slug'] ?? '',
+        'product_slug' => trim(preg_replace('/-+/', '-', str_replace(' ', '-', trim($_POST['product_slug'] ?? ''))), '-'),
         'product_description' => $_POST['product_description'] ?? '',
         'short_description' => $_POST['short_description'] ?? '',
         'product_status' => $_POST['product_status'] ?? '0',
@@ -116,9 +116,92 @@ function epImageCandidates($rawPath)
 
     return array_values(array_unique(array_filter($candidates)));
 }
+
+// Load variation data for this product
+require_once dirname(__DIR__, 1) . '/app/Models/VariationModel.php';
+$vModel = new VariationModel();
+$allVarTypes = $vModel->getVariationTypesWithValues();
+$existingVariations = $vModel->getProductVariationsForFrontend($product['product_id']);
+$currentProductType = $product['product_type'] ?? 'simple';
 ?>
 
 <style>
+/* ---- Variation Builder (edit page) ---- */
+
+/* Global reset: override admin theme's span/label/p color inside the variation section */
+#epVariationBuilderWrap,
+#epVariationBuilderWrap * {
+    background-color: transparent;
+    color: #111111;
+}
+#epVariationBuilderWrap span,
+#epVariationBuilderWrap label,
+#epVariationBuilderWrap p,
+#epVariationBuilderWrap th,
+#epVariationBuilderWrap td {
+    color: #111111 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+#epVariationBuilderWrap .vb-step-title { color: #111111 !important; }
+#epVariationBuilderWrap .vb-type-badge { color: #6b7280 !important; }
+
+.vb-toggle-wrap { position:relative; display:inline-block; }
+.vb-toggle-track { width:46px; height:24px; border-radius:999px; background:#e5e7eb; transition:background .2s; cursor:pointer; }
+input#enableVariationsEP:checked + .vb-toggle-track { background:#facc15; }
+.vb-toggle-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.18); transition:left .2s; }
+input#enableVariationsEP:checked ~ .vb-toggle-track .vb-toggle-thumb,
+input#enableVariationsEP:checked + .vb-toggle-track .vb-toggle-thumb { left:25px; }
+.vb-step { border:1px solid #e5e7eb; border-radius:12px; margin-bottom:16px; overflow:hidden; }
+.vb-step-title { padding:12px 16px; background:#f8fafc !important; font-weight:800; font-size:.9rem; color:#111 !important; border-bottom:1px solid #e5e7eb; }
+.vb-step-body { padding:16px; background:#fff !important; }
+.vb-type-grid { display:flex; flex-wrap:wrap; gap:10px; }
+.vb-type-check {
+    display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    padding:8px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+    font-size:.88rem; font-weight:700; color:#111 !important;
+    background:#fff !important; transition:border-color .15s,background .15s;
+    user-select:none;
+}
+.vb-type-check:has(input:checked) { border-color:#facc15 !important; background:#fffbeb !important; }
+.vb-type-check input { accent-color:#facc15; width:15px; height:15px; cursor:pointer; flex-shrink:0; }
+.vb-type-check span { color:#111 !important; background:transparent !important; }
+.vb-type-badge { font-size:.72rem; color:#6b7280 !important; margin-left:4px; }
+.vb-value-pill {
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+    padding:6px 12px; border:1.5px solid #e5e7eb; border-radius:999px;
+    font-size:.85rem; font-weight:700; color:#111 !important;
+    background:#fff !important; transition:border-color .15s,background .15s;
+    user-select:none;
+}
+.vb-value-pill:has(input:checked) { border-color:#facc15 !important; background:#fffbeb !important; }
+.vb-value-pill input { display:none; }
+.vb-value-pill span { color:#111 !important; background:transparent !important; }
+.vb-swatch { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
+.vb-btn-ep {
+    display:inline-flex; align-items:center; height:40px; padding:0 16px;
+    border:1px solid #111; border-radius:10px; background:#111 !important;
+    color:#fff !important; font-size:.86rem; font-weight:700; cursor:pointer;
+    transition:color .12s,transform .12s;
+}
+.vb-btn-ep:hover { color:#facc15 !important; transform:translateY(-1px); }
+.vb-btn-ep-outline { background:#fff !important; color:#111 !important; border-color:#e5e7eb; }
+.vb-btn-ep-outline:hover { border-color:#facc15; color:#111 !important; background:#fffbeb !important; transform:none; }
+.vb-btn-ep-sm { height:30px; padding:0 10px; font-size:.78rem; border-radius:8px; }
+.vb-btn-ep-del { background:#fff !important; color:#111 !important; border-color:#e5e7eb; }
+.vb-btn-ep-del:hover { color:#ef4444 !important; border-color:#ef4444; background:#fff0f0 !important; transform:none; }
+.vb-table-ep { width:100%; border-collapse:collapse; font-size:.85rem; }
+.vb-table-ep th { background:#f8fafc !important; color:#111 !important; font-weight:800; padding:10px 12px; text-align:left; border-bottom:1px solid #e5e7eb; white-space:nowrap; }
+.vb-table-ep td { padding:8px 10px; border-bottom:1px solid #f3f4f6; vertical-align:middle; color:#111 !important; background:transparent !important; }
+.vb-table-ep tr:last-child td { border-bottom:0; }
+.vb-input-ep {
+    height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px;
+    font-size:.84rem; color:#111 !important; background:#fff !important;
+    outline:none; width:100%; transition:border-color .15s;
+}
+.vb-input-ep:focus { border-color:#facc15; }
+select.vb-input-ep { cursor:pointer; }
+
     :root {
         --black: #111111;
         --yellow: #facc15;
@@ -970,9 +1053,611 @@ function epImageCandidates($rawPath)
             <button class="ep-btn add-attribute" type="button" onclick="addNewAttribute()">Add New Attribute</button>
         </div>
 
+        <!-- ============================================================
+             PRODUCT VARIATIONS SECTION (Edit)
+             ============================================================ -->
+        <div class="ep-card" style="margin-top:20px;padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+                <div>
+                    <h3 style="margin:0;font-size:1.05rem;font-weight:800;color:#111">Product Variations</h3>
+                    <p style="margin:4px 0 0;color:#6b7280;font-size:.88rem">Enable for products with Color, RAM, Storage, Size options</p>
+                </div>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                    <div class="vb-toggle-wrap">
+                        <input type="checkbox" id="enableVariationsEP" style="display:none" <?= $currentProductType === 'variable' ? 'checked' : '' ?>>
+                        <div class="vb-toggle-track"><div class="vb-toggle-thumb"></div></div>
+                    </div>
+                    <span style="font-weight:700;font-size:.9rem" id="epVarToggleText"><?= $currentProductType === 'variable' ? 'Variable Product (ON)' : 'Variable Product' ?></span>
+                </label>
+            </div>
+
+            <div id="epVariationBuilderWrap" style="display:<?= $currentProductType === 'variable' ? 'block' : 'none' ?>">
+
+                <div class="vb-step">
+                    <div class="vb-step-title">Step 1: Select Variation Types</div>
+                    <div class="vb-step-body">
+                        <div id="epTypeCheckboxes" class="vb-type-grid"></div>
+                    </div>
+                </div>
+
+                <div class="vb-step" id="epStep2" style="display:none">
+                    <div class="vb-step-title">Step 2: Choose Values Per Type</div>
+                    <div class="vb-step-body" id="epValueSelectors"></div>
+                </div>
+
+                <div class="vb-step" id="epStep3" style="display:none">
+                    <div class="vb-step-title">Step 3: Variation Combinations</div>
+                    <div class="vb-step-body">
+                        <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+                            <button type="button" class="vb-btn-ep" onclick="epGenerateVariations()">Generate All Combinations</button>
+                            <button type="button" class="vb-btn-ep vb-btn-ep-outline" onclick="epAddBlankVariation()">+ Add Row Manually</button>
+                            <button type="button" onclick="epRemoveEmptyRows()" title="Remove rows with no SKU, price, stock or image"
+                                style="height:40px;padding:0 14px;border:1px solid #e5e7eb;border-radius:10px;
+                                       background:#fff;color:#6b7280;font-size:.82rem;font-weight:700;cursor:pointer"
+                                onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'"
+                                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#6b7280'">
+                                Remove empty rows
+                            </button>
+                            <span id="epComboCount" style="font-size:.82rem;color:#6b7280;font-weight:700"></span>
+                        </div>
+                        <div id="epCombinationsWrap"></div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="product_type" id="epProductTypeInput" value="<?= htmlspecialchars($currentProductType) ?>">
+                <input type="hidden" name="variations_json" id="epVariationsJson" value="<?= htmlspecialchars(json_encode($existingVariations)) ?>">
+            </div>
+        </div>
+
         <button type="submit" class="ep-btn">Update Product</button>
     </form>
 </div>
+
+<script>
+// ---- EP (Edit Product) Variation Builder ----
+const EP_ADMIN_BASE = <?= json_encode(rtrim((defined('BASE_PATH') ? BASE_PATH : ''), '/')) ?>;
+function epBase(path) {
+    if (!path || !path.startsWith('/')) return path;
+    if (EP_ADMIN_BASE && !path.startsWith(EP_ADMIN_BASE + '/')) return EP_ADMIN_BASE + path;
+    return path;
+}
+const EP_VB_TYPES = <?= json_encode($allVarTypes, JSON_UNESCAPED_UNICODE) ?>;
+let epSelectedTypes = [];
+let epSelectedValues = {};
+let epVariations = <?= json_encode($existingVariations, JSON_UNESCAPED_UNICODE) ?>;
+
+function epEscHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function epBuildLabel(v) {
+    return Object.entries(v.attributes||{}).map(([tid,vid]) => {
+        const t = EP_VB_TYPES.find(x=>x.id==tid);
+        const val = t ? (t.values||[]).find(x=>x.id==vid) : null;
+        return (t?t.name:'?') + ': ' + (val?val.value:'?');
+    }).join(' / ') || 'Variation';
+}
+
+// Restore type/value selections from existing variations
+function epRestoreSelectionsFromVariations() {
+    if (!epVariations.length) return;
+    const usedTypes = new Set();
+    const usedValues = {};
+    epVariations.forEach(v => {
+        Object.entries(v.attributes||{}).forEach(([tid,vid]) => {
+            usedTypes.add(parseInt(tid));
+            if (!usedValues[tid]) usedValues[tid] = new Set();
+            usedValues[tid].add(parseInt(vid));
+        });
+    });
+    usedTypes.forEach(tid => {
+        const t = EP_VB_TYPES.find(x => x.id == tid);
+        if (t && !epSelectedTypes.find(x=>x.id==tid)) epSelectedTypes.push(t);
+        if (!epSelectedValues[tid]) epSelectedValues[tid] = [];
+        (usedValues[tid]||new Set()).forEach(vid => {
+            if (!epSelectedValues[tid].includes(vid)) epSelectedValues[tid].push(vid);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    epRenderTypeCheckboxes();
+    if (epVariations.length > 0) {
+        epRestoreSelectionsFromVariations();
+        epRenderTypeCheckboxes(); // re-render with checks
+        epRenderValueSelectors();
+        epRefreshStep3();
+        epRenderVariationRows();
+    }
+    if (<?= $currentProductType === 'variable' ? 'true' : 'false' ?>) {
+        document.getElementById('epVariationBuilderWrap').style.display = 'block';
+    }
+});
+
+document.getElementById('enableVariationsEP').addEventListener('change', function() {
+    document.getElementById('epVariationBuilderWrap').style.display = this.checked ? 'block' : 'none';
+    document.getElementById('epProductTypeInput').value = this.checked ? 'variable' : 'simple';
+    document.getElementById('epVarToggleText').textContent = this.checked ? 'Variable Product (ON)' : 'Variable Product';
+});
+
+function epRenderTypeCheckboxes() {
+    const container = document.getElementById('epTypeCheckboxes');
+    if (!EP_VB_TYPES.length) {
+        container.innerHTML = '<p style="color:#9ca3af;font-size:.88rem">No variation types. <a href="manage-variations.php" target="_blank" style="color:#111;font-weight:700">Create some first.</a></p>';
+        return;
+    }
+    container.innerHTML = EP_VB_TYPES.map(t => {
+        const checked = !!epSelectedTypes.find(x=>x.id==t.id);
+        return `<label class="vb-type-check">
+            <input type="checkbox" value="${t.id}" ${checked?'checked':''} onchange="epOnTypeToggle(${t.id}, this.checked)">
+            <span>${epEscHtml(t.name)}</span>
+            <span class="vb-type-badge">${t.values.length} values</span>
+        </label>`;
+    }).join('');
+}
+
+function epOnTypeToggle(type_id, checked) {
+    const t = EP_VB_TYPES.find(x => x.id == type_id);
+    if (!t) return;
+    if (checked) {
+        if (!epSelectedTypes.find(x=>x.id==type_id)) epSelectedTypes.push(t);
+        if (!epSelectedValues[type_id]) epSelectedValues[type_id] = [];
+    } else {
+        epSelectedTypes = epSelectedTypes.filter(x=>x.id!=type_id);
+        delete epSelectedValues[type_id];
+    }
+    epRenderValueSelectors();
+    epUpdateComboCount();
+    epRefreshStep3();
+}
+
+function epRenderValueSelectors() {
+    const step2 = document.getElementById('epStep2');
+    const container = document.getElementById('epValueSelectors');
+    if (!epSelectedTypes.length) { step2.style.display='none'; return; }
+    step2.style.display='block';
+    container.innerHTML = epSelectedTypes.map(t => `
+        <div style="margin-bottom:18px">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">${epEscHtml(t.name)}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${(t.values||[]).map(v => `
+                    <label class="vb-value-pill">
+                        <input type="checkbox" value="${v.id}"
+                            ${(epSelectedValues[t.id]||[]).includes(v.id)?'checked':''}
+                            onchange="epOnValueToggle(${t.id}, ${v.id}, this.checked)">
+                        ${t.display_type==='color'&&v.color_code
+                            ? `<span class="vb-swatch" style="background:${epEscHtml(v.color_code)}"></span>` : ''}
+                        <span>${epEscHtml(v.value)}</span>
+                    </label>
+                `).join('')}
+                ${!t.values.length ? '<span style="color:#9ca3af;font-size:.85rem">No values.</span>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function epOnValueToggle(type_id, value_id, checked) {
+    if (!epSelectedValues[type_id]) epSelectedValues[type_id] = [];
+    if (checked) { if (!epSelectedValues[type_id].includes(value_id)) epSelectedValues[type_id].push(value_id); }
+    else { epSelectedValues[type_id] = epSelectedValues[type_id].filter(x=>x!==value_id); }
+    epUpdateComboCount();
+    epRefreshStep3();
+}
+
+// ── Stylish toast notification ──────────────────────────────────
+function epToast(message, type) {
+    // type: 'success' | 'info' | 'warning'
+    var existing = document.getElementById('epToastNotif');
+    if (existing) existing.remove();
+
+    var icons = {
+        success: '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#16a34a;color:#fff;font-size:12px;font-weight:900;margin-right:10px;flex-shrink:0">✓</span>',
+        info:    '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#6b7280;color:#fff;font-size:11px;font-weight:900;margin-right:10px;flex-shrink:0">i</span>',
+        warning: '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f97316;color:#fff;font-size:12px;font-weight:900;margin-right:10px;flex-shrink:0">!</span>'
+    };
+    var borders = { success:'#16a34a', info:'#6b7280', warning:'#f97316' };
+
+    var t = document.createElement('div');
+    t.id = 'epToastNotif';
+    t.innerHTML = (icons[type] || icons.info) + message;
+    t.style.cssText = [
+        'position:fixed', 'bottom:24px', 'right:24px', 'z-index:99999',
+        'display:flex', 'align-items:center',
+        'padding:13px 20px',
+        'background:#111111',
+        'color:#fff',
+        'border-left:4px solid ' + (borders[type] || '#6b7280'),
+        'border-radius:12px',
+        'box-shadow:0 8px 28px rgba(0,0,0,.28)',
+        'font-size:.88rem', 'font-weight:700',
+        'min-width:260px', 'max-width:380px',
+        'animation:epSlideIn .25s ease',
+        'cursor:pointer'
+    ].join(';');
+
+    // inject keyframe once
+    if (!document.getElementById('epToastKF')) {
+        var s = document.createElement('style');
+        s.id = 'epToastKF';
+        s.textContent = '@keyframes epSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}';
+        document.head.appendChild(s);
+    }
+
+    t.onclick = function(){ t.remove(); };
+    document.body.appendChild(t);
+    setTimeout(function(){ if(t.parentNode) t.remove(); }, 3500);
+}
+
+function epRemoveEmptyRows() {
+    const before = epVariations.length;
+    epVariations = epVariations.filter(function(v) {
+        return (v.sku && v.sku.trim()) ||
+               (v.regular_price !== '' && parseFloat(v.regular_price) > 0) ||
+               (parseInt(v.stock_quantity) > 0) ||
+               (v.image && v.image.trim());
+    });
+    const removed = before - epVariations.length;
+    if (removed === 0) {
+        epToast('No empty rows to remove.', 'info');
+        return;
+    }
+    epRenderVariationRows();
+    epToast('Removed ' + removed + ' empty row' + (removed !== 1 ? 's' : '') + ' successfully.', 'success');
+}
+
+function epUpdateComboCount() {
+    const countEl = document.getElementById('epComboCount');
+    if (!countEl) return;
+    const activeTypes = epSelectedTypes.filter(t => (epSelectedValues[t.id]||[]).length > 0);
+    if (!activeTypes.length) { countEl.textContent = ''; return; }
+    const total = activeTypes.reduce((acc, t) => acc * (epSelectedValues[t.id]||[]).length, 1);
+    const color = total > 100 ? '#ef4444' : total > 50 ? '#f97316' : '#16a34a';
+    countEl.innerHTML = `Will generate: <strong style="color:${color}">${total}</strong> combination${total!==1?'s':''}` +
+        (total > 100 ? ' — <span style="color:#ef4444">⚠ Too many! Reduce selection.</span>' : '');
+}
+
+function epRefreshStep3() {
+    const hasSelected = epSelectedTypes.some(t => (epSelectedValues[t.id]||[]).length > 0);
+    document.getElementById('epStep3').style.display = hasSelected || epVariations.length > 0 ? 'block' : 'none';
+    if (epVariations.length > 0) epRenderVariationRows();
+}
+
+function epCartesian(sets) {
+    return sets.reduce((acc, set) => acc.flatMap(combo => set.map(item => [...combo, item])), [[]]);
+}
+
+function epGenerateVariations() {
+    const selectedTypes = epSelectedTypes.filter(t => (epSelectedValues[t.id]||[]).length > 0);
+    if (!selectedTypes.length) { alert('Select at least one type and value.'); return; }
+
+    // Count total combinations before generating
+    const totalCombos = selectedTypes.reduce((acc, t) => acc * (epSelectedValues[t.id]||[]).length, 1);
+    if (totalCombos > 100) {
+        const ok = confirm(
+            '⚠️ Warning: ' + totalCombos + ' combinations will be generated.\n\n' +
+            'This is a very large number. Please reduce your selection:\n' +
+            '• Only select variation types this product actually needs\n' +
+            '• Only select values this product actually comes in\n\n' +
+            'Recommended: max 30–50 combinations.\n\n' +
+            'Continue anyway?'
+        );
+        if (!ok) return;
+    }
+
+    const valueSets = selectedTypes.map(t =>
+        (epSelectedValues[t.id]||[]).map(vid => {
+            const valObj = (t.values||[]).find(v=>v.id==vid);
+            return {type_id:t.id, type_name:t.name, value_id:vid, value_name:valObj?valObj.value:vid};
+        })
+    );
+    const combos = epCartesian(valueSets);
+
+    // PRESERVE all existing variations that have any data filled in
+    // (user may have already set SKU / price / stock / image for a previous combination)
+    function epHasData(v) {
+        return (v.sku && v.sku.trim()) ||
+               (v.regular_price !== '' && parseFloat(v.regular_price) > 0) ||
+               (parseInt(v.stock_quantity) > 0) ||
+               (v.image && v.image.trim());
+    }
+    const preserved = epVariations.filter(v => epHasData(v));
+    const seenKeys  = new Set(preserved.map(v => JSON.stringify(v.attributes)));
+    const result    = [...preserved]; // start with preserved rows
+
+    let addedCount    = 0;
+    let existingCount = 0;
+
+    combos.forEach(combo => {
+        const attrs = {};
+        const label = combo.map(c => { attrs[c.type_id]=c.value_id; return c.type_name+': '+c.value_name; }).join(' / ');
+        const key   = JSON.stringify(attrs);
+        if (seenKeys.has(key)) { existingCount++; return; }
+        seenKeys.add(key);
+        result.push({attributes:attrs, label, sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0});
+        addedCount++;
+    });
+
+    epVariations = result;
+    epRenderVariationRows();
+
+    // Informative feedback
+    if (addedCount === 0 && existingCount > 0) {
+        epToast(
+            existingCount + ' combination' + (existingCount !== 1 ? 's' : '') +
+            ' already exist' + (existingCount === 1 ? 's' : '') + '. No new rows added.',
+            'info'
+        );
+    } else if (addedCount > 0 && existingCount > 0) {
+        epToast(
+            addedCount + ' new combination' + (addedCount !== 1 ? 's' : '') + ' added. ' +
+            existingCount + ' already existed and were kept.',
+            'success'
+        );
+    } else if (addedCount > 0) {
+        epToast(addedCount + ' combination' + (addedCount !== 1 ? 's' : '') + ' generated successfully.', 'success');
+    }
+}
+
+function epAddBlankVariation() {
+    epVariations.push({attributes:{}, label:'Custom', sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0});
+    epRenderVariationRows();
+}
+
+function epRenderVariationRows() {
+    const wrap = document.getElementById('epCombinationsWrap');
+    document.getElementById('epStep3').style.display = 'block';
+    if (!epVariations.length) { wrap.innerHTML='<p style="color:#9ca3af">No combinations yet.</p>'; epSyncVariationsJson(); return; }
+    wrap.innerHTML = `<div style="overflow-x:auto;overflow-y:visible"><table class="vb-table-ep" style="overflow:visible" id="epVarTable">
+        <thead><tr>
+            <th style="width:160px">Combination</th><th>SKU</th><th>Regular Price</th><th>Sale Price</th>
+            <th>Stock</th><th>Image</th><th>Status</th><th>Default</th><th></th>
+        </tr></thead>
+        <tbody id="epVarTbody">${epVariations.map((v,i) => epRenderRow(v,i)).join('')}</tbody>
+    </table></div>`;
+    epSyncVariationsJson();
+}
+
+function epRenderRow(v, i) {
+    const label = v.label || epBuildLabel(v);
+    const imgSrc = v.image ? epBase(v.image) : '';
+    const imgThumb = imgSrc
+        ? `<img src="${epEscHtml(imgSrc)}" id="epThumb${i}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:block;margin-bottom:4px">`
+        : `<div id="epThumb${i}" style="width:48px;height:48px;border-radius:8px;border:1px dashed #e5e7eb;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:20px;margin-bottom:4px;background:#f9fafb">+</div>`;
+    return `<tr id="epRow${i}" draggable="true"
+        ondragstart="epDragStart(event,${i})"
+        ondragover="epDragOver(event)"
+        ondrop="epDrop(event,${i})"
+        ondragend="epDragEnd(event)"
+        style="cursor:default">
+        <td style="min-width:150px;display:flex;align-items:flex-start;gap:8px;padding-top:10px">
+            <span class="ep-drag-handle" title="Drag to reorder"
+                style="cursor:grab;color:#9ca3af;font-size:16px;line-height:1;padding-top:2px;flex-shrink:0;user-select:none"
+                onmousedown="this.closest('tr').setAttribute('draggable','true')">⠿</span>
+            <span style="font-weight:700;font-size:.84rem;color:#111;display:block">${epEscHtml(label)}</span>
+        </td>
+        <td style="min-width:90px">
+            <input class="vb-input-ep" type="text" placeholder="SKU-001" value="${epEscHtml(v.sku||'')}"
+                onchange="epVariations[${i}].sku=this.value;epSyncVariationsJson()" style="width:90px">
+        </td>
+        <td style="min-width:100px">
+            <input class="vb-input-ep" type="number" placeholder="0" value="${v.regular_price||''}"
+                onchange="epVariations[${i}].regular_price=this.value;epSyncVariationsJson()" style="width:100px">
+        </td>
+        <td style="min-width:100px">
+            <input class="vb-input-ep" type="number" placeholder="0" value="${v.sale_price||''}"
+                onchange="epVariations[${i}].sale_price=this.value;epSyncVariationsJson()" style="width:100px">
+        </td>
+        <td style="min-width:80px">
+            <input class="vb-input-ep" type="number" placeholder="0" value="${v.stock_quantity||0}"
+                onchange="epVariations[${i}].stock_quantity=this.value;epSyncVariationsJson()" style="width:75px">
+        </td>
+        <td style="min-width:80px">
+            ${imgThumb}
+            <label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #111;border-radius:8px;background:#111;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload
+                <input type="file" accept="image/*" style="display:none" onchange="epUploadVarImage(this,${i})">
+            </label>
+            <input type="hidden" id="epVbImg${i}" value="${epEscHtml(v.image||'')}">
+        </td>
+        <td style="min-width:110px">
+            <div class="ep-vb-dropdown" style="position:relative;display:inline-block;width:108px">
+                <button type="button"
+                    onclick="epToggleDropdown(this)"
+                    style="width:108px;height:36px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;
+                           color:#111;font-size:.84rem;font-weight:600;padding:0 32px 0 10px;text-align:left;
+                           cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+                           white-space:nowrap;outline:none"
+                    onmouseover="this.style.borderColor='#facc15'"
+                    onmouseout="if(!this.closest('.ep-vb-dropdown').classList.contains('ep-dd-open'))this.style.borderColor='#e5e7eb'">
+                    <span>${v.status==1?'Active':'Inactive'}</span>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0;margin-left:4px">
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="ep-dd-menu" style="display:none;position:fixed;left:0;top:0;width:108px;
+                     background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+                     box-shadow:0 8px 20px rgba(17,17,17,.14);z-index:99999;overflow:hidden">
+                    <button type="button" data-val="1"
+                        onclick="epPickStatus(this,${i})"
+                        style="width:100%;padding:8px 12px;text-align:left;border:0;background:${v.status==1?'#facc15':'#fff'};
+                               color:#111;font-size:.84rem;font-weight:600;cursor:pointer;display:block"
+                        onmouseover="if(this.dataset.val!=epVariations[${i}].status)this.style.background='#fffbeb'"
+                        onmouseout="if(this.dataset.val!=epVariations[${i}].status)this.style.background='#fff'">Active</button>
+                    <button type="button" data-val="0"
+                        onclick="epPickStatus(this,${i})"
+                        style="width:100%;padding:8px 12px;text-align:left;border:0;background:${v.status==0?'#facc15':'#fff'};
+                               color:#111;font-size:.84rem;font-weight:600;cursor:pointer;display:block;border-top:1px solid #f3f4f6"
+                        onmouseover="if(this.dataset.val!=epVariations[${i}].status)this.style.background='#fffbeb'"
+                        onmouseout="if(this.dataset.val!=epVariations[${i}].status)this.style.background='#fff'">Inactive</button>
+                </div>
+            </div>
+        </td>
+        <td style="text-align:center;min-width:60px">
+            <label style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;cursor:pointer">
+                <input type="checkbox" ${v.is_default?'checked':''} onchange="epSetDefault(${i},this.checked)"
+                    style="width:18px;height:18px;accent-color:#facc15;cursor:pointer">
+            </label>
+        </td>
+        <td style="text-align:center;min-width:40px">
+            <button type="button" onclick="epRemoveVariation(${i})"
+                style="width:32px;height:32px;padding:0;border-radius:8px;font-size:16px;line-height:1;
+                       border:1px solid #e5e7eb!important;background:#fff!important;color:#9ca3af!important;
+                       cursor:pointer;display:inline-flex;align-items:center;justify-content:center"
+                onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fff5f5'"
+                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#9ca3af';this.style.background='#fff'">✕</button>
+        </td>
+    </tr>`;
+}
+
+function epSetDefault(idx, checked) {
+    epVariations.forEach((v,i) => v.is_default = (i===idx&&checked)?1:0);
+    epSyncVariationsJson();
+}
+
+function epRemoveVariation(idx) {
+    epVariations.splice(idx,1);
+    epRenderVariationRows();
+}
+
+function epSyncVariationsJson() {
+    document.getElementById('epVariationsJson').value = JSON.stringify(epVariations);
+}
+
+// ── Drag-and-Drop Row Reordering ─────────────────────────────────
+let epDragIdx = null;
+
+function epDragStart(event, idx) {
+    epDragIdx = idx;
+    event.dataTransfer.effectAllowed = 'move';
+    // Style the dragged row
+    setTimeout(function() {
+        const row = document.getElementById('epRow' + idx);
+        if (row) row.style.opacity = '0.4';
+    }, 0);
+}
+
+function epDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    // Highlight target row
+    const tr = event.currentTarget;
+    document.querySelectorAll('#epVarTbody tr').forEach(function(r) {
+        r.style.borderTop = '';
+        r.style.background = '';
+    });
+    tr.style.borderTop = '2px solid #facc15';
+    tr.style.background = '#fffbeb';
+}
+
+function epDrop(event, targetIdx) {
+    event.preventDefault();
+    if (epDragIdx === null || epDragIdx === targetIdx) return;
+
+    // Reorder the array
+    const moved = epVariations.splice(epDragIdx, 1)[0];
+    epVariations.splice(targetIdx, 0, moved);
+
+    epDragIdx = null;
+    epRenderVariationRows();
+    epSyncVariationsJson();
+    epToast('Row reordered successfully.', 'success');
+}
+
+function epDragEnd(event) {
+    epDragIdx = null;
+    // Remove all drag highlights
+    document.querySelectorAll('#epVarTbody tr').forEach(function(r) {
+        r.style.opacity    = '';
+        r.style.borderTop  = '';
+        r.style.background = '';
+    });
+}
+
+// Custom dropdown helpers for status
+function epCloseAllDropdowns() {
+    document.querySelectorAll('.ep-vb-dropdown.ep-dd-open').forEach(function(d) {
+        d.classList.remove('ep-dd-open');
+        d.querySelector('.ep-dd-menu').style.display = 'none';
+        var tb = d.querySelector(':scope > button');
+        if (tb) { tb.style.borderColor = '#e5e7eb'; tb.style.boxShadow = 'none'; }
+    });
+}
+function epToggleDropdown(btn) {
+    const wrap = btn.closest('.ep-vb-dropdown');
+    const isOpen = wrap.classList.contains('ep-dd-open');
+    epCloseAllDropdowns();
+    if (!isOpen) {
+        const menu = wrap.querySelector('.ep-dd-menu');
+        const rect = btn.getBoundingClientRect();
+        menu.style.display = 'block';
+        menu.style.top    = (rect.bottom + 4) + 'px';
+        menu.style.left   = rect.left + 'px';
+        menu.style.width  = rect.width + 'px';
+        wrap.classList.add('ep-dd-open');
+        btn.style.borderColor = '#facc15';
+        btn.style.boxShadow   = '0 0 0 3px rgba(250,204,21,.18)';
+    }
+}
+
+function epPickStatus(optBtn, idx) {
+    const val = parseInt(optBtn.dataset.val);
+    epVariations[idx].status = val;
+    epSyncVariationsJson();
+    // Update trigger button text
+    const wrap = optBtn.closest('.ep-vb-dropdown');
+    const trigger = wrap.querySelector(':scope > button > span');
+    if (trigger) trigger.textContent = val === 1 ? 'Active' : 'Inactive';
+    // Update option highlights
+    wrap.querySelectorAll('.ep-dd-menu button').forEach(function(b) {
+        b.style.background = parseInt(b.dataset.val) === val ? '#facc15' : '#fff';
+    });
+    // Close
+    wrap.classList.remove('ep-dd-open');
+    wrap.querySelector('.ep-dd-menu').style.display = 'none';
+    wrap.querySelector(':scope > button').style.borderColor = '#e5e7eb';
+    wrap.querySelector(':scope > button').style.boxShadow = 'none';
+}
+
+// Close dropdowns on outside click or scroll
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.ep-vb-dropdown')) epCloseAllDropdowns();
+});
+document.addEventListener('scroll', epCloseAllDropdowns, true);
+
+async function epUploadVarImage(input, idx) {
+    const file = input.files[0];
+    if (!file) return;
+    const label = input.closest('label');
+    if (label) { label.style.opacity='0.6'; label.textContent='Uploading…'; }
+    const fd = new FormData();
+    fd.append('variation_image', file);
+    try {
+        const res = await fetch('ajax-upload-variation-image.php', {method:'POST', body:fd});
+        const data = await res.json();
+        if (data.success) {
+            epVariations[idx].image = data.url;
+            document.getElementById('epVbImg'+idx).value = data.url;
+            epSyncVariationsJson();
+            // Update the thumbnail
+            const thumb = document.getElementById('epThumb'+idx);
+            if (thumb) {
+                const img = document.createElement('img');
+                img.src = epBase(data.url);
+                img.id = 'epThumb'+idx;
+                img.style = 'width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:block;margin-bottom:4px';
+                thumb.parentNode.replaceChild(img, thumb);
+            }
+        } else { alert(data.message||'Upload failed.'); }
+    } catch(e) { alert('Upload error: ' + e.message); }
+    finally {
+        if (label) { label.style.opacity='1'; label.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload<input type="file" accept="image/*" style="display:none" onchange="epUploadVarImage(this,'+idx+')">'; }
+    }
+}
+
+// Sync before submit
+document.querySelector('form').addEventListener('submit', function() { epSyncVariationsJson(); });
+</script>
 <?php if ($flashMessage !== null): ?>
     <div id="ep-toast" class="ep-toast <?= $flashType === 'error' ? 'ep-toast-error' : 'ep-toast-success' ?>">
         <?= htmlspecialchars($flashMessage) ?>

@@ -46,6 +46,86 @@ $brands_result = $conn->query($brands_query);
     unset($_SESSION['message_type']); ?>
 <?php endif; ?>
 
+<style>
+/* ---- Variation Builder styles ---- */
+
+/* Override admin theme's global span/label color inside the variation section */
+#variationBuilderWrap,
+#variationBuilderWrap * {
+    background-color: transparent;
+    color: #111111;
+}
+#variationBuilderWrap span,
+#variationBuilderWrap label,
+#variationBuilderWrap p,
+#variationBuilderWrap th,
+#variationBuilderWrap td {
+    color: #111111 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+#variationBuilderWrap .vb-step-title { color: #111111 !important; }
+#variationBuilderWrap .vb-type-badge { color: #6b7280 !important; }
+
+.vb-toggle-wrap { position:relative; display:inline-block; }
+.vb-toggle-track { width:46px; height:24px; border-radius:999px; background:#e5e7eb; transition:background .2s; cursor:pointer; }
+input#enableVariations:checked + .vb-toggle-track { background:#facc15; }
+.vb-toggle-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.18); transition:left .2s; }
+input#enableVariations:checked ~ .vb-toggle-track .vb-toggle-thumb,
+input#enableVariations:checked + .vb-toggle-track .vb-toggle-thumb { left:25px; }
+.vb-toggle-label { user-select:none; }
+.vb-step { border:1px solid #e5e7eb; border-radius:12px; margin-bottom:16px; overflow:hidden; }
+.vb-step-title { padding:12px 16px; background:#f8fafc !important; font-weight:800; font-size:.9rem; color:#111 !important; border-bottom:1px solid #e5e7eb; }
+.vb-step-body { padding:16px; background:#fff !important; }
+.vb-type-grid { display:flex; flex-wrap:wrap; gap:10px; }
+.vb-type-check {
+    display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    padding:8px 14px; border:1.5px solid #e5e7eb; border-radius:10px;
+    font-size:.88rem; font-weight:700; color:#111 !important;
+    background:#fff !important; transition:border-color .15s,background .15s;
+    user-select:none;
+}
+.vb-type-check:has(input:checked) { border-color:#facc15 !important; background:#fffbeb !important; }
+.vb-type-check input { accent-color:#facc15; width:15px; height:15px; cursor:pointer; flex-shrink:0; }
+.vb-type-check span { color:#111 !important; background:transparent !important; }
+.vb-type-badge { font-size:.72rem; color:#6b7280 !important; margin-left:4px; }
+.vb-value-pill {
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+    padding:6px 12px; border:1.5px solid #e5e7eb; border-radius:999px;
+    font-size:.85rem; font-weight:700; color:#111 !important;
+    background:#fff !important; transition:border-color .15s,background .15s;
+    user-select:none;
+}
+.vb-value-pill:has(input:checked) { border-color:#facc15 !important; background:#fffbeb !important; }
+.vb-value-pill input { display:none; }
+.vb-value-pill span { color:#111 !important; background:transparent !important; }
+.vb-swatch { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
+.vb-btn {
+    display:inline-flex; align-items:center; height:40px; padding:0 16px;
+    border:1px solid #111; border-radius:10px; background:#111 !important; color:#fff !important;
+    font-size:.86rem; font-weight:700; cursor:pointer; text-decoration:none;
+    transition:color .12s,transform .12s,box-shadow .12s;
+}
+.vb-btn:hover { color:#facc15 !important; transform:translateY(-1px); box-shadow:0 6px 14px rgba(17,17,17,.14); }
+.vb-btn-outline { background:#fff !important; color:#111 !important; border-color:#e5e7eb; }
+.vb-btn-outline:hover { border-color:#facc15; color:#111 !important; background:#fffbeb !important; }
+.vb-btn-sm { height:30px; padding:0 10px; font-size:.78rem; border-radius:8px; }
+.vb-btn-del { background:#fff !important; color:#111 !important; border-color:#e5e7eb; }
+.vb-btn-del:hover { color:#ef4444 !important; border-color:#ef4444; background:#fff0f0 !important; transform:none; box-shadow:none; }
+.vb-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.vb-table th { background:#f8fafc !important; color:#111 !important; font-weight:800; padding:10px 12px; text-align:left; border-bottom:1px solid #e5e7eb; white-space:nowrap; }
+.vb-table td { padding:8px 10px; border-bottom:1px solid #f3f4f6; vertical-align:middle; color:#111 !important; background:transparent !important; }
+.vb-table tr:last-child td { border-bottom:0; }
+.vb-input {
+    height:36px; border:1px solid #e5e7eb; border-radius:8px; padding:0 10px;
+    font-size:.84rem; color:#111 !important; background:#fff !important; outline:none; width:100%;
+    transition:border-color .15s;
+}
+.vb-input:focus { border-color:#facc15; }
+.vb-input[type=number] { max-width:120px; }
+select.vb-input { cursor:pointer; }
+</style>
+
 <div class="admin-page">
     <div class="page-header form-card">
         <div>
@@ -248,13 +328,415 @@ $brands_result = $conn->query($brands_query);
             <div id="gallery_images_metadata" class="gallery-metadata-grid"></div>
         </section>
 
+        <!-- ============================================================
+             PRODUCT VARIATIONS SECTION
+             ============================================================ -->
+        <section class="form-card" id="variationsSection">
+            <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div>
+                    <h2 style="margin:0">Product Variations</h2>
+                    <p style="margin:4px 0 0;color:#6b7280;font-size:.88rem">Enable for products with multiple options like Color, RAM, Storage</p>
+                </div>
+                <label class="vb-toggle-label" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                    <div class="vb-toggle-wrap">
+                        <input type="checkbox" id="enableVariations" style="display:none">
+                        <div class="vb-toggle-track"><div class="vb-toggle-thumb"></div></div>
+                    </div>
+                    <span style="font-weight:700;font-size:.9rem" id="variationToggleText">Variable Product</span>
+                </label>
+            </div>
+
+            <div id="variationBuilderWrap" style="display:none;padding:20px">
+
+                <!-- Step 1: Select variation types for this product -->
+                <div class="vb-step">
+                    <div class="vb-step-title">Step 1: Select Variation Types</div>
+                    <div class="vb-step-body">
+                        <div id="vbTypeCheckboxes" class="vb-type-grid">
+                            <!-- Populated by JS from AJAX -->
+                            <p style="color:#9ca3af;font-size:.88rem">Loading variation types…</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Choose values per selected type -->
+                <div class="vb-step" id="vbStep2" style="display:none">
+                    <div class="vb-step-title">Step 2: Choose Values Per Type</div>
+                    <div class="vb-step-body" id="vbValueSelectors"></div>
+                </div>
+
+                <!-- Step 3: Generate & manage combinations -->
+                <div class="vb-step" id="vbStep3" style="display:none">
+                    <div class="vb-step-title">Step 3: Variation Combinations</div>
+                    <div class="vb-step-body">
+                        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+                            <button type="button" class="vb-btn" onclick="generateVariations()">Generate All Combinations</button>
+                            <button type="button" class="vb-btn vb-btn-outline" onclick="addBlankVariation()">+ Add Row Manually</button>
+                        </div>
+                        <div id="vbCombinationsWrap"></div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="product_type" id="productTypeInput" value="simple">
+                <input type="hidden" name="variations_json" id="variationsJson" value="[]">
+            </div>
+        </section>
+
         <div class="form-footer-actions">
             <button type="submit" class="submit-btn">Save Product</button>
         </div>
     </form>
 </div>
 
+<?php
+// Load all variation types for the builder
+require_once dirname(__DIR__, 1) . '/app/Models/VariationModel.php';
+$vModel = new VariationModel();
+$allVarTypes = $vModel->getVariationTypesWithValues();
+?>
+
 <script>
+const VB_ADMIN_BASE = <?= json_encode(rtrim((defined('BASE_PATH') ? BASE_PATH : ''), '/')) ?>;
+function vbBase(path) {
+    if (!path || !path.startsWith('/')) return path;
+    if (VB_ADMIN_BASE && !path.startsWith(VB_ADMIN_BASE + '/')) return VB_ADMIN_BASE + path;
+    return path;
+}
+const VB_TYPES = <?= json_encode($allVarTypes, JSON_UNESCAPED_UNICODE) ?>;
+let vbSelectedTypes = [];   // [{id, name, display_type, values:[]}]
+let vbSelectedValues = {};  // {type_id: [value_id, …]}
+let vbVariations = [];      // final combination rows
+
+// ---- Toggle ----
+document.getElementById('enableVariations').addEventListener('change', function() {
+    const wrap = document.getElementById('variationBuilderWrap');
+    document.getElementById('productTypeInput').value = this.checked ? 'variable' : 'simple';
+    document.getElementById('variationToggleText').textContent = this.checked ? 'Variable Product (ON)' : 'Variable Product';
+    if (this.checked) {
+        wrap.style.display = 'block';
+        renderTypeCheckboxes();
+    } else {
+        wrap.style.display = 'none';
+    }
+});
+
+function renderTypeCheckboxes() {
+    const container = document.getElementById('vbTypeCheckboxes');
+    if (!VB_TYPES.length) {
+        container.innerHTML = '<p style="color:#9ca3af">No variation types found. <a href="manage-variations.php" target="_blank" style="color:#111;font-weight:700">Create some first.</a></p>';
+        return;
+    }
+    container.innerHTML = VB_TYPES.map(t => `
+        <label class="vb-type-check">
+            <input type="checkbox" value="${t.id}" onchange="onTypeToggle(${t.id}, this.checked)">
+            <span>${escHtml(t.name)}</span>
+            <span class="vb-type-badge">${t.values.length} values</span>
+        </label>
+    `).join('');
+}
+
+function onTypeToggle(type_id, checked) {
+    const t = VB_TYPES.find(x => x.id == type_id);
+    if (!t) return;
+    if (checked) {
+        if (!vbSelectedTypes.find(x => x.id == type_id)) vbSelectedTypes.push(t);
+        if (!vbSelectedValues[type_id]) vbSelectedValues[type_id] = [];
+    } else {
+        vbSelectedTypes = vbSelectedTypes.filter(x => x.id != type_id);
+        delete vbSelectedValues[type_id];
+    }
+    renderValueSelectors();
+    refreshStep3();
+}
+
+function renderValueSelectors() {
+    const step2 = document.getElementById('vbStep2');
+    const container = document.getElementById('vbValueSelectors');
+    if (!vbSelectedTypes.length) { step2.style.display='none'; return; }
+    step2.style.display='block';
+    container.innerHTML = vbSelectedTypes.map(t => `
+        <div style="margin-bottom:18px">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">${escHtml(t.name)}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${(t.values||[]).map(v => `
+                    <label class="vb-value-pill ${t.display_type}" style="${t.display_type==='color'&&v.color_code?'--swatch:'+v.color_code:''}">
+                        <input type="checkbox" value="${v.id}"
+                            ${(vbSelectedValues[t.id]||[]).includes(v.id)?'checked':''}
+                            onchange="onValueToggle(${t.id}, ${v.id}, this.checked)">
+                        ${t.display_type==='color'&&v.color_code
+                            ? `<span class="vb-swatch" style="background:${escHtml(v.color_code)}"></span>`
+                            : ''}
+                        <span>${escHtml(v.value)}</span>
+                    </label>
+                `).join('')}
+                ${!t.values.length ? '<span style="color:#9ca3af;font-size:.85rem">No values. Add values in Manage Variations.</span>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function onValueToggle(type_id, value_id, checked) {
+    if (!vbSelectedValues[type_id]) vbSelectedValues[type_id] = [];
+    if (checked) {
+        if (!vbSelectedValues[type_id].includes(value_id)) vbSelectedValues[type_id].push(value_id);
+    } else {
+        vbSelectedValues[type_id] = vbSelectedValues[type_id].filter(x => x !== value_id);
+    }
+    refreshStep3();
+}
+
+function refreshStep3() {
+    const step3 = document.getElementById('vbStep3');
+    const hasSelected = vbSelectedTypes.some(t => (vbSelectedValues[t.id]||[]).length > 0);
+    step3.style.display = hasSelected ? 'block' : 'none';
+}
+
+function generateVariations() {
+    const selectedTypes = vbSelectedTypes.filter(t => (vbSelectedValues[t.id]||[]).length > 0);
+    if (!selectedTypes.length) { alert('Select at least one type and value.'); return; }
+
+    const valueSets = selectedTypes.map(t =>
+        (vbSelectedValues[t.id]||[]).map(vid => {
+            const valObj = (t.values||[]).find(v => v.id == vid);
+            return { type_id: t.id, type_name: t.name, value_id: vid, value_name: valObj ? valObj.value : vid };
+        })
+    );
+
+    const combos = cartesian(valueSets);
+    const existing = [...vbVariations];
+    const newVariations = [];
+
+    combos.forEach(combo => {
+        const attrs = {};
+        let label = combo.map(c => { attrs[c.type_id] = c.value_id; return c.type_name + ': ' + c.value_name; }).join(' / ');
+        // Check if already exists (by attr key match)
+        const key = JSON.stringify(attrs);
+        const dupe = existing.find(v => JSON.stringify(v.attributes) === key);
+        if (!dupe) {
+            newVariations.push({ attributes: attrs, label, sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0 });
+        } else {
+            newVariations.push(dupe);
+        }
+    });
+
+    vbVariations = newVariations;
+    renderVariationRows();
+}
+
+function cartesian(sets) {
+    return sets.reduce((acc, set) => acc.flatMap(combo => set.map(item => [...combo, item])), [[]]);
+}
+
+function addBlankVariation() {
+    vbVariations.push({ attributes:{}, label:'Custom', sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0 });
+    renderVariationRows();
+}
+
+function renderVariationRows() {
+    const wrap = document.getElementById('vbCombinationsWrap');
+    if (!vbVariations.length) { wrap.innerHTML = '<p style="color:#9ca3af">No combinations yet. Click "Generate All Combinations".</p>'; syncVariationsJson(); return; }
+
+    wrap.innerHTML = `
+        <div style="overflow-x:auto;overflow-y:visible">
+        <table class="vb-table" style="overflow:visible">
+            <thead><tr>
+                <th>Combination</th><th>SKU</th><th>Regular Price</th><th>Sale Price</th>
+                <th>Stock</th><th>Image</th><th>Status</th><th>Default</th><th></th>
+            </tr></thead>
+            <tbody id="vbTbody">${vbVariations.map((v,i) => renderRow(v,i)).join('')}</tbody>
+        </table>
+        </div>
+    `;
+    syncVariationsJson();
+}
+
+function renderRow(v, i) {
+    const label = v.label || buildLabel(v);
+    const imgSrc = v.image ? vbBase(v.image) : '';
+    const imgThumb = imgSrc
+        ? `<img src="${escHtml(imgSrc)}" id="vbThumb${i}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:block;margin-bottom:4px">`
+        : `<div id="vbThumb${i}" style="width:48px;height:48px;border-radius:8px;border:1px dashed #e5e7eb;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:20px;margin-bottom:4px;background:#f9fafb">+</div>`;
+    return `<tr id="vbRow${i}">
+        <td style="min-width:150px">
+            <span style="font-weight:700;font-size:.84rem;color:#111;display:block">${escHtml(label)}</span>
+        </td>
+        <td style="min-width:90px">
+            <input class="vb-input" type="text" placeholder="SKU-001" value="${escHtml(v.sku||'')}"
+                onchange="vbVariations[${i}].sku=this.value;syncVariationsJson()" style="width:90px">
+        </td>
+        <td style="min-width:100px">
+            <input class="vb-input" type="number" placeholder="0" value="${v.regular_price||''}"
+                onchange="vbVariations[${i}].regular_price=this.value;syncVariationsJson()" style="width:100px">
+        </td>
+        <td style="min-width:100px">
+            <input class="vb-input" type="number" placeholder="0" value="${v.sale_price||''}"
+                onchange="vbVariations[${i}].sale_price=this.value;syncVariationsJson()" style="width:100px">
+        </td>
+        <td style="min-width:80px">
+            <input class="vb-input" type="number" placeholder="0" value="${v.stock_quantity||0}"
+                onchange="vbVariations[${i}].stock_quantity=this.value;syncVariationsJson()" style="width:75px">
+        </td>
+        <td style="min-width:80px">
+            ${imgThumb}
+            <label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #111;border-radius:8px;background:#111;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload
+                <input type="file" accept="image/*" style="display:none" onchange="uploadVarImage(this,${i})">
+            </label>
+            <input type="hidden" id="vbImg${i}" value="${escHtml(v.image||'')}">
+        </td>
+        <td style="min-width:110px">
+            <div class="vb-add-dropdown" style="position:relative;display:inline-block;width:108px">
+                <button type="button"
+                    onclick="vbToggleDropdown(this)"
+                    style="width:108px;height:36px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;
+                           color:#111;font-size:.84rem;font-weight:600;padding:0 32px 0 10px;text-align:left;
+                           cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+                           white-space:nowrap;outline:none"
+                    onmouseover="this.style.borderColor='#facc15'"
+                    onmouseout="if(!this.closest('.vb-add-dropdown').classList.contains('vb-dd-open'))this.style.borderColor='#e5e7eb'">
+                    <span>${v.status==1?'Active':'Inactive'}</span>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0;margin-left:4px">
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="vb-dd-menu" style="display:none;position:fixed;left:0;top:0;width:108px;
+                     background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+                     box-shadow:0 8px 20px rgba(17,17,17,.14);z-index:99999;overflow:hidden">
+                    <button type="button" data-val="1"
+                        onclick="vbPickStatus(this,${i})"
+                        style="width:100%;padding:8px 12px;text-align:left;border:0;background:${v.status==1?'#facc15':'#fff'};
+                               color:#111;font-size:.84rem;font-weight:600;cursor:pointer;display:block"
+                        onmouseover="if(this.dataset.val!=vbVariations[${i}].status)this.style.background='#fffbeb'"
+                        onmouseout="if(this.dataset.val!=vbVariations[${i}].status)this.style.background='#fff'">Active</button>
+                    <button type="button" data-val="0"
+                        onclick="vbPickStatus(this,${i})"
+                        style="width:100%;padding:8px 12px;text-align:left;border:0;background:${v.status==0?'#facc15':'#fff'};
+                               color:#111;font-size:.84rem;font-weight:600;cursor:pointer;display:block;border-top:1px solid #f3f4f6"
+                        onmouseover="if(this.dataset.val!=vbVariations[${i}].status)this.style.background='#fffbeb'"
+                        onmouseout="if(this.dataset.val!=vbVariations[${i}].status)this.style.background='#fff'">Inactive</button>
+                </div>
+            </div>
+        </td>
+        <td style="text-align:center;min-width:60px">
+            <input type="checkbox" ${v.is_default?'checked':''} onchange="setDefault(${i},this.checked)"
+                style="width:18px;height:18px;accent-color:#facc15;cursor:pointer">
+        </td>
+        <td style="text-align:center;min-width:40px">
+            <button type="button" onclick="removeVariation(${i})"
+                style="width:32px;height:32px;padding:0;border-radius:8px;font-size:16px;line-height:1;
+                       border:1px solid #e5e7eb!important;background:#fff!important;color:#9ca3af!important;
+                       cursor:pointer;display:inline-flex;align-items:center;justify-content:center"
+                onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fff5f5'"
+                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#9ca3af';this.style.background='#fff'">✕</button>
+        </td>
+    </tr>`;
+}
+
+function buildLabel(v) {
+    return Object.entries(v.attributes||{}).map(([tid,vid]) => {
+        const t = VB_TYPES.find(x=>x.id==tid);
+        const val = t ? (t.values||[]).find(x=>x.id==vid) : null;
+        return (t?t.name:'?') + ': ' + (val?val.value:'?');
+    }).join(' / ') || 'Variation';
+}
+
+function setDefault(idx, checked) {
+    vbVariations.forEach((v,i) => v.is_default = (i===idx && checked) ? 1 : 0);
+    syncVariationsJson();
+}
+
+function removeVariation(idx) {
+    vbVariations.splice(idx, 1);
+    renderVariationRows();
+}
+
+function syncVariationsJson() {
+    document.getElementById('variationsJson').value = JSON.stringify(vbVariations);
+}
+
+async function uploadVarImage(input, idx) {
+    const file = input.files[0];
+    if (!file) return;
+    const label = input.closest('label');
+    if (label) { label.style.opacity='0.6'; }
+    const fd = new FormData();
+    fd.append('variation_image', file);
+    try {
+        const res = await fetch('ajax-upload-variation-image.php', { method:'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            vbVariations[idx].image = data.url;
+            document.getElementById('vbImg'+idx).value = data.url;
+            syncVariationsJson();
+            const thumb = document.getElementById('vbThumb'+idx);
+            if (thumb) {
+                const img = document.createElement('img');
+                img.src = vbBase(data.url); img.id = 'vbThumb'+idx;
+                img.style = 'width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:block;margin-bottom:4px';
+                thumb.parentNode.replaceChild(img, thumb);
+            }
+        } else { alert(data.message || 'Upload failed.'); }
+    } catch(e) { alert('Upload error: ' + e.message); }
+    finally { if (label) label.style.opacity='1'; }
+}
+
+// Save variations via AJAX before form submits (product_id comes from server redirect)
+document.getElementById('add-product-form').addEventListener('submit', function() {
+    syncVariationsJson();
+});
+
+function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Custom dropdown helpers (add-product)
+function vbCloseAllDropdowns() {
+    document.querySelectorAll('.vb-add-dropdown.vb-dd-open').forEach(function(d) {
+        d.classList.remove('vb-dd-open');
+        d.querySelector('.vb-dd-menu').style.display = 'none';
+        var tb = d.querySelector(':scope > button');
+        if (tb) { tb.style.borderColor = '#e5e7eb'; tb.style.boxShadow = 'none'; }
+    });
+}
+function vbToggleDropdown(btn) {
+    const wrap = btn.closest('.vb-add-dropdown');
+    const isOpen = wrap.classList.contains('vb-dd-open');
+    vbCloseAllDropdowns();
+    if (!isOpen) {
+        const menu = wrap.querySelector('.vb-dd-menu');
+        const rect = btn.getBoundingClientRect();
+        menu.style.display = 'block';
+        menu.style.top    = (rect.bottom + 4) + 'px';
+        menu.style.left   = rect.left + 'px';
+        menu.style.width  = rect.width + 'px';
+        wrap.classList.add('vb-dd-open');
+        btn.style.borderColor = '#facc15';
+        btn.style.boxShadow   = '0 0 0 3px rgba(250,204,21,.18)';
+    }
+}
+
+function vbPickStatus(optBtn, idx) {
+    const val = parseInt(optBtn.dataset.val);
+    vbVariations[idx].status = val;
+    syncVariationsJson();
+    const wrap = optBtn.closest('.vb-add-dropdown');
+    const trigger = wrap.querySelector(':scope > button > span');
+    if (trigger) trigger.textContent = val === 1 ? 'Active' : 'Inactive';
+    wrap.querySelectorAll('.vb-dd-menu button').forEach(function(b) {
+        b.style.background = parseInt(b.dataset.val) === val ? '#facc15' : '#fff';
+    });
+    wrap.classList.remove('vb-dd-open');
+    wrap.querySelector('.vb-dd-menu').style.display = 'none';
+    wrap.querySelector(':scope > button').style.borderColor = '#e5e7eb';
+    wrap.querySelector(':scope > button').style.boxShadow = 'none';
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.vb-add-dropdown')) vbCloseAllDropdowns();
+});
+document.addEventListener('scroll', vbCloseAllDropdowns, true);
+
 function previewGalleryImages(event) {
     const metadataContainer = document.getElementById('gallery_images_metadata');
     metadataContainer.innerHTML = '';

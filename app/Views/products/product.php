@@ -269,6 +269,30 @@ foreach ($paragraphs as $index => $para) {
                 </div>
 
                 <?php
+                // ----------------------------------------------------------------
+                // For variable products: overwrite price with lowest variation price
+                // ----------------------------------------------------------------
+                if (!empty($isVariableProduct) && !empty($productVariations)) {
+                    $activeVars = array_filter($productVariations, fn($v) => $v['status'] == 1 && $v['stock_quantity'] > 0);
+                    if (!empty($activeVars)) {
+                        $lowestEffective = min(array_map(fn($v) => $v['sale_price'] !== null ? $v['sale_price'] : $v['regular_price'], $activeVars));
+                        $product['sale_price']    = null;
+                        $product['regular_price'] = $lowestEffective;
+                    }
+                    $hasActiveVarStock = !empty($activeVars);
+                    if (!$hasActiveVarStock) {
+                        $productAvailability = 'outofstock';
+                        $availabilityText    = 'Out of Stock';
+                        $availabilityClass   = 'out-of-stock';
+                        $stockQuantity       = 0;
+                    } else {
+                        $productAvailability = 'instock';
+                        $availabilityText    = 'In Stock';
+                        $availabilityClass   = 'in-stock';
+                        $stockQuantity       = array_sum(array_column($activeVars, 'stock_quantity'));
+                    }
+                }
+
                 $validPrice = ($productAvailability === 'instock' && isset($product['sale_price']) && is_numeric($product['sale_price']) && $product['sale_price'] > 0)
                     ? $product['sale_price']
                     : ($productAvailability === 'instock' && isset($product['regular_price']) && is_numeric($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
@@ -301,10 +325,343 @@ foreach ($paragraphs as $index => $para) {
                         </div>
                     </div>
                 <?php endif; ?>
-                <!-- Cart Form -->
+<!-- === VARIATION SWATCHES === -->
+<?php if (!empty($isVariableProduct) && !empty($productVariations)):
+    $usedTypeIds = [];
+    foreach ($productVariations as $_pv) {
+        foreach (array_keys($_pv['attributes']) as $_tid) $usedTypeIds[(int)$_tid] = true;
+    }
+    $productVarTypes = array_values(array_filter($variationTypes, fn($t) => isset($usedTypeIds[(int)$t['id']])));
+?>
+
+<style>
+/* ===== Variation Swatches — PhonesDukan Theme ===== */
+.pdsw-wrap { margin: 20px 0 16px; }
+.pdsw-group { margin-bottom: 20px; }
+
+/* Section label */
+.pdsw-label {
+    font-size: .9rem; font-weight: 800; color: #111111;
+    margin-bottom: 12px; display: block;
+    letter-spacing: -.01em;
+}
+.pdsw-chosen-name { font-weight: 600; color: #6b7280; }
+.pdsw-options { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+
+/* ---- IMAGE / COLOR CARD swatches ---- */
+.pdsw-card {
+    display: flex; flex-direction: column; align-items: center;
+    width: 90px; min-height: 110px;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 7px 6px 9px;
+    cursor: pointer; outline: none;
+    transition: border-color .17s, box-shadow .17s;
+    position: relative;
+    -webkit-user-select: none; user-select: none;
+}
+.pdsw-card:hover:not(:disabled) {
+    border-color: #facc15;
+    box-shadow: 0 2px 10px rgba(250,204,21,.25);
+}
+.pdsw-card.active {
+    border-color: #facc15;
+    box-shadow: 0 0 0 2.5px #facc15;
+}
+.pdsw-card:disabled,
+.pdsw-card.pdsw-oos {
+    opacity: .35; cursor: not-allowed;
+}
+/* Product image inside card */
+.pdsw-card-img {
+    width: 70px; height: 72px;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+    background: #f8f8f8;
+}
+/* Solid color block inside card (when no image uploaded) */
+.pdsw-card-color {
+    width: 70px; height: 72px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,.07);
+    display: block;
+}
+/* Name label below visual */
+.pdsw-card-name {
+    font-size: .76rem; font-weight: 700; color: #111;
+    margin-top: 7px; text-align: center;
+    line-height: 1.3;
+    max-width: 80px;
+    word-break: break-word;
+}
+.pdsw-card.active .pdsw-card-name { font-weight: 800; }
+.pdsw-card.pdsw-oos .pdsw-card-name { color: #9ca3af; }
+
+/* OOS diagonal badge */
+.pdsw-oos-x {
+    position: absolute; inset: 0; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+}
+.pdsw-oos-x::before {
+    content: '';
+    position: absolute; top: 50%; left: 0; right: 0; height: 1.5px;
+    background: rgba(200,0,0,.4); transform: rotate(-30deg);
+}
+
+/* ---- PILL / TEXT swatches ---- */
+.pdsw-pill {
+    display: inline-flex; align-items: center;
+    padding: 8px 18px;
+    border: 2px solid #e5e7eb;
+    border-radius: 999px;
+    background: #fff; color: #111;
+    font-size: .85rem; font-weight: 700;
+    cursor: pointer; outline: none;
+    transition: border-color .15s, background .15s, color .15s;
+    white-space: nowrap;
+    -webkit-user-select: none; user-select: none;
+}
+.pdsw-pill:hover:not(:disabled) {
+    border-color: #facc15;
+    background: #fffbeb;
+}
+.pdsw-pill.active {
+    border-color: #facc15;
+    background: #facc15;
+    color: #111;
+    box-shadow: 0 0 0 1px #facc15;
+}
+.pdsw-pill:disabled,
+.pdsw-pill.pdsw-oos {
+    opacity: .38; cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Notice / SKU */
+.pdsw-notice {
+    display: none; margin: 10px 0 2px;
+    padding: 8px 14px; border-radius: 8px;
+    background: #fffbeb; border: 1px solid #facc15;
+    font-size: .84rem; font-weight: 700; color: #111;
+}
+.pdsw-sku-line { display: none; font-size: .8rem; color: #6b7280; margin: 5px 0; }
+
+@media (max-width: 480px) {
+    .pdsw-card { width: 74px; }
+    .pdsw-card-img, .pdsw-card-color { width: 56px; height: 58px; }
+    .pdsw-pill { padding: 7px 13px; font-size: .8rem; }
+}
+</style>
+
+<div class="pdsw-wrap" id="pdSwatchesWrap">
+<?php
+// Build a map: variation_type_id → value_id → product_variation image
+// This lets each color swatch show the image uploaded in Step 3 of the variation builder
+$varImgMap = [];
+foreach ($productVariations as $_pv) {
+    if (!empty($_pv['image'])) {
+        foreach ($_pv['attributes'] as $_tid => $_vid) {
+            // Only set if not already set (prefer first / default variation image)
+            if (!isset($varImgMap[(int)$_tid][(int)$_vid])) {
+                $varImgMap[(int)$_tid][(int)$_vid] = $_pv['image'];
+            }
+        }
+    }
+}
+?>
+<?php foreach ($productVarTypes as $vt):
+    $usedValueIds = [];
+    foreach ($productVariations as $_pv) {
+        if (isset($_pv['attributes'][(int)$vt['id']])) {
+            $usedValueIds[(int)$_pv['attributes'][(int)$vt['id']]] = true;
+        }
+    }
+    /* Show as cards: image type OR color type */
+    $isCardType = in_array($vt['display_type'], ['image','color']);
+?>
+<div class="pdsw-group" data-type-id="<?= $vt['id'] ?>">
+  <div class="pdsw-label">
+    <?= htmlspecialchars($vt['name']) ?>
+    <span class="pdsw-chosen-name" id="pdSwChosen_<?= $vt['id'] ?>"></span>
+  </div>
+  <div class="pdsw-options">
+  <?php foreach ($vt['values'] as $val):
+    if (!isset($usedValueIds[(int)$val['id']])) continue;
+    $isAvail = false;
+    foreach ($productVariations as $_pv) {
+        if (isset($_pv['attributes'][(int)$vt['id']])
+            && (int)$_pv['attributes'][(int)$vt['id']] === (int)$val['id']
+            && $_pv['status'] == 1 && $_pv['stock_quantity'] > 0) {
+            $isAvail = true; break;
+        }
+    }
+    $dis      = $isAvail ? '' : 'disabled';
+    $oosClass = $isAvail ? '' : ' pdsw-oos';
+
+    // Image priority:
+    // 1. Product-variation image (uploaded in Step 3 — specific to this product+color)
+    // 2. Global variation-value image (uploaded in Manage Variations)
+    // 3. Color code block
+    // 4. Grey placeholder
+    $swatchImg   = $varImgMap[(int)$vt['id']][(int)$val['id']] ?? null;
+    $globalImg   = $val['image'] ?? null;
+    $colorCode   = $val['color_code'] ?? null;
+    $displayImg  = $swatchImg ?: $globalImg;
+  ?>
+
+  <?php if ($isCardType): ?>
+    <button type="button"
+      class="pdsw-card<?= $oosClass ?>"
+      data-type-id="<?= $vt['id'] ?>"
+      data-value-id="<?= $val['id'] ?>"
+      data-value-name="<?= htmlspecialchars($val['value']) ?>"
+      title="<?= htmlspecialchars($val['value']) ?>"
+      <?= $dis ?>>
+      <?php if ($displayImg): ?>
+        <img class="pdsw-card-img"
+             src="<?= htmlspecialchars($displayImg) ?>"
+             alt="<?= htmlspecialchars($val['value']) ?>" loading="lazy">
+      <?php elseif ($colorCode): ?>
+        <span class="pdsw-card-color"
+              style="background:<?= htmlspecialchars($colorCode) ?>"></span>
+      <?php else: ?>
+        <span class="pdsw-card-color" style="background:#f1f5f9"></span>
+      <?php endif; ?>
+      <span class="pdsw-card-name"><?= htmlspecialchars($val['value']) ?></span>
+      <?php if (!$isAvail): ?><span class="pdsw-oos-x"></span><?php endif; ?>
+    </button>
+
+  <?php else: /* pill / text swatch */ ?>
+    <button type="button"
+      class="pdsw-pill<?= $oosClass ?>"
+      data-type-id="<?= $vt['id'] ?>"
+      data-value-id="<?= $val['id'] ?>"
+      data-value-name="<?= htmlspecialchars($val['value']) ?>"
+      <?= $dis ?>>
+      <?= htmlspecialchars($val['value']) ?>
+    </button>
+  <?php endif; ?>
+
+  <?php endforeach; ?>
+  </div>
+</div>
+<?php endforeach; ?>
+
+<p class="pdsw-notice" id="pdSwNotice">Please select all product options first.</p>
+<p class="pdsw-sku-line" id="pdSwSku">SKU: <strong id="pdSwSkuVal"></strong></p>
+<input type="hidden" id="selectedVariationId" value="">
+</div>
+
+<script>
+(function(){
+var PD_VARS = <?= json_encode($productVariations, JSON_UNESCAPED_UNICODE) ?>;
+var pdSel = {};
+var withBase = window.pdWithBase || function(p){ var b=String(window.__PD_BASE_PATH__||'').replace(/\/+$/,''); return p&&p.startsWith('/')&&!p.startsWith(b+'/')?b+p:p; };
+
+// Attach click handlers to all swatch buttons
+document.querySelectorAll('.pdsw-card:not(:disabled), .pdsw-pill:not(:disabled)').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        var tid=parseInt(this.dataset.typeId), vid=parseInt(this.dataset.valueId), vname=this.dataset.valueName||'';
+        // Deselect all buttons of this type
+        document.querySelectorAll('.pdsw-card[data-type-id="'+tid+'"], .pdsw-pill[data-type-id="'+tid+'"]').forEach(function(b){ b.classList.remove('active'); });
+        if(pdSel[tid]===vid){
+            delete pdSel[tid];
+            var chosen=document.getElementById('pdSwChosen_'+tid);
+            if(chosen) chosen.textContent='';
+        } else {
+            pdSel[tid]=vid;
+            this.classList.add('active');
+            var chosen=document.getElementById('pdSwChosen_'+tid);
+            if(chosen) chosen.textContent=' — '+vname;
+        }
+        pdMatch();
+    });
+});
+
+function pdMatch(){
+    var notice=document.getElementById('pdSwNotice');
+    var allTypeIds=[...new Set(PD_VARS.flatMap(function(v){return Object.keys(v.attributes).map(Number);}))];
+    var allSelected=allTypeIds.every(function(t){return pdSel[t]!==undefined;});
+    if(!Object.keys(pdSel).length){pdReset();return;}
+    var match=PD_VARS.find(function(v){return allTypeIds.every(function(t){return v.attributes[t]==pdSel[t];});});
+    if(!allSelected){if(match){pdUpdatePrice(match.regular_price,match.sale_price);} return;}
+    if(!match||match.status!=1){
+        notice.style.display='block'; notice.textContent=(!match)?'This combination is unavailable.':'This combination is out of stock.';
+        document.getElementById('selectedVariationId').value=''; pdDisableCart(); return;
+    }
+    notice.style.display='none';
+    document.getElementById('selectedVariationId').value=match.id;
+    pdUpdatePrice(match.regular_price,match.sale_price);
+    pdUpdateStock(match.stock_quantity);
+    if(match.sku){document.getElementById('pdSwSku').style.display='';document.getElementById('pdSwSkuVal').textContent=match.sku;}
+    else{document.getElementById('pdSwSku').style.display='none';}
+    if(match.image){var mi=document.getElementById('mainImage');if(mi)mi.src=withBase(match.image);}
+    match.stock_quantity>0?pdEnableCart(match.sale_price||match.regular_price,match.stock_quantity):pdDisableCart();
+}
+
+function pdUpdatePrice(reg,sale){
+    var eff=(sale&&sale>0&&sale<reg)?sale:reg;
+    var el=document.querySelector('.new-price');if(el)el.textContent='Rs. '+eff.toLocaleString('en-PK',{minimumFractionDigits:2});
+    var old=document.querySelector('.old-price');
+    if(old){if(sale&&sale>0&&sale<reg){old.textContent='Rs. '+reg.toLocaleString('en-PK',{minimumFractionDigits:2});old.style.display='';}else{old.style.display='none';}}
+    document.querySelectorAll('.add-to-cart').forEach(function(b){b.dataset.unitPrice=eff;});
+}
+function pdUpdateStock(qty){
+    var el=document.querySelector('.stock-status');
+    if(!el)return;
+    var cls=qty>0?'in-stock':'out-of-stock',txt=qty>0?'In Stock':'Out of Stock';
+    el.className='stock-status '+cls;
+    var dot=el.querySelector('.stock-dot');
+    el.textContent='';if(dot)el.appendChild(dot);
+    el.appendChild(document.createTextNode(txt));
+}
+function pdEnableCart(price,maxQty){
+    document.querySelectorAll('.add-to-cart,.buy-now').forEach(function(b){b.disabled=false;});
+    document.querySelectorAll('.add-to-cart').forEach(function(b){b.dataset.unitPrice=price;});
+    document.querySelectorAll('input[name="quantity"]').forEach(function(i){i.max=maxQty;});
+}
+function pdDisableCart(){document.querySelectorAll('.add-to-cart,.buy-now').forEach(function(b){b.disabled=true;});}
+function pdReset(){document.getElementById('selectedVariationId').value='';document.getElementById('pdSwNotice').style.display='none';}
+
+// Guard: require variation selection before adding to cart
+document.querySelectorAll('.add-to-cart').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+        var vid=document.getElementById('selectedVariationId').value;
+        if(!vid){e.stopImmediatePropagation();var n=document.getElementById('pdSwNotice');if(n){n.style.display='block';n.textContent='Please select all product options first.';}return false;}
+        btn.dataset.variationId=vid;
+    },true);
+});
+
+// Auto-select on page load:
+// 1. If a variation is marked Default → use its attributes
+// 2. Otherwise → click the FIRST visible (non-disabled) swatch in each type group (DOM order)
+//    This always matches what the user sees first on screen, regardless of DB insertion order.
+(function(){
+    var defVar = PD_VARS.find(function(v){return v.is_default==1&&v.status==1&&v.stock_quantity>0;});
+    if(defVar){
+        // Admin explicitly set a default — respect it
+        Object.entries(defVar.attributes).forEach(function(e){
+            var b=document.querySelector('.pdsw-card[data-type-id="'+e[0]+'"][data-value-id="'+e[1]+'"], .pdsw-pill[data-type-id="'+e[0]+'"][data-value-id="'+e[1]+'"]');
+            if(b) b.click();
+        });
+    } else {
+        // No default set — click the first available swatch in each group (visual/DOM order)
+        document.querySelectorAll('.pdsw-group').forEach(function(group){
+            var first = group.querySelector('.pdsw-card:not([disabled]), .pdsw-pill:not([disabled])');
+            if(first) first.click();
+        });
+    }
+})();
+})();
+</script>
+<?php endif; // end variation swatches ?>
+
 <!-- Cart Form -->
 <?php
-$cartFormCondition = $productAvailability === 'instock' && $stockQuantity > 0 && ($validPrice > 0 || !empty($productAttributes));
+$cartFormCondition = $productAvailability === 'instock' && $stockQuantity > 0 && ($validPrice > 0 || !empty($productAttributes) || !empty($isVariableProduct));
 error_log("Cart form condition: " . ($cartFormCondition ? 'true' : 'false') . ", Availability: $productAvailability, Stock: $stockQuantity, Valid Price: $validPrice, Attributes: " . (empty($productAttributes) ? 'none' : 'present'));
 if ($cartFormCondition): ?>
             <!-- Payment Method Selection -->
@@ -325,6 +682,7 @@ if ($cartFormCondition): ?>
                 data-product-id="<?php echo $product['product_id']; ?>"
                 data-unit-price="<?php echo $validPrice; ?>"
                 data-attribute-value=""
+                data-variation-id=""
                 data-payment-method="cod"
                 id="add-to-cart-btn-desktop">
             Add to Cart
