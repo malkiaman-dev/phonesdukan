@@ -783,6 +783,8 @@ h4.attribute-name {
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  flex-shrink: 0;
+  min-width: 120px;
 }
 
 #quantity-mobile {
