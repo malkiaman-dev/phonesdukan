@@ -1656,6 +1656,11 @@ li.custom-tab-title h2 {
    ================================================================ */
 @media screen and (max-width: 768px) {
 
+  /* Keep chatbot button above sticky cart on product page mobile */
+  #pd-chatbot-toggle {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
+  }
+
   .nav-path {
     padding: 0 14px;
   }
@@ -1767,6 +1772,38 @@ li.custom-tab-title h2 {
 
   .sticky-cart-wrapper {
     display: block;
+  }
+
+  /* Tighten sticky cart layout on small mobiles so CTA buttons never crop */
+  .sticky-cart-wrapper {
+    padding: 8px 10px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+  }
+
+  .mobile-cart-form {
+    gap: 6px;
+  }
+
+  .quantity-wrapper {
+    min-width: 98px;
+  }
+
+  .quantity-wrapper .quantity-btn {
+    width: 30px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  #quantity-mobile {
+    width: 30px;
+    font-size: 14px;
+  }
+
+  .mobile-cart-form .btn {
+    min-width: 0;
+    padding: 0 10px;
+    height: 42px;
+    font-size: 13px;
   }
 
   .trust-signals {
@@ -1908,6 +1945,35 @@ li.custom-tab-title h2 {
 
 /* Small mobile — still 2 columns, tighter; matches homepage 480px */
 @media screen and (max-width: 480px) {
+  #pd-chatbot-toggle {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 66px);
+  }
+
+  .quantity-wrapper {
+    min-width: 90px;
+  }
+
+  .quantity-wrapper .quantity-btn {
+    width: 28px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  #quantity-mobile {
+    width: 28px;
+    font-size: 13px;
+  }
+
+  .mobile-cart-form {
+    gap: 5px;
+  }
+
+  .mobile-cart-form .btn {
+    height: 40px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+
   .product-grid-wrapper {
     gap: 10px;
   }
