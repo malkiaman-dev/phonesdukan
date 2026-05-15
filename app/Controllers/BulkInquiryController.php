@@ -2,9 +2,6 @@
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/BulkInquiryModel.php';
 
-// Set error reporting for debugging
-error_log("BulkInquiryController accessed at " . date('Y-m-d H:i:s'));
-
 header('Content-Type: application/json');
 
 try {
@@ -21,9 +18,6 @@ try {
     if ($input === null) {
         throw new Exception('Invalid JSON input.');
     }
-
-    // Log input for debugging
-    error_log("Bulk Inquiry Input: " . json_encode($input));
 
     // Sanitize inputs
     $sanitizeString = function($value) {
@@ -96,7 +90,6 @@ try {
         $submittedTotal = (float) ($input['total_price'] ?? 0);
         if (abs($calculatedTotal - $submittedTotal) > 0.01) {
             $errors[] = 'Invalid total price. Calculated: ' . $calculatedTotal . ', Submitted: ' . $submittedTotal;
-            error_log("Total price mismatch: Calculated $calculatedTotal, Submitted $submittedTotal");
         } else {
             $input['total_price'] = $calculatedTotal; // Use calculated value
         }
@@ -133,7 +126,6 @@ try {
         throw new Exception('Failed to save inquiry to database.');
     }
 } catch (Exception $e) {
-    error_log("BulkInquiryController Error: " . $e->getMessage());
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }

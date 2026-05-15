@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Clear output buffer to prevent stray output
 ob_start();
 header('Content-Type: application/json');
@@ -106,8 +103,6 @@ class CartController {
         }
     
         $data = json_decode(file_get_contents("php://input"), true);
-        error_log("RemoveCartItem Input: " . json_encode($data));
-    
         $productId = isset($data['product_id']) ? (int)$data['product_id'] : 0;
     
         if ($productId <= 0) {
@@ -121,8 +116,6 @@ class CartController {
         if ($removed) {
             $cartItems = $this->cartModel->fetchCartItems($sessionId, $userId);
             $totals = $this->calculateCartTotals($cartItems);
-            $response = ['status' => 'success', 'message' => 'Item removed from cart', 'cart_items' => $cartItems, 'cart_summary' => $totals];
-            error_log("RemoveCartItem Response: " . json_encode($response));
             $this->sendResponse('success', 'Item removed from cart', [
                 'cart_items' => $cartItems,
                 'cart_summary' => $totals

@@ -31,28 +31,20 @@ class OrderModel {
         $this->db = $database->getConnection();
         
         if (!$this->db) {
-            error_log("ERROR: Database connection failed.");
             die("Database connection error.");
-        } else {
-            error_log("DEBUG: Database connection established successfully.");
         }
     }
 
 
     public function createOrder($orderData) {
         try {
-            error_log("DEBUG: Received Order Data: " . json_encode($orderData));
-    
-            // Ensure payment_method is set
             if (!isset($orderData['payment_method']) || empty($orderData['payment_method'])) {
-                $orderData['payment_method'] = 'COD'; // Default value
+                $orderData['payment_method'] = 'COD';
             }
-    
-            error_log("DEBUG: Payment Method: " . $orderData['payment_method']);
-    
+
             $query = "INSERT INTO orders (customer_name, customer_email, customer_phone, total_price, order_status, payment_method)
                       VALUES (:customer_name, :customer_email, :customer_phone, :total_price, :order_status, :payment_method)";
-    
+
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':customer_name', $orderData['customer_name']);
             $stmt->bindParam(':customer_email', $orderData['customer_email']);
@@ -60,19 +52,13 @@ class OrderModel {
             $stmt->bindParam(':total_price', $orderData['total_price']);
             $stmt->bindParam(':order_status', $orderData['order_status']);
             $stmt->bindParam(':payment_method', $orderData['payment_method'], PDO::PARAM_STR);
-    
-            error_log("DEBUG: Running Query...");
-    
+
             if ($stmt->execute()) {
-                $orderId = $this->db->lastInsertId();
-                error_log("✅ Order Created! ID: " . $orderId);
-                return ['success' => true, 'order_id' => $orderId];
+                return ['success' => true, 'order_id' => $this->db->lastInsertId()];
             } else {
-                error_log("❌ SQL Error: " . implode(", ", $stmt->errorInfo()));
                 return ['success' => false, 'message' => 'Order creation failed'];
             }
         } catch (Exception $e) {
-            error_log("❌ Exception: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
@@ -84,7 +70,6 @@ class OrderModel {
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
     
         if ($order && $order['confirmation_email_sent']) {
-            error_log("Order confirmation email already sent for Order ID: $order_id. Skipping.");
             return false;
         }
     
@@ -113,8 +98,8 @@ class OrderModel {
             $mail->isHTML(true);
             $mail->Subject = "Order Confirmation - Order #$order_id";
     
-            // Load external CSS file content
-            $css = file_get_contents('/public/assets/css/frontend/email.css/'); // Make sure this path is correct
+            $emailCssPath = dirname(__DIR__, 2) . '/public/assets/css/frontend/email.css';
+            $css = file_exists($emailCssPath) ? file_get_contents($emailCssPath) : '';
     
             // Creating a colorful, professional user email message
             $user_message = "
@@ -171,16 +156,12 @@ class OrderModel {
                 throw new Exception("Error sending email to admin: " . $mail->ErrorInfo);
             }
     
-            // ✅ Update email sent status
             $updateStmt = $this->db->prepare("UPDATE orders SET confirmation_email_sent = 1 WHERE order_id = ?");
             $updateStmt->execute([$order_id]);
-    
-            error_log("Order confirmation emails sent and status updated for Order ID: $order_id");
-    
             return true;
-    
+
         } catch (Exception $e) {
-            error_log("Error in sending email: " . $mail->ErrorInfo);
+            error_log('Order email send failed (Order #' . $order_id . '): ' . $e->getMessage());
             return false;
         }
     }
@@ -188,37 +169,21 @@ class OrderModel {
     
     public function addOrderItem($orderId, $item) {
         try {
-            error_log("DEBUG: Entered addOrderItem() for Order ID: " . $orderId);
-            error_log("DEBUG: Order Item Data: " . json_encode($item));
-
-            // Validate required fields
             if (!isset($item['product_id'], $item['quantity'], $item['subtotal_price'])) {
-                error_log("ERROR: Missing required item data. Item: " . json_encode($item));
                 return false;
             }
 
-            $query = "INSERT INTO order_items (order_id, product_id, quantity, subtotal_price) 
-                      VALUES (:order_id, :product_id, :quantity, :subtotal_price)";
-
-            $stmt = $this->db->prepare($query);
+            $stmt = $this->db->prepare(
+                "INSERT INTO order_items (order_id, product_id, quantity, subtotal_price)
+                 VALUES (:order_id, :product_id, :quantity, :subtotal_price)"
+            );
             $stmt->bindParam(':order_id', $orderId, PDO::PARAM_INT);
             $stmt->bindParam(':product_id', $item['product_id'], PDO::PARAM_INT);
             $stmt->bindParam(':quantity', $item['quantity'], PDO::PARAM_INT);
             $stmt->bindParam(':subtotal_price', $item['subtotal_price'], PDO::PARAM_STR);
-
-            error_log("DEBUG: Executing addOrderItem() for Order ID: $orderId, Product ID: " . $item['product_id']);
-
-            if (!$stmt->execute()) {
-                error_log("ERROR: Order item insertion failed - Order ID: $orderId, Product ID: " . $item['product_id']);
-                error_log("SQL Error: " . implode(", ", $stmt->errorInfo()));
-                return false;
-            } 
-
-            error_log("DEBUG: Order item inserted successfully - Order ID: $orderId, Product ID: " . $item['product_id']);
-            return true;
+            return $stmt->execute();
 
         } catch (Exception $e) {
-            error_log("ERROR: Exception in addOrderItem - " . $e->getMessage());
             return false;
         }
     }

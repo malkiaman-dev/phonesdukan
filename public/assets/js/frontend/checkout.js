@@ -138,75 +138,8 @@ function closeModal() {
 }
 
 // ================================================================
-// COPY ACCOUNT NUMBER  (unchanged)
+// COPY ACCOUNT NUMBER
 // ================================================================
-
-function copyAccount(icon) {
-    // Robust find: Look for nearest .account-number (handles nesting like your <ol>)
-    const accountSpan = icon.closest('li').querySelector('.account-number');
-    const accountNum = accountSpan ? accountSpan.dataset.copy : '';
-    if (!accountNum) {
-        console.error('No account number found—check data-copy attr');
-        return;
-    }
-
-    console.log('Attempting copy:', accountNum); // Debug: See in DevTools
-
-    // Modern clipboard (desktop + mobile)
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(accountNum).then(() => {
-            console.log('Copied:', accountNum);
-            feedbackSuccess(icon);
-        }).catch(err => {
-            console.error('Clipboard API failed:', err);
-            fallbackCopy(accountNum, icon);
-        });
-    } else {
-        // Fallback for older/HTTP
-        fallbackCopy(accountNum, icon);
-    }
-}
-
-function feedbackSuccess(icon) {
-    const originalTitle = icon.title || 'Copy Account Number';
-    icon.title = 'Copied!';
-    // Mobile haptic buzz (if supported)
-    if (navigator.vibrate) {
-        navigator.vibrate(50); // Quick vibe
-    }
-    setTimeout(() => { icon.title = originalTitle; }, 2000);
-}
-
-function copyAccount(icon) {
-    // Robust find: Look for nearest .account-number (handles nesting like your <ol>)
-    const accountSpan = icon.closest('li').querySelector('.account-number');
-    const accountNum = accountSpan ? accountSpan.dataset.copy : '';
-    if (!accountNum) {
-        return;
-    }
-
-    // Modern clipboard (desktop + mobile)
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(accountNum).then(() => {
-            feedbackSuccess(icon);
-        }).catch(err => {
-            fallbackCopy(accountNum, icon);
-        });
-    } else {
-        // Fallback for older/HTTP
-        fallbackCopy(accountNum, icon);
-    }
-}
-
-function feedbackSuccess(icon) {
-    const originalTitle = icon.title || 'Copy Account Number';
-    icon.title = 'Copied!';
-    // Mobile haptic buzz (if supported)
-    if (navigator.vibrate) {
-        navigator.vibrate(50); // Quick vibe
-    }
-    setTimeout(() => { icon.title = originalTitle; }, 2000);
-}
 
 function copyAccount(icon) {
     // Robust find: Look for nearest .account-number

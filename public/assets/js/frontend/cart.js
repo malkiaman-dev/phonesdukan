@@ -12,10 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.__cartInitialized = true;
 
     const cartContainer = document.querySelector('.cart-container');
-    if (!cartContainer) {
-        console.error("Cart container not found");
-        return;
-    }
+    if (!cartContainer) return;
 
     // ----------------------------------------------------------------
     // Toast — lightweight non-blocking notification

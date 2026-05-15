@@ -42,10 +42,8 @@ class ProductController
         $attributeValues = [];
         foreach ($productAttributes as $attribute) {
             $values = $this->model->getAttributeValues($attribute['attribute_id']);
-            error_log("Fetched values for attribute_id " . $attribute['attribute_id'] . ": " . print_r($values, true));
             $attributeValues[$attribute['attribute_id']] = $values;
         }
-        error_log("Final attributeValues array: " . print_r($attributeValues, true));
         return [
             'product' => $product,
             'categories' => $categories,
@@ -70,8 +68,6 @@ class ProductController
 
     public function updateProduct($id, $data, $seoData, $primaryImage, $galleryImages, $imageMetadata, $primaryImageId = null)
     {
-        error_log('updateProduct called with id: ' . $id);
-        error_log('POST data: ' . print_r($_POST, true));
         
         if (empty($id) || empty($data)) {
             session_start();
@@ -98,8 +94,6 @@ class ProductController
         
             $attributes = $_POST['attributes'] ?? [];
             $removeAttributes = $_POST['remove_attributes'] ?? [];
-            error_log('Attributes sent in POST for product_id ' . $id . ': ' . print_r($attributes, true));
-            error_log('Attributes to remove for product_id ' . $id . ': ' . print_r($removeAttributes, true));
         
             $this->updateAssignedProductAttributes($id, $attributes, $removeAttributes);
 
@@ -148,7 +142,6 @@ class ProductController
                         $isPrimarySet = true;
                     }
                     $imageId = $this->model->insertProductImage($productId, $imagePath, $isPrimary);
-                    error_log("New image uploaded with image_id: $imageId");
                     $metadataToInsert = [
                         'alt_text' => null,
                         'title' => null,
@@ -170,10 +163,8 @@ class ProductController
                         'description' => isset($imageMetadata['description'][$imageId]) ? $imageMetadata['description'][$imageId] : null,
                         'caption' => isset($imageMetadata['caption'][$imageId]) ? $imageMetadata['caption'][$imageId] : null
                     ];
-                    error_log("Updating metadata for existing image with image_id: $imageId");
                     $this->model->updateImageMetadata($imageId, $metadataToUpdate);
                 } else {
-                    error_log("Metadata not found for image_id $imageId, inserting new metadata with null values.");
                     $metadataToInsert = [
                         'alt_text' => null,
                         'title' => null,
@@ -186,14 +177,12 @@ class ProductController
         }
     
         if ($primaryImageId) {
-            error_log("Setting image with image_id $primaryImageId as primary image for product_id: $productId");
             $this->model->setPrimaryImage($productId, $primaryImageId);
         }
     
         $removeImages = isset($_POST['remove_image']) ? $_POST['remove_image'] : [];
         if (!empty($removeImages)) {
             foreach ($removeImages as $imageId => $value) {
-                error_log("Removing image with image_id: $imageId for product_id: $productId");
                 $this->model->removeImage($imageId);
             }
         }
@@ -202,7 +191,6 @@ class ProductController
     public function uploadImage($file, $key = null)
     {
         if (isset($_SERVER['IS_TEST_ENV']) && $_SERVER['IS_TEST_ENV'] === true) {
-            error_log('Mocking file upload for testing');
             return '/public/uploads/mock_image.jpg';
         }
         if ($key !== null) {
@@ -251,18 +239,13 @@ class ProductController
 
     public function updateAssignedProductAttributes($productId, $attributes, $removeAttributes = [])
     {
-        error_log('Updating attributes for product_id: ' . $productId);
-        error_log('Attributes to process: ' . print_r($attributes, true));
-        error_log('Attributes to remove: ' . print_r($removeAttributes, true));
 
         // Remove specified attributes
         if (!empty($removeAttributes)) {
             foreach ($removeAttributes as $index => $attributeId) {
                 if (!empty($attributeId) && is_numeric($attributeId)) {
                     $this->model->clearProductAttributes($productId, $attributeId);
-                    error_log("Removed attribute_id: $attributeId for product_id: $productId");
                 } else {
-                    error_log("Skipping invalid attribute_id: " . var_export($attributeId, true) . " for index: $index");
                 }
             }
         }
@@ -297,7 +280,6 @@ class ProductController
                     );
                 }
             } else {
-                error_log("Skipping attribute at index $index due to missing attribute_id, value_id, or marked for removal");
             }
         }
     }

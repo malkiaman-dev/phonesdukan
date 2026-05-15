@@ -174,7 +174,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const nextBtn = wrapper.querySelector(".next-btn");
 
         if (!container || !grid || !prevBtn || !nextBtn) {
-            console.error("One or more elements are missing in a section!", { container, grid, prevBtn, nextBtn });
             return;
         }
 
