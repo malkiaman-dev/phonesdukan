@@ -8,9 +8,10 @@ class CategoryController {
         if (file_exists($view_path)) {
             include $view_path;
         } else {
-            include __DIR__ . '/../Views/404.php'; // Show 404 if category page is missing
+            http_response_code(404);
+            include __DIR__ . '/../Views/404.php';
         }
-    } 
+    }
 }
 
 ?>

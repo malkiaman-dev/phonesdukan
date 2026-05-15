@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../../includes/header.php'; 
+// Search results are unique per query — noindex to avoid thin-content indexing
+$metaRobots = 'noindex, follow';
+
+require_once __DIR__ . '/../../includes/header.php';
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/ProductModel.php';
 

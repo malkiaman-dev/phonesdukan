@@ -21,26 +21,21 @@ class NewsSitemapController {
             $model = new NewsSitemapModel($this->db);
             $articles = $model->getRecentNewsArticles();
 
-            if (empty($articles)) {
-                echo '<error>No recent news articles found</error>' . PHP_EOL;
-            } else {
-                foreach ($articles as $article) {
-                    echo '  <url>' . PHP_EOL;
-                    echo '    <loc>' . htmlspecialchars($article['url']) . '</loc>' . PHP_EOL;
-                    echo '    <news:news>' . PHP_EOL;
-                    echo '      <news:publication>' . PHP_EOL;
-                    echo '        <news:name>Phones Dukan</news:name>' . PHP_EOL;
-                    echo '        <news:language>en</news:language>' . PHP_EOL;
-                    echo '      </news:publication>' . PHP_EOL;
-                    echo '      <news:publication_date>' . $article['publication_date'] . '</news:publication_date>' . PHP_EOL;
-                    echo '      <news:title>' . $article['title'] . '</news:title>' . PHP_EOL;
-                    echo '    </news:news>' . PHP_EOL;
-                    echo '  </url>' . PHP_EOL;
-                }
+            foreach ($articles as $article) {
+                echo '  <url>' . PHP_EOL;
+                echo '    <loc>' . htmlspecialchars($article['url']) . '</loc>' . PHP_EOL;
+                echo '    <news:news>' . PHP_EOL;
+                echo '      <news:publication>' . PHP_EOL;
+                echo '        <news:name>Phones Dukan</news:name>' . PHP_EOL;
+                echo '        <news:language>en</news:language>' . PHP_EOL;
+                echo '      </news:publication>' . PHP_EOL;
+                echo '      <news:publication_date>' . $article['publication_date'] . '</news:publication_date>' . PHP_EOL;
+                echo '      <news:title>' . $article['title'] . '</news:title>' . PHP_EOL;
+                echo '    </news:news>' . PHP_EOL;
+                echo '  </url>' . PHP_EOL;
             }
         } catch (Exception $e) {
-            error_log("News Sitemap Error: " . $e->getMessage());
-            echo '<error>Failed to generate sitemap: ' . htmlspecialchars($e->getMessage()) . '</error>' . PHP_EOL;
+            error_log('News Sitemap Error: ' . $e->getMessage());
         }
 
         echo '</urlset>' . PHP_EOL;

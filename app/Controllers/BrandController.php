@@ -38,6 +38,7 @@ class BrandController {
             // Fall through to 404 below.
         }
 
+        http_response_code(404);
         include __DIR__ . '/../Views/404.php';
     }
 }

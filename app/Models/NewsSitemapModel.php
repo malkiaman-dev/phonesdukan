@@ -11,39 +11,35 @@ class NewsSitemapModel {
         $this->db = $db;
     }
 
-    public function getRecentNewsArticles() {
+    public function getRecentNewsArticles(): array
+    {
         $newsArticles = [];
         try {
-            // Assuming a junction table `post_category_mappings` exists
+            // posts.category_id is a direct FK to post_categories.id — no junction table
             $query = "
-                SELECT
-                    p.slug AS post_slug,
-                    p.title,
-                    p.published_at,
-                    c.slug AS category_slug
+                SELECT p.slug AS post_slug, p.title, p.published_at
                 FROM posts p
-                INNER JOIN post_category_mappings pcm ON p.id = pcm.post_id
-                INNER JOIN post_categories c ON pcm.category_id = c.id
+                INNER JOIN post_categories c ON p.category_id = c.id
                 WHERE p.status = 'published'
-                AND c.slug = 'news'
-                AND p.published_at >= :two_days_ago
+                  AND c.slug = 'news'
+                  AND p.published_at >= :two_days_ago
                 ORDER BY p.published_at DESC
             ";
             $stmt = $this->db->prepare($query);
-            $two_days_ago = date('Y-m-d H:i:s', strtotime('-48 hours'));
-            $stmt->bindParam(':two_days_ago', $two_days_ago, PDO::PARAM_STR);
+            $stmt->bindValue(':two_days_ago', date('Y-m-d H:i:s', strtotime('-48 hours')), PDO::PARAM_STR);
             $stmt->execute();
 
+            // News posts are routed at /news/{slug} (see routes.php)
             $baseUrl = 'https://www.phonesdukan.com';
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $newsArticles[] = [
-                    'url' => rtrim($baseUrl, '/') . '/' . trim($row['category_slug'], '/') . '/' . trim($row['post_slug'], '/') . '/',
-                    'title' => htmlspecialchars($row['title']),
-                    'publication_date' => date('c', strtotime($row['published_at'] ?? 'now'))
+                    'url'              => $baseUrl . '/news/' . trim($row['post_slug'], '/') . '/',
+                    'title'            => htmlspecialchars($row['title'], ENT_XML1, 'UTF-8'),
+                    'publication_date' => date('c', strtotime($row['published_at'] ?? 'now')),
                 ];
             }
         } catch (Exception $e) {
-            error_log("NewsSitemapModel Error: " . $e->getMessage() . " in " . __FILE__ . " at line " . __LINE__);
+            error_log('NewsSitemapModel Error: ' . $e->getMessage());
             throw $e;
         }
         return $newsArticles;

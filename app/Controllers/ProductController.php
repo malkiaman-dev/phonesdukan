@@ -99,7 +99,7 @@ class ProductController
             require_once __DIR__ . '/../Views/products/product.php';
             require_once __DIR__ . '/../Views/products/related-products.php';
         } else {
-            // Display 404 page
+            http_response_code(404);
             include __DIR__ . '/../Views/404.php';
         }
     }
