@@ -1,8 +1,12 @@
 <?php
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Buy Top Bluetooth Speakers Online in Pakistan | Phones Dukan";
 $metaDescription = "Shop the best Bluetooth speakers at Phones Dukan with updated prices in Pakistan. Compare compact to premium speakers with stronger bass and longer battery life.";
 $metaKeywords = "Bluetooth speaker, bluetooth speaker price in pakistan, best bluetooth speaker, mini bluetooth speaker, bluetooth speaker price, bluetooth speakers in pakistan";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('bluetooth-speakers', 'Bluetooth Speakers');
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';

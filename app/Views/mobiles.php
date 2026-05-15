@@ -1,8 +1,12 @@
 <?php
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+
 $pageTitle       = "Mobile Prices in Pakistan " . date('F Y') . " – Updated Rates & Top Brands";
 $metaDescription = "Explore mobile prices in Pakistan " . date('F Y') . ". Compare latest models from Samsung, Infinix, Oppo, Vivo, Xiaomi & more. Updated daily!";
 $metaRobots      = "index, follow";
 $metaKeywords    = "mobile prices Pakistan, buy mobile online Pakistan, smartphone prices Pakistan";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('mobiles', 'Mobiles');
 
 require_once __DIR__ . '/../../database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';
@@ -256,5 +260,34 @@ $totalBrands   = count($brandList);
 
     </div>
 </section>
+
+<script type="application/ld+json">
+<?= SeoHelper::faqSchema([
+    [
+        'question' => 'Are all mobile phones at Phones Dukan PTA approved?',
+        'answer'   => 'Yes. Every smartphone sold at Phones Dukan is 100% PTA (Pakistan Telecommunication Authority) approved. This ensures your device can be legally registered and used on all Pakistani networks without any network-lock issues or extra taxes.'
+    ],
+    [
+        'question' => 'Do you offer cash on delivery across Pakistan?',
+        'answer'   => 'Yes, we offer cash on delivery to all major cities including Islamabad, Lahore, Karachi, Rawalpindi, Faisalabad, Multan, Peshawar, and Quetta. Delivery typically takes 2–4 working days.'
+    ],
+    [
+        'question' => 'What warranty comes with mobile phones purchased at Phones Dukan?',
+        'answer'   => 'All smartphones at Phones Dukan come with an official 1-year brand warranty covering manufacturing defects. Some models may come with up to 2-year warranties. Warranty claims are handled directly through the official brand service centres in Pakistan.'
+    ],
+    [
+        'question' => 'What is the return policy for mobiles?',
+        'answer'   => 'We offer a 7-day return and exchange policy. If you receive a defective or incorrect product, contact us within 7 days of delivery with the original packaging and receipt. Products must be unused and in original condition for a full refund or replacement.'
+    ],
+    [
+        'question' => 'Which mobile brands are available at Phones Dukan?',
+        'answer'   => 'We stock a wide range of brands including Samsung, Apple iPhone, Xiaomi, Redmi, Vivo, Oppo, Infinix, Tecno, Realme, OnePlus, Google Pixel, Honor, and Nothing. All models are PTA approved and available at competitive prices.'
+    ],
+    [
+        'question' => 'What is the best budget smartphone under PKR 50,000 in Pakistan?',
+        'answer'   => 'Top picks under PKR 50,000 include the Infinix Hot series, Samsung Galaxy A series, Realme Narzo, Xiaomi Redmi Note, and Tecno Spark models. These offer a solid balance of performance, camera quality, and battery life for everyday use.'
+    ],
+]) ?>
+</script>
 
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>

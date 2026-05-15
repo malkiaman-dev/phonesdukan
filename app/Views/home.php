@@ -1,9 +1,15 @@
 <?php
 $showPreloader = true;
-$pageTitle = 'Best Mobile Deals &amp; Prices in Pakistan - Phones Dukan';
-$metaDescription = 'Shop top-rated mobiles, smartwatches, and accessories at Phones Dukan – Pakistan’s trusted store. Best prices, quality, and fast delivery. Explore now!';
-$metaRobots = 'index, follow';  // Optional; default is good
-$metaKeywords = 'Online Shopping in Pakistan, Buy Mobile in Pakistan, Smartwatch Price in Pakistan, Mobile Accessories, Wireless Earbuds, Tablet Price in Pakistan, Mobiles in Pakistan, Best Mobile Price, Phones Dukan';
+$pageTitle       = 'Best Mobile Deals &amp; Prices in Pakistan - Phones Dukan';
+$metaDescription = 'Shop top-rated mobiles, smartwatches, and accessories at Phones Dukan – Pakistan\'s trusted store. Best prices, quality, and fast delivery. Explore now!';
+$metaRobots      = 'index, follow';
+$metaKeywords    = 'Online Shopping in Pakistan, Buy Mobile in Pakistan, Smartwatch Price in Pakistan, Mobile Accessories, Wireless Earbuds, Tablet Price in Pakistan, Mobiles in Pakistan, Best Mobile Price, Phones Dukan';
+
+// LCP preload — tells the browser to fetch the hero image as early as possible
+$lcpPreload = '/public/assets/images/hero/hero-slide-1.png';
+
+$breadcrumbs = [['name' => 'Home', 'url' => 'https://www.phonesdukan.com/']];
+
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 require_once __DIR__ . '/../Models/ProductCategoryModel.php';  // Correct path
 require_once __DIR__ . '/../Models/PostModel.php';

@@ -1,8 +1,12 @@
 <?php
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Best Power Bank Price in Pakistan – Affordable & Reliable";
 $metaDescription = "Explore updated power bank prices in Pakistan at Phones Dukan. Compare affordable to premium fast-charging power banks with trusted backup performance.";
 $metaRobots = "index, follow";
 $metaKeywords = "Power bank, Power bank price in Pakistan, Best power bank in Pakistan, Best power bank, fast charging power bank, best power bank online";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('power-banks', 'Power Banks');
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';

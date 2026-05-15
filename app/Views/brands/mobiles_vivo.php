@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Vivo Mobile Price in Pakistan " . date('F Y') . " - Latest Deals & Offers";
 $metaDescription = "Check Vivo mobile price in Pakistan at Phones Dukan. Get the latest deals and fast delivery in cities like Islamabad, Lahore, Karachi, and more.";
 $metaKeywords = "Vivo mobiles Pakistan, Vivo lowest prices, Vivo mobiles prices in Pakistan, Vivo mobile specifications, Vivo mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'vivo', 'Vivo');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 

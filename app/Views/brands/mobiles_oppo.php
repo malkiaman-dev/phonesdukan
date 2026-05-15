@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "OPPO Mobile Price in Pakistan " . date('F Y') . " – Latest & Best Deals";
 $metaDescription = "Find the latest OPPO mobile prices in Pakistan for " . date('F Y') . " at Phones Dukan. Prices starting from PKR 34,899.";
 $metaKeywords = "OPPO mobiles Pakistan, OPPO lowest prices, OPPO mobiles prices in Pakistan, OPPO mobile specifications, OPPO mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'oppo', 'Oppo');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 

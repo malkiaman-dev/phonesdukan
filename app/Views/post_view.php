@@ -1,8 +1,39 @@
 <?php
 require_once dirname(__DIR__, 2) . '/app/Controllers/PostController.php';
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
 
 /* ── Meta for main header.php ── */
 $pageTitle = $metaTitle ?? ($post['title'] ?? 'Blog | Phones Dukan');
+
+/* ── Breadcrumbs for BreadcrumbList schema ── */
+if (isset($post) && is_array($post)) {
+    $breadcrumbs = SeoHelper::blogBreadcrumbs(
+        (string)($post['category_slug'] ?? 'blog'),
+        (string)($post['category_name'] ?? ucfirst($post['category_slug'] ?? 'Blog')),
+        (string)($post['title']         ?? ''),
+        (string)($post['slug']          ?? '')
+    );
+}
+
+/* ── Article schema — output via $schema so footer.php picks it up ── */
+if (isset($post) && is_array($post)) {
+    $postImageUrl = !empty($post['image_url'])
+        ? 'https://www.phonesdukan.com' . ltrim($post['image_url'], '/')
+        : 'https://www.phonesdukan.com/public/assets/images/phonesdukan_logo.webp';
+
+    $schema = SeoHelper::articleSchema([
+        'title'         => $post['title']          ?? $pageTitle,
+        'description'   => $metaDescription        ?? ($post['excerpt'] ?? ''),
+        'url'           => 'https://www.phonesdukan.com/blog/'
+                           . ($post['category_slug'] ?? 'blog') . '/'
+                           . ($post['slug']          ?? '') . '/',
+        'image'         => $postImageUrl,
+        'datePublished' => $post['published_at']   ?? date('Y-m-d'),
+        'dateModified'  => $post['updated_at']     ?? ($post['published_at'] ?? date('Y-m-d')),
+        'authorName'    => 'Phones Dukan',
+    ]);
+}
+
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 
 /* ── Fetch non-primary gallery images ── */

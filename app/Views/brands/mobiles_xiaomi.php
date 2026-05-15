@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Xiaomi Mobile Prices in Pakistan - " . date('F Y');
 $metaDescription = "Discover Xiaomi mobiles prices in Pakistan starting at PKR 39,999. Compare features, prices, and updates for " . date('F Y') . " to find the best deals at Phones Dukan.";
 $metaKeywords = "Xiaomi mobiles Pakistan, Xiaomi lowest prices, Xiaomi mobiles prices in Pakistan, Xiaomi mobile specifications, Xiaomi mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'xiaomi', 'Xiaomi');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 

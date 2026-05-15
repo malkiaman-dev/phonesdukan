@@ -1,8 +1,12 @@
 <?php
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Smart Watch Price in Pakistan – " . date('F Y') . " | Phones Dukan";
 $metaDescription = "Discover updated Smart Watch Price in Pakistan for " . date('F Y') . ". Shop top brands like Apple, Samsung, and Fitbit at competitive rates.";
 $metaRobots = "index, follow";
 $metaKeywords = "Smart watch, smart watch price in pakistan, smart watch price";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('smart-watches', 'Smart Watches');
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';

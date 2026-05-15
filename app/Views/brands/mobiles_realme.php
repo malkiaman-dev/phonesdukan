@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Realme Mobile Price in Pakistan " . date('F Y') . " - Latest Realme Phones";
 $metaDescription = "Discover the latest Realme mobile price in Pakistan for " . date('F Y') . ", starting at PKR 23,500. Shop feature-packed phones at Phones Dukan today!";
 $metaKeywords = "Realme mobiles Pakistan, Realme lowest prices, Realme mobiles prices in Pakistan, Realme mobile specifications, Realme mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'realme', 'Realme');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 

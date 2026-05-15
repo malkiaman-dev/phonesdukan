@@ -22,8 +22,8 @@ class ProductSitemapController {
         echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . PHP_EOL;
     
-        // Get the base domain of the site
-        $domain = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'];
+        // Always use the canonical www domain to prevent duplicate-content issues
+        $domain = 'https://www.phonesdukan.com';
     
         // Initialize the ProductSitemapModel with the DB connection
         try {

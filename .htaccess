@@ -1,3 +1,4 @@
+# ── URL Routing ──────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
     Options -MultiViews
@@ -17,4 +18,93 @@
 
     # Route all other requests through index.php
     RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# ── Gzip / Brotli Compression ─────────────────────────────────────────────
+# Reduces HTML/CSS/JS payload by 60-80%, critical for Pakistan 4G connections
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE font/woff
+    AddOutputFilterByType DEFLATE font/woff2
+    AddOutputFilterByType DEFLATE application/font-woff
+    AddOutputFilterByType DEFLATE application/font-woff2
+
+    # Prevent compression of already-compressed formats
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|avif|ico|zip|gz|bz2)$ no-gzip dont-vary
+</IfModule>
+
+# ── Browser Caching (Cache-Control) ──────────────────────────────────────
+# Versioned assets (emitJs/emitCss append ?v=filemtime) are safe to cache
+# forever with immutable; uploaded images use long-but-not-immutable cache.
+<IfModule mod_headers.c>
+    # CSS & JS — versioned via ?v=filemtime, safe to cache immutably
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header unset ETag
+    </FilesMatch>
+
+    # Fonts — never change once deployed
+    <FilesMatch "\.(woff|woff2|ttf|eot|otf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Images — long cache, no immutable (product images can be updated)
+    <FilesMatch "\.(webp|avif|jpg|jpeg|png|gif|svg|ico)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+
+    # HTML — dynamic content, no public cache
+    <FilesMatch "\.php$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate"
+    </FilesMatch>
+
+    # ── Security headers ──────────────────────────────────────────────────
+    # Prevent MIME-type sniffing (prevents drive-by downloads)
+    Header set X-Content-Type-Options "nosniff"
+    # Prevent clickjacking via iframes from other sites
+    Header set X-Frame-Options "SAMEORIGIN"
+    # Enforce browser XSS filter (legacy browsers)
+    Header set X-XSS-Protection "1; mode=block"
+    # Limit referrer info leaked to third parties
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # Only allow the site to be embedded by itself
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ── ETags: disable server-generated ETags for static files ───────────────
+# (We use Cache-Control + versioned URLs; ETags add unnecessary header weight)
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|woff|woff2|webp|avif|jpg|jpeg|png|gif|svg|ico)$">
+        Header unset ETag
+    </FilesMatch>
+</IfModule>
+FileETag None
+
+# ── Expires headers (fallback for servers without mod_headers) ────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault                          "access plus 1 month"
+    ExpiresByType text/html                 "access plus 0 seconds"
+    ExpiresByType text/css                  "access plus 1 year"
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType image/webp                "access plus 1 year"
+    ExpiresByType image/avif                "access plus 1 year"
+    ExpiresByType image/jpeg                "access plus 1 year"
+    ExpiresByType image/png                 "access plus 1 year"
+    ExpiresByType image/gif                 "access plus 1 year"
+    ExpiresByType image/svg+xml             "access plus 1 year"
+    ExpiresByType image/x-icon              "access plus 1 year"
+    ExpiresByType font/woff                 "access plus 1 year"
+    ExpiresByType font/woff2                "access plus 1 year"
+    ExpiresByType application/font-woff     "access plus 1 year"
+    ExpiresByType application/font-woff2    "access plus 1 year"
 </IfModule>

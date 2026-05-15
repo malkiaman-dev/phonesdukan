@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Infinix Mobile Price in Pakistan " . date('F Y') . " – Latest & Best Deals";
 $metaDescription = "Explore Infinix mobile prices in Pakistan for " . date('F Y') . " at Phones Dukan. Find top models, features, and discounts. Prices starting from 15,000 PKR!";
 $metaKeywords = "Infinix mobiles Pakistan, Infinix lowest prices, lowest prices for Infinix mobiles, Infinix mobiles prices in Pakistan, Infinix mobile specifications, Infinix mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'infinix', 'Infinix');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 

@@ -1,8 +1,22 @@
 <?php
 require_once dirname(__DIR__, 3) . '/includes/functions.php';
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
 
-$pageTitle = $seo['seo_title'] ?? $product['product_name'];
-$metaDescription = $seo['seo_description'] ?? $product['product_description'];
+// ── SEO meta ──────────────────────────────────────────────────────────────
+$productPrice = isset($product['sale_price']) && is_numeric($product['sale_price']) && (float)$product['sale_price'] > 0
+    ? (float)$product['sale_price']
+    : (float)($product['regular_price'] ?? 0);
+
+$pageTitle = SeoHelper::productTitle(
+    (string)($product['product_name'] ?? ''),
+    $seo['seo_title'] ?? null
+);
+$metaDescription = SeoHelper::productDescription(
+    (string)($product['product_name'] ?? ''),
+    (string)($product['brand_name'] ?? ''),
+    $productPrice ?: null,
+    $seo['seo_description'] ?? null
+);
 $metaKeywords = $seo['focus_keyword'] ?? '';
 $metaRobots = ($product['product_status'] == 1) ? 'index, follow' : 'noindex';
 $pageUrl = rtrim(getBaseURL(), '/') . buildProductPath(
@@ -10,9 +24,6 @@ $pageUrl = rtrim(getBaseURL(), '/') . buildProductPath(
     (string) ($product['brand_slug'] ?? ''),
     (string) ($product['product_slug'] ?? '')
 );
-
-// Use regular_price and sale_price instead of product_price
-$productPrice = isset($product['sale_price']) && is_numeric($product['sale_price']) && $product['sale_price'] > 0 ? $product['sale_price'] : (isset($product['regular_price']) && is_numeric($product['regular_price']) ? $product['regular_price'] : 0);
 
 // Determine product availability with stricter checks
 $productAvailability = 'outofstock'; // Default to out of stock
@@ -64,7 +75,16 @@ if ($reviewCount > 0) {
     $averageRating = round($totalRating / $reviewCount, 1);
 }
 
-// Display attributes as buttons or dropdown
+// Breadcrumbs for BreadcrumbList schema (consumed by header.php)
+$breadcrumbs = SeoHelper::productBreadcrumbs(
+    (string)($product['category_slug'] ?? ''),
+    (string)($product['category_name'] ?? ucwords(str_replace('-', ' ', $product['category_slug'] ?? ''))),
+    (string)($product['brand_slug']    ?? ''),
+    (string)($product['brand_name']    ?? ucwords(str_replace('-', ' ', $product['brand_slug']    ?? ''))),
+    (string)($product['product_name']  ?? ''),
+    (string)($product['product_slug']  ?? '')
+);
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 ?>
 <div class="main-wrapper">

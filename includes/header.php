@@ -52,6 +52,9 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
 <?php endif; ?>
 <meta name="robots" content="<?= $metaRobots ?>">
 <link rel="canonical" href="<?= $pageUrl ?>">
+<?php if (!empty($lcpPreload)): ?>
+<link rel="preload" as="image" href="<?= htmlspecialchars($lcpPreload) ?>" fetchpriority="high">
+<?php endif; ?>
 
 <!-- Open Graph Tags -->
 <meta property="og:title" content="<?= $pageTitle ?>">
@@ -76,13 +79,148 @@ $productImageAlt = isset($product['product_name']) ? $product['product_name'] : 
 
 <!-- Favicon -->
 <link rel="icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png" type="image/x-icon">
+<link rel="apple-touch-icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png">
 
 <!-- Author & Theme -->
 <meta name="author" content="Phones Dukan">
 <meta name="theme-color" content="#F7D117">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Pakistan geo targeting -->
+<meta name="geo.region" content="PK-IS">
+<meta name="geo.placename" content="Islamabad, Pakistan">
+<meta name="geo.position" content="33.6682924;72.9984135">
+<meta name="ICBM" content="33.6682924, 72.9984135">
+
+<!-- Resource hints — preconnect to critical third-party origins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="//www.googletagmanager.com">
+<link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
+<link rel="dns-prefetch" href="//cdn.onesignal.com">
+<link rel="dns-prefetch" href="//www.clarity.ms">
+
 <script>
 window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 </script>
+
+<!-- ── Global Schema.org JSON-LD ─────────────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://www.phonesdukan.com/#website",
+  "name": "Phones Dukan",
+  "alternateName": "PhonesDukan",
+  "url": "https://www.phonesdukan.com/",
+  "description": "Pakistan’s trusted online mobile store for PTA-approved smartphones, smart watches, earbuds, and accessories.",
+  "inLanguage": "en-PK",
+  "publisher": { "@id": "https://www.phonesdukan.com/#organization" },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://www.phonesdukan.com/shop?query={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://www.phonesdukan.com/#organization",
+  "name": "Phones Dukan",
+  "alternateName": ["PhonesDukan", "Mobile Island"],
+  "url": "https://www.phonesdukan.com/",
+  "logo": {
+    "@type": "ImageObject",
+    "@id": "https://www.phonesdukan.com/#logo",
+    "url": "https://www.phonesdukan.com/public/assets/images/phonesdukan_logo.webp",
+    "contentUrl": "https://www.phonesdukan.com/public/assets/images/phonesdukan_logo.webp",
+    "width": 512,
+    "height": 120,
+    "caption": "Phones Dukan"
+  },
+  "image": { "@id": "https://www.phonesdukan.com/#logo" },
+  "description": "Phones Dukan (Mobile Island) is Pakistan’s trusted online store for PTA-approved smartphones, smart watches, wireless earbuds, mobile accessories, power banks, and Bluetooth speakers.",
+  "email": "info@phonesdukan.com",
+  "telephone": "+92-311-6600031",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Al-Ghaffar Shopping Mall, Shop 13B, G-11 Markaz",
+    "addressLocality": "Islamabad",
+    "addressRegion": "Islamabad Capital Territory",
+    "postalCode": "44000",
+    "addressCountry": "PK"
+  },
+  "sameAs": [
+    "https://www.facebook.com/mobileisland01/",
+    "https://www.youtube.com/@mobileisland",
+    "https://www.instagram.com/mobile_island01/",
+    "https://www.tiktok.com/@mobile_island_g11_isb"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["Store", "MobilePhoneStore", "LocalBusiness"],
+  "@id": "https://www.phonesdukan.com/#localbusiness",
+  "name": "Phones Dukan — Mobile Island",
+  "image": "https://www.phonesdukan.com/public/assets/images/phonesdukan_logo.webp",
+  "url": "https://www.phonesdukan.com/",
+  "telephone": "+92-311-6600031",
+  "email": "info@phonesdukan.com",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Al-Ghaffar Shopping Mall, Shop 13B, G-11 Markaz",
+    "addressLocality": "Islamabad",
+    "addressRegion": "Islamabad Capital Territory",
+    "postalCode": "44000",
+    "addressCountry": "PK"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 33.6682924,
+    "longitude": 72.9984135
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+      "opens": "10:00",
+      "closes": "21:00"
+    }
+  ],
+  "priceRange": "PKR",
+  "currenciesAccepted": "PKR",
+  "paymentAccepted": "Cash, Credit Card, Debit Card, JazzCash, EasyPaisa",
+  "areaServed": { "@type": "Country", "name": "Pakistan" },
+  "hasMap": "https://www.google.com/maps/dir//Al-ghaffar+shoping+mall,+G-11+Markaz+G+11+Markaz+G-11,+Islamabad,+Islamabad+Capital+Territory+44000",
+  "parentOrganization": { "@id": "https://www.phonesdukan.com/#organization" }
+}
+</script>
+<?php if (isset($breadcrumbs) && is_array($breadcrumbs) && count($breadcrumbs) > 0): ?>
+<script type="application/ld+json">
+<?= json_encode([
+    '@context' => 'https://schema.org',
+    '@type'    => 'BreadcrumbList',
+    'itemListElement' => array_map(function($crumb, $idx) {
+        $item = [
+            '@type'    => 'ListItem',
+            'position' => $idx + 1,
+            'name'     => $crumb['name'],
+        ];
+        if (!empty($crumb['url'])) {
+            $item['item'] = $crumb['url'];
+        }
+        return $item;
+    }, $breadcrumbs, array_keys($breadcrumbs))
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) ?>
+</script>
+<?php endif; ?>
 
 <?php if (isset($product) && is_array($product)): ?>
 <!-- Enhanced Open Graph -->
@@ -108,8 +246,6 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/style.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/header.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/footer.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
 
 </head>

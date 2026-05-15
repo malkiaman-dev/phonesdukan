@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Tecno Mobile Price in Pakistan - Updated " . date('F Y');
 $metaDescription = "Find updated Tecno mobile prices in Pakistan starting at 21,500 PKR. Explore affordable, feature-packed smartphones in " . date('F Y') . ".";
 $metaKeywords = "Tecno mobiles Pakistan, Tecno lowest prices, Tecno mobiles prices in Pakistan, Tecno mobile specifications, Tecno mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'tecno', 'Tecno');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 

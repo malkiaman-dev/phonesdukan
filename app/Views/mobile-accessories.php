@@ -1,8 +1,12 @@
 <?php
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Best Mobile Accessories Prices in Pakistan | Phones Dukan";
 $metaDescription = "Discover updated mobile accessories prices in Pakistan at Phones Dukan. Compare chargers, cables, cases, and premium smartphone accessories in one place.";
 $metaRobots = "index, follow";
 $metaKeywords = "mobile accessories, mobile accessories online, mobile accessories in Pakistan, phone chargers, phone cases, screen protectors";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('mobile-accessories', 'Mobile Accessories');
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';

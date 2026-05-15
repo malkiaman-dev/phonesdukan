@@ -1,8 +1,12 @@
 <?php
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+
 $pageTitle = "Best Wireless Earbuds Prices in Pakistan | Phones Dukan";
 $metaDescription = "Shop premium wireless earbuds at Phones Dukan with updated prices in Pakistan. Compare budget to premium earbuds with ANC, calling, and long battery life.";
 $metaRobots = "index, follow";
 $metaKeywords = "Wireless Earbuds, best wireless earbuds, wireless earbuds price in pakistan";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('wireless-earbuds', 'Wireless Earbuds');
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';
