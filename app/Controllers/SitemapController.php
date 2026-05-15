@@ -22,8 +22,9 @@ class SitemapController {
             ['name' => 'images-sitemap.xml',       'lastmod' => $today],
             ['name' => 'post-sitemap.xml',         'lastmod' => $today],
             ['name' => 'post_category-sitemap.xml','lastmod' => $today],
-            ['name' => 'news-sitemap.xml',         'lastmod' => $today],
             ['name' => 'page-sitemap.xml',         'lastmod' => $today],
+            // news-sitemap.xml removed: blog posts covered by post-sitemap.xml;
+            // the news sitemap was causing "Missing xml tag: url" errors in GSC.
         ];
 
         foreach ($sitemaps as $sitemap) {

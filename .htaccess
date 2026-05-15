@@ -1,3 +1,11 @@
+# ── Permanently removed resources (410 Gone) ─────────────────────────────
+# 410 tells Google "permanently gone" — clears GSC errors without manual action.
+# mod_alias runs before mod_rewrite so these take precedence over PHP routing.
+<IfModule mod_alias.c>
+    Redirect 410 /news-sitemap.xml
+    Redirect 410 /locations.kml
+</IfModule>
+
 # ── URL Routing ──────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
