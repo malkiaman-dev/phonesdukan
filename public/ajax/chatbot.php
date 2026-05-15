@@ -92,7 +92,59 @@ try {
         // Effective price: use sale_price if set, otherwise regular_price
         $priceExpr = 'COALESCE(p.sale_price, p.regular_price)';
 
-        if ($budget && $categorySlug) {
+        // ── Priority: specific product name search ────────────────────────────
+        // If the message looks like it is asking about a specific product
+        // (contains a brand/model name), search by name first before falling
+        // through to the generic category/budget logic.
+        $specificStopWords = ['the','and','for','can','you','are','have','best','good',
+            'want','need','looking','give','suggest','show','what','which','any','some',
+            'get','tell','your','store','details','about','this','product','price','me',
+            'please','plz','is','do','does','has','how','much','cost','available','buy',
+            'purchase','check','find','information','info','specs','review','features'];
+        $specificWords = array_filter(
+            explode(' ', preg_replace('/[^a-z0-9 ]/i', ' ', $message)),
+            fn($w) => strlen($w) >= 3 && !in_array(strtolower($w), $specificStopWords)
+        );
+        // Only treat as specific product query if 2+ distinctive words found
+        if (count($specificWords) >= 2) {
+            $seen = [];
+            foreach (array_slice(array_values($specificWords), 0, 4) as $word) {
+                $stmt = $db->prepare("
+                    SELECT p.product_name, p.regular_price, p.sale_price,
+                           {$priceExpr} AS effective_price, p.product_slug,
+                           c.slug AS category_slug, b.slug AS brand_slug
+                    FROM products p
+                    LEFT JOIN categories c ON p.category_id = c.category_id
+                    LEFT JOIN brands     b ON p.brand_id     = b.brand_id
+                    WHERE p.product_status = 1
+                      AND p.product_name LIKE :q
+                    LIMIT 3
+                ");
+                $stmt->bindValue(':q', '%' . $word . '%');
+                $stmt->execute();
+                foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $slug = $row['product_slug'];
+                    if (!isset($seen[$slug])) {
+                        $seen[$slug] = ['row' => $row, 'hits' => 0];
+                    }
+                    $seen[$slug]['hits']++;
+                }
+            }
+            // Keep only products matched by 2+ keywords — strong signal it is the right one
+            $specificResults = [];
+            foreach ($seen as $item) {
+                if ($item['hits'] >= 2) {
+                    $specificResults[] = $item['row'];
+                }
+            }
+            if (!empty($specificResults)) {
+                $results = array_slice($specificResults, 0, 3);
+            }
+        }
+
+        if (!empty($results)) {
+            // Specific product found — skip generic search
+        } elseif ($budget && $categorySlug) {
             // Budget + category: products within 30% below budget up to budget
             $minBudget = $budget * 0.7;
             $stmt = $db->prepare("
@@ -213,7 +265,14 @@ try {
                     $productContext .= ', PKR ' . number_format($price);
                 }
                 if (!empty($p['category_slug']) && !empty($p['brand_slug']) && !empty($p['product_slug'])) {
+                    // Full product URL
                     $productContext .= ', Link: https://phonesdukan.com/' . $p['category_slug'] . '/' . $p['brand_slug'] . '/' . $p['product_slug'];
+                } elseif (!empty($p['category_slug'])) {
+                    // Fallback to category page
+                    $productContext .= ', Link: https://phonesdukan.com/' . $p['category_slug'] . '/';
+                } else {
+                    // Last resort: store homepage
+                    $productContext .= ', Link: https://phonesdukan.com/';
                 }
                 $productContext .= "\n";
             }
@@ -244,11 +303,11 @@ foreach ($history as $turn) {
 
 $messages[] = ['role' => 'user', 'content' => $message];
 
-// ── OpenRouter API call ───────────────────────────────────────────────────────
+// ── Groq API call ────────────────────────────────────────────────────────────
 $payload = json_encode([
     'model'       => CHATBOT_MODEL,
     'messages'    => $messages,
-    'max_tokens'  => 800,
+    'max_tokens'  => 512,
     'temperature' => 0.7,
 ]);
 
@@ -276,8 +335,6 @@ curl_setopt_array($ch, [
     CURLOPT_HTTPHEADER     => [
         'Content-Type: application/json',
         'Authorization: Bearer ' . CHATBOT_API_KEY,
-        'HTTP-Referer: ' . CHATBOT_SITE_URL,
-        'X-Title: Phones Dukan Chat',
     ],
     CURLOPT_TIMEOUT        => 30,
     CURLOPT_SSL_VERIFYPEER => $verifySsl,
@@ -349,7 +406,7 @@ switch ($httpCode) {
         exit;
 }
 
-// OpenRouter can embed an error object inside a 200 response
+// Groq can embed an error object inside a 200 response
 if (isset($data['error'])) {
     $code   = $data['error']['code']    ?? 0;
     $apiMsg = $data['error']['message'] ?? '';

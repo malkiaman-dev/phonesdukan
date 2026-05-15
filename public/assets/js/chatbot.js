@@ -15,6 +15,47 @@ document.addEventListener('DOMContentLoaded', function () {
     var isOpen   = false;
     var isBusy   = false;
 
+    // ── Out-of-scope reply (no API call needed) ─────────────────────────────────
+    var OUT_OF_SCOPE_REPLY = 'Ha, that is a bit outside what I can help with! I am only here for Phones Dukan shopping. Is there a phone, watch, earbuds, or accessory I can find for you?';
+
+    // ── Domain check — fast client-side filter before hitting the API ───────────
+    function isPhonesDukanQuery(text) {
+        var t = (text || '').toLowerCase().trim();
+        if (!t) return true;
+
+        var smallTalk = ['hi','hello','hey','salam','assalam','aoa','thanks','thank you','ok','okay','how are you','who are you','what are you'];
+        if (smallTalk.some(function(h) { return t === h || t.indexOf(h) === 0; })) return true;
+
+        var allowed = ['phone','mobile','watch','earbud','speaker','charger','accessory','accessories',
+            'cable','cover','case','power bank','powerbank','price','buy','order','deliver','return',
+            'policy','warranty','samsung','xiaomi','oppo','vivo','realme','tecno','infinix','nokia',
+            'iphone','apple','huawei','redmi','poco','audionic','ronin','qualcomm','oneplus',
+            'battery','camera','gaming','budget','cheap','best','location','address','contact',
+            'whatsapp','store','product','stock','available','cash','cod','earphone','headphone',
+            'tws','airpod','bluetooth','smartwatch','brand','model','suggest','recommend'];
+        if (allowed.some(function(h) { return t.indexOf(h) !== -1; })) return true;
+
+        var blocked = ['python','javascript','java',' code','program','html','css','2+2','math',
+            'joke','poem','song','recipe','weather','news','movie','cricket','football',
+            'homework','essay','calculate','c++','algorithm','write a'];
+        if (blocked.some(function(h) { return t.indexOf(h) !== -1; })) return false;
+
+        if (/\b\d+\s*[+\-*/]\s*\d+\b/.test(t)) return false;
+
+        return true;
+    }
+
+    // ── Sanitize reply — strip em/en dashes the model may still produce ─────────
+    function sanitizeReply(text) {
+        if (!text) return text;
+        return text
+            .replace(/[–—―]/g, ',')
+            .replace(/\s+,/g, ',')
+            .replace(/,{2,}/g, ',')
+            .replace(/[ \t]{2,}/g, ' ')
+            .trim();
+    }
+
     // ── Mobile keyboard: reposition window when keyboard opens/closes ───────────
     function isMobile() { return window.innerWidth <= 480; }
 
@@ -101,6 +142,15 @@ document.addEventListener('DOMContentLoaded', function () {
         isBusy = true;
         if (sendBtn) sendBtn.disabled = true;
 
+        // Block off-topic queries instantly without hitting the API
+        if (!isPhonesDukanQuery(text)) {
+            addMessage('assistant', OUT_OF_SCOPE_REPLY);
+            isBusy = false;
+            if (sendBtn) sendBtn.disabled = false;
+            input.focus();
+            return;
+        }
+
         var typing = addTyping();
 
         var endpoint = (window.pdWithBase ? window.pdWithBase('/public/ajax/chatbot.php') : '/public/ajax/chatbot.php');
@@ -120,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(function (data) {
             typing.remove();
-            var reply = data.reply || data.error || fallback;
+            var reply = sanitizeReply(data.reply) || data.error || fallback;
             addMessage('assistant', reply);
 
             if (data.reply) {
@@ -149,10 +199,15 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;');
 
-        // 2. Convert markdown links [label](url) to <a> tags
+        // 2. Convert markdown links [label](url) to <a> tags — supports https, http, tel, mailto
         esc = esc.replace(
-            /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
-            '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+            /\[([^\]]+)\]\(((?:https?:\/\/|tel:|mailto:)[^)\s]+)\)/g,
+            function (_, label, url) {
+                var isTel    = url.indexOf('tel:')    === 0;
+                var isMail   = url.indexOf('mailto:') === 0;
+                var target   = (isTel || isMail) ? '' : ' target="_blank" rel="noopener noreferrer"';
+                return '<a href="' + url + '"' + target + '>' + label + '</a>';
+            }
         );
 
         // 3. Convert any remaining bare URLs to "View Product" links
@@ -169,10 +224,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── DOM helpers ─────────────────────────────────────────────────────────────
     function addMessage(role, text) {
-        // Remove welcome message on first real exchange
-        var welcome = msgBox.querySelector('.pd-chat-welcome');
-        if (welcome) welcome.remove();
-
         var div = document.createElement('div');
         div.className = 'pd-chat-msg pd-chat-msg--' + role;
         if (role === 'assistant') {

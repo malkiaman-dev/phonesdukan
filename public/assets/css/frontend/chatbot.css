@@ -131,6 +131,24 @@
     border-radius: 4px;
 }
 
+/* ── Welcome message avatar row ──────────────────────────────────────────────── */
+.pd-chat-msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+.pd-chat-avatar--assistant {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ffd400;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* ── Message bubbles ─────────────────────────────────────────────────────────── */
 .pd-chat-msg {
     max-width: 82%;
@@ -248,14 +266,9 @@
 }
 
 /* ── Welcome message ─────────────────────────────────────────────────────────── */
+
 .pd-chat-welcome {
-    text-align: center;
-    padding: 6px 4px 4px;
-}
-.pd-chat-welcome p {
-    font-size: 0.8rem;
-    color: #6b7280;
-    margin: 0;
+    white-space: normal;
 }
 
 /* ── Mobile ──────────────────────────────────────────────────────────────────── */

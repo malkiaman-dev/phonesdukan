@@ -576,8 +576,13 @@
     </div>
 
     <div id="pd-chatbot-messages" class="pd-chat-messages">
-        <div class="pd-chat-welcome">
-            <p>Hi! Ask me about prices, products, or anything about Phones Dukan.</p>
+        <div class="pd-chat-msg-row pd-chat-msg-row--assistant">
+            <div class="pd-chat-avatar pd-chat-avatar--assistant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/>
+                </svg>
+            </div>
+            <div class="pd-chat-welcome pd-chat-msg pd-chat-msg--assistant">Hey! I'm the Phones Dukan Assistant, your guide to everything at Phones Dukan.<br><br>Whether you want to find the best phone, compare prices, or get help choosing the right accessory, I'm all yours. What's on your mind?</div>
         </div>
     </div>
 
