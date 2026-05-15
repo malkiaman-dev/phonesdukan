@@ -8,6 +8,15 @@
     RewriteCond %{HTTP_HOST} ^phonesdukan\.com$ [NC]
     RewriteRule ^ https://www.phonesdukan.com%{REQUEST_URI} [L,R=301,NE]
 
+    # Force trailing slash on clean URLs (category, brand, static pages)
+    # Excludes: real files, URLs with extensions, sitemap XMLs, admin, AJAX
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !/$
+    RewriteCond %{REQUEST_URI} !\.(xml|txt|html|php|css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$
+    RewriteCond %{REQUEST_URI} !^/admin
+    RewriteCond %{REQUEST_URI} !^/ajax
+    RewriteRule ^(.+)$ https://www.phonesdukan.com/$1/ [R=301,L,NE]
+
     # Fix accidental admin-relative asset URLs like /admin/public/assets/...
     RewriteRule ^admin/public/(.*)$ public/$1 [L,NC]
 

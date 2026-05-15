@@ -39,7 +39,7 @@ class ProductSitemapController {
             // Loop through the product slugs and generate the XML
             foreach ($product_slugs as $product) {
                 // Construct the product URL in the desired format
-                $product_url = $domain . '/' . $product['category_slug'] . '/' . $product['brand_slug'] . '/' . $product['product_slug'];
+                $product_url = $domain . '/' . $product['category_slug'] . '/' . $product['brand_slug'] . '/' . $product['product_slug'] . '/';
     
                 // Fetch the product images
                 $images = $productSitemapModel->getProductImages($product['product_id']);
