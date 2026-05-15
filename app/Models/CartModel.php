@@ -86,10 +86,10 @@ class CartModel {
     }
     
     public function mergeGuestCartWithUser($sessionId, $userId) {
-        $sql = "UPDATE cart SET user_id = :user_id WHERE session_id = :session_id AND user_id IS NULL";
+        $sql = "UPDATE cart SET user_id = :user_id WHERE session_id = :session_id AND (user_id IS NULL OR user_id = 0)";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->bindParam(':session_id', $sessionId, PDO::PARAM_STR);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':session_id', $sessionId, PDO::PARAM_STR);
         return $stmt->execute();
     }
     
@@ -116,8 +116,8 @@ class CartModel {
                     JOIN products p ON c.product_id = p.product_id
                     LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
                     LEFT JOIN product_variations pv ON c.variation_id = pv.id
-                    WHERE (c.user_id = :user_id AND c.user_id IS NOT NULL)
-                       OR (c.session_id = :session_id AND c.user_id IS NULL)";
+                    WHERE (c.user_id = :user_id AND c.user_id IS NOT NULL AND c.user_id > 0)
+                       OR (c.session_id = :session_id AND (c.user_id IS NULL OR c.user_id = 0))";
         } else {
             // Fallback query without variation columns (pre-migration)
             $sql = "SELECT
@@ -136,13 +136,13 @@ class CartModel {
                     FROM cart c
                     JOIN products p ON c.product_id = p.product_id
                     LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
-                    WHERE (c.user_id = :user_id AND c.user_id IS NOT NULL)
-                       OR (c.session_id = :session_id AND c.user_id IS NULL)";
+                    WHERE (c.user_id = :user_id AND c.user_id IS NOT NULL AND c.user_id > 0)
+                       OR (c.session_id = :session_id AND (c.user_id IS NULL OR c.user_id = 0))";
         }
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':session_id', $session_id, PDO::PARAM_STR);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+        $stmt->bindValue(':user_id', $user_id ?? 0, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -166,11 +166,11 @@ class CartModel {
     }
     
     public function updateCartQuantity($sessionId, $userId, $productId, $newQuantity, $attributeValue, $payment_method = null) {
-        $checkSql = "SELECT * FROM cart WHERE product_id = :product_id AND (session_id = :session_id OR user_id = :user_id)";
+        $checkSql = "SELECT * FROM cart WHERE product_id = :product_id AND (session_id = :session_id OR (user_id = :user_id AND user_id > 0))";
         $checkStmt = $this->db->prepare($checkSql);
-        $checkStmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
-        $checkStmt->bindParam(':session_id', $sessionId, PDO::PARAM_STR);
-        $checkStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':session_id', $sessionId, PDO::PARAM_STR);
+        $checkStmt->bindValue(':user_id', $userId ?? 0, PDO::PARAM_INT);
         $checkStmt->execute();
 
         $cartItem = $checkStmt->fetch(PDO::FETCH_ASSOC);
@@ -194,7 +194,7 @@ class CartModel {
                 $params[':payment_method'] = $payment_method;
             }
 
-            $updateSql .= " WHERE product_id = :product_id AND (session_id = :session_id OR user_id = :user_id)";
+            $updateSql .= " WHERE product_id = :product_id AND (session_id = :session_id OR (user_id = :user_id AND user_id > 0))";
             $updateStmt = $this->db->prepare($updateSql);
             $updateStmt->execute($params);
             return true;
@@ -229,33 +229,37 @@ class CartModel {
     }
 
     public function removeCartItem($sessionId, $userId, $productId) {
-        $checkSql = "SELECT * FROM cart WHERE product_id = :product_id AND (session_id = :session_id OR user_id = :user_id)";
+        $uid = $userId ?? 0;
+        $checkSql = "SELECT cart_id FROM cart WHERE product_id = :product_id AND (session_id = :session_id OR (user_id = :user_id AND user_id > 0))";
         $checkStmt = $this->db->prepare($checkSql);
-        $checkStmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
-        $checkStmt->bindParam(':session_id', $sessionId, PDO::PARAM_STR);
-        $checkStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        $checkStmt->bindValue(':session_id', $sessionId, PDO::PARAM_STR);
+        $checkStmt->bindValue(':user_id', $uid, PDO::PARAM_INT);
         $checkStmt->execute();
-    
+
         $cartItem = $checkStmt->fetch(PDO::FETCH_ASSOC);
         if (!$cartItem) {
             return false;
         }
-    
-        $sql = "DELETE FROM cart WHERE product_id = :product_id AND (session_id = :session_id OR user_id = :user_id)";
+
+        $sql = "DELETE FROM cart WHERE cart_id = :cart_id";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
-        $stmt->bindParam(':session_id', $sessionId, PDO::PARAM_STR);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        
+        $stmt->bindValue(':cart_id', $cartItem['cart_id'], PDO::PARAM_INT);
         return $stmt->execute();
     }
-    
-    public function clearCart($userId = null, $sessionId = null) {
-        $sql = "DELETE FROM cart WHERE user_id = :user_id OR session_id = :session_id";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $stmt->bindParam(':session_id', $sessionId, PDO::PARAM_STR);
 
+    public function clearCart($userId = null, $sessionId = null) {
+        $uid = $userId ?? 0;
+        if ($uid > 0) {
+            $sql = "DELETE FROM cart WHERE user_id = :user_id OR session_id = :session_id";
+        } else {
+            $sql = "DELETE FROM cart WHERE session_id = :session_id";
+        }
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':session_id', $sessionId, PDO::PARAM_STR);
+        if ($uid > 0) {
+            $stmt->bindValue(':user_id', $uid, PDO::PARAM_INT);
+        }
         return $stmt->execute();
     }
 }

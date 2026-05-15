@@ -30,9 +30,6 @@ $productAvailability = 'outofstock'; // Default to out of stock
 $availabilityText = 'Out of Stock';
 $availabilityClass = 'out-of-stock';
 
-// Log initial product data for debugging
-error_log("Initial Product Data - ID: {$product['product_id']}, Stock: " . ($product['stock_quantity'] ?? 'unset') . ", Status: " . ($product['product_status'] ?? 'unset') . ", Coming Soon: " . (isset($isComingSoon) ? ($isComingSoon ? 'true' : 'false') : 'unset'));
-
 // Explicitly check stock_quantity and handle NULL or non-numeric cases
 $stockQuantity = isset($product['stock_quantity']) && is_numeric($product['stock_quantity']) ? (int)$product['stock_quantity'] : 0;
 $productStatus = isset($product['product_status']) ? (int)$product['product_status'] : 0;
@@ -50,9 +47,6 @@ if (isset($isComingSoon) && $isComingSoon === true) {
     $availabilityText = 'Out of Stock';
     $availabilityClass = 'out-of-stock';
 }
-
-// Debug: Log availability decision
-error_log("Availability Decision - Product ID: {$product['product_id']}, Availability: $productAvailability, Stock Quantity: $stockQuantity, Status: $productStatus, Coming Soon: " . (isset($isComingSoon) ? ($isComingSoon ? 'true' : 'false') : 'unset'));
 
 // Set the product image URL (fallback to default favicon image if no image is available)
 $productImage = !empty($images[0]['image_url'])
@@ -317,7 +311,6 @@ foreach ($paragraphs as $index => $para) {
                     ? $product['sale_price']
                     : ($productAvailability === 'instock' && isset($product['regular_price']) && is_numeric($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
                 $showLocationMessage = (isset($product['category_slug']) && strtolower($product['category_slug']) === 'mobiles') && !isset($isComingSoon);
-                error_log("Location Message Check - Product ID: {$product['product_id']}, Category: " . ($product['category_slug'] ?? 'unset') . ", Coming Soon: " . (isset($isComingSoon) ? ($isComingSoon ? 'true' : 'false') : 'unset'));
                 if ($showLocationMessage): ?>
                     <p class="location-restriction-msg">
                         This product is available for delivery only in Rawalpindi and Islamabad.
@@ -682,7 +675,6 @@ document.querySelectorAll('.add-to-cart').forEach(function(btn){
 <!-- Cart Form -->
 <?php
 $cartFormCondition = $productAvailability === 'instock' && $stockQuantity > 0 && ($validPrice > 0 || !empty($productAttributes) || !empty($isVariableProduct));
-error_log("Cart form condition: " . ($cartFormCondition ? 'true' : 'false') . ", Availability: $productAvailability, Stock: $stockQuantity, Valid Price: $validPrice, Attributes: " . (empty($productAttributes) ? 'none' : 'present'));
 if ($cartFormCondition): ?>
             <!-- Payment Method Selection -->
     <div class="payment-method-selection">

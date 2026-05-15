@@ -298,12 +298,6 @@ mobileSearchInput.addEventListener("keypress", function (event) {
 }
 
 
-    // Function to sanitize input by removing unwanted characters
-    function sanitizeInput(input) {
-        return input.replace(/[^a-zA-Z0-9\s]/g, ''); // Allows letters, numbers, and spaces
-    }
-
-
     if (!searchInput || !searchResults || !closeButton) {
         return;
     }

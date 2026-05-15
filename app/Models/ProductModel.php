@@ -17,7 +17,6 @@ class ProductModel
             error_log('Database connection failed: ' . $e->getMessage());
             throw new RuntimeException('Failed to connect to database');
         }
-        error_log("Using ProductModel version 2025-05-19-3");
     }
 
     /**
@@ -235,14 +234,10 @@ class ProductModel
      */
     public function generateProductSchema(int $product_id): string
     {
-        error_log("START: Generating schema for product ID {$product_id} at " . date('Y-m-d H:i:s'));
-    
         $product = $this->getProductDetails($product_id);
         if (!$product) {
-            error_log("ERROR: No product found for ID {$product_id}");
             return json_encode([], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }
-        error_log("Product data retrieved for ID {$product_id}: " . json_encode($product, JSON_UNESCAPED_UNICODE));
     
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -322,7 +317,6 @@ class ProductModel
             : 'https://schema.org/OutOfStock';
     
         $attributes = $this->getProductAttributes($product_id);
-        error_log("Attributes for product ID {$product_id}: " . (empty($attributes) ? 'None' : json_encode($attributes, JSON_UNESCAPED_UNICODE)));
     
         // Add additionalProperty for attributes (e.g., Storage, Color)
         if (!empty($attributes)) {
@@ -350,12 +344,10 @@ class ProductModel
                     ];
                 }
             }
-            error_log("Added additionalProperty for product ID {$product_id}: " . json_encode($main_schema['additionalProperty'], JSON_UNESCAPED_UNICODE));
         }
     
         // Handle product offers
         if (!empty($attributes)) {
-            error_log("Processing attributed product ID {$product_id}");
             $offers = [];
     
             foreach ($attributes as $index => $attribute) {
@@ -467,7 +459,6 @@ class ProductModel
                 ]
             ];
         } else {
-            error_log("Processing non-attributed product ID {$product_id}");
             $regular_price = isset($product['regular_price']) && is_numeric($product['regular_price']) ? (float)$product['regular_price'] : 0;
             $sale_price = isset($product['sale_price']) && is_numeric($product['sale_price']) ? (float)$product['sale_price'] : 0;
             $final_price = ($sale_price > 0) ? $sale_price : $regular_price;
@@ -475,15 +466,11 @@ class ProductModel
             if ($final_price <= 0) {
                 if (preg_match('/Price in Pakistan:[\s]*(\d+(?:\.\d{1,2})?)(?:\s*PKR)?/i', $description, $matches)) {
                     $final_price = (float)$matches[1];
-                    error_log("Price extracted from description for product ID {$product_id}: {$final_price}");
                 } else {
-                    error_log("Price extraction failed for product ID {$product_id}. Description: {$description}");
                     $final_price = 0;
                 }
             }
             $final_price = number_format($final_price, 2, '.', '');
-    
-            error_log("Non-attribute product ID {$product_id} - sale_price: {$sale_price}, regular_price: {$regular_price}, final_price: {$final_price}");
     
             $main_schema['offers'] = [
                 '@type' => 'Offer',
@@ -585,8 +572,6 @@ class ProductModel
     
         // Output schema
         $schema_output = [$main_schema, $breadcrumb_schema];
-    
-        error_log("Final schema for product ID {$product_id}: " . json_encode($schema_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     
         return json_encode($schema_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     }

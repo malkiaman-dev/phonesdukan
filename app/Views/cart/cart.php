@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../Models/CartModel.php';
 require_once __DIR__ . '/../../../includes/header.php';
 
 $cartModel = new CartModel();
-$sessionId = $_SESSION['session_id'] ?? session_id();
+$sessionId = session_id();
 $userId = $_SESSION['user_id'] ?? null;
 
 $cartItems = $cartModel->fetchCartItems($sessionId, $userId);
@@ -56,7 +56,7 @@ if (!empty($cartItems)) {
                     <?php foreach ($cartItems as $item) : ?>
                     <tr>
                         <td class="td-product">
-                            <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                            <img src="<?php echo htmlspecialchars(!empty($item['image_url']) ? $item['image_url'] : '/public/assets/images/Phones_dukan_favicon.png'); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
                             <div class="product-info">
                                 <p class="product-name-text"><?php echo htmlspecialchars($item['product_name']); ?></p>
                                 <?php if (!empty($item['variation_attributes'])): ?>

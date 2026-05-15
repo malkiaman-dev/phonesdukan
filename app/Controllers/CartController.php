@@ -84,8 +84,7 @@ class CartController {
     }
     
     public function getCartItems() {
-        session_start();
-        $sessionId = $_SESSION['session_id'] ?? session_id();  
+        $sessionId = session_id();
         $userId = $_SESSION['user_id'] ?? null;
     
         $cartItems = $this->cartModel->fetchCartItems($sessionId, $userId);
@@ -115,9 +114,9 @@ class CartController {
             $this->sendResponse('error', 'Invalid product ID');
         }
     
-        $sessionId = $_SESSION['session_id'] ?? session_id();
+        $sessionId = session_id();
         $userId = $_SESSION['user_id'] ?? null;
-    
+
         $removed = $this->cartModel->removeCartItem($sessionId, $userId, $productId);
         if ($removed) {
             $cartItems = $this->cartModel->fetchCartItems($sessionId, $userId);

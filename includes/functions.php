@@ -209,6 +209,10 @@ if (!function_exists('assetFilePath')) {
 if (!function_exists('emitCss')) {
     function emitCss($relativePath)
     {
+        static $emitted = [];
+        if (isset($emitted[$relativePath])) return;
+        $emitted[$relativePath] = true;
+
         $fullPath = assetFilePath($relativePath);
         if (!file_exists($fullPath)) {
             return;

@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 require_once dirname(__DIR__, 1) . '/database/db.php';
 
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
@@ -97,15 +95,13 @@ switch (true) {
     $stmt = $conn->prepare($query);
     $stmt->execute([':username' => trim($matches[1])]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("User Page Route: username={$matches[1]}, found_user=" . ($user ? $user['id'] : 'none'));
-    if ($user) {
-        $_GET['username'] = $matches[1]; // Pass username (e.g., azmeryalakhtar)
-        error_log("Router: Including AdminsController: " . __DIR__ . '/Controllers/AdminsController.php');
-        include __DIR__ . '/Controllers/AdminsController.php';
+    $adminsControllerPath = __DIR__ . '/Controllers/AdminsController.php';
+    if ($user && file_exists($adminsControllerPath)) {
+        $_GET['username'] = $matches[1];
+        include $adminsControllerPath;
         $controller = new AdminsController();
         $controller->showUserPage();
     } else {
-        error_log("User Page Route: No user found for username={$matches[1]}");
         http_response_code(404);
         include __DIR__ . '/Views/404.php';
     }

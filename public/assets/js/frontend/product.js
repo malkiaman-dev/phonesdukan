@@ -120,7 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
         element.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Redirecting to wholesale page:', this.className, 'at:', new Date().toISOString());
             window.location.href = withBase('/wholesale');
         });
     });
@@ -133,12 +132,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const productName = this.getAttribute('data-product-name') || 'this product';
             const message = encodeURIComponent(`I want to know the retailer price per product of ${productName}.`);
             const whatsappUrl = `https://wa.me/+923116600031?text=${message}`;
-            console.log('Opening WhatsApp with URL:', whatsappUrl);
             window.open(whatsappUrl, '_blank');
         });
     });
 
-    function scrollToReviews() {
+    window.scrollToReviews = function scrollToReviews() {
         const reviewTabTitle = document.querySelector('.custom-tab-title[data-tab="tab-reviews"]');
         const reviewTab = document.getElementById('tab-reviews');
         if (reviewTabTitle && reviewTab) {
@@ -150,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const el = document.querySelector('.reviews-section-wrapper') || document.querySelector('.custom-tabs');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }
+    };
 
     const addToCartButtons = {
         desktop: document.getElementById('add-to-cart-btn-desktop'),
@@ -300,7 +298,6 @@ document.addEventListener("DOMContentLoaded", function () {
             originalSalePrice = 0;
         }
         baseUnitPrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
-        console.log(`Non-Attributed Product - Original Regular: ${originalRegularPrice}, Original Sale: ${originalSalePrice}, Base Unit: ${baseUnitPrice}`);
         if (baseUnitPrice <= 0) {
             disableButtons(true);
             priceContent.innerHTML = `<div class="product-price"><span class="price-label">Phones Dukan Price</span><span class="error-price">Price not available</span></div>`;
@@ -321,9 +318,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function updatePriceAndButton(button) {
         originalRegularPrice = parseFloat(button.getAttribute('data-regular-price')) || 0;
         originalSalePrice = parseFloat(button.getAttribute('data-sale-price')) || 0;
-        baseUnitPrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;  // Set base before payment discount
+        baseUnitPrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
         const attributeValue = button.getAttribute('data-attribute-value');
-        console.log(`Attribute Selected - Original Regular: ${originalRegularPrice}, Original Sale: ${originalSalePrice}, Base: ${baseUnitPrice}, Attribute: ${attributeValue}`);
         applyPaymentDiscount();  // Now apply payment on top
         for (let key in addToCartButtons) {
             if (addToCartButtons[key]) {
@@ -394,7 +390,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             return;
         }
-        console.log(`Sending to Cart - Product ID: ${productId}, Quantity: ${quantity}, Unit Price: ${unitPrice} (discounted), Attribute: ${attributeValue}, Payment: ${paymentMethod}, VariationId: ${resolvedVariationId}`);
         $.ajax({
             url: withBase("/app/Controllers/CartController.php"),
             type: "POST",
@@ -409,7 +404,6 @@ document.addEventListener("DOMContentLoaded", function () {
             contentType: "application/json",
             dataType: "json",
             success: function(response) {
-                console.log("Server Response:", response);
                 if (response.status === "success") {
                     // Update cart count in the DOM
                     const cartCountElements = document.querySelectorAll('.cart-count');
@@ -445,7 +439,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         });
                     }
                 } else {
-                    console.error("Server Error:", response.message);
                     Swal.fire({
                         title: "Oops!",
                         text: response.message,
@@ -455,7 +448,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             },
             error: function(xhr, status, error) {
-                console.error("AJAX Error:", error, xhr.responseText);
                 Swal.fire({
                     title: "Error!",
                     text: "Something went wrong, please try again.",
@@ -492,14 +484,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    console.log("JavaScript loaded successfully!");
     const stars = document.querySelectorAll(".star-rating input[type='radio']");
     const hiddenRating = document.getElementById("hidden-rating");
     stars.forEach(star => {
         star.addEventListener("change", function () {
-            hiddenRating.value = this.value;
-            console.log("Selected Rating: " + this.value);
-            console.log("Hidden Rating Value: " + hiddenRating.value);
+            if (hiddenRating) hiddenRating.value = this.value;
         });
     });
 

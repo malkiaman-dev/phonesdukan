@@ -1,7 +1,5 @@
 <?php
 ob_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 $pageTitle = "Checkout - Phones Dukan";
 $metaDescription = "Review your order and complete your checkout at Phones Dukan. Enjoy fast processing and reliable delivery across Pakistan.";
 $metaRobots = "noindex, nofollow"; // Optional; default is good
@@ -84,16 +82,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Sanitize inputs before inserting into DB
-    $customer_name = htmlspecialchars($_POST['customer_name']);
-    $customer_email = htmlspecialchars($_POST['customer_email']);
-    $customer_phone = htmlspecialchars($_POST['customer_phone']);
-    $shipping_address = htmlspecialchars($_POST['shipping_address']);
-    $shipping_city = htmlspecialchars($_POST['shipping_city']);
-    $shipping_country = htmlspecialchars($_POST['shipping_country']);
+    // Strip tags from inputs before storing in DB (htmlspecialchars belongs at output, not storage)
+    $customer_name     = strip_tags(trim($_POST['customer_name']));
+    $customer_email    = strip_tags(trim($_POST['customer_email']));
+    $customer_phone    = strip_tags(trim($_POST['customer_phone']));
+    $shipping_address  = strip_tags(trim($_POST['shipping_address']));
+    $shipping_city     = strip_tags(trim($_POST['shipping_city']));
+    $shipping_country  = strip_tags(trim($_POST['shipping_country']));
 
     $orderData = [
-        'user_id' => 1,
+        'user_id' => $_SESSION['user_id'] ?? null,
         'total_price' => array_sum(array_column($cartItems, 'subtotal')) + $deliveryCharge,  // Add delivery charge to total price
         'order_status' => 'pending',
         'created_at' => date('Y-m-d H:i:s'),
@@ -106,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'shipping_address' => $shipping_address,
         'shipping_city' => $shipping_city,
         'shipping_country' => $shipping_country,
-        'customer_note' => htmlspecialchars($_POST['customer_note'] ?? ''),
+        'customer_note' => strip_tags(trim($_POST['customer_note'] ?? '')),
         'applied_coupons' => ''
     ];
 

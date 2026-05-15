@@ -31,13 +31,22 @@ foreach ($cartItems as $item) {
 }
 ?>
 <?php
-// These should ideally be passed from controller
-// Initialize default values in case the product is not set
-$productPrice = isset($product['product_price']) ? $product['product_price'] : null;
-$productCurrency = 'PKR';
-$productAvailability = isset($product['product_status']) && $product['product_status'] == 1 ? 'instock' : 'outofstock';
-$productImage = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
-$productImageAlt = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
+// Compute product price/availability for OG/Twitter meta (used on product pages only)
+if (isset($product) && is_array($product)) {
+    $salePrice    = isset($product['sale_price'])    && is_numeric($product['sale_price'])    ? (float)$product['sale_price']    : 0;
+    $regularPrice = isset($product['regular_price']) && is_numeric($product['regular_price']) ? (float)$product['regular_price'] : 0;
+    $productPrice = ($salePrice > 0 && $salePrice < $regularPrice) ? $salePrice : $regularPrice;
+} else {
+    $productPrice = null;
+}
+if (!isset($formattedProductPrice)) {
+    $formattedProductPrice = $productPrice > 0 ? number_format((float)$productPrice, 2) : '0.00';
+}
+$productCurrency     = 'PKR';
+$stockQty            = isset($product['stock_quantity']) && is_numeric($product['stock_quantity']) ? (int)$product['stock_quantity'] : 0;
+$productAvailability = (isset($product['product_status']) && (int)$product['product_status'] === 1 && $stockQty > 0) ? 'instock' : 'outofstock';
+$productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
+$productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -243,7 +252,6 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 
 <!-- Load Styles -->
 <?php loadCSS(); ?>
-<link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/style.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/header.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/footer.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
