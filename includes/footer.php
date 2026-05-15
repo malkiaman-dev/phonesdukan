@@ -8,16 +8,16 @@
             </a>
             <p class="footer-brand-about">PhonesDukan is your trusted store for mobiles, smart watches, earbuds, accessories, power banks, and speakers across Pakistan.</p>
             <div class="footer-social-icons">
-                <a href="https://www.facebook.com/phonesdukan" aria-label="Visit our Facebook page" class="footer-social-icon facebook-icon">
+                <a href="https://www.facebook.com/mobileisland01/" aria-label="Visit our Facebook page" class="footer-social-icon facebook-icon">
                     <img src="<?= url('public/assets/images/facebook_icon.svg'); ?>" alt="Facebook">
                 </a>
-                <a href="https://www.youtube.com/c/MobileIsland" aria-label="Visit our YouTube channel" class="footer-social-icon youtube-icon">
+                <a href="https://www.youtube.com/@mobileisland" aria-label="Visit our YouTube channel" class="footer-social-icon youtube-icon">
                     <img src="<?= url('public/assets/images/youtube_icon.svg'); ?>" alt="YouTube">
                 </a>
-                <a href="https://www.instagram.com/phonesdukan/" aria-label="Visit our Instagram page" class="footer-social-icon instagram-icon">
+                <a href="https://www.instagram.com/mobile_island01/" aria-label="Visit our Instagram page" class="footer-social-icon instagram-icon">
                     <img src="<?= url('public/assets/images/instagram_icon.svg'); ?>" alt="Instagram">
                 </a>
-                <a href="https://www.tiktok.com/@phonesdukan" aria-label="Visit our TikTok page" class="footer-social-icon tiktok-icon">
+                <a href="https://www.tiktok.com/@mobile_island_g11_isb" aria-label="Visit our TikTok page" class="footer-social-icon tiktok-icon">
                     <img src="<?= url('public/assets/images/tiktok_icon.svg'); ?>" alt="TikTok">
                 </a>
                 <a href="https://wa.me/923116600031" aria-label="Visit our WhatsApp page" class="footer-social-icon whatsapp-icon">
