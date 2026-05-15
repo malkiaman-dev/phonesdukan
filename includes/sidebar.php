@@ -3,7 +3,7 @@
     <aside id="sidebar" class="sidebar">
         <div id="close-sidebar" class="close-sidebar">
             <a href="<?= url(); ?>">
-                <img src="https://www.phonesdukan.com/wp-content/uploads/2024/10/phonesdukan_logo.webp" alt="PhonesDukan" style="width: 170px; height: auto;">
+                <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="PhonesDukan" style="width: 170px; height: auto;" decoding="async">
             </a>
             <img src="<?= url('public/assets/images/close-icon.svg'); ?>" alt="Close Icon">
         </div>

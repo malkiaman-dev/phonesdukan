@@ -254,7 +254,8 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 <?php loadCSS(); ?>
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/header.css">
 <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/footer.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
 </head>
 <body>

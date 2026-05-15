@@ -1,27 +1,27 @@
-</div><!-- #content -->
+</main><!-- /.content -->
 
 <footer id="footer">
     <div class="footer-widgets">
         <div class="footer-widget footer-brand">
             <a href="<?= url(); ?>" class="footer-brand-logo" aria-label="Visit Phones Dukan Home">
-                <img src="<?= url('public/assets/images/phonesdukan_logo.png'); ?>" alt="Phones Dukan Logo">
+                <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="Phones Dukan Logo" loading="lazy" decoding="async">
             </a>
             <p class="footer-brand-about">PhonesDukan is your trusted store for mobiles, smart watches, earbuds, accessories, power banks, and speakers across Pakistan.</p>
             <div class="footer-social-icons">
                 <a href="https://www.facebook.com/mobileisland01/" aria-label="Visit our Facebook page" class="footer-social-icon facebook-icon">
-                    <img src="<?= url('public/assets/images/facebook_icon.svg'); ?>" alt="Facebook">
+                    <img src="<?= url('public/assets/images/facebook_icon.svg'); ?>" alt="Facebook" loading="lazy" decoding="async">
                 </a>
                 <a href="https://www.youtube.com/@mobileisland" aria-label="Visit our YouTube channel" class="footer-social-icon youtube-icon">
-                    <img src="<?= url('public/assets/images/youtube_icon.svg'); ?>" alt="YouTube">
+                    <img src="<?= url('public/assets/images/youtube_icon.svg'); ?>" alt="YouTube" loading="lazy" decoding="async">
                 </a>
                 <a href="https://www.instagram.com/mobile_island01/" aria-label="Visit our Instagram page" class="footer-social-icon instagram-icon">
-                    <img src="<?= url('public/assets/images/instagram_icon.svg'); ?>" alt="Instagram">
+                    <img src="<?= url('public/assets/images/instagram_icon.svg'); ?>" alt="Instagram" loading="lazy" decoding="async">
                 </a>
                 <a href="https://www.tiktok.com/@mobile_island_g11_isb" aria-label="Visit our TikTok page" class="footer-social-icon tiktok-icon">
-                    <img src="<?= url('public/assets/images/tiktok_icon.svg'); ?>" alt="TikTok">
+                    <img src="<?= url('public/assets/images/tiktok_icon.svg'); ?>" alt="TikTok" loading="lazy" decoding="async">
                 </a>
                 <a href="https://wa.me/923116600031" aria-label="Visit our WhatsApp page" class="footer-social-icon whatsapp-icon">
-                    <img src="<?= url('public/assets/images/whatsapp_icon.svg'); ?>" alt="Whatsapp">
+                    <img src="<?= url('public/assets/images/whatsapp_icon.svg'); ?>" alt="Whatsapp" loading="lazy" decoding="async">
                 </a>
             </div>
         </div>

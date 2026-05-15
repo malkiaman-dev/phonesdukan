@@ -72,7 +72,7 @@ foreach ($latest_posts_raw as $post) {
     <div class="pd-hero-slider" data-pd-hero-slider tabindex="0">
         <article class="pd-hero-slide is-active" data-pd-slide aria-hidden="false">
             <div class="pd-hero-media">
-                <img src="/public/assets/images/hero/hero-slide-1.png" alt="Latest smartphones and accessories at Mobile Island" loading="eager" fetchpriority="high">
+                <img src="/public/assets/images/hero/hero-slide-1.png" alt="Latest smartphones and accessories at Mobile Island" loading="eager" fetchpriority="high" decoding="sync">
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
@@ -162,31 +162,31 @@ foreach ($latest_posts_raw as $post) {
             <div class="cat-track" id="cat-track">
                 <a href="mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
                     <div class="cat-img-box">
-                        <img src="/public/assets/images/mobile_category.png" alt="Mobiles">
+                        <img src="/public/assets/images/mobile_category.png" alt="Mobiles" loading="lazy" decoding="async">
                     </div>
                     <p class="cat-label">Mobiles</p>
                 </a>
                 <a href="smart-watches" class="cat-card" style="--cat-bg:#d1fae5;">
                     <div class="cat-img-box">
-                        <img src="/public/assets/images/smartwatches_category.webp" alt="Smartwatches">
+                        <img src="/public/assets/images/smartwatches_category.webp" alt="Smartwatches" loading="lazy" decoding="async">
                     </div>
                     <p class="cat-label">Smart Watches</p>
                 </a>
                 <a href="wireless-earbuds" class="cat-card" style="--cat-bg:#ede9fe;">
                     <div class="cat-img-box">
-                        <img src="/public/assets/images/wireless_earbuds.webp" alt="Wireless Earbuds">
+                        <img src="/public/assets/images/wireless_earbuds.webp" alt="Wireless Earbuds" loading="lazy" decoding="async">
                     </div>
                     <p class="cat-label">Wireless Earbuds</p>
                 </a>
                 <a href="mobile-accessories" class="cat-card" style="--cat-bg:#fde8d8;">
                     <div class="cat-img-box">
-                        <img src="/public/assets/images/mobile_accessories.webp" alt="Accessories">
+                        <img src="/public/assets/images/mobile_accessories.webp" alt="Accessories" loading="lazy" decoding="async">
                     </div>
                     <p class="cat-label">Mobile Accessories</p>
                 </a>
                 <a href="power-banks" class="cat-card" style="--cat-bg:#fef9c3;">
                     <div class="cat-img-box">
-                        <img src="/public/assets/images/power-banks.webp" alt="Power Banks">
+                        <img src="/public/assets/images/power-banks.webp" alt="Power Banks" loading="lazy" decoding="async">
                     </div>
                     <p class="cat-label">Fast Charging Power Banks</p>
                 </a>
@@ -237,7 +237,7 @@ foreach ($latest_posts_raw as $post) {
 
                     <a href="<?= $product_url ?>" class="na-img-link">
                         <div class="na-img-box">
-                            <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                            <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                         </div>
                     </a>
 
@@ -384,7 +384,7 @@ foreach ($latest_posts_raw as $post) {
 
 <div class="s-banner s-banner--full sw-home-banner">
 <a href="/smart-watches">
-         <img src="/public/assets/images/smart-watch-banner.png" alt="smart-watches_banner" class="banner-image">
+         <img src="/public/assets/images/smart-watch-banner.png" alt="smart-watches_banner" class="banner-image" loading="lazy" decoding="async">
 </a>
 </div>
 
@@ -443,7 +443,7 @@ foreach ($latest_posts_raw as $post) {
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
-                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                             </div>
                         </a>
 
@@ -471,7 +471,8 @@ foreach ($latest_posts_raw as $post) {
                                         Add to Cart
                                     </button>
                                     <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
                                         Buy Now
                                     </button>
                                 <?php else: ?>
@@ -492,7 +493,7 @@ foreach ($latest_posts_raw as $post) {
 
 <div class="s-banner s-banner--full earbuds-home-banner">
 <a href="/wireless-earbuds">
-         <img src="/public/assets/images/wireless_earbuds_banner.png" alt="wireless_earbuds_banner" class="banner-image">
+         <img src="/public/assets/images/wireless_earbuds_banner.png" alt="wireless_earbuds_banner" class="banner-image" loading="lazy" decoding="async">
 </a>
 </div>
 
@@ -555,7 +556,7 @@ foreach ($latest_posts_raw as $post) {
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
-                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                             </div>
                         </a>
                         
@@ -591,7 +592,8 @@ foreach ($latest_posts_raw as $post) {
                                         Add to Cart
                                     </button>
                                     <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
                                         Buy Now
                                     </button>
                                 <?php else: ?>
@@ -644,7 +646,7 @@ foreach ($latest_posts_raw as $post) {
 
 <div class="s-banner s-banner--full">
 <a href="/mobiles">
-    <img src="/public/assets/images/mobiles_banner.png" alt="mobiles" class="banner-image">
+    <img src="/public/assets/images/mobiles_banner.png" alt="mobiles" class="banner-image" loading="lazy" decoding="async">
 </a>
 </div>
 
@@ -688,7 +690,7 @@ foreach ($latest_posts_raw as $post) {
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
-                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                             </div>
                         </a>
 
@@ -718,7 +720,8 @@ foreach ($latest_posts_raw as $post) {
                                         Add to Cart
                                     </button>
                                     <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
                                         Buy Now
                                     </button>
                                 <?php else: ?>
@@ -756,7 +759,7 @@ foreach ($latest_posts_raw as $post) {
 
 <div class="s-banner s-banner--full">
 <a href="/mobile-accessories">
-    <img src="/public/assets/images/mobiles_accessories_banner.png" alt="mobiles_accessories_banner" class="banner-image">
+    <img src="/public/assets/images/mobiles_accessories_banner.png" alt="mobiles_accessories_banner" class="banner-image" loading="lazy" decoding="async">
 </a>
 </div>
 
@@ -800,7 +803,7 @@ foreach ($latest_posts_raw as $post) {
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
-                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                             </div>
                         </a>
 
@@ -828,7 +831,8 @@ foreach ($latest_posts_raw as $post) {
                                         Add to Cart
                                     </button>
                                     <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
                                         Buy Now
                                     </button>
                                 <?php else: ?>
@@ -850,7 +854,7 @@ foreach ($latest_posts_raw as $post) {
 
 <div class="s-banner s-banner--full">
 <a href="/power-banks">
-    <img src="/public/assets/images/powerbanks_banner.png" alt="power_banks_banner" class="banner-image">
+    <img src="/public/assets/images/powerbanks_banner.png" alt="power_banks_banner" class="banner-image" loading="lazy" decoding="async">
 </a>
 </div>
 
@@ -894,7 +898,7 @@ foreach ($latest_posts_raw as $post) {
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
-                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                             </div>
                         </a>
 
@@ -922,7 +926,8 @@ foreach ($latest_posts_raw as $post) {
                                         Add to Cart
                                     </button>
                                     <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
                                         Buy Now
                                     </button>
                                 <?php else: ?>
@@ -987,7 +992,7 @@ foreach ($latest_posts_raw as $post) {
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
-                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy">
+                                <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
                             </div>
                         </a>
 
@@ -1015,7 +1020,8 @@ foreach ($latest_posts_raw as $post) {
                                         Add to Cart
                                     </button>
                                     <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>">
+                                        data-product-id="<?= (int)$product['product_id'] ?>"
+                                        data-unit-price="<?= (float)$unit_price ?>">
                                         Buy Now
                                     </button>
                                 <?php else: ?>
@@ -1044,23 +1050,23 @@ foreach ($latest_posts_raw as $post) {
     <div class="brand-marquee-outer">
         <div class="brand-marquee-track" id="brandMarqueeTrack">
             <!-- Set 1 — real items -->
-            <a href="/mobiles/samsung" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="Samsung" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/infinix/" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="Infinix" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/oppo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="Oppo" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/xiaomi" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="Xiaomi" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/vivo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="Vivo" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/tecno" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="Tecno" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/realme" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="Realme" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/apple" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="Apple" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/samsung" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="Samsung" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/infinix/" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="Infinix" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/oppo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="Oppo" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/xiaomi" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="Xiaomi" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/vivo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="Vivo" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/tecno" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="Tecno" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/realme" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="Realme" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/apple" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="Apple" draggable="false" loading="lazy" decoding="async"></div></a>
             <!-- Set 2 — duplicate for seamless loop, hidden from assistive tech -->
-            <a href="/mobiles/samsung" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/infinix/" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/oppo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/xiaomi" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/vivo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/tecno" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/realme" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
-            <a href="/mobiles/apple" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="" draggable="false" loading="lazy"></div></a>
+            <a href="/mobiles/samsung" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/infinix/" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/oppo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/xiaomi" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/vivo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/tecno" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/realme" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <a href="/mobiles/apple" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
         </div>
     </div>
 </section>

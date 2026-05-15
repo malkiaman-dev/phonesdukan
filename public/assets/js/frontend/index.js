@@ -125,14 +125,19 @@ document.addEventListener("DOMContentLoaded", function () {
         heroSlider.addEventListener("mouseleave", startAutoplay);
         heroSlider.addEventListener("focusin", stopAutoplay);
         heroSlider.addEventListener("focusout", startAutoplay);
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                stopAutoplay();
-            } else {
-                startAutoplay();
-            }
+
+        const onVisibilityChange = () => {
+            if (document.hidden) { stopAutoplay(); } else { startAutoplay(); }
+        };
+        const onPageShow = () => startAutoplay();
+
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        window.addEventListener("pageshow", onPageShow);
+
+        heroSlider.addEventListener("remove", () => {
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+            window.removeEventListener("pageshow", onPageShow);
         });
-        window.addEventListener("pageshow", startAutoplay);
 
         heroSlider.addEventListener("keydown", (event) => {
             if (event.key === "ArrowRight") {
@@ -163,7 +168,6 @@ document.addEventListener("DOMContentLoaded", function () {
             startAutoplay();
         }, { passive: true });
 
-        setActiveSlide(currentIndex);
         startAutoplay();
     }
 
@@ -177,15 +181,15 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        let scrollAmount = container.clientWidth * 0.8; // Scroll by 80% of container width
+        const getScrollAmount = () => container.clientWidth * 0.8;
 
         nextBtn.addEventListener("click", () => {
-            container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            container.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
             setTimeout(() => updateButtonState(container, prevBtn, nextBtn, grid), 500);
         });
 
         prevBtn.addEventListener("click", () => {
-            container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+            container.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
             setTimeout(() => updateButtonState(container, prevBtn, nextBtn, grid), 500);
         });
 

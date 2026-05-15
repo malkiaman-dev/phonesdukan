@@ -237,52 +237,51 @@ function createSearchImage(product) {
     return img;
 }
 
-// Live search on mobile
+// Live search on mobile (debounced — fires 300ms after user stops typing)
 if (mobileSearchInput && mobileSearchResults) {
-mobileSearchInput.addEventListener("input", function () {
-    let query = mobileSearchInput.value;
-    let sanitizedQuery = sanitizeInput(query);
+    let mobileSearchTimer = null;
+    mobileSearchInput.addEventListener("input", function () {
+        let query = mobileSearchInput.value;
+        let sanitizedQuery = sanitizeInput(query);
 
-    // If the sanitized query is different, update the input value
-    if (sanitizedQuery !== query) {
-        mobileSearchInput.value = sanitizedQuery;
-    }
+        if (sanitizedQuery !== query) mobileSearchInput.value = sanitizedQuery;
 
-    // If input is less than 2 characters, clear results and exit
-    if (sanitizedQuery.trim().length < 2) {
-        mobileSearchResults.innerHTML = ""; // Hide results if less than 2 characters
-        mobileSearchResults.style.display = "none"; // Hide the results dropdown
-        return;
-    }
+        if (sanitizedQuery.trim().length < 2) {
+            mobileSearchResults.innerHTML = "";
+            mobileSearchResults.style.display = "none";
+            return;
+        }
 
-    // Fetch search results
-    fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
-        .then(response => response.json())
-        .then(data => {
-            mobileSearchResults.innerHTML = ""; // Clear previous results
-            if (data.length > 0) {
-                mobileSearchResults.style.display = "block"; // Show results if there are any
-                data.forEach(product => {
-                    const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
-                    const resultItem = document.createElement("div");
-                    resultItem.classList.add("search-item");
-                    const link = document.createElement('a');
-                    link.href = productUrl;
-                    link.appendChild(createSearchImage(product));
-                    const text = document.createElement('span');
-                    text.className = 'search-text';
-                    text.textContent = product.product_name || '';
-                    link.appendChild(text);
-                    resultItem.appendChild(link);
-                    mobileSearchResults.appendChild(resultItem);
-                });
-            } else {
-                mobileSearchResults.style.display = "block"; // Show "No results found" if no products match
-                mobileSearchResults.innerHTML = "<div class='search-item'>No results found</div>";
-            }
-        })
-        .catch(error => console.error("Error fetching mobile search results:", error));
-});
+        clearTimeout(mobileSearchTimer);
+        mobileSearchTimer = setTimeout(function () {
+            fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
+                .then(response => response.json())
+                .then(data => {
+                    mobileSearchResults.innerHTML = "";
+                    if (data.length > 0) {
+                        mobileSearchResults.style.display = "block";
+                        data.forEach(product => {
+                            const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
+                            const resultItem = document.createElement("div");
+                            resultItem.classList.add("search-item");
+                            const link = document.createElement('a');
+                            link.href = productUrl;
+                            link.appendChild(createSearchImage(product));
+                            const text = document.createElement('span');
+                            text.className = 'search-text';
+                            text.textContent = product.product_name || '';
+                            link.appendChild(text);
+                            resultItem.appendChild(link);
+                            mobileSearchResults.appendChild(resultItem);
+                        });
+                    } else {
+                        mobileSearchResults.style.display = "block";
+                        mobileSearchResults.innerHTML = "<div class='search-item'>No results found</div>";
+                    }
+                })
+                .catch(error => console.error("Error fetching mobile search results:", error));
+        }, 300);
+    });
 }
 
 // Redirect to search results page on Enter key press
@@ -302,50 +301,47 @@ mobileSearchInput.addEventListener("keypress", function (event) {
         return;
     }
 
+    let desktopSearchTimer = null;
     searchInput.addEventListener("input", function () {
-        let query = searchInput.value; // Get the original input value
-
-        // ✅ Sanitize input but allow spaces
+        let query = searchInput.value;
         let sanitizedQuery = sanitizeInput(query);
 
-        // ✅ Update input value only if different (prevents cursor jumping issues)
-        if (sanitizedQuery !== query) {
-            searchInput.value = sanitizedQuery;
-        }
+        if (sanitizedQuery !== query) searchInput.value = sanitizedQuery;
 
-        // ✅ Trim spaces & check length
         if (sanitizedQuery.trim().length < 2) {
             searchResults.innerHTML = "";
             closeButton.style.display = "none";
             return;
         }
 
-        // ✅ Send search request
-        fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
-            .then(response => response.json())
-            .then(data => {
-                searchResults.innerHTML = ""; // Clear previous results
-                if (data.length > 0) {
-                    closeButton.style.display = "flex";
-                    data.forEach(product => {
-                        const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
-                        const li = document.createElement("li");
-                        const link = document.createElement('a');
-                        link.href = productUrl;
-                        link.className = 'search-item';
-                        link.appendChild(createSearchImage(product));
-                        const text = document.createElement('span');
-                        text.className = 'search-text';
-                        text.textContent = product.product_name || '';
-                        link.appendChild(text);
-                        li.appendChild(link);
-                        searchResults.appendChild(li);
-                    });
-                } else {
-                    searchResults.innerHTML = "<li>No results found</li>";
-                }
-            })
-            .catch(error => console.error("Error fetching search results:", error));
+        clearTimeout(desktopSearchTimer);
+        desktopSearchTimer = setTimeout(function () {
+            fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
+                .then(response => response.json())
+                .then(data => {
+                    searchResults.innerHTML = "";
+                    if (data.length > 0) {
+                        closeButton.style.display = "flex";
+                        data.forEach(product => {
+                            const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
+                            const li = document.createElement("li");
+                            const link = document.createElement('a');
+                            link.href = productUrl;
+                            link.className = 'search-item';
+                            link.appendChild(createSearchImage(product));
+                            const text = document.createElement('span');
+                            text.className = 'search-text';
+                            text.textContent = product.product_name || '';
+                            link.appendChild(text);
+                            li.appendChild(link);
+                            searchResults.appendChild(li);
+                        });
+                    } else {
+                        searchResults.innerHTML = "<li>No results found</li>";
+                    }
+                })
+                .catch(error => console.error("Error fetching search results:", error));
+        }, 300);
     });
 
 
