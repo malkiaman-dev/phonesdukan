@@ -1547,7 +1547,7 @@ function epRenderRow(v, i) {
     const imgThumb = imgSrc
         ? `<img src="${epEscHtml(imgSrc)}" id="epThumb${i}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;display:block;margin-bottom:4px">`
         : `<div id="epThumb${i}" style="width:48px;height:48px;border-radius:8px;border:1px dashed #e5e7eb;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:20px;margin-bottom:4px;background:#f9fafb">+</div>`;
-    return `<tr id="epRow${i}" draggable="true"
+    return `<tr id="epRow${i}" draggable="false"
         ondragstart="epDragStart(event,${i})"
         ondragover="epDragOver(event)"
         ondrop="epDrop(event,${i})"
@@ -1556,7 +1556,8 @@ function epRenderRow(v, i) {
         <td style="min-width:150px;display:flex;align-items:flex-start;gap:8px;padding-top:10px">
             <span class="ep-drag-handle" title="Drag to reorder"
                 style="cursor:grab;color:#9ca3af;font-size:16px;line-height:1;padding-top:2px;flex-shrink:0;user-select:none"
-                onmousedown="this.closest('tr').setAttribute('draggable','true')">⠿</span>
+                onmousedown="this.closest('tr').setAttribute('draggable','true')"
+                onmouseup="this.closest('tr').setAttribute('draggable','false')">⠿</span>
             <span style="font-weight:700;font-size:.84rem;color:#111;display:block">${epEscHtml(label)}</span>
         </td>
         <td style="min-width:90px">
@@ -1690,11 +1691,11 @@ function epDrop(event, targetIdx) {
 
 function epDragEnd(event) {
     epDragIdx = null;
-    // Remove all drag highlights
     document.querySelectorAll('#epVarTbody tr').forEach(function(r) {
         r.style.opacity    = '';
         r.style.borderTop  = '';
         r.style.background = '';
+        r.setAttribute('draggable', 'false');
     });
 }
 
