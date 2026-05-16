@@ -50,6 +50,40 @@ class ProductController
                     'product_tag' => $_POST['product_tag']
                 ];
 
+                // Ensure slug is unique — auto-append numeric suffix if a duplicate exists
+                $slugCheck = $this->db->prepare('SELECT product_id FROM products WHERE product_slug = ?');
+                $slugCheck->execute([$productData['product_slug']]);
+                if ($slugCheck->fetch()) {
+                    $originalSlug = $productData['product_slug'];
+                    $counter = 2;
+                    do {
+                        $productData['product_slug'] = $originalSlug . '-' . $counter++;
+                        $slugCheck->execute([$productData['product_slug']]);
+                    } while ($slugCheck->fetch());
+                }
+
+                // Validate SKU uniqueness if a SKU was provided
+                if (!empty($productData['product_sku'])) {
+                    $skuCheck = $this->db->prepare('SELECT product_id FROM products WHERE product_sku = ?');
+                    $skuCheck->execute([$productData['product_sku']]);
+                    if ($skuCheck->fetch()) {
+                        $this->db->rollBack();
+                        $_SESSION['message'] = 'Error: SKU "' . htmlspecialchars($productData['product_sku']) . '" is already used by another product.';
+                        $_SESSION['message_type'] = 'error';
+                        header('Location: /admin/add-product.php');
+                        exit();
+                    }
+                }
+
+                // Fetch category and brand info needed for SEO auto-fill and canonical URL
+                $catStmt = $this->db->prepare('SELECT category_name, slug FROM categories WHERE category_id = ?');
+                $catStmt->execute([$productData['category_id']]);
+                $catRow = $catStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+                $brandStmt = $this->db->prepare('SELECT brand_name, slug FROM brands WHERE brand_id = ?');
+                $brandStmt->execute([$productData['brand_id']]);
+                $brandRow = $brandStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
                 // Insert the product into the database
                 $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description,
                                                 short_description, product_status, stock_quantity, regular_price, sale_price,
@@ -62,16 +96,55 @@ class ProductController
                 $stmt->execute($productData);
                 $productId = $this->db->lastInsertId();  // Get the last inserted product ID
 
+                // Auto-fill SEO fields if the user left them empty
+                $months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                $monthYear = $months[(int)date('n') - 1] . ' ' . date('Y');
+
+                $seoTitle = !empty(trim($_POST['seo_title'] ?? ''))
+                    ? trim($_POST['seo_title'])
+                    : ($productData['product_name'] . ' Price in Pakistan ' . $monthYear . ' | Phones Dukan');
+
+                $seoDesc = trim($_POST['seo_description'] ?? '');
+                if (empty($seoDesc)) {
+                    $brandName = $brandRow['brand_name'] ?? '';
+                    $priceStr  = !empty($productData['regular_price'])
+                        ? 'Starting from Rs. ' . number_format((float)$productData['regular_price'], 0) . '. '
+                        : '';
+                    $seoDesc = 'Buy ' . $productData['product_name'] . ' in Pakistan at the best price. ' . $priceStr
+                        . ($brandName ? 'PTA-approved ' . $brandName . ' with official warranty. ' : '')
+                        . 'Fast delivery across Pakistan. Shop now at Phones Dukan.';
+                    if (strlen($seoDesc) > 160) {
+                        $seoDesc = substr($seoDesc, 0, 157) . '...';
+                    }
+                }
+
+                $focusKeyword = !empty(trim($_POST['focus_keyword'] ?? ''))
+                    ? trim($_POST['focus_keyword'])
+                    : (strtolower($productData['product_name']) . ' price in pakistan');
+
+                $canonicalUrl = !empty(trim($_POST['canonical_url'] ?? ''))
+                    ? trim($_POST['canonical_url'])
+                    : ('https://www.phonesdukan.com/'
+                        . ($catRow['slug'] ?? '') . '/'
+                        . ($brandRow['slug'] ?? '') . '/'
+                        . $productData['product_slug'] . '/');
+
+                $secondaryKeywords = trim($_POST['secondary_keywords'] ?? '');
+
                 // Insert SEO data
                 $seoData = [
-                    'product_id' => $productId,
-                    'seo_title' => $_POST['seo_title'],
-                    'seo_description' => $_POST['seo_description'],
-                    'focus_keyword' => $_POST['focus_keyword'],
+                    'product_id'         => $productId,
+                    'seo_title'          => $seoTitle,
+                    'seo_description'    => $seoDesc,
+                    'focus_keyword'      => $focusKeyword,
+                    'canonical_url'      => $canonicalUrl,
+                    'secondary_keywords' => $secondaryKeywords,
                 ];
 
-                $seoQuery = 'INSERT INTO product_seo (product_id, seo_title, seo_description, focus_keyword)
-                             VALUES (:product_id, :seo_title, :seo_description, :focus_keyword)';
+                $seoQuery = 'INSERT INTO product_seo
+                                (product_id, seo_title, seo_description, focus_keyword, canonical_url, secondary_keywords)
+                             VALUES
+                                (:product_id, :seo_title, :seo_description, :focus_keyword, :canonical_url, :secondary_keywords)';
                 $seoStmt = $this->db->prepare($seoQuery);
                 $seoStmt->execute($seoData);
 

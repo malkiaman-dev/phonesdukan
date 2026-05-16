@@ -82,7 +82,26 @@ class ProductController
             }
         
             $this->model->updateProduct($id, $data);
-        
+
+            // Auto-regenerate canonical URL from the current category/brand/product slugs
+            try {
+                $dbSlug = (new Database())->getConnection();
+                $catS = $dbSlug->prepare('SELECT slug FROM categories WHERE category_id = ?');
+                $catS->execute([$data['category_id']]);
+                $catSlugRow = $catS->fetch(PDO::FETCH_ASSOC);
+
+                $brandS = $dbSlug->prepare('SELECT slug FROM brands WHERE brand_id = ?');
+                $brandS->execute([$data['brand_id']]);
+                $brandSlugRow = $brandS->fetch(PDO::FETCH_ASSOC);
+
+                $seoData['canonical_url'] = 'https://www.phonesdukan.com/'
+                    . ($catSlugRow['slug'] ?? '') . '/'
+                    . ($brandSlugRow['slug'] ?? '') . '/'
+                    . $data['product_slug'] . '/';
+            } catch (Exception $eSlug) {
+                // Fall back to client-provided value
+            }
+
             $existingSeo = $this->model->getSeoDataByProductId($id);
             if ($existingSeo) {
                 $this->model->updateSeoData($id, $seoData);

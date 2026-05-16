@@ -30,10 +30,10 @@ include __DIR__ . '/admin_sidebar.php';
 // Include the header
 include __DIR__ . '/admin_header.php';
 // Get categories and brands for dropdowns
-$categories_query = "SELECT * FROM categories"; // Adjust this query to your actual categories table
+$categories_query = "SELECT category_id, category_name, slug FROM categories ORDER BY category_name";
 $categories_result = $conn->query($categories_query);
 
-$brands_query = "SELECT * FROM brands"; // Adjust this query to your actual brands table
+$brands_query = "SELECT brand_id, brand_name, slug FROM brands ORDER BY brand_name";
 $brands_result = $conn->query($brands_query);
 ?>
 
@@ -124,6 +124,76 @@ input#enableVariations:checked + .vb-toggle-track .vb-toggle-thumb { left:25px; 
 .vb-input:focus { border-color:#facc15; }
 .vb-input[type=number] { max-width:120px; }
 select.vb-input { cursor:pointer; }
+
+/* ---- SEO Section enhancements ---- */
+.seo-preview-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-left: 3px solid #4285f4;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 0 0 20px;
+    font-family: Arial, sans-serif;
+}
+.seo-preview-label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 8px;
+}
+.seo-preview-url { font-size: .78rem; color: #1e8e3e; margin-bottom: 3px; word-break: break-all; }
+.seo-preview-title { font-size: 1.05rem; color: #1a0dab; margin-bottom: 4px; word-break: break-word; }
+.seo-preview-desc { font-size: .85rem; color: #4d5156; line-height: 1.4; word-break: break-word; }
+.seo-char-counter { font-size: .75rem; font-weight: 700; }
+.seo-char-counter.good { color: #16a34a; }
+.seo-char-counter.too-long { color: #ef4444; }
+.seo-char-counter.too-short { color: #f97316; }
+.seo-field-wrap { display: flex; gap: 8px; align-items: flex-start; }
+.seo-field-wrap > input, .seo-field-wrap > textarea { flex: 1 1 0%; min-width: 0; }
+.seo-auto-btn {
+    flex-shrink: 0;
+    height: 48px;
+    padding: 0 12px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .15s;
+    align-self: flex-start;
+}
+.seo-auto-btn:hover { color: #facc15; }
+.seo-field-hint { display: block; color: #9ca3af; font-size: .76rem; margin-top: 4px; }
+.seo-fill-all-btn {
+    background: #facc15;
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: .82rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .15s;
+}
+.seo-fill-all-btn:hover { background: #eab308; }
+.discount-badge {
+    display: none;
+    align-items: center;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: .76rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
 </style>
 
 <div class="admin-page">
@@ -152,7 +222,7 @@ select.vb-input { cursor:pointer; }
                     <div class="custom-select" data-select-id="category_id">
                         <select class="native-select" id="category_id" name="category_id" required>
                             <?php while ($row = $categories_result->fetch(PDO::FETCH_ASSOC)) { ?>
-                                <option value="<?php echo $row['category_id']; ?>"><?php echo $row['category_name']; ?></option>
+                                <option value="<?php echo $row['category_id']; ?>" data-slug="<?php echo htmlspecialchars($row['slug'] ?? ''); ?>"><?php echo htmlspecialchars($row['category_name']); ?></option>
                             <?php } ?>
                         </select>
                         <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -167,7 +237,7 @@ select.vb-input { cursor:pointer; }
                     <div class="custom-select" data-select-id="brand_id">
                         <select class="native-select" id="brand_id" name="brand_id" required>
                             <?php while ($row = $brands_result->fetch(PDO::FETCH_ASSOC)) { ?>
-                                <option value="<?php echo $row['brand_id']; ?>"><?php echo $row['brand_name']; ?></option>
+                                <option value="<?php echo $row['brand_id']; ?>" data-slug="<?php echo htmlspecialchars($row['slug'] ?? ''); ?>"><?php echo htmlspecialchars($row['brand_name']); ?></option>
                             <?php } ?>
                         </select>
                         <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
@@ -204,6 +274,7 @@ select.vb-input { cursor:pointer; }
                 <div class="form-group">
                     <label for="sale_price">Sale Price</label>
                     <input id="sale_price" type="number" name="sale_price" placeholder="4499">
+                    <span id="discount_badge" class="discount-badge"></span>
                 </div>
                 <div class="form-group">
                     <label for="stock_quantity">Stock Quantity</label>
@@ -211,7 +282,11 @@ select.vb-input { cursor:pointer; }
                 </div>
                 <div class="form-group">
                     <label for="product_sku">Product SKU</label>
-                    <input id="product_sku" type="text" name="product_sku" placeholder="MI-IPH-001">
+                    <div class="seo-field-wrap">
+                        <input id="product_sku" type="text" name="product_sku" placeholder="SAM-MOB-X7K2">
+                        <button type="button" class="seo-auto-btn" onclick="generateProductSku()" title="Auto-generate SKU from brand and category">Auto</button>
+                    </div>
+                    <span class="seo-field-hint">Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2</span>
                 </div>
             </div>
         </section>
@@ -263,19 +338,69 @@ select.vb-input { cursor:pointer; }
         </section>
 
         <section class="form-card">
-            <div class="form-card-header"><h2>SEO Information</h2></div>
+            <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+                <h2>SEO Information</h2>
+                <button type="button" class="seo-fill-all-btn" onclick="seoAutoFillAll()">Auto-Fill All SEO</button>
+            </div>
+
+            <!-- Google Search Snippet Preview -->
+            <div class="seo-preview-box">
+                <span class="seo-preview-label">Google Search Preview</span>
+                <div class="seo-preview-url" id="snippet_url">www.phonesdukan.com/category/brand/product-slug/</div>
+                <div class="seo-preview-title" id="snippet_title">Product SEO Title</div>
+                <div class="seo-preview-desc" id="snippet_desc">Product SEO description will appear here...</div>
+            </div>
+
             <div class="form-grid cols-2">
-                <div class="form-group">
-                    <label for="seo_title">SEO Title</label>
-                    <input id="seo_title" type="text" name="seo_title" placeholder="Buy product name online in Pakistan" required>
+                <div class="form-group full-width">
+                    <label for="seo_title" style="display:flex;justify-content:space-between;align-items:center">
+                        <span>SEO Title</span>
+                        <span id="seo_title_counter" class="seo-char-counter too-short">0/60</span>
+                    </label>
+                    <div class="seo-field-wrap">
+                        <input id="seo_title" type="text" name="seo_title"
+                            placeholder="Product Name Price in Pakistan May 2026 | Phones Dukan"
+                            oninput="seoUpdateCharCounter('seo_title',60);seoUpdateSnippetPreview()">
+                        <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoTitle()" title="Auto-generate from product name">Auto</button>
+                    </div>
+                    <span class="seo-field-hint">Recommended: 50–60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
                 </div>
+
                 <div class="form-group">
                     <label for="focus_keyword">Focus Keyword</label>
-                    <input id="focus_keyword" type="text" name="focus_keyword" placeholder="product keyword">
+                    <div class="seo-field-wrap">
+                        <input id="focus_keyword" type="text" name="focus_keyword"
+                            placeholder="product name price in pakistan">
+                        <button type="button" class="seo-auto-btn" onclick="seoGenerateFocusKeyword()" title="Auto-generate from product name">Auto</button>
+                    </div>
                 </div>
+
+                <div class="form-group">
+                    <label for="secondary_keywords">Secondary Keywords</label>
+                    <input id="secondary_keywords" type="text" name="secondary_keywords"
+                        placeholder="buy online, best price, official warranty, pakistan">
+                    <span class="seo-field-hint">Comma-separated. Supporting search terms for this product.</span>
+                </div>
+
                 <div class="form-group full-width">
-                    <label for="seo_description">SEO Description</label>
-                    <textarea id="seo_description" name="seo_description" placeholder="Write a short SEO description" required></textarea>
+                    <label for="seo_description" style="display:flex;justify-content:space-between;align-items:center">
+                        <span>SEO Meta Description</span>
+                        <span id="seo_description_counter" class="seo-char-counter too-short">0/160</span>
+                    </label>
+                    <div class="seo-field-wrap">
+                        <textarea id="seo_description" name="seo_description"
+                            placeholder="Buy product name in Pakistan at the best price. PTA-approved with official warranty. Fast delivery..."
+                            oninput="seoUpdateCharCounter('seo_description',160);seoUpdateSnippetPreview()"></textarea>
+                        <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoDescription()" title="Auto-generate from short description" style="align-self:flex-start">Auto</button>
+                    </div>
+                    <span class="seo-field-hint">Recommended: 140–160 characters. Auto-generates from short description or product name.</span>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="canonical_url">Canonical URL <small style="color:#9ca3af;font-weight:400">(auto-generated, read-only)</small></label>
+                    <input id="canonical_url" type="text" name="canonical_url" readonly
+                        placeholder="https://www.phonesdukan.com/category/brand/product-slug/"
+                        style="background:#f8fafc;color:#6b7280;cursor:default;font-size:.88rem">
                 </div>
             </div>
         </section>
@@ -372,6 +497,7 @@ select.vb-input { cursor:pointer; }
                         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
                             <button type="button" class="vb-btn" onclick="generateVariations()">Generate All Combinations</button>
                             <button type="button" class="vb-btn vb-btn-outline" onclick="addBlankVariation()">+ Add Row Manually</button>
+                            <button type="button" class="vb-btn vb-btn-outline" onclick="generateAllVariationSkus()" title="Auto-fill empty SKU fields for all variations">Generate SKUs</button>
                         </div>
                         <div id="vbCombinationsWrap"></div>
                     </div>
@@ -914,4 +1040,176 @@ function initCustomSelect(root) {
 }
 
 document.querySelectorAll('.custom-select').forEach(initCustomSelect);
+
+// ===== SEO & Slug Auto-generation =====
+let seoSlugAutoMode = true; // tracks if slug was auto-generated (not manually edited)
+
+document.getElementById('product_name').addEventListener('input', function() {
+    if (seoSlugAutoMode) {
+        const slug = this.value.trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        document.getElementById('product_slug').value = slug;
+    }
+    seoUpdateCanonicalUrl();
+    seoUpdateSnippetPreview();
+});
+
+document.getElementById('product_slug').addEventListener('input', function() {
+    seoSlugAutoMode = false;
+    seoUpdateCanonicalUrl();
+    seoUpdateSnippetPreview();
+});
+
+document.getElementById('product_name').addEventListener('blur', function() {
+    const altField = document.getElementById('primary_alt_text');
+    if (altField && !altField.value.trim()) {
+        altField.value = this.value.trim();
+    }
+});
+
+document.getElementById('category_id').addEventListener('change', seoUpdateCanonicalUrl);
+document.getElementById('brand_id').addEventListener('change', seoUpdateCanonicalUrl);
+document.getElementById('regular_price').addEventListener('input', seoUpdateDiscountBadge);
+document.getElementById('sale_price').addEventListener('input', seoUpdateDiscountBadge);
+
+function seoGetMonthYear() {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const d = new Date();
+    return months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function seoGenerateSeoTitle() {
+    const name = document.getElementById('product_name').value.trim();
+    if (!name) { return; }
+    const title = name + ' Price in Pakistan ' + seoGetMonthYear() + ' | Phones Dukan';
+    document.getElementById('seo_title').value = title;
+    seoUpdateCharCounter('seo_title', 60);
+    seoUpdateSnippetPreview();
+}
+
+function seoGenerateSeoDescription() {
+    const name = document.getElementById('product_name').value.trim();
+    const shortDesc = document.getElementById('short_description').value.trim();
+    if (!name) { return; }
+    let desc;
+    if (shortDesc.length >= 50) {
+        desc = shortDesc.length > 155 ? shortDesc.substring(0, 152) + '...' : shortDesc;
+    } else {
+        desc = 'Buy ' + name + ' in Pakistan at the best price. PTA-approved with official warranty. Fast delivery across Pakistan. Shop now at Phones Dukan.';
+    }
+    if (desc.length > 160) desc = desc.substring(0, 157) + '...';
+    document.getElementById('seo_description').value = desc;
+    seoUpdateCharCounter('seo_description', 160);
+    seoUpdateSnippetPreview();
+}
+
+function seoGenerateFocusKeyword() {
+    const name = document.getElementById('product_name').value.trim();
+    if (!name) { return; }
+    document.getElementById('focus_keyword').value = name.toLowerCase() + ' price in pakistan';
+}
+
+function seoAutoFillAll() {
+    seoGenerateSeoTitle();
+    seoGenerateSeoDescription();
+    seoGenerateFocusKeyword();
+    seoUpdateCanonicalUrl();
+}
+
+function seoUpdateCanonicalUrl() {
+    const slug = document.getElementById('product_slug').value.trim() || 'product-slug';
+    const catSelect = document.getElementById('category_id');
+    const brandSelect = document.getElementById('brand_id');
+    const catSlug = catSelect.options[catSelect.selectedIndex]?.getAttribute('data-slug') || 'category';
+    const brandSlug = brandSelect.options[brandSelect.selectedIndex]?.getAttribute('data-slug') || 'brand';
+    const canonical = 'https://www.phonesdukan.com/' + catSlug + '/' + brandSlug + '/' + slug + '/';
+    document.getElementById('canonical_url').value = canonical;
+    seoUpdateSnippetPreview();
+}
+
+function seoUpdateSnippetPreview() {
+    const title = document.getElementById('seo_title').value.trim() || document.getElementById('product_name').value.trim() || 'Product Title';
+    const desc = document.getElementById('seo_description').value.trim() || 'Product meta description will appear here...';
+    const canonical = document.getElementById('canonical_url').value || 'https://www.phonesdukan.com/category/brand/product-slug/';
+    const urlDisplay = canonical.replace('https://', '').replace(/\/$/, '') + '/';
+    const tEl = document.getElementById('snippet_title');
+    const dEl = document.getElementById('snippet_desc');
+    const uEl = document.getElementById('snippet_url');
+    if (tEl) tEl.textContent = title.length > 60 ? title.substring(0, 60) + '…' : title;
+    if (dEl) dEl.textContent = desc.length > 160 ? desc.substring(0, 160) + '…' : desc;
+    if (uEl) uEl.textContent = urlDisplay;
+}
+
+function seoUpdateCharCounter(fieldId, limit) {
+    const field = document.getElementById(fieldId);
+    const counter = document.getElementById(fieldId + '_counter');
+    if (!field || !counter) return;
+    const len = field.value.length;
+    counter.textContent = len + '/' + limit;
+    counter.className = 'seo-char-counter ';
+    if (len === 0 || len < Math.floor(limit * 0.6)) counter.className += 'too-short';
+    else if (len > limit) counter.className += 'too-long';
+    else counter.className += 'good';
+}
+
+function seoUpdateDiscountBadge() {
+    const regular = parseFloat(document.getElementById('regular_price').value) || 0;
+    const sale = parseFloat(document.getElementById('sale_price').value) || 0;
+    const badge = document.getElementById('discount_badge');
+    if (!badge) return;
+    if (regular > 0 && sale > 0 && sale < regular) {
+        const pct = Math.round(((regular - sale) / regular) * 100);
+        badge.textContent = pct + '% OFF';
+        badge.style.display = 'inline-flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Initialize SEO UI on load
+seoUpdateCanonicalUrl();
+seoUpdateSnippetPreview();
+
+// ===== SKU Auto-generation =====
+function generateProductSku() {
+    const catSelect   = document.getElementById('category_id');
+    const brandSelect = document.getElementById('brand_id');
+    const catName     = (catSelect.options[catSelect.selectedIndex]?.textContent   || '').trim();
+    const brandName   = (brandSelect.options[brandSelect.selectedIndex]?.textContent || '').trim();
+    const brandCode   = brandName.substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'PD';
+    const catCode     = catName.substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, '')   || 'GEN';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let rand = '';
+    for (let i = 0; i < 4; i++) rand += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById('product_sku').value = brandCode + '-' + catCode + '-' + rand;
+}
+
+function skuAbbrev(str) {
+    return String(str || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 3);
+}
+
+function generateAllVariationSkus() {
+    if (!vbVariations.length) { alert('Generate combinations first, then generate SKUs.'); return; }
+    const productSku = document.getElementById('product_sku').value.trim() || 'PD';
+    let filled = 0;
+    vbVariations.forEach(function(v, i) {
+        if (v.sku && v.sku.trim()) return; // never overwrite an existing SKU
+        const attrParts = Object.entries(v.attributes || {}).map(function([tid, vid]) {
+            const t   = VB_TYPES.find(function(x) { return x.id == tid; });
+            const val = t ? (t.values || []).find(function(x) { return x.id == vid; }) : null;
+            return val ? skuAbbrev(val.value) : '';
+        }).filter(Boolean);
+        v.sku = productSku + (attrParts.length ? '-' + attrParts.join('-') : '-V' + (i + 1));
+        filled++;
+    });
+    if (filled === 0) {
+        alert('All variations already have SKUs. Clear them first if you want to regenerate.');
+        return;
+    }
+    renderVariationRows();
+}
 </script>

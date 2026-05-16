@@ -99,27 +99,36 @@ class ProductModel
 
     public function updateSeoData($productId, $data)
     {
-        $stmt = $this->db->prepare('UPDATE product_seo SET 
-            focus_keyword = ?, 
-            seo_title = ?, 
-            seo_description = ? 
+        $stmt = $this->db->prepare('UPDATE product_seo SET
+            focus_keyword      = ?,
+            seo_title          = ?,
+            seo_description    = ?,
+            canonical_url      = ?,
+            secondary_keywords = ?
             WHERE product_id = ?');
         return $stmt->execute([
             $data['focus_keyword'],
             $data['seo_title'],
             $data['seo_description'],
-            $productId
+            $data['canonical_url'] ?? null,
+            $data['secondary_keywords'] ?? null,
+            $productId,
         ]);
     }
 
     public function insertSeoData($productId, $data)
     {
-        $stmt = $this->db->prepare('INSERT INTO product_seo (product_id, focus_keyword, seo_title, seo_description) VALUES (?, ?, ?, ?)');
+        $stmt = $this->db->prepare(
+            'INSERT INTO product_seo (product_id, focus_keyword, seo_title, seo_description, canonical_url, secondary_keywords)
+             VALUES (?, ?, ?, ?, ?, ?)'
+        );
         return $stmt->execute([
             $productId,
             $data['focus_keyword'],
             $data['seo_title'],
-            $data['seo_description']
+            $data['seo_description'],
+            $data['canonical_url'] ?? null,
+            $data['secondary_keywords'] ?? null,
         ]);
     }
 
