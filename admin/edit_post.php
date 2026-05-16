@@ -608,7 +608,7 @@ $_postViewUrl = 'https://www.phonesdukan.com/blog/'
 
             <!-- Google Search Snippet Preview -->
             <div class="post-seo-preview-box">
-                <span class="post-seo-preview-label">Google Search Preview</span>
+                <!-- <span class="post-seo-preview-label">Google Search Preview</span> -->
                 <div class="post-seo-preview-url" id="post_snippet_url"><?= htmlspecialchars(str_replace('https://', '', $_postViewUrl)) ?></div>
                 <div class="post-seo-preview-title" id="post_snippet_title"><?= htmlspecialchars($post['meta_title'] ?? $post['title'] ?? 'Post Title') ?></div>
                 <div class="post-seo-preview-desc" id="post_snippet_desc"><?= htmlspecialchars($post['meta_description'] ?? 'Post meta description will appear here...') ?></div>

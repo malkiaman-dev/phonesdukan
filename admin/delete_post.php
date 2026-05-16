@@ -6,7 +6,7 @@ session_start();
 require_once __DIR__ . '/../database/db.php';
 require_once dirname(__DIR__, 1) . '/app/Models/AdminPostModel.php';
 
-// Initialize database connection and model
+// Initifalize database connection and model
 $database = new Database();
 $conn = $database->getConnection();
 $postModel = new AdminPostModel();
