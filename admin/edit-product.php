@@ -799,7 +799,10 @@ select.vb-input-ep { cursor:pointer; }
             <h2>Edit Product</h2>
             <p>Update product information, pricing, images, SEO, and attributes</p>
         </div>
-        <button type="submit" class="ep-btn" form="product-form">Update Product</button>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <a href="<?= htmlspecialchars('/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/') ?>" target="_blank" class="ep-btn" style="text-decoration:none;">View Product</a>
+            <button type="submit" class="ep-btn" form="product-form">Update Product</button>
+        </div>
     </div>
 
     <form method="POST" enctype="multipart/form-data" action="" id="product-form">
@@ -1109,7 +1112,10 @@ select.vb-input-ep { cursor:pointer; }
             </div>
         </div>
 
-        <button type="submit" class="ep-btn">Update Product</button>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <a href="<?= htmlspecialchars('/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/') ?>" target="_blank" class="ep-btn" style="text-decoration:none;">View Product</a>
+            <button type="submit" class="ep-btn">Update Product</button>
+        </div>
     </form>
 </div>
 

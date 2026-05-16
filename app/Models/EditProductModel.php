@@ -15,7 +15,7 @@ class ProductModel
 
     public function getProductById($id)
     {
-        $stmt = $this->db->prepare('SELECT * FROM products WHERE product_id = ? LIMIT 1');
+        $stmt = $this->db->prepare('SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug FROM products p LEFT JOIN categories c ON p.category_id = c.category_id LEFT JOIN brands b ON p.brand_id = b.brand_id WHERE p.product_id = ? LIMIT 1');
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
