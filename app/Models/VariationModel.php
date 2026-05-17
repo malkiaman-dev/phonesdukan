@@ -295,15 +295,16 @@ class VariationModel {
         $result = [];
         foreach ($variations as $v) {
             $entry = [
-                'id'             => (int)$v['id'],
-                'sku'            => $v['sku'],
-                'regular_price'  => (float)$v['regular_price'],
-                'sale_price'     => $v['sale_price'] !== null ? (float)$v['sale_price'] : null,
-                'stock_quantity' => (int)$v['stock_quantity'],
-                'image'          => $v['image'],
-                'status'         => (int)$v['status'],
-                'is_default'     => (int)$v['is_default'],
-                'attributes'     => [],
+                'id'                      => (int)$v['id'],
+                'sku'                     => $v['sku'],
+                'regular_price'           => (float)$v['regular_price'],
+                'sale_price'              => $v['sale_price'] !== null ? (float)$v['sale_price'] : null,
+                'stock_quantity'          => (int)$v['stock_quantity'],
+                'image'                   => $v['image'],
+                'status'                  => (int)$v['status'],
+                'is_default'              => (int)$v['is_default'],
+                'prepaid_discount_amount' => isset($v['prepaid_discount_amount']) ? (float)$v['prepaid_discount_amount'] : 0,
+                'attributes'              => [],
             ];
             if (!empty($v['value_map'])) {
                 foreach (explode('|', $v['value_map']) as $pair) {
@@ -356,20 +357,21 @@ class VariationModel {
             $del->execute([(int)$product_id]);
 
             foreach ($variations as $v) {
-                $sku            = $v['sku'] ?? null;
-                $regular_price  = isset($v['regular_price']) && $v['regular_price'] !== '' ? (float)$v['regular_price'] : null;
-                $sale_price     = isset($v['sale_price']) && $v['sale_price'] !== '' ? (float)$v['sale_price'] : null;
-                $stock_quantity = isset($v['stock_quantity']) ? (int)$v['stock_quantity'] : 0;
-                $image          = $v['image'] ?? null;
-                $status         = isset($v['status']) ? (int)$v['status'] : 1;
-                $is_default     = isset($v['is_default']) ? (int)$v['is_default'] : 0;
+                $sku                    = $v['sku'] ?? null;
+                $regular_price          = isset($v['regular_price']) && $v['regular_price'] !== '' ? (float)$v['regular_price'] : null;
+                $sale_price             = isset($v['sale_price']) && $v['sale_price'] !== '' ? (float)$v['sale_price'] : null;
+                $stock_quantity         = isset($v['stock_quantity']) ? (int)$v['stock_quantity'] : 0;
+                $image                  = $v['image'] ?? null;
+                $status                 = isset($v['status']) ? (int)$v['status'] : 1;
+                $is_default             = isset($v['is_default']) ? (int)$v['is_default'] : 0;
+                $prepaid_discount_amount = isset($v['prepaid_discount_amount']) && is_numeric($v['prepaid_discount_amount']) ? max(0, (float)$v['prepaid_discount_amount']) : 0;
 
                 $ins = $this->db->prepare(
                     "INSERT INTO product_variations
-                     (product_id, sku, regular_price, sale_price, stock_quantity, image, status, is_default)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                     (product_id, sku, regular_price, sale_price, stock_quantity, image, status, is_default, prepaid_discount_amount)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
-                $ins->execute([(int)$product_id, $sku, $regular_price, $sale_price, $stock_quantity, $image, $status, $is_default]);
+                $ins->execute([(int)$product_id, $sku, $regular_price, $sale_price, $stock_quantity, $image, $status, $is_default, $prepaid_discount_amount]);
                 $pv_id = $this->db->lastInsertId();
 
                 // Insert value mapping

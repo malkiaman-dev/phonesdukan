@@ -277,6 +277,10 @@ select.vb-input { cursor:pointer; }
                     <span id="discount_badge" class="discount-badge"></span>
                 </div>
                 <div class="form-group">
+                    <label for="prepaid_discount_amount">Prepaid Discount Amount (PKR)</label>
+                    <input id="prepaid_discount_amount" type="number" name="prepaid_discount_amount" step="0.01" min="0" placeholder="0" value="0">
+                </div>
+                <div class="form-group">
                     <label for="stock_quantity">Stock Quantity</label>
                     <input id="stock_quantity" type="number" name="stock_quantity" placeholder="25" required>
                 </div>
@@ -639,7 +643,7 @@ function generateVariations() {
         const key = JSON.stringify(attrs);
         const dupe = existing.find(v => JSON.stringify(v.attributes) === key);
         if (!dupe) {
-            newVariations.push({ attributes: attrs, label, sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0 });
+            newVariations.push({ attributes: attrs, label, sku:'', regular_price:'', sale_price:'', prepaid_discount_amount:0, stock_quantity:0, image:'', status:1, is_default:0 });
         } else {
             newVariations.push(dupe);
         }
@@ -654,7 +658,7 @@ function cartesian(sets) {
 }
 
 function addBlankVariation() {
-    vbVariations.push({ attributes:{}, label:'Custom', sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0 });
+    vbVariations.push({ attributes:{}, label:'Custom', sku:'', regular_price:'', sale_price:'', prepaid_discount_amount:0, stock_quantity:0, image:'', status:1, is_default:0 });
     renderVariationRows();
 }
 
@@ -666,7 +670,7 @@ function renderVariationRows() {
         <div style="overflow-x:auto;overflow-y:visible">
         <table class="vb-table" style="overflow:visible">
             <thead><tr>
-                <th>Combination</th><th>SKU</th><th>Regular Price</th><th>Sale Price</th>
+                <th>Combination</th><th>SKU</th><th>Regular Price</th><th>Sale Price</th><th>Prepaid Disc. (PKR)</th>
                 <th>Stock</th><th>Image</th><th>Status</th><th>Default</th><th></th>
             </tr></thead>
             <tbody id="vbTbody">${vbVariations.map((v,i) => renderRow(v,i)).join('')}</tbody>
@@ -697,6 +701,10 @@ function renderRow(v, i) {
         <td style="min-width:100px">
             <input class="vb-input" type="number" placeholder="0" value="${v.sale_price||''}"
                 onchange="vbVariations[${i}].sale_price=this.value;syncVariationsJson()" style="width:100px">
+        </td>
+        <td style="min-width:100px">
+            <input class="vb-input" type="number" placeholder="0" min="0" step="0.01" value="${v.prepaid_discount_amount||0}"
+                onchange="vbVariations[${i}].prepaid_discount_amount=parseFloat(this.value)||0;syncVariationsJson()" style="width:100px">
         </td>
         <td style="min-width:80px">
             <input class="vb-input" type="number" placeholder="0" value="${v.stock_quantity||0}"

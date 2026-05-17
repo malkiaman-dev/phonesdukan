@@ -594,20 +594,43 @@ document.querySelectorAll('.pdsw-card:not(:disabled), .pdsw-pill:not(:disabled)'
     });
 });
 
+// Product-level prepaid discount (fallback when no variation selected)
+var pdProductPrepaidDiscount = <?= isset($product['prepaid_discount_amount']) ? (float)$product['prepaid_discount_amount'] : 0 ?>;
+
+function pdSetVariationBase(reg, sale){
+    window.pdCurrentRegularPrice = Math.max(0, parseFloat(reg) || 0);
+    var s = parseFloat(sale) || 0;
+    window.pdCurrentBasePrice = (s > 0 && s < window.pdCurrentRegularPrice) ? s : window.pdCurrentRegularPrice;
+    // Also keep closure vars in sync for simple-product fallback path
+    if(typeof window.pdSyncVariationPrice === 'function') window.pdSyncVariationPrice(reg, sale);
+}
+
+function pdSetPrepaidDiscount(amount){
+    var btn=document.querySelector('.payment-btn.prepaid');
+    if(!btn)return;
+    btn.setAttribute('data-prepaid-discount', amount);
+    btn.textContent = amount > 0
+        ? 'Prepaid · Save Rs. ' + amount.toLocaleString('en-PK', {minimumFractionDigits:0, maximumFractionDigits:0})
+        : 'Prepaid';
+    if(typeof applyPaymentDiscount === 'function') applyPaymentDiscount();
+}
+
 function pdMatch(){
     var notice=document.getElementById('pdSwNotice');
     var allTypeIds=[...new Set(PD_VARS.flatMap(function(v){return Object.keys(v.attributes).map(Number);}))];
     var allSelected=allTypeIds.every(function(t){return pdSel[t]!==undefined;});
     if(!Object.keys(pdSel).length){pdReset();return;}
     var match=PD_VARS.find(function(v){return allTypeIds.every(function(t){return v.attributes[t]==pdSel[t];});});
-    if(!allSelected){if(match){pdUpdatePrice(match.regular_price,match.sale_price);} return;}
+    if(!allSelected){if(match){pdSetVariationBase(match.regular_price,match.sale_price||0);pdUpdatePrice(match.regular_price,match.sale_price);pdSetPrepaidDiscount(match.prepaid_discount_amount||0);} return;}
     if(!match||match.status!=1){
         notice.style.display='block'; notice.textContent=(!match)?'This combination is unavailable.':'This combination is out of stock.';
         document.getElementById('selectedVariationId').value=''; pdDisableCart(); return;
     }
     notice.style.display='none';
     document.getElementById('selectedVariationId').value=match.id;
+    pdSetVariationBase(match.regular_price, match.sale_price||0);
     pdUpdatePrice(match.regular_price,match.sale_price);
+    pdSetPrepaidDiscount(match.prepaid_discount_amount||0);
     pdUpdateStock(match.stock_quantity);
     if(match.sku){document.getElementById('pdSwSku').style.display='';document.getElementById('pdSwSkuVal').textContent=match.sku;}
     else{document.getElementById('pdSwSku').style.display='none';}
@@ -637,7 +660,7 @@ function pdEnableCart(price,maxQty){
     document.querySelectorAll('input[name="quantity"]').forEach(function(i){i.max=maxQty;});
 }
 function pdDisableCart(){document.querySelectorAll('.add-to-cart,.buy-now').forEach(function(b){b.disabled=true;});}
-function pdReset(){document.getElementById('selectedVariationId').value='';document.getElementById('pdSwNotice').style.display='none';}
+function pdReset(){document.getElementById('selectedVariationId').value='';document.getElementById('pdSwNotice').style.display='none';window.pdCurrentBasePrice=0;window.pdCurrentRegularPrice=0;pdSetPrepaidDiscount(pdProductPrepaidDiscount);}
 
 // Guard: require variation selection before adding to cart
 document.querySelectorAll('.add-to-cart').forEach(function(btn){
@@ -668,6 +691,18 @@ document.querySelectorAll('.add-to-cart').forEach(function(btn){
         });
     }
 })();
+
+// The payment button is rendered AFTER this script block, so pdSetPrepaidDiscount()
+// called during auto-select above finds no button and returns early.
+// Re-apply the variation's prepaid discount once the full DOM is available.
+document.addEventListener('DOMContentLoaded', function(){
+    var allTypeIds=[...new Set(PD_VARS.flatMap(function(v){return Object.keys(v.attributes).map(Number);}))];
+    if(!allTypeIds.length) return;
+    var allSelected=allTypeIds.every(function(t){return pdSel[t]!==undefined;});
+    if(!allSelected) return;
+    var match=PD_VARS.find(function(v){return allTypeIds.every(function(t){return v.attributes[t]==pdSel[t];});});
+    if(match){pdSetVariationBase(match.regular_price,match.sale_price||0);pdSetPrepaidDiscount(match.prepaid_discount_amount||0);}
+});
 })();
 </script>
 <?php endif; // end variation swatches ?>
@@ -675,11 +710,15 @@ document.querySelectorAll('.add-to-cart').forEach(function(btn){
 <!-- Cart Form -->
 <?php
 $cartFormCondition = $productAvailability === 'instock' && $stockQuantity > 0 && ($validPrice > 0 || !empty($productAttributes) || !empty($isVariableProduct));
+$prepaidDiscountAmount = isset($product['prepaid_discount_amount']) ? (float)$product['prepaid_discount_amount'] : 0;
+$prepaidBtnLabel = $prepaidDiscountAmount > 0
+    ? 'Prepaid · Save Rs. ' . number_format($prepaidDiscountAmount, 0)
+    : 'Prepaid';
 if ($cartFormCondition): ?>
             <!-- Payment Method Selection -->
     <div class="payment-method-selection">
         <button type="button" class="payment-btn cod active" data-method="cod">COD</button>
-        <button type="button" class="payment-btn prepaid" data-method="prepaid">Prepaid · Save 4%</button>
+        <button type="button" class="payment-btn prepaid" data-method="prepaid" data-prepaid-discount="<?= $prepaidDiscountAmount ?>"><?= $prepaidBtnLabel ?></button>
     </div>
 
     <!-- Desktop Cart Form -->

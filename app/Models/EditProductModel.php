@@ -44,28 +44,31 @@ class ProductModel
         $taxClass = empty($data['tax_class']) ? null : $data['tax_class'];
         $b2bRegularPrice = empty($data['b2b_regular_price']) ? null : $data['b2b_regular_price'];
     
-        $stmt = $this->db->prepare('UPDATE products SET 
-            product_name = ?, 
-            product_slug = ?, 
-            product_description = ?, 
-            short_description = ?, 
-            product_status = ?, 
-            stock_quantity = ?, 
-            regular_price = ?, 
-            sale_price = ?, 
-            product_sku = ?, 
-            weight_kg = ?, 
-            length_cm = ?, 
-            width_cm = ?, 
-            height_cm = ?, 
-            tax_class = ?, 
-            product_tag = ?, 
-            category_id = ?, 
+        $prepaidDiscountAmount = isset($data['prepaid_discount_amount']) && is_numeric($data['prepaid_discount_amount']) ? max(0, (float)$data['prepaid_discount_amount']) : 0;
+
+        $stmt = $this->db->prepare('UPDATE products SET
+            product_name = ?,
+            product_slug = ?,
+            product_description = ?,
+            short_description = ?,
+            product_status = ?,
+            stock_quantity = ?,
+            regular_price = ?,
+            sale_price = ?,
+            product_sku = ?,
+            weight_kg = ?,
+            length_cm = ?,
+            width_cm = ?,
+            height_cm = ?,
+            tax_class = ?,
+            product_tag = ?,
+            category_id = ?,
             brand_id = ?,
             is_b2b_available = ?,
-            b2b_regular_price = ?
+            b2b_regular_price = ?,
+            prepaid_discount_amount = ?
             WHERE product_id = ?');
-    
+
         return $stmt->execute([
             $data['product_name'],
             $data['product_slug'],
@@ -86,6 +89,7 @@ class ProductModel
             $data['brand_id'],
             $data['is_b2b_available'],
             $b2bRegularPrice,
+            $prepaidDiscountAmount,
             $id
         ]);
     }

@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_act
         'brand_id' => $_POST['brand_id'] ?? null,
         'is_b2b_available' => isset($_POST['is_b2b_available']) ? 1 : 0,
         'b2b_regular_price' => $_POST['b2b_regular_price'] ?? null,
+        'prepaid_discount_amount' => isset($_POST['prepaid_discount_amount']) && is_numeric($_POST['prepaid_discount_amount']) ? max(0, (float)$_POST['prepaid_discount_amount']) : 0,
     ];
 
     $seoData = [
@@ -953,6 +954,10 @@ select.vb-input-ep { cursor:pointer; }
                     <input type="number" name="sale_price" value="<?= $product['sale_price'] ?>">
                 </div>
                 <div class="ep-field">
+                    <label>Prepaid Discount Amount (PKR)</label>
+                    <input type="number" name="prepaid_discount_amount" value="<?= htmlspecialchars((float)($product['prepaid_discount_amount'] ?? 0)) ?>" step="0.01" min="0" placeholder="0">
+                </div>
+                <div class="ep-field">
                     <label>Product SKU</label>
                     <div class="ep-seo-field-wrap">
                         <input type="text" id="ep_product_sku" name="product_sku" value="<?= htmlspecialchars($product['product_sku'] ?? '') ?>" placeholder="SAM-MOB-X7K2">
@@ -1497,7 +1502,7 @@ function epGenerateVariations() {
         const key   = JSON.stringify(attrs);
         if (seenKeys.has(key)) { existingCount++; return; }
         seenKeys.add(key);
-        result.push({attributes:attrs, label, sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0});
+        result.push({attributes:attrs, label, sku:'', regular_price:'', sale_price:'', prepaid_discount_amount:0, stock_quantity:0, image:'', status:1, is_default:0});
         addedCount++;
     });
 
@@ -1523,7 +1528,7 @@ function epGenerateVariations() {
 }
 
 function epAddBlankVariation() {
-    epVariations.push({attributes:{}, label:'Custom', sku:'', regular_price:'', sale_price:'', stock_quantity:0, image:'', status:1, is_default:0});
+    epVariations.push({attributes:{}, label:'Custom', sku:'', regular_price:'', sale_price:'', prepaid_discount_amount:0, stock_quantity:0, image:'', status:1, is_default:0});
     epRenderVariationRows();
 }
 
@@ -1533,7 +1538,7 @@ function epRenderVariationRows() {
     if (!epVariations.length) { wrap.innerHTML='<p style="color:#9ca3af">No combinations yet.</p>'; epSyncVariationsJson(); return; }
     wrap.innerHTML = `<div style="overflow-x:auto;overflow-y:visible"><table class="vb-table-ep" style="overflow:visible" id="epVarTable">
         <thead><tr>
-            <th style="width:160px">Combination</th><th>SKU</th><th>Regular Price</th><th>Sale Price</th>
+            <th style="width:160px">Combination</th><th>SKU</th><th>Regular Price</th><th>Sale Price</th><th>Prepaid Disc. (PKR)</th>
             <th>Stock</th><th>Image</th><th>Status</th><th>Default</th><th></th>
         </tr></thead>
         <tbody id="epVarTbody">${epVariations.map((v,i) => epRenderRow(v,i)).join('')}</tbody>
@@ -1571,6 +1576,10 @@ function epRenderRow(v, i) {
         <td style="min-width:100px">
             <input class="vb-input-ep" type="number" placeholder="0" value="${v.sale_price||''}"
                 onchange="epVariations[${i}].sale_price=this.value;epSyncVariationsJson()" style="width:100px">
+        </td>
+        <td style="min-width:100px">
+            <input class="vb-input-ep" type="number" placeholder="0" min="0" step="0.01" value="${v.prepaid_discount_amount||0}"
+                onchange="epVariations[${i}].prepaid_discount_amount=parseFloat(this.value)||0;epSyncVariationsJson()" style="width:100px">
         </td>
         <td style="min-width:80px">
             <input class="vb-input-ep" type="number" placeholder="0" value="${v.stock_quantity||0}"

@@ -47,7 +47,8 @@ class ProductController
                     'width_cm' => !empty($_POST['width_cm']) ? $_POST['width_cm'] : NULL,
                     'height_cm' => !empty($_POST['height_cm']) ? $_POST['height_cm'] : NULL,
                     'tax_class' => isset($_POST['tax_class']) && is_numeric($_POST['tax_class']) ? $_POST['tax_class'] : NULL,
-                    'product_tag' => $_POST['product_tag']
+                    'product_tag' => $_POST['product_tag'],
+                    'prepaid_discount_amount' => isset($_POST['prepaid_discount_amount']) && is_numeric($_POST['prepaid_discount_amount']) ? max(0, (float)$_POST['prepaid_discount_amount']) : 0,
                 ];
 
                 // Ensure slug is unique — auto-append numeric suffix if a duplicate exists
@@ -87,10 +88,10 @@ class ProductController
                 // Insert the product into the database
                 $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description,
                                                 short_description, product_status, stock_quantity, regular_price, sale_price,
-                                                product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag, product_type)
+                                                product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag, product_type, prepaid_discount_amount)
                           VALUES (:product_name, :product_slug, :category_id, :brand_id, :product_description,
                                   :short_description, :product_status, :stock_quantity, :regular_price, :sale_price,
-                                  :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag, :product_type)';
+                                  :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag, :product_type, :prepaid_discount_amount)';
                 $productData['product_type'] = $product_type;
                 $stmt = $this->db->prepare($query);
                 $stmt->execute($productData);

@@ -199,11 +199,24 @@ document.addEventListener("DOMContentLoaded", function () {
         applyPaymentDiscount();  // Re-apply discount on current base price
     }
 
+    // Allow variation switcher (inline script) to keep base prices in sync
+    window.pdSyncVariationPrice = function(reg, sale) {
+        originalRegularPrice = Math.max(0, parseFloat(reg) || 0);
+        originalSalePrice    = (sale > 0 && sale < originalRegularPrice) ? Math.max(0, parseFloat(sale)) : 0;
+        baseUnitPrice        = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
+    };
+
     // Apply payment discount and update display/buttons
     function applyPaymentDiscount() {
-        const discountFactor = currentPaymentMethod === 'prepaid' ? 0.96 : 1.0;  // 4% off = *0.96
-        const basePrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
-        const displayPrice = basePrice * discountFactor;
+        const prepaidDiscountPKR = parseFloat(document.querySelector('.payment-btn.prepaid')?.getAttribute('data-prepaid-discount') || 0);
+
+        // Prefer variation-level prices set by pdMatch(); fall back to closure vars for simple products
+        const activeRegular = (window.pdCurrentRegularPrice > 0) ? window.pdCurrentRegularPrice : originalRegularPrice;
+        const activeSale    = (window.pdCurrentBasePrice > 0 && window.pdCurrentBasePrice < activeRegular) ? window.pdCurrentBasePrice : 0;
+        const basePrice     = activeSale > 0 ? activeSale : activeRegular;
+
+        const prepaidDeduction = (currentPaymentMethod === 'prepaid' && prepaidDiscountPKR > 0) ? prepaidDiscountPKR : 0;
+        const displayPrice = Math.max(0, basePrice - prepaidDeduction);
         const formattedDisplay = formatPrice(displayPrice);
 
         // Update price display
@@ -214,20 +227,22 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
         `;
 
-        // Show discount block if applicable
+        // Show discount block when a sale price exists OR when prepaid deduction applies
         let showDiscount = false;
         let oldPrice = 0;
         let totalDiscount = 0;
-        if (originalRegularPrice > basePrice) {
-            // Original sale exists
+        if (activeRegular > basePrice) {
+            // Existing sale discount — combine with any prepaid deduction
             showDiscount = true;
-            oldPrice = originalRegularPrice;  // Keep original regular (not discounted)
-            totalDiscount = Math.round((originalRegularPrice - displayPrice) / originalRegularPrice * 100);
-        } else if (currentPaymentMethod === 'prepaid') {
-            // No original sale, but prepaid discount
+            oldPrice = activeRegular;
+            totalDiscount = activeRegular > 0
+                ? Math.min(100, Math.round((activeRegular - displayPrice) / activeRegular * 100))
+                : 0;
+        } else if (prepaidDeduction > 0 && basePrice > 0) {
+            // Prepaid-only deduction (no existing sale)
             showDiscount = true;
-            oldPrice = originalRegularPrice;
-            totalDiscount = 4;
+            oldPrice = basePrice;
+            totalDiscount = Math.min(100, Math.round((prepaidDeduction / basePrice) * 100));
         }
 
         if (showDiscount) {
@@ -269,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        disableButtons(displayPrice <= 0);
+        disableButtons(displayPrice < 0);
     }
 
     // Event listeners for payment buttons (desktop and mobile)
