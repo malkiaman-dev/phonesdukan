@@ -612,7 +612,7 @@ function pdSetPrepaidDiscount(amount){
     btn.textContent = amount > 0
         ? 'Prepaid · Save Rs. ' + amount.toLocaleString('en-PK', {minimumFractionDigits:0, maximumFractionDigits:0})
         : 'Prepaid';
-    if(typeof applyPaymentDiscount === 'function') applyPaymentDiscount();
+    if(typeof window.pdApplyPaymentDiscount === 'function') window.pdApplyPaymentDiscount();
 }
 
 function pdMatch(){

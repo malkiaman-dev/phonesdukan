@@ -199,6 +199,9 @@ document.addEventListener("DOMContentLoaded", function () {
         applyPaymentDiscount();  // Re-apply discount on current base price
     }
 
+    // Expose applyPaymentDiscount globally so the inline variation script can call it
+    window.pdApplyPaymentDiscount = function() { applyPaymentDiscount(); };
+
     // Allow variation switcher (inline script) to keep base prices in sync
     window.pdSyncVariationPrice = function(reg, sale) {
         originalRegularPrice = Math.max(0, parseFloat(reg) || 0);
