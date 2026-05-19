@@ -69,6 +69,27 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             letter-spacing: -0.2px;
         }
 
+        .orders-page-header {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(17,17,17,0.06);
+            padding: 20px 24px;
+            margin-bottom: 18px;
+        }
+        .orders-page-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--brand-black);
+            letter-spacing: -0.02em;
+        }
+        .orders-page-header p {
+            margin: 6px 0 0;
+            color: var(--brand-muted);
+            font-size: 0.92rem;
+        }
+
         .orders-head {
             display: flex;
             align-items: flex-end;
@@ -700,11 +721,11 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
     </style>
 
 <div class="ord-wrap">
+    <div class="orders-page-header">
+        <h2>Manage B2B Orders</h2>
+        <p>View and manage all business inquiry orders</p>
+    </div>
     <div class="orders-head">
-        <div class="orders-title">
-            <h2 class="ord-title">Manage B2B Orders</h2>
-            <p>View and manage all business inquiry orders</p>
-        </div>
         <div class="orders-controls">
             <input id="b2bSearch" class="ui-input" type="search" placeholder="Search B2B orders..." autocomplete="off">
             <select id="b2bStatusFilter" class="native-filter-select" aria-label="Filter by status">

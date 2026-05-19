@@ -111,6 +111,28 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 0 20px;
         }
 
+        /* ===== Page title card ===== */
+        .orders-page-header {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(17,17,17,0.06);
+            padding: 20px 24px;
+            margin-bottom: 18px;
+        }
+        .orders-page-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+        .orders-page-header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
         /* ===== Header section ===== */
         .orders-head{
             display:flex;
@@ -801,11 +823,11 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 
 <div class="ord-wrap">
+    <div class="orders-page-header">
+        <h2>Manage Orders</h2>
+        <p>View and manage all customer orders</p>
+    </div>
     <div class="orders-head">
-        <div class="orders-title">
-            <h2>Manage Orders</h2>
-            <p>View and manage all customer orders</p>
-        </div>
         <div class="orders-controls">
             <input id="ordersSearch" class="ui-input" type="search" placeholder="Search orders…" autocomplete="off">
             <select id="ordersStatusFilter" class="native-filter-select">
