@@ -10,8 +10,19 @@
         <!-- Login Box Section -->
         <div class="sb-login-box">
             <!-- Login Button -->
-            <a href="<?= url('my-account'); ?>" class="sb-login-link">
-                <img src="<?= url('public/assets/images/my-account.svg'); ?>" alt="Login" class="sb-icon"> My Account
+            <a href="<?= url('my-account'); ?>" class="sb-login-link <?= !empty($userId) ? 'sb-loggedin-link' : '' ?>">
+                <?php if (!empty($userId)): ?>
+                    <span class="sb-user-avatar">
+                        <?php if (!empty($headerUserPhoto)): ?>
+                            <img src="<?= url(htmlspecialchars($headerUserPhoto)) ?>" alt="<?= htmlspecialchars($headerUserInitials ?? '') ?>">
+                        <?php else: ?>
+                            <span><?= htmlspecialchars($headerUserInitials ?? 'U') ?></span>
+                        <?php endif; ?>
+                    </span>
+                    My Account
+                <?php else: ?>
+                    <img src="<?= url('public/assets/images/my-account.svg'); ?>" alt="Login" class="sb-icon"> My Account
+                <?php endif; ?>
             </a>
 
             <!-- Track My Order (Visible when logged out) -->
