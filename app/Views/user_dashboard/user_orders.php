@@ -73,7 +73,7 @@
     display: inline-block;
     padding: 12px 28px;
     background: #facc15;
-    color: #111827;
+    color: #111827 !important;
     border-radius: 10px;
     font-size: 14px;
     font-weight: 700;
@@ -81,7 +81,7 @@
     transition: background 0.2s;
 }
 
-.ord-shop-btn:hover { background: #e8b900; }
+.ord-shop-btn:hover { background: #e8b900; color: #111827 !important; text-decoration: none !important; }
 
 .ord-summary {
     font-size: 13px;
