@@ -1,97 +1,207 @@
+/* ── Layout ─────────────────────────────────────────────────────────────── */
 .verify-form-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    min-height: 60vh;
     width: 100%;
-    margin: 20px 0;
+    padding: 32px 16px;
+    box-sizing: border-box;
+    background: #f0f0f0;
 }
 
 .verify-container {
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    border-radius: 8px;
+    background: #ffffff;
+    padding: 36px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 420px;
+    border-radius: 12px;
+    border-top: 4px solid #f7d117;
+    text-align: center;
 }
+
 .verify-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #111111;
 }
-.verify-container p {
-    font-size: 14px;
-    text-align: center;
+
+.verify-hint {
+    margin: 0 0 24px;
+    font-size: 13px;
+    color: #888888;
 }
-.error-message {
-    color: red;
-    text-align: center;
+
+/* ── Messages ────────────────────────────────────────────────────────────── */
+.verify-msg {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 0 0 16px;
 }
-.success-message {
-    color: green;
-    text-align: center;
+.verify-msg--error   { background: #fef2f2; color: #cc0000; border-left: 3px solid #cc0000; text-align:left; }
+.verify-msg--success { background: #f0fdf4; color: #166534; border-left: 3px solid #22c55e; text-align:left; }
+
+/* ── SVG Ring Timer ──────────────────────────────────────────────────────── */
+.vt-ring-wrap {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 8px;
 }
+
+.vt-svg {
+    width: 110px;
+    height: 110px;
+    transform: rotate(-90deg);
+}
+
+.vt-bg {
+    fill: none;
+    stroke: #e8e8e8;
+    stroke-width: 6;
+}
+
+.vt-ring {
+    fill: none;
+    stroke: #f7d117;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.9s linear, stroke 0.4s ease;
+}
+
+.vt-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.vt-number {
+    font-size: 30px;
+    font-weight: 700;
+    color: #111111;
+    font-family: 'Courier New', monospace;
+}
+
+.vt-unit {
+    font-size: 11px;
+    color: #999999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.vt-status {
+    font-size: 12px;
+    color: #888888;
+    margin: 0 0 20px;
+    letter-spacing: 0.5px;
+}
+
+/* ── Expired Banner ──────────────────────────────────────────────────────── */
+.vt-expired {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    background: #fef2f2;
+    color: #cc0000;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border-left: 3px solid #cc0000;
+    margin: 0 0 20px;
+    text-align: left;
+}
+
+/* ── OTP Input ───────────────────────────────────────────────────────────── */
 .form-group {
-    margin-bottom: 20px;
-}
-.form-group label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 5px;
-    color: #333;
-}
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    margin-bottom: 16px;
+    text-align: left;
 }
 
-.form-group input:focus {
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    color: #111111;
+    background: #f8f8f8;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: 'Courier New', monospace;
+}
+
+.form-group input[type="text"]:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: #f7d117;
+    background: #fffbf0;
 }
 
-.form-group button {
+/* ── Submit Button ───────────────────────────────────────────────────────── */
+.form-group button[type="submit"],
+#submitBtn {
     width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
+    padding: 13px;
+    background: #111111;
+    color: #f7d117;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
     cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
 }
-.form-group button:disabled {
-    background-color: #b0c4de;
+
+.form-group button[type="submit"]:hover,
+#submitBtn:hover {
+    background: #222222;
 }
-#timer {
-    margin-top: 10px;
-    font-size: 18px;
-    color: #555;
-    text-align: center;
-}
+
+/* ── Resend Button ───────────────────────────────────────────────────────── */
 .resend-otp {
-    margin-top: 20px;
+    margin-top: 4px;
     text-align: center;
 }
+
 .resend-otp button {
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
+    width: 100%;
+    padding: 12px;
+    background: #f7d117;
+    color: #111111;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
 }
+
+.resend-otp button:hover:not(:disabled) {
+    background: #e5c210;
+}
+
 .resend-otp button:disabled {
-    background-color: #dcdcdc;
+    background: #e8e8e8;
+    color: #aaaaaa;
+    cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-    .verify-form-wrapper {
-        margin: 0px;
-
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .verify-container {
+        padding: 28px 20px;
     }
 }

@@ -2,8 +2,10 @@
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/app/Models/ReviewModel.php';
 
+$wasSubmitted = ($_SERVER['REQUEST_METHOD'] === 'POST');
+
 // Check if the form was submitted
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($wasSubmitted) {
     // Sanitize and validate input
     $product_id = isset($_POST['product_id']) ? (int)$_POST['product_id'] : null;
     $reviewContent = isset($_POST['content']) ? htmlspecialchars($_POST['content']) : '';
@@ -66,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="rs-container">
 
         <?php if (isset($_SESSION['review'])): ?>
+        <?php $rev = $_SESSION['review']; unset($_SESSION['review']); ?>
 
             <div class="rs-card">
 
@@ -87,13 +90,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Review preview -->
                 <div class="rs-preview">
                     <span class="rs-preview-product">
-                        <?= htmlspecialchars($_SESSION['review']['product_name'] ?? 'Product') ?>
+                        <?= htmlspecialchars($rev['product_name'] ?? 'Product') ?>
                     </span>
                     <p class="rs-preview-author">
-                        <?= htmlspecialchars($_SESSION['review']['author'] ?? 'Anonymous') ?>
+                        <?= htmlspecialchars($rev['author'] ?? 'Anonymous') ?>
                     </p>
                     <p class="rs-preview-content">
-                        "<?= nl2br(htmlspecialchars($_SESSION['review']['content'] ?? '')) ?>"
+                        "<?= nl2br(htmlspecialchars($rev['content'] ?? '')) ?>"
                     </p>
                 </div>
 
@@ -107,14 +110,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                         Back to Product
                     </button>
-                    <a href="<?= htmlspecialchars($_SESSION['review']['return_url'] ?? '/') ?>" class="rs-btn rs-btn--secondary">
+                    <a href="<?= htmlspecialchars($rev['return_url'] ?? '/') ?>" class="rs-btn rs-btn--secondary">
                         Continue Shopping
                     </a>
                 </div>
 
             </div>
 
-        <?php else: ?>
+        <?php elseif ($wasSubmitted): ?>
+        <?php unset($_SESSION['error']); ?>
 
             <div class="rs-card rs-card--error">
 
@@ -130,9 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <h1 class="rs-heading">Something went wrong</h1>
-                <p class="rs-sub">
-                    <?= htmlspecialchars($_SESSION['error'] ?? 'There was an issue submitting your review. Please try again.') ?>
-                </p>
+                <p class="rs-sub">There was an issue submitting your review. Please try again.</p>
 
                 <div class="rs-actions">
                     <button class="rs-btn rs-btn--primary" onclick="history.back()">
@@ -143,6 +145,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </svg>
                         Try Again
                     </button>
+                    <a href="/" class="rs-btn rs-btn--secondary">Go Home</a>
+                </div>
+
+            </div>
+
+        <?php else: ?>
+
+            <!-- Direct GET access — guide the user to a product page -->
+            <div class="rs-card">
+
+                <div class="rs-icon-wrap rs-icon-wrap--success">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+
+                <h1 class="rs-heading">Leave a Review</h1>
+                <p class="rs-sub">
+                    To submit a review, please visit the product page you purchased and click the
+                    <strong>Write a Review</strong> button in the Reviews section.
+                </p>
+
+                <div class="rs-actions">
+                    <a href="/mobiles" class="rs-btn rs-btn--primary">Browse Products</a>
                     <a href="/" class="rs-btn rs-btn--secondary">Go Home</a>
                 </div>
 

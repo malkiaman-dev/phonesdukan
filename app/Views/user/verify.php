@@ -83,65 +83,128 @@ if (isset($_POST['resend_otp'])) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Verification</title>
-    <script>
-        // Calculate the time remaining for the button to be enabled (1 minute countdown)
-        let otpTimestamp = <?php echo $_SESSION['otp_timestamp']; ?>;
-        let currentTime = <?php echo $currentTime; ?>;
-        let timeRemaining = 60 - (currentTime - otpTimestamp);
+<?php
+$otpTimeLeft = max(0, 60 - ($currentTime - $_SESSION['otp_timestamp']));
+?>
+<div class="verify-form-wrapper">
+  <div class="verify-container">
 
-        // Function to update the countdown timer
-        function updateTimer() {
-            if (timeRemaining > 0) {
-                document.getElementById('timer').innerText = "Time remaining: " + timeRemaining + " seconds";
-                timeRemaining--;
-            } else {
-                document.getElementById('timer').innerText = "You can now resend the OTP.";
-                document.getElementById('resendButton').disabled = false; // Enable the resend button
-            }
-        }
+    <h2>OTP Verification</h2>
+    <p class="verify-hint">Code sent to <strong><?= htmlspecialchars($email) ?></strong></p>
 
-        // Start the timer
-        setInterval(updateTimer, 1000);
-    </script>
-</head>
-<body>
-    <div class="verify-form-wrapper">
-<div class="verify-container">
-        <h2>Enter OTP</h2>
+    <?php if (isset($error)): ?>
+      <p class="verify-msg verify-msg--error"><?= htmlspecialchars($error) ?></p>
+    <?php endif; ?>
+    <?php if (isset($success)): ?>
+      <p class="verify-msg verify-msg--success"><?= htmlspecialchars($success) ?></p>
+    <?php endif; ?>
 
-        <?php if (isset($error)) { echo "<p class='error-message'>$error</p>"; } ?>
-        <?php if (isset($success)) { echo "<p class='success-message'>$success</p>"; } ?>
-
-        <!-- OTP Form -->
-        <form method="POST">
-            <div class="form-group">
-                <label for="otp">OTP: </label>
-                <input type="text" name="otp" id="otp" required>
-            </div>
-            <div class="form-group">
-                <button type="submit">Verify OTP</button>
-            </div>
-        </form>
-
-        <!-- Timer for OTP -->
-        <div id="timer">
-            <!-- Timer will display here -->
-        </div>
-
-        <!-- Resend OTP Form -->
-        <div class="resend-otp">
-            <form method="POST">
-                <button type="submit" name="resend_otp" id="resendButton" disabled>Resend OTP</button>
-            </form>
-        </div>
+    <!-- Countdown ring -->
+    <div class="vt-ring-wrap">
+      <svg class="vt-svg" viewBox="0 0 100 100">
+        <circle class="vt-bg"   cx="50" cy="50" r="40"/>
+        <circle class="vt-ring" cx="50" cy="50" r="40" id="vtRing"
+                stroke-dasharray="251.33" stroke-dashoffset="0"/>
+      </svg>
+      <div class="vt-center">
+        <span class="vt-number" id="vtNumber"><?= $otpTimeLeft ?></span>
+        <span class="vt-unit">sec</span>
+      </div>
     </div>
+    <p class="vt-status" id="vtStatus">Time remaining</p>
+
+    <!-- OTP form (hidden when expired) -->
+    <div id="otpFormWrap">
+      <form method="POST" id="otpForm">
+        <div class="form-group">
+          <input type="text" name="otp" id="otpInput"
+                 maxlength="6" placeholder="Enter 6-digit code"
+                 autocomplete="one-time-code" inputmode="numeric" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" id="submitBtn">Verify OTP</button>
+        </div>
+      </form>
     </div>
-</body>
-</html>
+
+    <!-- Expired banner (shown when timer hits 0) -->
+    <div class="vt-expired" id="vtExpired" style="display:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      OTP Expired — request a new code below
+    </div>
+
+    <!-- Resend form -->
+    <div class="resend-otp">
+      <form method="POST">
+        <button type="submit" name="resend_otp" id="resendButton" <?= $otpTimeLeft > 0 ? 'disabled' : '' ?>>
+          Resend OTP
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  const TOTAL       = 60;
+  const CIRC        = 251.33;
+  let   timeLeft    = <?= $otpTimeLeft ?>;
+
+  const ring        = document.getElementById('vtRing');
+  const number      = document.getElementById('vtNumber');
+  const status      = document.getElementById('vtStatus');
+  const formWrap    = document.getElementById('otpFormWrap');
+  const expiredBanner = document.getElementById('vtExpired');
+  const resendBtn   = document.getElementById('resendButton');
+  const otpInput    = document.getElementById('otpInput');
+  const submitBtn   = document.getElementById('submitBtn');
+
+  function setExpired() {
+    ring.style.stroke          = '#cc0000';
+    ring.style.strokeDashoffset = CIRC;
+    number.textContent         = '0';
+    status.textContent         = 'OTP Expired';
+    status.style.color         = '#cc0000';
+    formWrap.style.display     = 'none';
+    expiredBanner.style.display = 'flex';
+    resendBtn.disabled         = false;
+  }
+
+  function tick() {
+    if (timeLeft <= 0) { setExpired(); return; }
+
+    const fraction = timeLeft / TOTAL;
+    ring.style.strokeDashoffset = CIRC * (1 - fraction);
+
+    // Colour shifts: gold → orange → red as time runs low
+    if (timeLeft > 20) {
+      ring.style.stroke = '#f7d117';
+    } else if (timeLeft > 10) {
+      ring.style.stroke = '#f59e0b';
+    } else {
+      ring.style.stroke = '#ef4444';
+    }
+
+    number.textContent = timeLeft;
+    timeLeft--;
+  }
+
+  tick(); // draw immediately
+  const interval = setInterval(function () {
+    tick();
+    if (timeLeft < 0) clearInterval(interval);
+  }, 1000);
+
+  // If already expired on load
+  if (timeLeft <= 0) setExpired();
+})();
+</script>
+
 <?php require_once dirname(__DIR__, 3) . '/includes/footer.php'; ?>
