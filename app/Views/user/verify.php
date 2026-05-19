@@ -55,10 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['otp'])) {
 
             if ($updateSuccess) {
                 $_SESSION['is_verified'] = 1;  // Store the verified status in session
-
-                // Redirect to the dashboard after successful OTP verification
-                header("Location: /login");
-                exit();
+                $verified = true;
             } else {
                 // If database update failed, show error
                 $error = "Error verifying the OTP, please try again.";
@@ -86,6 +83,55 @@ if (isset($_POST['resend_otp'])) {
 <?php
 $otpTimeLeft = max(0, 60 - ($currentTime - $_SESSION['otp_timestamp']));
 ?>
+<?php if (!empty($verified)): ?>
+<div class="verify-form-wrapper">
+  <div class="verify-container">
+    <div class="vt-success-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+        <path d="M7 12.5l3.5 3.5L17 8" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2 class="vt-success-title">Registration Successful!</h2>
+    <p class="vt-success-text">Your account has been verified successfully. You can now log in to your account.</p>
+    <p class="vt-redirect-note">Redirecting to login in <strong id="vtRedirectCount">3</strong> seconds…</p>
+    <a href="/login" class="vt-login-btn">Go to Login</a>
+  </div>
+</div>
+<style>
+.vt-success-icon { margin: 0 auto 16px; width: 72px; height: 72px; }
+.vt-success-icon svg { width: 72px; height: 72px; }
+.vt-success-title { margin: 0 0 10px; font-size: 22px; font-weight: 700; color: #166534; }
+.vt-success-text { margin: 0 0 16px; font-size: 14px; color: #4b5563; line-height: 1.6; }
+.vt-redirect-note { font-size: 13px; color: #6b7280; margin: 0 0 20px; }
+.vt-login-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 13px;
+    background: #111111;
+    color: #f7d117;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}
+.vt-login-btn:hover { background: #222222; }
+</style>
+<script>
+(function () {
+    var count = 3;
+    var el = document.getElementById('vtRedirectCount');
+    var t = setInterval(function () {
+        count--;
+        if (el) el.textContent = count;
+        if (count <= 0) { clearInterval(t); window.location.href = '/login'; }
+    }, 1000);
+})();
+</script>
+<?php else: ?>
 <div class="verify-form-wrapper">
   <div class="verify-container">
 
@@ -150,7 +196,9 @@ $otpTimeLeft = max(0, 60 - ($currentTime - $_SESSION['otp_timestamp']));
 
   </div>
 </div>
+<?php endif; ?>
 
+<?php if (empty($verified)): ?>
 <script>
 (function () {
   const TOTAL       = 60;
@@ -206,5 +254,6 @@ $otpTimeLeft = max(0, 60 - ($currentTime - $_SESSION['otp_timestamp']));
   if (timeLeft <= 0) setExpired();
 })();
 </script>
+<?php endif; ?>
 
 <?php require_once dirname(__DIR__, 3) . '/includes/footer.php'; ?>
