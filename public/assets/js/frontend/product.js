@@ -215,7 +215,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Prefer variation-level prices set by pdMatch(); fall back to closure vars for simple products
         const activeRegular = (window.pdCurrentRegularPrice > 0) ? window.pdCurrentRegularPrice : originalRegularPrice;
-        const activeSale    = (window.pdCurrentBasePrice > 0 && window.pdCurrentBasePrice < activeRegular) ? window.pdCurrentBasePrice : 0;
+        const activeSale    = (window.pdCurrentBasePrice > 0 && window.pdCurrentBasePrice < activeRegular)
+            ? window.pdCurrentBasePrice
+            : (originalSalePrice > 0 && originalSalePrice < activeRegular ? originalSalePrice : 0);
         const basePrice     = activeSale > 0 ? activeSale : activeRegular;
 
         const prepaidDeduction = (currentPaymentMethod === 'prepaid' && prepaidDiscountPKR > 0) ? prepaidDiscountPKR : 0;
