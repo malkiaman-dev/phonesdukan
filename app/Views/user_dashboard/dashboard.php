@@ -411,6 +411,13 @@ $tab = $_GET['tab'] ?? 'default';
     align-items: center;
     gap: 16px;
     color: #fff;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    cursor: default;
+}
+
+.db-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.14);
 }
 
 .db-stat--blue   { background: linear-gradient(135deg, #111827, #1f2937); color: #ffffff; }
@@ -501,11 +508,12 @@ $tab = $_GET['tab'] ?? 'default';
 .db-quick-card:hover,
 .db-quick-card:focus {
     border-color: #facc15;
-    box-shadow: 0 4px 14px rgba(250,204,21,0.22);
-    transform: translateY(-2px);
-    text-decoration: none;
-    color: #111827;
+    box-shadow: 0 6px 20px rgba(250,204,21,0.25);
+    transform: translateY(-3px);
+    text-decoration: none !important;
+    color: #111827 !important;
     outline: none;
+    background: #fffdf0;
 }
 
 /* ── Section ─────────────────────────────────────────────────────────── */
