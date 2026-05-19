@@ -861,6 +861,14 @@ select.vb-input-ep { cursor:pointer; }
             <p>Update product information, pricing, images, SEO, and attributes</p>
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
+            <?php
+                $isActive = !empty($product['product_status']) && $product['product_status'] == 1;
+                $pillColor = $isActive ? '#22c55e' : 'tomato';
+                $pillLabel = $isActive ? 'Active' : 'Inactive';
+            ?>
+            <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
+                <?= $pillLabel ?>
+            </span>
             <a href="<?= htmlspecialchars('/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/') ?>" target="_blank" class="ep-btn" style="text-decoration:none;">View Product</a>
             <button type="submit" class="ep-btn" form="product-form">Update Product</button>
         </div>
@@ -1236,6 +1244,9 @@ select.vb-input-ep { cursor:pointer; }
         </div>
 
         <div style="display:flex;gap:10px;align-items:center;">
+            <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
+                <?= $pillLabel ?>
+            </span>
             <a href="<?= htmlspecialchars('/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/') ?>" target="_blank" class="ep-btn" style="text-decoration:none;">View Product</a>
             <button type="submit" class="ep-btn">Update Product</button>
         </div>
