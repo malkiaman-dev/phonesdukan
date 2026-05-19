@@ -48,6 +48,12 @@ $tab = $_GET['tab'] ?? 'default';
 
     <!-- Sidebar -->
     <aside class="db-sidebar" id="dbSidebar">
+        <div class="db-sidebar-toprow">
+            <button class="db-sidebar-close" id="dbSidebarClose" aria-label="Close menu">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Close
+            </button>
+        </div>
         <div class="db-avatar">
             <span><?= $initials ?></span>
         </div>
@@ -283,6 +289,7 @@ $tab = $_GET['tab'] ?? 'default';
     font-size: 14px;
     font-weight: 500;
     transition: background 0.2s, color 0.2s;
+    outline: none;
 }
 
 .db-nav-link svg {
@@ -292,9 +299,12 @@ $tab = $_GET['tab'] ?? 'default';
 }
 
 .db-nav-link:hover,
+.db-nav-link:focus,
 .db-nav-link.active {
     background: #1f2937;
     color: #facc15;
+    text-decoration: none;
+    outline: none;
 }
 
 .db-logout {
@@ -317,8 +327,11 @@ $tab = $_GET['tab'] ?? 'default';
     height: 18px;
 }
 
-.db-logout:hover {
+.db-logout:hover,
+.db-logout:focus {
     background: #1f2937;
+    text-decoration: none;
+    outline: none;
 }
 
 /* ── Main ────────────────────────────────────────────────────────────── */
@@ -384,9 +397,14 @@ $tab = $_GET['tab'] ?? 'default';
     color: #fff;
 }
 
-.db-stat--blue   { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-.db-stat--green  { background: linear-gradient(135deg, #22c55e, #15803d); }
-.db-stat--yellow { background: linear-gradient(135deg, #facc15, #ca8a04); color: #111827; }
+.db-stat--blue   { background: linear-gradient(135deg, #111827, #1f2937); color: #ffffff; }
+.db-stat--green  { background: linear-gradient(135deg, #facc15, #e8a800); color: #111827; }
+.db-stat--yellow { background: linear-gradient(135deg, #374151, #1f2937); color: #ffffff; }
+.db-stat--blue .db-stat-label,
+.db-stat--blue .db-stat-value,
+.db-stat--yellow .db-stat-label,
+.db-stat--yellow .db-stat-value { color: #ffffff !important; }
+.db-stat--green .db-stat-icon { background: rgba(0,0,0,0.12); }
 
 .db-stat-icon {
     width: 44px;
@@ -455,6 +473,7 @@ $tab = $_GET['tab'] ?? 'default';
     font-weight: 600;
     text-align: center;
     transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    outline: none;
 }
 
 .db-quick-card svg {
@@ -463,10 +482,14 @@ $tab = $_GET['tab'] ?? 'default';
     color: #facc15;
 }
 
-.db-quick-card:hover {
+.db-quick-card:hover,
+.db-quick-card:focus {
     border-color: #facc15;
-    box-shadow: 0 4px 14px rgba(250,204,21,0.25);
+    box-shadow: 0 4px 14px rgba(250,204,21,0.22);
     transform: translateY(-2px);
+    text-decoration: none;
+    color: #111827;
+    outline: none;
 }
 
 /* ── Section ─────────────────────────────────────────────────────────── */
@@ -562,13 +585,40 @@ $tab = $_GET['tab'] ?? 'default';
 .db-badge--delivered  { background: #dcfce7; color: #166534; }
 .db-badge--cancelled  { background: #fee2e2; color: #991b1b; }
 
+/* ── Sidebar close button row ────────────────────────────────────────── */
+.db-sidebar-toprow {
+    display: none;
+    width: 100%;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.db-sidebar-close {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    color: #d1d5db;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.db-sidebar-close:hover { background: #374151; color: #fff; }
+.db-sidebar-close svg   { width: 15px; height: 15px; pointer-events: none; }
+
 /* ── Mobile overlay ──────────────────────────────────────────────────── */
 .db-overlay {
     display: none;
     position: fixed;
-    inset: 0;
     background: rgba(0,0,0,0.45);
     z-index: 199;
+    top: 0; left: 0; right: 0; bottom: 0;
 }
 
 .db-overlay.open { display: block; }
@@ -582,14 +632,17 @@ $tab = $_GET['tab'] ?? 'default';
     .db-sidebar {
         position: fixed;
         left: -260px;
-        top: 0;
+        top: 0;           /* overridden by JS with actual header height */
         z-index: 200;
-        height: 100%;
+        height: 100%;     /* overridden by JS */
         transition: left 0.28s ease;
         width: 240px;
+        overflow-y: auto;
     }
 
     .db-sidebar.open { left: 0; }
+
+    .db-sidebar-toprow { display: flex; }
 
     .db-main {
         padding: 16px;
@@ -611,23 +664,49 @@ $tab = $_GET['tab'] ?? 'default';
 
 <script>
 (function () {
-    var btn     = document.getElementById('dbMenuBtn');
-    var sidebar = document.getElementById('dbSidebar');
-    var overlay = document.getElementById('dbOverlay');
+    var btn        = document.getElementById('dbMenuBtn');
+    var closeBtn   = document.getElementById('dbSidebarClose');
+    var sidebar    = document.getElementById('dbSidebar');
+    var overlay    = document.getElementById('dbOverlay');
     if (!btn) return;
 
-    function open() {
+    function getHeaderHeight() {
+        var mobileHeader = document.getElementById('mobile-header');
+        var mainHeader   = document.getElementById('main-header');
+        var el = (mobileHeader && mobileHeader.offsetHeight > 0) ? mobileHeader : mainHeader;
+        return el ? el.offsetHeight : 0;
+    }
+
+    function applyHeaderOffset() {
+        if (window.innerWidth > 767) return;
+        var h = getHeaderHeight();
+        sidebar.style.top     = h + 'px';
+        sidebar.style.height  = 'calc(100% - ' + h + 'px)';
+        overlay.style.top     = h + 'px';
+        overlay.style.height  = 'calc(100% - ' + h + 'px)';
+    }
+
+    function openSidebar() {
+        applyHeaderOffset();
         sidebar.classList.add('open');
         overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
     }
 
-    function close() {
+    function closeSidebar() {
         sidebar.classList.remove('open');
         overlay.classList.remove('open');
+        document.body.style.overflow = '';
     }
 
-    btn.addEventListener('click', open);
-    overlay.addEventListener('click', close);
+    btn.addEventListener('click', openSidebar);
+    overlay.addEventListener('click', closeSidebar);
+    if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 767) closeSidebar();
+        else applyHeaderOffset();
+    });
 })();
 </script>
 
