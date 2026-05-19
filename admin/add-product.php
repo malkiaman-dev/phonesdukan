@@ -169,7 +169,8 @@ select.vb-input { cursor:pointer; }
     align-self: flex-start;
 }
 .seo-auto-btn:hover { color: #facc15; }
-.seo-field-hint { display: block; color: #9ca3af; font-size: .76rem; margin-top: 4px; }
+.seo-field-hint { display: block; color: #9ca3af !important; font-size: 0.72rem !important; margin-top: 4px; line-height: 1.4; }
+.form-group .seo-field-hint, .form-group span.seo-field-hint { font-size: 0.72rem !important; }
 .seo-fill-all-btn {
     background: #facc15;
     color: #111;
@@ -290,7 +291,7 @@ select.vb-input { cursor:pointer; }
                         <input id="product_sku" type="text" name="product_sku" placeholder="SAM-MOB-X7K2">
                         <button type="button" class="seo-auto-btn" onclick="generateProductSku()" title="Auto-generate SKU from brand and category">Auto</button>
                     </div>
-                    <span class="seo-field-hint">Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2</span>
+                    <span class="seo-field-hint" style="font-size:0.72rem!important;color:#9ca3af!important;line-height:1.4;">Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2</span>
                 </div>
             </div>
         </section>
