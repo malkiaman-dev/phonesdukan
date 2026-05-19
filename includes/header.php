@@ -29,6 +29,29 @@ $cartCount = 0;
 foreach ($cartItems as $item) {
     $cartCount += (int)$item['total_quantity'];
 }
+
+// Fetch logged-in user's avatar data for header
+$headerUserPhoto    = '';
+$headerUserInitials = '';
+if ($userId) {
+    try {
+        require_once dirname(__DIR__, 1) . '/database/db.php';
+        $_hdb   = (new Database())->getConnection();
+        $_hstmt = $_hdb->prepare('SELECT full_name, profile_photo FROM users WHERE user_id = :id');
+        $_hstmt->bindParam(':id', $userId, PDO::PARAM_INT);
+        $_hstmt->execute();
+        $_hu = $_hstmt->fetch(PDO::FETCH_ASSOC);
+        if ($_hu) {
+            $headerUserPhoto = $_hu['profile_photo'] ?? '';
+            $name = trim($_hu['full_name'] ?? '');
+            foreach (explode(' ', $name) as $p) {
+                $headerUserInitials .= strtoupper(mb_substr($p, 0, 1));
+            }
+            $headerUserInitials = mb_substr($headerUserInitials, 0, 2);
+            $headerUserFirstName = explode(' ', $name)[0] ?? 'Account';
+        }
+    } catch (Exception $_e) {}
+}
 ?>
 <?php
 // Compute product price/availability for OG/Twitter meta (used on product pages only)
@@ -372,9 +395,19 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 
                 <div class="pd-header-right">
                     <div class="icons">
-                        <a href="<?= url('my-account/'); ?>" class="icon pd-action-icon" aria-label="My Account">
-                            <img src="<?= url('public/assets/images/my-account.svg'); ?>" alt="My Account">
-                            <span class="pd-action-label">Account</span>
+                        <a href="<?= url('my-account/'); ?>" class="icon pd-action-icon <?= $userId ? 'pd-account-loggedin' : '' ?>" aria-label="My Account">
+                            <?php if ($userId): ?>
+                                <span class="pd-header-avatar">
+                                    <?php if ($headerUserPhoto): ?>
+                                        <img src="<?= url(htmlspecialchars($headerUserPhoto)) ?>" alt="<?= htmlspecialchars($headerUserInitials) ?>">
+                                    <?php else: ?>
+                                        <span><?= htmlspecialchars($headerUserInitials) ?></span>
+                                    <?php endif; ?>
+                                </span>
+                            <?php else: ?>
+                                <img src="<?= url('public/assets/images/my-account.svg'); ?>" alt="My Account">
+                            <?php endif; ?>
+                            <span class="pd-action-label"><?= $userId ? htmlspecialchars($headerUserFirstName) : 'Account' ?></span>
                         </a>
                         <a href="<?= url('cart'); ?>" class="icon pd-action-icon" aria-label="View Cart">
                             <img src="<?= url('public/assets/images/cart_icon.svg'); ?>" alt="Cart">
@@ -414,8 +447,18 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
                         <img src="<?= url('public/assets/images/cart_icon.svg'); ?>" alt="Cart">
                         <span class="cart-count"><?= $cartCount ?></span>
                     </a>
-                    <a href="<?= url('my-account/'); ?>" class="mobile-icon icon" aria-label="My Account">
-                        <img src="<?= url('public/assets/images/my-account-mobile.svg'); ?>" alt="My Account">
+                    <a href="<?= url('my-account/'); ?>" class="mobile-icon icon <?= $userId ? 'pd-account-loggedin' : '' ?>" aria-label="My Account">
+                        <?php if ($userId): ?>
+                            <span class="pd-header-avatar pd-header-avatar--sm">
+                                <?php if ($headerUserPhoto): ?>
+                                    <img src="<?= url(htmlspecialchars($headerUserPhoto)) ?>" alt="<?= htmlspecialchars($headerUserInitials) ?>">
+                                <?php else: ?>
+                                    <span><?= htmlspecialchars($headerUserInitials) ?></span>
+                                <?php endif; ?>
+                            </span>
+                        <?php else: ?>
+                            <img src="<?= url('public/assets/images/my-account-mobile.svg'); ?>" alt="My Account">
+                        <?php endif; ?>
                     </a>
                 </div>
             </div>
