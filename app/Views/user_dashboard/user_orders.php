@@ -1,151 +1,129 @@
-<h2 class="order">Your Orders</h2>
-<div class="orders-table-wrapper">
-<table class="orders-table">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Customer Name</th>
-            <th>Status</th>
-            <th>Total Price</th>
-            <th>Order Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($orders as $order): ?>
+<div class="ord-wrap">
+    <h1 class="db-page-title">My Orders</h1>
+
+    <?php if (empty($orders)): ?>
+    <div class="ord-empty">
+        <div class="ord-empty-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h2>No orders yet</h2>
+        <p>You haven't placed any orders. Start shopping to see your orders here.</p>
+        <a href="/" class="ord-shop-btn">Browse Products</a>
+    </div>
+    <?php else: ?>
+    <div class="ord-summary">
+        <span><?= count($orders) ?> order<?= count($orders) !== 1 ? 's' : '' ?> found</span>
+    </div>
+    <div class="db-table-wrap">
+    <table class="db-table">
+        <thead>
             <tr>
-                <td data-label="Order ID"><?= $order['order_id']; ?></td>
-                <td data-label="Customer Name"><?= $order['customer_name']; ?></td>
-                <td data-label="Status"><?= $order['order_status']; ?></td>
-                <td data-label="Total Price"><?= $order['total_price']; ?> <?= $order['currency']; ?></td>
-                <td data-label="Order Date"><?= $order['created_at']; ?></td>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($orders as $o): ?>
+            <tr>
+                <td data-label="Order ID"><strong>#<?= htmlspecialchars($o['order_id']) ?></strong></td>
+                <td data-label="Customer"><?= htmlspecialchars($o['customer_name']) ?></td>
+                <td data-label="Status"><span class="db-badge db-badge--<?= strtolower($o['order_status']) ?>"><?= htmlspecialchars($o['order_status']) ?></span></td>
+                <td data-label="Total"><strong><?= htmlspecialchars($o['total_price']) ?> <?= htmlspecialchars($o['currency']) ?></strong></td>
+                <td data-label="Date"><?= htmlspecialchars(date('d M Y', strtotime($o['created_at']))) ?></td>
             </tr>
         <?php endforeach; ?>
-    </tbody>
-</table>
-        </div>
+        </tbody>
+    </table>
+    </div>
+    <?php endif; ?>
+</div>
+
 <style>
-    /* Table Styling */
-    .orders-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    
-    .orders-table th, .orders-table td {
-        padding: 12px 15px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
-    
-    .orders-table th {
-        background-color: #3498db;
-        color: white;
-    }
+.ord-wrap { }
 
-    .orders-table tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .orders-table tr:hover {
-        background-color: #dff9fb;
-    }
-
-    .orders-table td {
-        font-size: 14px;
-    }
-
-    h2.order {
-    margin-bottom: 0px;
+.ord-empty {
+    background: #fff;
+    border: 1px solid #e9edf4;
+    border-radius: 14px;
+    padding: 60px 20px;
+    text-align: center;
 }
 
-    /* Style the table header for better visibility */
-    .orders-table th {
-        font-size: 16px;
-        font-weight: bold;
-        padding: 10px;
+.ord-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: #9ca3af;
+}
+
+.ord-empty-icon svg { width: 32px; height: 32px; }
+
+.ord-empty h2 { margin: 0 0 8px; font-size: 18px; color: #111827; }
+.ord-empty p  { margin: 0 0 20px; font-size: 14px; color: #6b7280; }
+
+.ord-shop-btn {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #facc15;
+    color: #111827;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.ord-shop-btn:hover { background: #e8b900; }
+
+.ord-summary {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+/* Reuse db-table styles from dashboard.php */
+.db-table-wrap {
+    background: #fff;
+    border: 1px solid #e9edf4;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+@media (max-width: 600px) {
+    .db-table thead { display: none; }
+
+    .db-table tr {
+        display: block;
+        border-bottom: 1px solid #f3f4f6;
+        padding: 12px 16px;
     }
 
-    /* Style the table data for a clean look */
-    .orders-table td {
-        font-size: 14px;
-    }
+    .db-table tr:last-child { border-bottom: none; }
 
-    /* Mobile Styling */
-@media screen and (max-width: 768px) {
-    /* Wrapper for scrollable table on small screens */
-    .orders-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-bottom: 20px;
-    }
-
-    /* Ensure table is 100% width on mobile */
-    .orders-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    /* Remove table borders */
-    .orders-table th, .orders-table td {
-        padding: 12px 15px;
-        border: none;
-    }
-
-    /* Style each table row into a block element */
-    .orders-table td {
+    .db-table td {
         display: flex;
         justify-content: space-between;
-        padding: 10px 15px;
-        border-bottom: 1px solid #ddd;
-        font-size: 14px;
-        background-color: #f9f9f9;
-        margin-bottom: 5px;
-        border-radius: 5px;
-    }
-
-    /* Make each row look like a key-value pair with column name on the left */
-    .orders-table td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #3498db;
-        margin-right: 10px;
-        font-size: 14px;
-        text-transform: uppercase;
-        flex-shrink: 0;
-    }
-
-    /* Style header (optional: remove header on mobile, as it's redundant) */
-    .orders-table th {
-        display: none;
-    }
-
-    /* Optional: Style the first column */
-    .orders-table td:first-child {
-        background-color: #eef2f5;
-        font-weight: bold;
-    }
-
-    /* Style the last row */
-    .orders-table tr:last-child td {
+        align-items: center;
+        padding: 4px 0;
         border-bottom: none;
+        font-size: 13px;
     }
 
-    /* Add spacing for the whole table */
-    .orders-table-wrapper {
-        padding: 0 10px;
-    }
-
-    /* Improve row appearance with background and spacing */
-    .orders-table tr {
-        margin-bottom: 15px;
-        background-color: #fff;
-        border-radius: 8px;
-    }
-
-    /* Make the table cleaner and more modern with subtle hover effect */
-    .orders-table tr:hover {
-        background-color: #dff9fb;
+    .db-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
     }
 }
-
 </style>
