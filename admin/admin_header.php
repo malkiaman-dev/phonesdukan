@@ -87,6 +87,9 @@ $adminPageCssMap = [
             margin: 0;
             padding: 0;
         }
+        a {
+            text-decoration: none !important;
+        }
         #sidebar a,
         .admin-sidebar a,
         .sidebar a {
@@ -135,7 +138,7 @@ $adminPageCssMap = [
     </div>
 </nav>
 <script>
-window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('load', function () {
     document.documentElement.classList.remove('admin-loading');
     var toggleBtn = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');
