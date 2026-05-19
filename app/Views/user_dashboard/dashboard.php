@@ -14,13 +14,17 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'] ?? 0;
 
-$stmt = $conn->prepare('SELECT full_name, email, phone FROM users WHERE user_id = :user_id');
+// Ensure profile_photo column exists
+try { $conn->exec("ALTER TABLE users ADD COLUMN profile_photo VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
+
+$stmt = $conn->prepare('SELECT full_name, email, phone, profile_photo FROM users WHERE user_id = :user_id');
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-$user_name  = isset($profile['full_name']) ? htmlspecialchars($profile['full_name']) : 'User';
-$user_email = isset($profile['email'])     ? htmlspecialchars($profile['email'])     : '';
-$user_phone = isset($profile['phone'])     ? htmlspecialchars($profile['phone'])     : '';
+$user_name    = isset($profile['full_name'])    ? htmlspecialchars($profile['full_name'])    : 'User';
+$user_email   = isset($profile['email'])        ? htmlspecialchars($profile['email'])        : '';
+$user_phone   = isset($profile['phone'])        ? htmlspecialchars($profile['phone'])        : '';
+$profile_photo = $profile['profile_photo'] ?? '';
 $profile_complete = ($profile['full_name'] && $profile['email'] && $profile['phone']) ? 100 : 60;
 
 $orders_stmt = $conn->prepare('SELECT COUNT(*) AS total, COALESCE(SUM(total_price),0) AS total_spent FROM orders WHERE user_id = :user_id');
@@ -55,7 +59,11 @@ $tab = $_GET['tab'] ?? 'default';
             </button>
         </div>
         <div class="db-avatar">
-            <span><?= $initials ?></span>
+            <?php if ($profile_photo): ?>
+                <img src="<?= url(htmlspecialchars($profile_photo)) ?>?v=<?= time() ?>" alt="Profile photo">
+            <?php else: ?>
+                <span><?= $initials ?></span>
+            <?php endif; ?>
         </div>
         <p class="db-greeting">Hello,</p>
         <p class="db-uname"><?= $user_name ?></p>
@@ -244,6 +252,14 @@ $tab = $_GET['tab'] ?? 'default';
     color: #111827;
     margin-bottom: 12px;
     flex-shrink: 0;
+    overflow: hidden;
+}
+
+.db-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .db-greeting {
