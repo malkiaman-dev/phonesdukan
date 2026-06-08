@@ -117,7 +117,7 @@ class ProductModel
             FROM product_images pi
             LEFT JOIN image_metadata im ON pi.image_id = im.image_id
             WHERE pi.product_id = :product_id
-            ORDER BY pi.is_primary DESC, pi.image_id ASC
+            ORDER BY pi.sort_order ASC, pi.is_primary DESC, pi.image_id ASC
         ';
 
         $stmt = $this->db->prepare($sql);
@@ -125,6 +125,27 @@ class ProductModel
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Images + video merged for the product page gallery.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public function getProductGalleryMedia(int $product_id): array
+    {
+        require_once dirname(__DIR__) . '/Models/ProductMediaModel.php';
+        $mediaModel = new ProductMediaModel($this->db);
+
+        try {
+            return $mediaModel->getFrontendGalleryMedia($product_id);
+        } catch (PDOException $e) {
+            error_log('getProductGalleryMedia fallback: ' . $e->getMessage());
+            $images = $this->getProductImages($product_id);
+            return array_map(static function (array $img): array {
+                return array_merge($img, ['type' => 'image']);
+            }, $images);
+        }
     }
 
     /**

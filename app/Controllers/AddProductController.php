@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/AddProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
+require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
 
 class ProductController
 {
@@ -149,7 +150,9 @@ class ProductController
                 $seoStmt = $this->db->prepare($seoQuery);
                 $seoStmt->execute($seoData);
 
-                // Handle Primary Image Upload
+                $keyToImageId = [];
+                $mediaService = new ProductMediaService($this->db);
+
                 // Handle Primary Image Upload
                 if (isset($_FILES['primary_image']) && $_FILES['primary_image']['error'] == 0) {
                     $primaryImageName = $_FILES['primary_image']['name'];
@@ -192,6 +195,7 @@ class ProductController
 
                         // Get the image ID for the primary image
                         $primaryImageId = $this->db->lastInsertId();
+                        $keyToImageId['primary'] = (int) $primaryImageId;
 
                         // Insert metadata for the primary image
                         $metaQuery = 'INSERT INTO image_metadata (image_id, alt_text, meta_id, title, caption, description) 
@@ -257,6 +261,7 @@ class ProductController
                             $imageStmt->execute($imageData);
 
                             $galleryImageId = $this->db->lastInsertId();  // Get the last inserted gallery image ID
+                            $keyToImageId['gallery-' . $index] = (int) $galleryImageId;
 
                             // Insert metadata for the gallery image
                             $metaQuery = 'INSERT INTO image_metadata (image_id, alt_text, meta_id, title, caption, description) 
@@ -279,6 +284,14 @@ class ProductController
                         }
                     }
                 }
+
+                // Save product video and gallery order
+                $mediaService->saveFromRequest($productId, $_POST, $_FILES);
+                $mediaService->applyGalleryOrder(
+                    $productId,
+                    $_POST['gallery_order_json'] ?? '[]',
+                    $keyToImageId
+                );
 
                 // Save product variations if variable
                 if ($product_type === 'variable' && !empty($_POST['variations_json'])) {

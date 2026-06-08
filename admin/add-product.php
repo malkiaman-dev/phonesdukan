@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
@@ -45,6 +45,10 @@ $brands_result = $conn->query($brands_query);
     <?php unset($_SESSION['message']);
     unset($_SESSION['message_type']); ?>
 <?php endif; ?>
+
+<!-- AI SEO Assistant Styles -->
+<link rel="stylesheet" href="css/ai-seo.css?v=2.8">
+<link rel="stylesheet" href="css/product-media.css?v=1.1">
 
 <style>
 /* ---- Variation Builder styles ---- */
@@ -149,7 +153,7 @@ select.vb-input { cursor:pointer; }
 .seo-preview-desc { font-size: .85rem; color: #4d5156; line-height: 1.4; word-break: break-word; }
 .seo-char-counter { font-size: .75rem; font-weight: 700; }
 .seo-char-counter.good { color: #16a34a; }
-.seo-char-counter.too-long { color: #ef4444; }
+.seo-char-counter.too-long { color: #f97316; }
 .seo-char-counter.too-short { color: #f97316; }
 .seo-field-wrap { display: flex; gap: 8px; align-items: flex-start; }
 .seo-field-wrap > input, .seo-field-wrap > textarea { flex: 1 1 0%; min-width: 0; }
@@ -170,6 +174,10 @@ select.vb-input { cursor:pointer; }
 }
 .seo-auto-btn:hover { color: #facc15; }
 .seo-field-hint { display: block; color: #9ca3af !important; font-size: 0.72rem !important; margin-top: 4px; line-height: 1.4; }
+/* SEO field header: label LEFT, buttons RIGHT on same row */
+.ap-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.ap-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; flex-shrink: 0; }
+.ap-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; }
 .form-group .seo-field-hint, .form-group span.seo-field-hint { font-size: 0.72rem !important; }
 .seo-fill-all-btn {
     background: #facc15;
@@ -211,12 +219,29 @@ select.vb-input { cursor:pointer; }
             <div class="form-card-header"><h2>Basic Information</h2></div>
             <div class="form-grid cols-2">
                 <div class="form-group">
-                    <label for="product_name">Product Name</label>
-                    <input id="product_name" type="text" name="product_name" placeholder="Enter product name" required>
+                    <label for="product_name" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Product Name</span>
+                        <button type="button" class="ai-refine-btn" data-ai-refine="product_name" onclick="AISeo.refineField('product_name','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                    </label>
+                    <div class="ai-field-relative">
+                        <input id="product_name" type="text" name="product_name" placeholder="Enter product name" required oninput="AISeo.runScore()">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="product_slug">Product Slug</label>
-                    <input id="product_slug" type="text" name="product_slug" placeholder="product-name-slug" required>
+                    <div class="ap-seo-field-hdr">
+                        <label for="product_slug">Product Slug</label>
+                        <div class="ai-slug-btn-wrap">
+                            <button type="button" class="ai-slug-btn ai" onclick="AISeo.generateSlugAI(this)" title="Generate SEO-optimized slug with AI">
+                                <i class="fas fa-robot" style="font-size:.7rem"></i> AI Slug
+                            </button>
+                            <button type="button" class="ai-slug-btn manual" onclick="AISeo.generateSlugManual()" title="Generate slug from product name">
+                                <i class="fas fa-link" style="font-size:.7rem"></i> Manual
+                            </button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
+                        <input id="product_slug" type="text" name="product_slug" placeholder="product-name-slug" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="category_id">Category</label>
@@ -252,15 +277,57 @@ select.vb-input { cursor:pointer; }
         </section>
 
         <section class="form-card">
-            <div class="form-card-header"><h2>Description</h2></div>
+            <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+                <h2>Description</h2>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button type="button" class="ai-gen-btn ghost" style="background:#f1f5f9;color:#111;border:1px solid #e5e7eb;font-size:.78rem" onclick="AISeo.generateField('description', this)">
+                        <i class="fas fa-robot"></i> Generate Description
+                    </button>
+                    <button type="button" class="ai-gen-btn ghost" style="background:#f1f5f9;color:#111;border:1px solid #e5e7eb;font-size:.78rem" onclick="AISeo.generateField('short_description', this)">
+                        <i class="fas fa-magic"></i> Generate Short Desc
+                    </button>
+                </div>
+            </div>
             <div class="form-grid cols-2">
                 <div class="form-group full-width">
-                    <label for="product_description">Product Description</label>
-                    <textarea id="product_description" name="product_description" placeholder="Write full product description" required></textarea>
+                    <label for="product_description" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Product Description</span>
+                        <div style="display:flex;gap:6px">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="product_description" onclick="AISeo.refineField('product_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <div class="ai-btn-group">
+                                <button type="button" class="ai-btn-group-arrow" onclick="AISeo.toggleDropdown(this)" title="More AI options"><i class="fas fa-chevron-down"></i></button>
+                                <div class="ai-dropdown-menu">
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','professional')"><i class="fas fa-briefcase"></i> Make Professional</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','sales')"><i class="fas fa-rocket"></i> Make Sales-Focused</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','shorter')">Make Shorter</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','readability')"><i class="fas fa-book"></i> Improve Readability</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.generateField('description',this)"><i class="fas fa-robot"></i> Regenerate from Scratch</button>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                    <div class="ai-field-relative">
+                        <textarea id="product_description" name="product_description" placeholder="Write full product description" required oninput="AISeo.runScore()"></textarea>
+                    </div>
                 </div>
                 <div class="form-group full-width">
-                    <label for="short_description">Short Description</label>
-                    <textarea id="short_description" name="short_description" placeholder="Write short product summary" required></textarea>
+                    <label for="short_description" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Short Description</span>
+                        <div style="display:flex;gap:6px">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="short_description" onclick="AISeo.refineField('short_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <div class="ai-btn-group">
+                                <button type="button" class="ai-btn-group-arrow" onclick="AISeo.toggleDropdown(this)" title="More AI options"><i class="fas fa-chevron-down"></i></button>
+                                <div class="ai-dropdown-menu">
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('short_description','sales')"><i class="fas fa-rocket"></i> Make Sales-Focused</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('short_description','shorter')">Make Shorter</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.generateField('short_description',this)"><i class="fas fa-robot"></i> Regenerate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                    <div class="ai-field-relative">
+                        <textarea id="short_description" name="short_description" placeholder="Write short product summary" required oninput="AISeo.runScore()"></textarea>
+                    </div>
                 </div>
             </div>
         </section>
@@ -316,8 +383,13 @@ select.vb-input { cursor:pointer; }
                     </div>
                 </div>
                 <div class="form-group full-width">
-                    <label for="product_tag">Product Tags</label>
-                    <input id="product_tag" type="text" name="product_tag" placeholder="mobile, apple, iphone">
+                    <label for="product_tag" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Product Tags</span>
+                        <button type="button" class="ai-refine-btn" onclick="AISeo.generateField('tags',this)"><i class="fas fa-tags"></i> Suggest Tags with AI</button>
+                    </label>
+                    <div class="ai-field-relative">
+                        <input id="product_tag" type="text" name="product_tag" placeholder="mobile, apple, iphone" oninput="AISeo.runScore()">
+                    </div>
                 </div>
             </div>
         </section>
@@ -345,7 +417,21 @@ select.vb-input { cursor:pointer; }
         <section class="form-card">
             <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
                 <h2>SEO Information</h2>
-                <button type="button" class="seo-fill-all-btn" onclick="seoAutoFillAll()">Auto-Fill All SEO</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                    <button type="button" class="seo-fill-all-btn" onclick="seoAutoFillAll()" style="margin:0">Auto-Fill (Manual)</button>
+                    <button type="button" class="ai-gen-btn primary" style="padding:8px 16px;border-radius:8px;font-size:.82rem" onclick="AISeo.generateAll(this)">
+                        <i class="fas fa-robot"></i> AI Auto-Fill All SEO
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Generate Bar -->
+            <div class="ai-generate-bar" style="margin-bottom:16px">
+                <span class="ai-generate-bar-label"><i class="fas fa-robot"></i> AI SEO Generator</span>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateField('seo_title',this)"><i class="fas fa-thumbtack"></i> Generate Title</button>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateField('meta_description',this)"><i class="fas fa-file-alt"></i> Generate Meta</button>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateField('focus_keyword',this)"><i class="fas fa-key"></i> Generate Keyword</button>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateTagsDirect(this)"><i class="fas fa-tags"></i> Generate Tags</button>
             </div>
 
             <!-- Google Search Snippet Preview -->
@@ -358,47 +444,73 @@ select.vb-input { cursor:pointer; }
 
             <div class="form-grid cols-2">
                 <div class="form-group full-width">
-                    <label for="seo_title" style="display:flex;justify-content:space-between;align-items:center">
-                        <span>SEO Title</span>
-                        <span id="seo_title_counter" class="seo-char-counter too-short">0/60</span>
-                    </label>
-                    <div class="seo-field-wrap">
+                    <div class="ap-seo-field-hdr">
+                        <label for="seo_title">SEO Title <span id="seo_title_counter" class="seo-char-counter too-short">0/60</span></label>
+                        <div class="ap-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="seo_title" onclick="AISeo.refineField('seo_title','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoTitle()" style="height:34px;font-size:.72rem">Manual Auto</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
                         <input id="seo_title" type="text" name="seo_title"
                             placeholder="Product Name Price in Pakistan May 2026 | Phones Dukan"
-                            oninput="seoUpdateCharCounter('seo_title',60);seoUpdateSnippetPreview()">
-                        <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoTitle()" title="Auto-generate from product name">Auto</button>
+                            oninput="seoUpdateCharCounter('seo_title',60);seoUpdateSnippetPreview();AISeo.runScore()">
                     </div>
-                    <span class="seo-field-hint">Recommended: 50–60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
+                    <span class="seo-field-hint">Recommended: 50-60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
                 </div>
 
                 <div class="form-group">
-                    <label for="focus_keyword">Focus Keyword</label>
-                    <div class="seo-field-wrap">
+                    <div class="ap-seo-field-hdr">
+                        <label for="focus_keyword">Focus Keyword</label>
+                        <div class="ap-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" onclick="AISeo.generateField('focus_keyword',this)"><i class="fas fa-key"></i> AI Suggest</button>
+                            <button type="button" class="seo-auto-btn" onclick="seoGenerateFocusKeyword()" style="height:34px;font-size:.72rem">Manual</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
                         <input id="focus_keyword" type="text" name="focus_keyword"
-                            placeholder="product name price in pakistan">
-                        <button type="button" class="seo-auto-btn" onclick="seoGenerateFocusKeyword()" title="Auto-generate from product name">Auto</button>
+                            placeholder="product name price in pakistan"
+                            oninput="AISeo.runScore()">
                     </div>
+                    <span class="seo-field-hint">Primary keyword for ranking. Use: "brand model price in pakistan"</span>
                 </div>
 
                 <div class="form-group">
-                    <label for="secondary_keywords">Secondary Keywords</label>
-                    <input id="secondary_keywords" type="text" name="secondary_keywords"
-                        placeholder="buy online, best price, official warranty, pakistan">
-                    <span class="seo-field-hint">Comma-separated. Supporting search terms for this product.</span>
+                    <div class="ap-seo-field-hdr">
+                        <label for="secondary_keywords">Tags</label>
+                        <div class="ap-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" onclick="AISeo.generateTagsDirect(this)"><i class="fas fa-tags"></i> Generate Tags</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
+                        <input id="secondary_keywords" type="text" name="secondary_keywords"
+                            placeholder="buy online, best price, official warranty, pakistan">
+                    </div>
+                    <span class="seo-field-hint">Comma-separated tags for search visibility and discoverability.</span>
                 </div>
 
                 <div class="form-group full-width">
-                    <label for="seo_description" style="display:flex;justify-content:space-between;align-items:center">
-                        <span>SEO Meta Description</span>
-                        <span id="seo_description_counter" class="seo-char-counter too-short">0/160</span>
-                    </label>
-                    <div class="seo-field-wrap">
+                    <div class="ap-seo-field-hdr">
+                        <label for="seo_description">SEO Meta Description <span id="seo_description_counter" class="seo-char-counter too-short">0/160</span></label>
+                        <div class="ap-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="seo_description" onclick="AISeo.refineField('seo_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <div class="ai-btn-group">
+                                <button type="button" class="ai-btn-group-arrow" onclick="AISeo.toggleDropdown(this)" title="More AI options"><i class="fas fa-chevron-down"></i></button>
+                                <div class="ai-dropdown-menu">
+                                    <button class="ai-dropdown-item" onclick="AISeo.generateField('meta_description',this)"><i class="fas fa-robot"></i> Generate from Scratch</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('seo_description','sales')"><i class="fas fa-rocket"></i> Make Sales-Focused</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('seo_description','shorter')">Make Shorter</button>
+                                </div>
+                            </div>
+                            <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoDescription()" style="height:34px;font-size:.72rem">Manual Auto</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
                         <textarea id="seo_description" name="seo_description"
                             placeholder="Buy product name in Pakistan at the best price. PTA-approved with official warranty. Fast delivery..."
-                            oninput="seoUpdateCharCounter('seo_description',160);seoUpdateSnippetPreview()"></textarea>
-                        <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoDescription()" title="Auto-generate from short description" style="align-self:flex-start">Auto</button>
+                            oninput="seoUpdateCharCounter('seo_description',160);seoUpdateSnippetPreview();AISeo.runScore()"></textarea>
                     </div>
-                    <span class="seo-field-hint">Recommended: 140–160 characters. Auto-generates from short description or product name.</span>
+                    <span class="seo-field-hint">Recommended: 140-160 characters. Auto-generates from short description or product name.</span>
                 </div>
 
                 <div class="form-group full-width">
@@ -408,6 +520,15 @@ select.vb-input { cursor:pointer; }
                         style="background:#f8fafc;color:#6b7280;cursor:default;font-size:.88rem">
                 </div>
             </div>
+        </section>
+
+        <!-- === AI SEO SCORE & ANALYSIS === -->
+        <section class="form-card">
+            <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+                <h2><i class="fas fa-robot"></i> AI SEO Analysis</h2>
+                <button type="button" class="seo-auto-btn" onclick="AISeo.runScore()" style="height:36px;font-size:.78rem"><i class="fas fa-sync-alt"></i> Refresh Score</button>
+            </div>
+            <div id="ai-seo-score-section"></div>
         </section>
 
         <section class="form-card">
@@ -437,26 +558,56 @@ select.vb-input { cursor:pointer; }
                     </label>
                     <input class="file-input" type="file" name="gallery_images[]" id="gallery_images" multiple onchange="previewGalleryImages(event)">
                 </div>
+                <!-- Primary Alt Text -->
                 <div class="form-group">
-                    <label for="primary_alt_text">Alt Text for Primary Image</label>
-                    <input type="text" name="primary_alt_text" id="primary_alt_text" placeholder="Product image alt text" required>
+                    <label for="primary_alt_text">Alt Text for Primary Image <span class="ap-ai-badge"><i class="fas fa-robot"></i> AI</span></label>
+                    <div class="ai-field-relative" style="position:relative">
+                        <input type="text" name="primary_alt_text" id="primary_alt_text" placeholder="Product image alt text" required oninput="AISeo.runScore()" style="width:100%">
+                    </div>
+                    <button type="button" class="ap-ai-btn" onclick="AISeo.generatePrimaryImageMeta('primary_alt_text', 'alt_text', this)">
+                        <i class="fas fa-robot"></i> Generate Alt Text
+                    </button>
                 </div>
+                <!-- Primary Image Title -->
                 <div class="form-group">
-                    <label for="primary_image_title">Title for Primary Image</label>
-                    <input type="text" name="primary_image_title" id="primary_image_title" placeholder="Product image title" required>
+                    <label for="primary_image_title">Title for Primary Image <span class="ap-ai-badge"><i class="fas fa-robot"></i> AI</span></label>
+                    <div class="ai-field-relative" style="position:relative">
+                        <input type="text" name="primary_image_title" id="primary_image_title" placeholder="Product image title" required>
+                    </div>
+                    <button type="button" class="ap-ai-btn" onclick="AISeo.generatePrimaryImageMeta('primary_image_title', 'title', this)">
+                        <i class="fas fa-robot"></i> Generate Title
+                    </button>
                 </div>
+                <!-- Primary Image Caption -->
                 <div class="form-group">
-                    <label for="primary_image_caption">Caption for Primary Image</label>
-                    <input type="text" name="primary_image_caption" id="primary_image_caption" placeholder="Product image caption" required>
+                    <label for="primary_image_caption">Caption for Primary Image <span class="ap-ai-badge"><i class="fas fa-robot"></i> AI</span></label>
+                    <div class="ai-field-relative" style="position:relative">
+                        <input type="text" name="primary_image_caption" id="primary_image_caption" placeholder="Product image caption" required>
+                    </div>
+                    <button type="button" class="ap-ai-btn" onclick="AISeo.generatePrimaryImageMeta('primary_image_caption', 'caption', this)">
+                        <i class="fas fa-robot"></i> Generate Caption
+                    </button>
                 </div>
+                <!-- Primary Image Description -->
                 <div class="form-group">
-                    <label for="primary_image_description">Description for Primary Image</label>
-                    <input type="text" name="primary_image_description" id="primary_image_description" placeholder="Product image description" required>
+                    <label for="primary_image_description">Description for Primary Image <span class="ap-ai-badge"><i class="fas fa-robot"></i> AI</span></label>
+                    <div class="ai-field-relative" style="position:relative">
+                        <input type="text" name="primary_image_description" id="primary_image_description" placeholder="Product image description" required>
+                    </div>
+                    <button type="button" class="ap-ai-btn" onclick="AISeo.generatePrimaryImageMeta('primary_image_description', 'description', this)">
+                        <i class="fas fa-robot"></i> Generate Description
+                    </button>
                 </div>
             </div>
 
             <div id="gallery_images_metadata" class="gallery-metadata-grid"></div>
         </section>
+
+        <?php
+        $pmWrapperClass = 'form-card';
+        $pmHeadingTag = 'h2';
+        include __DIR__ . '/includes/product-media-section.php';
+        ?>
 
         <!-- ============================================================
              PRODUCT VARIATIONS SECTION
@@ -484,7 +635,7 @@ select.vb-input { cursor:pointer; }
                     <div class="vb-step-body">
                         <div id="vbTypeCheckboxes" class="vb-type-grid">
                             <!-- Populated by JS from AJAX -->
-                            <p style="color:#9ca3af;font-size:.88rem">Loading variation types…</p>
+                            <p style="color:#9ca3af;font-size:.88rem">Loading variation types...</p>
                         </div>
                     </div>
                 </div>
@@ -535,7 +686,7 @@ function vbBase(path) {
 }
 const VB_TYPES = <?= json_encode($allVarTypes, JSON_UNESCAPED_UNICODE) ?>;
 let vbSelectedTypes = [];   // [{id, name, display_type, values:[]}]
-let vbSelectedValues = {};  // {type_id: [value_id, …]}
+let vbSelectedValues = {};  // {type_id: [value_id, ...]}
 let vbVariations = [];      // final combination rows
 
 // ---- Toggle ----
@@ -763,7 +914,7 @@ function renderRow(v, i) {
                        border:1px solid #e5e7eb!important;background:#fff!important;color:#9ca3af!important;
                        cursor:pointer;display:inline-flex;align-items:center;justify-content:center"
                 onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fff5f5'"
-                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#9ca3af';this.style.background='#fff'">✕</button>
+                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#9ca3af';this.style.background='#fff'"><i class="fas fa-times"></i></button>
         </td>
     </tr>`;
 }
@@ -879,43 +1030,81 @@ function previewGalleryImages(event) {
     const files = event.target.files;
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        const galleryIdx = 'g' + i; // unique key per gallery image
 
         const imageSection = document.createElement('div');
         imageSection.classList.add('gallery-image-section');
 
+        // Thumbnail
         const imagePreview = document.createElement('img');
         imagePreview.src = URL.createObjectURL(file);
         imagePreview.alt = file.name;
         imagePreview.classList.add('gallery-image-preview');
         imageSection.appendChild(imagePreview);
 
+        // ── Fields + AI buttons ──────────────────────────────────────
+        function makeField(labelText, inputEl, fieldType) {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'margin-bottom:8px';
+
+            const lbl = document.createElement('label');
+            lbl.innerHTML = labelText + ' <span class="ap-ai-badge"><i class="fas fa-robot"></i> AI</span>';
+            lbl.style.cssText = 'display:block;font-size:.82rem;font-weight:700;margin-bottom:4px;color:#111';
+
+            const fieldWrap = document.createElement('div');
+            fieldWrap.className = 'ai-field-relative';
+            fieldWrap.style.position = 'relative';
+            fieldWrap.appendChild(inputEl);
+
+            const aiBtn = document.createElement('button');
+            aiBtn.type = 'button';
+            aiBtn.className = 'ap-ai-btn';
+            aiBtn.innerHTML = '<i class="fas fa-robot"></i> Generate';
+            aiBtn.style.marginTop = '4px';
+            aiBtn.addEventListener('click', function () {
+                AISeo.generatePrimaryImageMeta(inputEl.id, fieldType, aiBtn);
+            });
+
+            wrap.appendChild(lbl);
+            wrap.appendChild(fieldWrap);
+            wrap.appendChild(aiBtn);
+            return wrap;
+        }
+
+        // Alt Text
         const altTextInput = document.createElement('input');
         altTextInput.type = 'text';
+        altTextInput.id   = 'gallery_alt_' + galleryIdx;
         altTextInput.name = 'alt_text_gallery[]';
-        altTextInput.placeholder = 'Alt Text for Gallery Image';
+        altTextInput.placeholder = 'Alt text for gallery image';
         altTextInput.classList.add('gallery-meta-input');
+        imageSection.appendChild(makeField('Alt Text', altTextInput, 'alt_text'));
 
+        // Title
         const titleInput = document.createElement('input');
         titleInput.type = 'text';
+        titleInput.id   = 'gallery_title_' + galleryIdx;
         titleInput.name = 'image_title_gallery[]';
-        titleInput.placeholder = 'Title for Gallery Image';
+        titleInput.placeholder = 'Title for gallery image';
         titleInput.classList.add('gallery-meta-input');
+        imageSection.appendChild(makeField('Title', titleInput, 'title'));
 
+        // Caption
         const captionInput = document.createElement('input');
         captionInput.type = 'text';
+        captionInput.id   = 'gallery_caption_' + galleryIdx;
         captionInput.name = 'image_caption_gallery[]';
-        captionInput.placeholder = 'Caption for Gallery Image';
+        captionInput.placeholder = 'Caption for gallery image';
         captionInput.classList.add('gallery-meta-input');
+        imageSection.appendChild(makeField('Caption', captionInput, 'caption'));
 
+        // Description
         const descriptionTextarea = document.createElement('textarea');
+        descriptionTextarea.id   = 'gallery_desc_' + galleryIdx;
         descriptionTextarea.name = 'image_description_gallery[]';
-        descriptionTextarea.placeholder = 'Description for Gallery Image';
+        descriptionTextarea.placeholder = 'Description for gallery image';
         descriptionTextarea.classList.add('gallery-meta-textarea');
-
-        imageSection.appendChild(altTextInput);
-        imageSection.appendChild(titleInput);
-        imageSection.appendChild(captionInput);
-        imageSection.appendChild(descriptionTextarea);
+        imageSection.appendChild(makeField('Description', descriptionTextarea, 'description'));
 
         metadataContainer.appendChild(imageSection);
     }
@@ -1100,9 +1289,17 @@ function seoGenerateSeoTitle() {
     seoUpdateSnippetPreview();
 }
 
+function seoStripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
 function seoGenerateSeoDescription() {
     const name = document.getElementById('product_name').value.trim();
-    const shortDesc = document.getElementById('short_description').value.trim();
+    // Strip HTML from short description before using as meta description
+    const shortRaw = document.getElementById('short_description').value.trim();
+    const shortDesc = seoStripHtml(shortRaw);
     if (!name) { return; }
     let desc;
     if (shortDesc.length >= 50) {
@@ -1148,8 +1345,8 @@ function seoUpdateSnippetPreview() {
     const tEl = document.getElementById('snippet_title');
     const dEl = document.getElementById('snippet_desc');
     const uEl = document.getElementById('snippet_url');
-    if (tEl) tEl.textContent = title.length > 60 ? title.substring(0, 60) + '…' : title;
-    if (dEl) dEl.textContent = desc.length > 160 ? desc.substring(0, 160) + '…' : desc;
+    if (tEl) tEl.textContent = title.length > 60 ? title.substring(0, 60) + '...' : title;
+    if (dEl) dEl.textContent = desc.length > 160 ? desc.substring(0, 160) + '...' : desc;
     if (uEl) uEl.textContent = urlDisplay;
 }
 
@@ -1222,3 +1419,30 @@ function generateAllVariationSkus() {
     renderVariationRows();
 }
 </script>
+
+<!-- AI SEO Assistant JS -->
+<script src="js/ai-seo.js?v=2.7"></script>
+<script src="js/product-media.js?v=1.1"></script>
+<script>
+// Initialize the AI SEO Assistant for Add Product page
+document.addEventListener('DOMContentLoaded', function () {
+    AISeo.init({
+        prefix:    '',          // field IDs have no prefix on add-product
+        productId: 0,           // no product ID yet (new product)
+        apiUrl:    'api/ai-seo.php',
+    });
+    ProductMedia.init({
+        mode: 'add',
+        basePath: <?= json_encode(rtrim((defined('BASE_PATH') ? BASE_PATH : ''), '/')) ?>,
+        ajaxUploadUrl: 'ajax-upload-product-video.php',
+        ajaxPreviewUrl: 'ajax-fetch-video-preview.php',
+    });
+});
+</script>
+
+
+
+
+
+
+

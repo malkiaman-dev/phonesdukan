@@ -1,7 +1,79 @@
+var withBase = window.pdWithBase || function (path) {
+    var localBasePath = String(window.__PD_BASE_PATH__ || "").replace(/\/+$/, "");
+    if (!path) return localBasePath + "/";
+    if (/^https?:\/\//i.test(path) || path.startsWith("//")) return path;
+    if (path.startsWith(localBasePath + "/")) return path;
+    if (path.startsWith("/")) return localBasePath + path;
+    return localBasePath + "/" + path;
+};
+
+function resolveGalleryMediaUrl(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path) || path.startsWith("//")) return path;
+    return withBase(path);
+}
+
+function playGalleryVideo(videoEl) {
+    if (!videoEl) return;
+    const playPromise = videoEl.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(function () {
+            // Browser may block autoplay until user interacts; controls remain available.
+        });
+    }
+}
+
+function updateMainMedia(thumb) {
+    const mainImage = document.getElementById("mainImage");
+    const videoContainer = document.getElementById("mainVideoContainer");
+    if (!mainImage || !videoContainer) return;
+
+    const mediaType = thumb.getAttribute("data-media-type") || "image";
+
+    document.querySelectorAll(".gallery-thumb").forEach(function (el) {
+        el.classList.remove("active");
+    });
+    thumb.classList.add("active");
+
+    if (mediaType === "video") {
+        const source = thumb.getAttribute("data-video-source") || "upload";
+        const embedUrl = thumb.getAttribute("data-embed-url") || "";
+        const videoUrl = resolveGalleryMediaUrl(thumb.getAttribute("data-video-url") || "");
+        const posterUrl = resolveGalleryMediaUrl(thumb.getAttribute("data-thumb-src") || "");
+        let html = "";
+
+        if (source === "youtube" || source === "vimeo") {
+            const autoplayUrl = embedUrl + (embedUrl.indexOf("?") >= 0 ? "&" : "?") + "autoplay=1";
+            html = '<iframe src="' + autoplayUrl + '" title="Product video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+        } else {
+            html = '<video controls playsinline preload="auto"'
+                + (posterUrl ? ' poster="' + posterUrl + '"' : "")
+                + ' src="' + videoUrl + '"></video>';
+        }
+
+        videoContainer.innerHTML = html;
+        videoContainer.style.display = "flex";
+        videoContainer.classList.add("is-active");
+        mainImage.style.display = "none";
+        mainImage.classList.add("is-hidden");
+
+        if (source !== "youtube" && source !== "vimeo") {
+            playGalleryVideo(videoContainer.querySelector("video"));
+        }
+        return;
+    }
+
+    mainImage.src = thumb.src;
+    mainImage.alt = thumb.alt || "";
+    mainImage.style.display = "";
+    mainImage.classList.remove("is-hidden");
+    videoContainer.innerHTML = "";
+    videoContainer.style.display = "none";
+    videoContainer.classList.remove("is-active");
+}
+
 function updateMainImage(thumbnail) {
-    document.getElementById("mainImage").src = thumbnail.src;
-    document.querySelectorAll(".thumbnail").forEach(img => img.classList.remove("active"));
-    thumbnail.classList.add("active");
+    updateMainMedia(thumbnail);
 }
 
 function scrollThumbnails(direction) {
@@ -13,15 +85,6 @@ function scrollThumbnails(direction) {
         container.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
 }
-
-var withBase = window.pdWithBase || function (path) {
-    var localBasePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
-    if (!path) return localBasePath + '/';
-    if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
-    if (path.startsWith(localBasePath + '/')) return path;
-    if (path.startsWith('/')) return localBasePath + path;
-    return localBasePath + '/' + path;
-};
 
 document.addEventListener("DOMContentLoaded", function () {
     const wrapper = document.querySelector(".image-wrapper");
@@ -49,12 +112,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const endX = e.changedTouches[0].clientX;
         const diffX = endX - startX;
         if (Math.abs(diffX) > 50) {
-            const thumbnails = Array.from(document.querySelectorAll(".thumbnail"));
-            const activeIndex = thumbnails.findIndex(img => img.classList.contains("active"));
+            const thumbnails = Array.from(document.querySelectorAll(".gallery-thumb"));
+            const activeIndex = thumbnails.findIndex(function (el) { return el.classList.contains("active"); });
             if (diffX < 0 && activeIndex < thumbnails.length - 1) {
-                updateMainImage(thumbnails[activeIndex + 1]);
+                updateMainMedia(thumbnails[activeIndex + 1]);
             } else if (diffX > 0 && activeIndex > 0) {
-                updateMainImage(thumbnails[activeIndex - 1]);
+                updateMainMedia(thumbnails[activeIndex - 1]);
             }
         }
     });

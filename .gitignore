@@ -1,2 +1,3 @@
 # Local secrets — never commit these
 app/config/chatbot_config.local.php
+app/config/ai-seo.secrets.php

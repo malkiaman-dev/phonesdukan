@@ -49,9 +49,12 @@ if (isset($isComingSoon) && $isComingSoon === true) {
 }
 
 // Set the product image URL (fallback to default favicon image if no image is available)
-$productImage = !empty($images[0]['image_url'])
-    ? normalizeMediaUrl((string) $images[0]['image_url'])
-    : getBaseURL() . 'public/assets/images/Phones_dukan_favicon.png';
+$firstGalleryItem = $galleryMedia[0] ?? $images[0] ?? null;
+$productImage = !empty($firstGalleryItem['image_url'])
+    ? normalizeMediaUrl((string) $firstGalleryItem['image_url'])
+    : (!empty($firstGalleryItem['thumbnail_url'])
+        ? normalizeMediaUrl((string) $firstGalleryItem['thumbnail_url'])
+        : getBaseURL() . 'public/assets/images/Phones_dukan_favicon.png');
 $productImageAlt = $product['product_name'];
 
 $productAttributes = $productModel->getProductAttributes($product['product_id']);  // Ensure you have initialized $productModel properly
@@ -132,58 +135,87 @@ foreach ($paragraphs as $index => $para) {
         <div class="product-content">
             <!-- Product Gallery -->
             <div class="product-gallery">
-                <?php if (!empty($images)): ?>
+                <?php if (!empty($galleryMedia)): ?>
                     <?php
-                    $seenUrls = [];
-                    $mainImage = $images[0];
-                    $mainImageUrl = normalizeMediaUrl((string) ($mainImage['image_url'] ?? ''));
-                    $seenUrls[] = $mainImageUrl;
+                    $firstItem = $galleryMedia[0];
+                    $firstIsVideo = ($firstItem['type'] ?? 'image') === 'video';
+                    $firstImageUrl = '';
+                    if (!$firstIsVideo) {
+                        $firstImageUrl = normalizeMediaUrl((string) ($firstItem['image_url'] ?? ''));
+                    }
                     ?>
 
-                    <!-- Main Image -->
-                    <div class="image-wrapper">
-                        <img src="<?= htmlspecialchars($mainImageUrl) ?>" 
-                             alt="<?= htmlspecialchars($mainImage['alt_text'] ?? '') ?>" 
-                             title="<?= htmlspecialchars($mainImage['title'] ?? '') ?>"
-                             data-description="<?= htmlspecialchars($mainImage['description'] ?? '') ?>"
-                             data-caption="<?= htmlspecialchars($mainImage['caption'] ?? '') ?>"
-                             class="primary-image" id="mainImage">
+                    <div class="image-wrapper" id="mainMediaWrapper">
+                        <img src="<?= $firstIsVideo ? '' : htmlspecialchars($firstImageUrl) ?>"
+                             alt="<?= htmlspecialchars($firstItem['alt_text'] ?? '') ?>"
+                             title="<?= htmlspecialchars($firstItem['title'] ?? '') ?>"
+                             data-description="<?= htmlspecialchars($firstItem['description'] ?? '') ?>"
+                             data-caption="<?= htmlspecialchars($firstItem['caption'] ?? '') ?>"
+                             class="primary-image<?= $firstIsVideo ? ' is-hidden' : '' ?>"
+                             id="mainImage"
+                             <?= $firstIsVideo ? 'style="display:none"' : '' ?>>
+
+                        <div class="main-video-container<?= $firstIsVideo ? ' is-active' : '' ?>"
+                             id="mainVideoContainer"
+                             <?= $firstIsVideo ? '' : 'style="display:none"' ?>>
+                            <?php if ($firstIsVideo): ?>
+                                <?php
+                                $embedUrl = (string) ($firstItem['embed_url'] ?? $firstItem['video_url'] ?? '');
+                                $videoSource = (string) ($firstItem['video_source'] ?? 'upload');
+                                if (in_array($videoSource, ['youtube', 'vimeo'], true)):
+                                ?>
+                                    <iframe src="<?= htmlspecialchars($embedUrl) ?>"
+                                            title="Product video"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen loading="lazy"></iframe>
+                                <?php else: ?>
+                                    <video controls playsinline preload="metadata"
+                                           src="<?= htmlspecialchars(normalizeMediaUrl((string) ($firstItem['video_url'] ?? ''))) ?>"></video>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
-                    <!-- Thumbnails -->
                     <div class="thumbnail-container">
-                        <button class="thumbnail-nav left" onclick="scrollThumbnails('left')">❮</button>
+                        <button class="thumbnail-nav left" type="button" onclick="scrollThumbnails('left')">❮</button>
 
                         <div class="thumbnail-gallery">
-                            <!-- Main Image as First Thumbnail -->
-                            <img src="<?= htmlspecialchars(normalizeMediaUrl((string) ($mainImage['image_url'] ?? '')) ) ?>" 
-                                 alt="<?= htmlspecialchars($mainImage['alt_text'] ?? '') ?>" 
-                                 title="<?= htmlspecialchars($mainImage['title'] ?? '') ?>"
-                                 data-description="<?= htmlspecialchars($mainImage['description'] ?? '') ?>"
-                                 data-caption="<?= htmlspecialchars($mainImage['caption'] ?? '') ?>"
-                                 class="thumbnail active" 
-                                 onclick="updateMainImage(this)">
-
-                            <!-- Gallery Images -->
-                            <?php
-                            foreach ($images as $img):
-                                $imageUrl = normalizeMediaUrl((string) ($img['image_url'] ?? ''));
-                                if (in_array($imageUrl, $seenUrls, true)) {
-                                    continue;
-                                }
-                                $seenUrls[] = $imageUrl;
-                                ?>
-                                <img src="<?= htmlspecialchars($imageUrl) ?>" 
-                                     alt="<?= htmlspecialchars($img['alt_text'] ?? '') ?>" 
-                                     title="<?= htmlspecialchars($img['title'] ?? '') ?>"
-                                     data-description="<?= htmlspecialchars($img['description'] ?? '') ?>"
-                                     data-caption="<?= htmlspecialchars($img['caption'] ?? '') ?>"
-                                     class="thumbnail" 
-                                     onclick="updateMainImage(this)">
+                            <?php foreach ($galleryMedia as $index => $item): ?>
+                                <?php if (($item['type'] ?? 'image') === 'video'): ?>
+                                    <?php
+                                    $thumbUrl = normalizeMediaUrl((string) ($item['thumbnail_url'] ?? ''));
+                                    $embedUrl = (string) ($item['embed_url'] ?? $item['video_url'] ?? '');
+                                    $videoUrl = normalizeMediaUrl((string) ($item['video_url'] ?? ''));
+                                    ?>
+                                    <button type="button"
+                                            class="gallery-thumb thumbnail thumbnail-video<?= $index === 0 ? ' active' : '' ?>"
+                                            data-media-type="video"
+                                            data-video-source="<?= htmlspecialchars($item['video_source'] ?? 'upload') ?>"
+                                            data-embed-url="<?= htmlspecialchars($embedUrl) ?>"
+                                            data-video-url="<?= htmlspecialchars($videoUrl) ?>"
+                                            data-thumb-src="<?= htmlspecialchars($thumbUrl) ?>"
+                                            onclick="updateMainMedia(this)"
+                                            aria-label="Play product video">
+                                        <?php if ($thumbUrl): ?>
+                                            <img src="<?= htmlspecialchars($thumbUrl) ?>" alt="Product video">
+                                        <?php endif; ?>
+                                        <span class="thumbnail-play-icon" aria-hidden="true">▶</span>
+                                    </button>
+                                <?php else: ?>
+                                    <?php $imageUrl = normalizeMediaUrl((string) ($item['image_url'] ?? '')); ?>
+                                    <img src="<?= htmlspecialchars($imageUrl) ?>"
+                                         alt="<?= htmlspecialchars($item['alt_text'] ?? '') ?>"
+                                         title="<?= htmlspecialchars($item['title'] ?? '') ?>"
+                                         data-description="<?= htmlspecialchars($item['description'] ?? '') ?>"
+                                         data-caption="<?= htmlspecialchars($item['caption'] ?? '') ?>"
+                                         data-media-type="image"
+                                         class="gallery-thumb thumbnail<?= $index === 0 ? ' active' : '' ?>"
+                                         onclick="updateMainMedia(this)">
+                                <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
 
-                        <button class="thumbnail-nav right" onclick="scrollThumbnails('right')">❯</button>
+                        <button class="thumbnail-nav right" type="button" onclick="scrollThumbnails('right')">❯</button>
                     </div>
                 <?php else: ?>
                     <img src="default-image.jpg" alt="No image available">

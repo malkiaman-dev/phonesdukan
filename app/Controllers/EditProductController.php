@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/EditProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
+require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
 
 class ProductController
 {
@@ -110,6 +111,10 @@ class ProductController
             }
         
             $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId);
+
+            $mediaService = new ProductMediaService((new Database())->getConnection());
+            $mediaService->saveFromRequest((int) $id, $_POST, $_FILES);
+            $mediaService->applyGalleryOrder((int) $id, $_POST['gallery_order_json'] ?? '[]', []);
         
             $attributes = $_POST['attributes'] ?? [];
             $removeAttributes = $_POST['remove_attributes'] ?? [];

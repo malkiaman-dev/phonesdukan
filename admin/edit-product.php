@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 ob_start();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -12,6 +12,10 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 
 include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+
+// AI SEO CSS
+echo '<link rel="stylesheet" href="css/ai-seo.css?v=2.8">';
+echo '<link rel="stylesheet" href="css/product-media.css?v=1.1">';
 
 $flashMessage = null;
 $flashType = 'success';
@@ -81,6 +85,11 @@ $categories = $data['categories'];
 $brands = $data['brands'];
 $seoData = $controller->getSeoData($product['product_id']);
 $productImages = $controller->getProductImages($product['product_id']);
+require_once dirname(__DIR__, 1) . '/database/db.php';
+require_once dirname(__DIR__, 1) . '/app/Services/ProductMediaService.php';
+$mediaService = new ProductMediaService((new Database())->getConnection());
+$productVideo = $mediaService->getModel()->getProductVideo($product['product_id']);
+$galleryOrderItems = $mediaService->getModel()->getGalleryOrderItems($product['product_id']);
 $productAttributes = $controller->getAssignedProductAttributes($product['product_id']);
 $attributeValues = $data['attributeValues'];
 $allAttributes = $data['productAttributes'];
@@ -243,6 +252,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-wrap small,
     .ep-wrap p {
         background: transparent !important;
+        color: inherit !important;
     }
 
     .ep-toast {
@@ -720,6 +730,45 @@ select.vb-input-ep { cursor:pointer; }
         min-width: 130px;
     }
 
+    /* ── Image AI buttons ── */
+    .ep-ai-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 6px;
+        padding: 5px 12px;
+        background: #111111;
+        color: #facc15;
+        border: 1px solid #facc15;
+        border-radius: 6px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+        font-family: inherit;
+    }
+    .ep-ai-btn:hover {
+        background: #facc15;
+        color: #111111;
+    }
+    .ep-ai-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+    .ep-ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #111;
+        color: #facc15;
+        font-size: 0.64rem;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+
     #product-attributes {
         display: grid;
         gap: 12px;
@@ -819,7 +868,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-seo-preview-desc { font-size: .85rem; color: #4d5156; line-height: 1.4; word-break: break-word; }
     .ep-seo-char-counter { font-size: .75rem; font-weight: 700; }
     .ep-seo-char-counter.good { color: #16a34a; }
-    .ep-seo-char-counter.too-long { color: #ef4444; }
+    .ep-seo-char-counter.too-long { color: #f97316; }
     .ep-seo-char-counter.too-short { color: #f97316; }
     .ep-seo-field-wrap { display: flex; gap: 8px; align-items: flex-start; }
     .ep-seo-field-wrap > input, .ep-seo-field-wrap > textarea { flex: 1 1 0%; min-width: 0; }
@@ -840,6 +889,14 @@ select.vb-input-ep { cursor:pointer; }
     }
     .ep-seo-auto-btn:hover { color: #facc15; }
     .ep-seo-field-hint { display: block; color: #9ca3af; font-size: .76rem; margin-top: 4px; }
+    /* SEO field header: label LEFT, buttons RIGHT — on the same row directly above input */
+    .ep-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .ep-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; font-size: .9rem; color: var(--black); flex-shrink: 0; }
+    .ep-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; }
+    /* Image field header: label left, AI button right */
+    .ep-img-field-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .ep-img-field-header label { margin-bottom: 0 !important; font-weight: 700; font-size: .9rem; color: var(--black); }
+    .ep-img-field-header .ep-ai-btn { margin-top: 0; }
     .ep-seo-fill-btn {
         background: #facc15;
         color: #111;
@@ -879,12 +936,29 @@ select.vb-input-ep { cursor:pointer; }
             <h3>Basic Information</h3>
             <div class="ep-grid">
                 <div class="ep-field">
-                    <label>Product Name</label>
-                    <input type="text" name="product_name" value="<?= htmlspecialchars($product['product_name']) ?>" required>
+                    <label style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Product Name</span>
+                        <button type="button" class="ai-refine-btn" onclick="AISeo.refineField('product_name','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                    </label>
+                    <div class="ai-field-relative">
+                        <input type="text" id="ep_product_name" name="product_name" value="<?= htmlspecialchars($product['product_name']) ?>" required oninput="AISeo.runScore()">
+                    </div>
                 </div>
                 <div class="ep-field">
-                    <label>Product Slug</label>
-                    <input type="text" name="product_slug" value="<?= htmlspecialchars($product['product_slug']) ?>" required>
+                    <div class="ep-seo-field-hdr">
+                        <label for="ep_product_slug">Product Slug</label>
+                        <div class="ai-slug-btn-wrap">
+                            <button type="button" class="ai-slug-btn ai" onclick="AISeo.generateSlugAI(this)" title="Generate SEO-optimized slug with AI">
+                                <i class="fas fa-robot" style="font-size:.7rem"></i> AI Slug
+                            </button>
+                            <button type="button" class="ai-slug-btn manual" onclick="AISeo.generateSlugManual()" title="Generate slug from product name">
+                                <i class="fas fa-link" style="font-size:.7rem"></i> Manual
+                            </button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
+                        <input type="text" id="ep_product_slug" name="product_slug" value="<?= htmlspecialchars($product['product_slug']) ?>" required>
+                    </div>
                 </div>
                 <div class="ep-field">
                     <label>Category</label>
@@ -933,15 +1007,53 @@ select.vb-input-ep { cursor:pointer; }
         </div>
 
         <div class="ep-card">
-            <h3>Description</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+                <h3 style="margin:0">Description</h3>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button type="button" class="ai-gen-btn ghost" style="background:#f1f5f9;color:#111;border:1px solid #e5e7eb;font-size:.78rem" onclick="AISeo.generateField('description',this)"><i class="fas fa-robot"></i> Generate Description</button>
+                    <button type="button" class="ai-gen-btn ghost" style="background:#f1f5f9;color:#111;border:1px solid #e5e7eb;font-size:.78rem" onclick="AISeo.generateField('short_description',this)"><i class="fas fa-magic"></i> Generate Short Desc</button>
+                </div>
+            </div>
             <div class="ep-grid">
                 <div class="ep-field full">
-                    <label>Product Description</label>
-                    <textarea name="product_description" required><?= htmlspecialchars($product['product_description']) ?></textarea>
+                    <label style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Product Description</span>
+                        <div style="display:flex;gap:6px">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="ep_product_description" onclick="AISeo.refineField('product_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <div class="ai-btn-group">
+                                <button type="button" class="ai-btn-group-arrow" onclick="AISeo.toggleDropdown(this)"><i class="fas fa-chevron-down"></i></button>
+                                <div class="ai-dropdown-menu">
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','professional')"><i class="fas fa-briefcase"></i> Make Professional</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','sales')"><i class="fas fa-rocket"></i> Make Sales-Focused</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','shorter')">Make Shorter</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('product_description','readability')"><i class="fas fa-book"></i> Improve Readability</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.generateField('description',this)"><i class="fas fa-robot"></i> Regenerate from Scratch</button>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                    <div class="ai-field-relative">
+                        <textarea id="ep_product_description" name="product_description" required oninput="AISeo.runScore()"><?= htmlspecialchars($product['product_description']) ?></textarea>
+                    </div>
                 </div>
                 <div class="ep-field full">
-                    <label>Short Description</label>
-                    <textarea name="short_description"><?= htmlspecialchars($product['short_description']) ?></textarea>
+                    <label style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Short Description</span>
+                        <div style="display:flex;gap:6px">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="ep_short_description" onclick="AISeo.refineField('short_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <div class="ai-btn-group">
+                                <button type="button" class="ai-btn-group-arrow" onclick="AISeo.toggleDropdown(this)"><i class="fas fa-chevron-down"></i></button>
+                                <div class="ai-dropdown-menu">
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('short_description','sales')"><i class="fas fa-rocket"></i> Sales-Focused</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('short_description','shorter')">Make Shorter</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.generateField('short_description',this)"><i class="fas fa-robot"></i> Regenerate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                    <div class="ai-field-relative">
+                        <textarea id="ep_short_description" name="short_description" oninput="AISeo.runScore()"><?= htmlspecialchars($product['short_description']) ?></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1000,8 +1112,13 @@ select.vb-input-ep { cursor:pointer; }
                     <input type="text" name="tax_class" value="<?= htmlspecialchars($product['tax_class'] ?? '') ?>">
                 </div>
                 <div class="ep-field">
-                    <label>Product Tags</label>
-                    <input type="text" name="product_tag" value="<?= htmlspecialchars($product['product_tag'] ?? '') ?>">
+                    <label style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+                        <span>Product Tags</span>
+                        <button type="button" class="ai-refine-btn" onclick="AISeo.generateField('tags',this)"><i class="fas fa-tags"></i> Suggest with AI</button>
+                    </label>
+                    <div class="ai-field-relative">
+                        <input type="text" id="ep_product_tag" name="product_tag" value="<?= htmlspecialchars($product['product_tag'] ?? '') ?>" oninput="AISeo.runScore()">
+                    </div>
                 </div>
             </div>
         </div>
@@ -1009,7 +1126,19 @@ select.vb-input-ep { cursor:pointer; }
         <div class="ep-card">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
                 <h3 style="margin:0">SEO Details</h3>
-                <button type="button" class="ep-seo-fill-btn" onclick="epSeoAutoFillAll()">Auto-Fill All SEO</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                    <button type="button" class="ep-seo-fill-btn" onclick="epSeoAutoFillAll()" style="margin:0">Auto-Fill (Manual)</button>
+                    <button type="button" class="ai-gen-btn primary" style="padding:8px 16px;border-radius:8px;font-size:.82rem" onclick="AISeo.generateAll(this)"><i class="fas fa-robot"></i> AI Auto-Fill All SEO</button>
+                </div>
+            </div>
+
+            <!-- AI Generate Bar -->
+            <div class="ai-generate-bar" style="margin-bottom:16px">
+                <span class="ai-generate-bar-label"><i class="fas fa-robot"></i> AI SEO Generator</span>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateField('seo_title',this)"><i class="fas fa-thumbtack"></i> Generate Title</button>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateField('meta_description',this)"><i class="fas fa-file-alt"></i> Generate Meta</button>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateField('focus_keyword',this)"><i class="fas fa-key"></i> Generate Keyword</button>
+                <button type="button" class="ai-gen-btn ghost" onclick="AISeo.generateTagsDirect(this)"><i class="fas fa-tags"></i> Generate Tags</button>
             </div>
 
             <!-- Google Search Snippet Preview -->
@@ -1022,50 +1151,76 @@ select.vb-input-ep { cursor:pointer; }
 
             <div class="ep-grid">
                 <div class="ep-field full">
-                    <label style="display:flex;justify-content:space-between;align-items:center">
-                        <span>SEO Title</span>
-                        <span id="ep_seo_title_counter" class="ep-seo-char-counter">0/60</span>
-                    </label>
-                    <div class="ep-seo-field-wrap">
+                    <div class="ep-seo-field-hdr">
+                        <label for="ep_seo_title">SEO Title <span id="ep_seo_title_counter" class="ep-seo-char-counter">0/60</span></label>
+                        <div class="ep-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="ep_seo_title" onclick="AISeo.refineField('seo_title','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateTitle()" style="height:34px;font-size:.72rem">Manual Auto</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
                         <input type="text" id="ep_seo_title" name="seo_title"
                             value="<?= htmlspecialchars($seoData['seo_title'] ?? '') ?>"
                             placeholder="Product Name Price in Pakistan May 2026 | Phones Dukan"
-                            oninput="epSeoUpdateCharCounter('ep_seo_title',60);epSeoUpdateSnippetPreview()">
-                        <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateTitle()" title="Auto-generate from product name">Auto</button>
+                            oninput="epSeoUpdateCharCounter('ep_seo_title',60);epSeoUpdateSnippetPreview();AISeo.runScore()">
                     </div>
-                    <span class="ep-seo-field-hint">Recommended: 50–60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
+                    <span class="ep-seo-field-hint">Recommended: 50-60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
                 </div>
 
                 <div class="ep-field">
-                    <label>Focus Keyword</label>
-                    <div class="ep-seo-field-wrap">
+                    <div class="ep-seo-field-hdr">
+                        <label for="ep_focus_keyword">Focus Keyword</label>
+                        <div class="ep-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" onclick="AISeo.generateField('focus_keyword',this)"><i class="fas fa-key"></i> AI Suggest</button>
+                            <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateFocusKeyword()" style="height:34px;font-size:.72rem">Manual</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
                         <input type="text" id="ep_focus_keyword" name="focus_keyword"
                             value="<?= htmlspecialchars($seoData['focus_keyword'] ?? '') ?>"
-                            placeholder="product name price in pakistan">
-                        <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateFocusKeyword()" title="Auto-generate from product name">Auto</button>
+                            placeholder="product name price in pakistan"
+                            oninput="AISeo.runScore()">
                     </div>
+                    <span class="ep-seo-field-hint">Primary keyword for ranking. Use: "brand model price in pakistan"</span>
                 </div>
 
                 <div class="ep-field">
-                    <label>Secondary Keywords</label>
-                    <input type="text" id="ep_secondary_keywords" name="secondary_keywords"
-                        value="<?= htmlspecialchars($seoData['secondary_keywords'] ?? '') ?>"
-                        placeholder="buy online, best price, official warranty, pakistan">
-                    <span class="ep-seo-field-hint">Comma-separated. Supporting search terms for this product.</span>
+                    <div class="ep-seo-field-hdr">
+                        <label for="ep_secondary_keywords">Tags</label>
+                        <div class="ep-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" onclick="AISeo.generateTagsDirect(this)"><i class="fas fa-tags"></i> Generate Tags</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
+                        <input type="text" id="ep_secondary_keywords" name="secondary_keywords"
+                            value="<?= htmlspecialchars($seoData['secondary_keywords'] ?? '') ?>"
+                            placeholder="buy online, best price, official warranty, pakistan">
+                    </div>
+                    <span class="ep-seo-field-hint">Comma-separated tags for search visibility and discoverability.</span>
                 </div>
 
                 <div class="ep-field full">
-                    <label style="display:flex;justify-content:space-between;align-items:center">
-                        <span>SEO Meta Description</span>
-                        <span id="ep_seo_desc_counter" class="ep-seo-char-counter">0/160</span>
-                    </label>
-                    <div class="ep-seo-field-wrap">
+                    <div class="ep-seo-field-hdr">
+                        <label for="ep_seo_description">SEO Meta Description <span id="ep_seo_desc_counter" class="ep-seo-char-counter">0/160</span></label>
+                        <div class="ep-seo-btn-row">
+                            <button type="button" class="ai-refine-btn" data-ai-refine="ep_seo_description" onclick="AISeo.refineField('seo_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
+                            <div class="ai-btn-group">
+                                <button type="button" class="ai-btn-group-arrow" onclick="AISeo.toggleDropdown(this)"><i class="fas fa-chevron-down"></i></button>
+                                <div class="ai-dropdown-menu">
+                                    <button class="ai-dropdown-item" onclick="AISeo.generateField('meta_description',this)"><i class="fas fa-robot"></i> Generate from Scratch</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('seo_description','sales')"><i class="fas fa-rocket"></i> Make Sales-Focused</button>
+                                    <button class="ai-dropdown-item" onclick="AISeo.refineField('seo_description','shorter')">Make Shorter</button>
+                                </div>
+                            </div>
+                            <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateDescription()" style="height:34px;font-size:.72rem">Manual Auto</button>
+                        </div>
+                    </div>
+                    <div class="ai-field-relative">
                         <textarea id="ep_seo_description" name="seo_description"
                             placeholder="Buy product name in Pakistan at the best price. PTA-approved with official warranty..."
-                            oninput="epSeoUpdateCharCounter('ep_seo_description',160);epSeoUpdateSnippetPreview()"><?= htmlspecialchars($seoData['seo_description'] ?? '') ?></textarea>
-                        <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateDescription()" title="Auto-generate from short description" style="align-self:flex-start">Auto</button>
+                            oninput="epSeoUpdateCharCounter('ep_seo_description',160);epSeoUpdateSnippetPreview();AISeo.runScore()"><?= htmlspecialchars($seoData['seo_description'] ?? '') ?></textarea>
                     </div>
-                    <span class="ep-seo-field-hint">Recommended: 140–160 characters. Auto-generates from short description or product name.</span>
+                    <span class="ep-seo-field-hint">Recommended: 140-160 characters. Auto-generates from short description or product name.</span>
                 </div>
 
                 <div class="ep-field full">
@@ -1075,6 +1230,15 @@ select.vb-input-ep { cursor:pointer; }
                         style="background:#f8fafc;color:#6b7280;cursor:default;font-size:.88rem">
                 </div>
             </div>
+        </div>
+
+        <!-- === AI SEO SCORE & ANALYSIS === -->
+        <div class="ep-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+                <h3 style="margin:0"><i class="fas fa-robot"></i> AI SEO Analysis</h3>
+                <button type="button" class="ep-seo-auto-btn" onclick="AISeo.runScore()" style="height:36px;font-size:.78rem"><i class="fas fa-sync-alt"></i> Refresh Score</button>
+            </div>
+            <div id="ai-seo-score-section"></div>
         </div>
 
         <div class="ep-card">
@@ -1110,21 +1274,68 @@ select.vb-input-ep { cursor:pointer; }
                                 <?php endif; ?>
                             </div>
                             <div class="ep-image-fields">
+                                <!-- Alt Text -->
+                                <!-- Alt Text -->
                                 <div class="ep-field">
-                                    <label>Alt Text</label>
-                                    <input type="text" name="alt_text[<?= $image['image_id'] ?>]" value="<?= htmlspecialchars($image['alt_text'] ?? '') ?>">
+                                    <div class="ep-img-field-header">
+                                        <label for="img_alt_<?= $image['image_id'] ?>">Alt Text</label>
+                                        <button type="button" class="ep-ai-btn"
+                                            onclick="AISeo.generateImageMeta(<?= $image['image_id'] ?>, 'alt_text', this)">
+                                            <i class="fas fa-robot"></i> Generate
+                                        </button>
+                                    </div>
+                                    <div class="ai-field-relative" style="position:relative">
+                                        <input type="text"
+                                            id="img_alt_<?= $image['image_id'] ?>"
+                                            name="alt_text[<?= $image['image_id'] ?>]"
+                                            value="<?= htmlspecialchars($image['alt_text'] ?? '') ?>">
+                                    </div>
                                 </div>
+                                <!-- Title -->
                                 <div class="ep-field">
-                                    <label>Title</label>
-                                    <input type="text" name="title[<?= $image['image_id'] ?>]" value="<?= htmlspecialchars($image['title'] ?? '') ?>">
+                                    <div class="ep-img-field-header">
+                                        <label for="img_title_<?= $image['image_id'] ?>">Title</label>
+                                        <button type="button" class="ep-ai-btn"
+                                            onclick="AISeo.generateImageMeta(<?= $image['image_id'] ?>, 'title', this)">
+                                            <i class="fas fa-robot"></i> Generate
+                                        </button>
+                                    </div>
+                                    <div class="ai-field-relative" style="position:relative">
+                                        <input type="text"
+                                            id="img_title_<?= $image['image_id'] ?>"
+                                            name="title[<?= $image['image_id'] ?>]"
+                                            value="<?= htmlspecialchars($image['title'] ?? '') ?>">
+                                    </div>
                                 </div>
+                                <!-- Description -->
                                 <div class="ep-field full">
-                                    <label>Description</label>
-                                    <textarea name="description[<?= $image['image_id'] ?>]"><?= htmlspecialchars($image['description'] ?? '') ?></textarea>
+                                    <div class="ep-img-field-header">
+                                        <label for="img_desc_<?= $image['image_id'] ?>">Description</label>
+                                        <button type="button" class="ep-ai-btn"
+                                            onclick="AISeo.generateImageMeta(<?= $image['image_id'] ?>, 'description', this)">
+                                            <i class="fas fa-robot"></i> Generate
+                                        </button>
+                                    </div>
+                                    <div class="ai-field-relative" style="position:relative">
+                                        <textarea
+                                            id="img_desc_<?= $image['image_id'] ?>"
+                                            name="description[<?= $image['image_id'] ?>]"><?= htmlspecialchars($image['description'] ?? '') ?></textarea>
+                                    </div>
                                 </div>
+                                <!-- Caption -->
                                 <div class="ep-field full">
-                                    <label>Caption</label>
-                                    <textarea name="caption[<?= $image['image_id'] ?>]"><?= htmlspecialchars($image['caption'] ?? '') ?></textarea>
+                                    <div class="ep-img-field-header">
+                                        <label for="img_caption_<?= $image['image_id'] ?>">Caption</label>
+                                        <button type="button" class="ep-ai-btn"
+                                            onclick="AISeo.generateImageMeta(<?= $image['image_id'] ?>, 'caption', this)">
+                                            <i class="fas fa-robot"></i> Generate
+                                        </button>
+                                    </div>
+                                    <div class="ai-field-relative" style="position:relative">
+                                        <textarea
+                                            id="img_caption_<?= $image['image_id'] ?>"
+                                            name="caption[<?= $image['image_id'] ?>]"><?= htmlspecialchars($image['caption'] ?? '') ?></textarea>
+                                    </div>
                                 </div>
                             </div>
                             <div class="ep-image-actions">
@@ -1141,6 +1352,12 @@ select.vb-input-ep { cursor:pointer; }
                 <p style="color: var(--muted);">No images available for this product.</p>
             <?php endif; ?>
         </div>
+
+        <?php
+        $pmWrapperClass = 'ep-card';
+        $pmHeadingTag = 'h3';
+        include __DIR__ . '/includes/product-media-section.php';
+        ?>
 
         <div class="ep-card">
             <h3>Product Attributes</h3>
@@ -1200,7 +1417,7 @@ select.vb-input-ep { cursor:pointer; }
                         <input type="checkbox" id="enableVariationsEP" style="display:none" <?= $currentProductType === 'variable' ? 'checked' : '' ?>>
                         <div class="vb-toggle-track"><div class="vb-toggle-thumb"></div></div>
                     </div>
-                    <span style="font-weight:700;font-size:.9rem" id="epVarToggleText"><?= $currentProductType === 'variable' ? 'Variable Product (ON)' : 'Variable Product' ?></span>
+                    <span id="epVarToggleText" style="display:inline-flex;align-items:center;height:36px;padding:0 14px;background:#111111 !important;color:#facc15 !important;border:1.5px solid #facc15;border-radius:10px;font-weight:700;font-size:.85rem;white-space:nowrap;"><?= $currentProductType === 'variable' ? 'Variable Product (ON)' : 'Variable Product' ?></span>
                 </label>
             </div>
 
@@ -1243,7 +1460,7 @@ select.vb-input-ep { cursor:pointer; }
             </div>
         </div>
 
-        <div style="display:flex;gap:10px;align-items:center;">
+        <div style="display:flex;gap:10px;align-items:center;padding:16px 0 16px 20px;">
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
                 <?= $pillLabel ?>
             </span>
@@ -1384,14 +1601,14 @@ function epOnValueToggle(type_id, value_id, checked) {
     epRefreshStep3();
 }
 
-// ── Stylish toast notification ──────────────────────────────────
+//  Stylish toast notification 
 function epToast(message, type) {
     // type: 'success' | 'info' | 'warning'
     var existing = document.getElementById('epToastNotif');
     if (existing) existing.remove();
 
     var icons = {
-        success: '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#16a34a;color:#fff;font-size:12px;font-weight:900;margin-right:10px;flex-shrink:0">✓</span>',
+        success: '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#16a34a;color:#fff;font-size:12px;font-weight:900;margin-right:10px;flex-shrink:0"></span>',
         info:    '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#6b7280;color:#fff;font-size:11px;font-weight:900;margin-right:10px;flex-shrink:0">i</span>',
         warning: '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f97316;color:#fff;font-size:12px;font-weight:900;margin-right:10px;flex-shrink:0">!</span>'
     };
@@ -1453,7 +1670,7 @@ function epUpdateComboCount() {
     const total = activeTypes.reduce((acc, t) => acc * (epSelectedValues[t.id]||[]).length, 1);
     const color = total > 100 ? '#ef4444' : total > 50 ? '#f97316' : '#16a34a';
     countEl.innerHTML = `Will generate: <strong style="color:${color}">${total}</strong> combination${total!==1?'s':''}` +
-        (total > 100 ? ' — <span style="color:#ef4444">⚠ Too many! Reduce selection.</span>' : '');
+        (total > 100 ? ' - <span style="color:#ef4444"><i class="fas fa-exclamation-triangle"></i> Too many! Reduce selection.</span>' : '');
 }
 
 function epRefreshStep3() {
@@ -1474,11 +1691,11 @@ function epGenerateVariations() {
     const totalCombos = selectedTypes.reduce((acc, t) => acc * (epSelectedValues[t.id]||[]).length, 1);
     if (totalCombos > 100) {
         const ok = confirm(
-            '⚠️ Warning: ' + totalCombos + ' combinations will be generated.\n\n' +
+            '<i class="fas fa-exclamation-triangle"></i> Warning: ' + totalCombos + ' combinations will be generated.\n\n' +
             'This is a very large number. Please reduce your selection:\n' +
-            '• Only select variation types this product actually needs\n' +
-            '• Only select values this product actually comes in\n\n' +
-            'Recommended: max 30–50 combinations.\n\n' +
+            '- Only select variation types this product actually needs\n' +
+            '- Only select values this product actually comes in\n\n' +
+            'Recommended: max 30-50 combinations.\n\n' +
             'Continue anyway?'
         );
         if (!ok) return;
@@ -1573,7 +1790,7 @@ function epRenderRow(v, i) {
             <span class="ep-drag-handle" title="Drag to reorder"
                 style="cursor:grab;color:#9ca3af;font-size:16px;line-height:1;padding-top:2px;flex-shrink:0;user-select:none"
                 onmousedown="this.closest('tr').setAttribute('draggable','true')"
-                onmouseup="this.closest('tr').setAttribute('draggable','false')">⠿</span>
+                onmouseup="this.closest('tr').setAttribute('draggable','false')"><i class="fas fa-grip-vertical"></i></span>
             <span style="font-weight:700;font-size:.84rem;color:#111;display:block">${epEscHtml(label)}</span>
         </td>
         <td style="min-width:90px">
@@ -1650,7 +1867,7 @@ function epRenderRow(v, i) {
                        border:1px solid #e5e7eb!important;background:#fff!important;color:#9ca3af!important;
                        cursor:pointer;display:inline-flex;align-items:center;justify-content:center"
                 onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fff5f5'"
-                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#9ca3af';this.style.background='#fff'">✕</button>
+                onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#9ca3af';this.style.background='#fff'"><i class="fas fa-times"></i></button>
         </td>
     </tr>`;
 }
@@ -1669,7 +1886,7 @@ function epSyncVariationsJson() {
     document.getElementById('epVariationsJson').value = JSON.stringify(epVariations);
 }
 
-// ── Drag-and-Drop Row Reordering ─────────────────────────────────
+//  Drag-and-Drop Row Reordering 
 let epDragIdx = null;
 
 function epDragStart(event, idx) {
@@ -1774,7 +1991,7 @@ async function epUploadVarImage(input, idx) {
     const file = input.files[0];
     if (!file) return;
     const label = input.closest('label');
-    if (label) { label.style.opacity='0.6'; label.textContent='Uploading…'; }
+    if (label) { label.style.opacity='0.6'; label.textContent='Uploading...'; }
     const fd = new FormData();
     fd.append('variation_image', file);
     try {
@@ -2041,7 +2258,7 @@ function removeAttribute(index, element, attributeId, valueId) {
     }
 }
 
-// ===== Edit Product — SEO Auto-generation =====
+// ===== Edit Product - SEO Auto-generation =====
 function epSeoGetMonthYear() {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const d = new Date();
@@ -2057,11 +2274,19 @@ function epSeoGenerateTitle() {
     if (field) { field.value = title; epSeoUpdateCharCounter('ep_seo_title', 60); epSeoUpdateSnippetPreview(); }
 }
 
+function epStripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
 function epSeoGenerateDescription() {
     const nameEl = document.querySelector('input[name="product_name"]');
     const shortEl = document.querySelector('textarea[name="short_description"]');
     const name = nameEl ? nameEl.value.trim() : '';
-    const shortDesc = shortEl ? shortEl.value.trim() : '';
+    // Strip HTML tags from short description before using as meta description
+    const shortRaw = shortEl ? shortEl.value.trim() : '';
+    const shortDesc = epStripHtml(shortRaw);
     if (!name) return;
     let desc;
     if (shortDesc.length >= 50) {
@@ -2096,8 +2321,8 @@ function epSeoUpdateSnippetPreview() {
     const desc  = (descField  ? descField.value.trim()  : '') || 'Product meta description will appear here...';
     const tEl = document.getElementById('ep_snippet_title');
     const dEl = document.getElementById('ep_snippet_desc');
-    if (tEl) tEl.textContent = title.length > 60 ? title.substring(0, 60) + '…' : title;
-    if (dEl) dEl.textContent = desc.length > 160  ? desc.substring(0, 160) + '…' : desc;
+    if (tEl) tEl.textContent = title.length > 60 ? title.substring(0, 60) + '...' : title;
+    if (dEl) dEl.textContent = desc.length > 160  ? desc.substring(0, 160) + '...' : desc;
 }
 
 function epSeoUpdateCharCounter(fieldId, limit) {
@@ -2123,7 +2348,7 @@ document.addEventListener('DOMContentLoaded', function() {
     epSeoUpdateSnippetPreview();
 });
 
-// ===== Edit Product — SKU Auto-generation =====
+// ===== Edit Product - SKU Auto-generation =====
 function epGenerateProductSku() {
     const catSelect   = document.querySelector('select[name="category_id"]');
     const brandSelect = document.querySelector('select[name="brand_id"]');
@@ -2194,3 +2419,33 @@ async function loadAttributeValues(selectElement) {
     }
 }
 </script>
+
+<!-- AI SEO Assistant JS -->
+<script src="js/ai-seo.js?v=2.7"></script>
+<script src="js/product-media.js?v=1.1"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    AISeo.init({
+        prefix:    'ep_',
+        productId: <?= (int)($product['product_id'] ?? 0) ?>,
+        apiUrl:    'api/ai-seo.php',
+    });
+    ProductMedia.init({
+        mode: 'edit',
+        productId: <?= (int)($product['product_id'] ?? 0) ?>,
+        basePath: <?= json_encode(rtrim((defined('BASE_PATH') ? BASE_PATH : ''), '/')) ?>,
+        existingVideo: <?= json_encode($productVideo ?: null, JSON_UNESCAPED_UNICODE) ?>,
+        existingVideoId: <?= (int)($productVideo['video_id'] ?? 0) ?>,
+        initialGalleryItems: <?= json_encode($galleryOrderItems, JSON_UNESCAPED_UNICODE) ?>,
+        ajaxUploadUrl: 'ajax-upload-product-video.php',
+        ajaxPreviewUrl: 'ajax-fetch-video-preview.php',
+    });
+});
+</script>
+
+
+
+
+
+
+

@@ -35,8 +35,11 @@ class ProductController
         }
 
         if ($product) {
-            // Get product images, reviews, and attributes
-            $images = $productModel->getProductImages($product['product_id']);
+            // Get product gallery (images + video), reviews, and attributes
+            $galleryMedia = $productModel->getProductGalleryMedia($product['product_id']);
+            $images = array_values(array_filter($galleryMedia, static function (array $item): bool {
+                return ($item['type'] ?? 'image') === 'image';
+            }));
             $isComingSoon = !empty($product['product_tag']) && stripos($product['product_tag'], 'coming_soon') !== false;
 
             // Fetch product attributes (legacy system)

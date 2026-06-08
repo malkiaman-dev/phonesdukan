@@ -139,11 +139,12 @@ class ProductModel
     public function getProductImages($productId)
     {
         $stmt = $this->db->prepare('
-            SELECT pi.image_id, pi.image_url, pi.is_primary, 
+            SELECT pi.image_id, pi.image_url, pi.is_primary, pi.sort_order,
                    im.alt_text, im.title, im.description, im.caption
             FROM product_images pi
             LEFT JOIN image_metadata im ON pi.image_id = im.image_id
             WHERE pi.product_id = ?
+            ORDER BY pi.sort_order ASC, pi.is_primary DESC, pi.image_id ASC
         ');
         $stmt->execute([$productId]);
         $productImages = $stmt->fetchAll(PDO::FETCH_ASSOC);
