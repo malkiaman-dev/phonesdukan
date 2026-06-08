@@ -31,7 +31,7 @@ class ProductMediaService
         $existing = $this->model->getProductVideo($productId);
 
         $source = $post['video_source'] ?? 'upload';
-        if (!in_array($source, ['upload', 'youtube', 'vimeo', 'mp4'], true)) {
+        if (!in_array($source, ProductMediaHelper::VIDEO_SOURCES, true)) {
             $source = 'upload';
         }
 

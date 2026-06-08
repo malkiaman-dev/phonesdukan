@@ -20,7 +20,8 @@ if ($url === '') {
 
 $sourceMap = [
     'youtube' => 'youtube',
-    'vimeo' => 'vimeo',
+    'tiktok' => 'tiktok',
+    'facebook' => 'facebook',
     'mp4' => 'mp4',
     'external_mp4' => 'mp4',
 ];
@@ -41,18 +42,5 @@ echo json_encode([
     'video_url' => $normalizedUrl,
     'video_source' => $resolvedSource,
     'thumbnail_url' => $thumbnail,
-    'embed_url' => self_buildEmbedUrl($normalizedUrl, $resolvedSource),
+    'embed_url' => ProductMediaHelper::buildEmbedUrl($normalizedUrl, $resolvedSource),
 ]);
-
-function self_buildEmbedUrl(string $url, string $source): string
-{
-    if ($source === 'youtube') {
-        $id = ProductMediaHelper::extractYouTubeId($url);
-        return $id ? 'https://www.youtube.com/embed/' . $id : $url;
-    }
-    if ($source === 'vimeo') {
-        $id = ProductMediaHelper::extractVimeoId($url);
-        return $id ? 'https://player.vimeo.com/video/' . $id : $url;
-    }
-    return $url;
-}

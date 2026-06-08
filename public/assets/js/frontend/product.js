@@ -42,9 +42,12 @@ function updateMainMedia(thumb) {
         const posterUrl = resolveGalleryMediaUrl(thumb.getAttribute("data-thumb-src") || "");
         let html = "";
 
-        if (source === "youtube" || source === "vimeo") {
-            const autoplayUrl = embedUrl + (embedUrl.indexOf("?") >= 0 ? "&" : "?") + "autoplay=1";
-            html = '<iframe src="' + autoplayUrl + '" title="Product video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+        if (source === "youtube" || source === "tiktok" || source === "facebook") {
+            let iframeUrl = embedUrl;
+            if (source === "youtube") {
+                iframeUrl = embedUrl + (embedUrl.indexOf("?") >= 0 ? "&" : "?") + "autoplay=1";
+            }
+            html = '<iframe src="' + iframeUrl + '" title="Product video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
         } else {
             html = '<video controls playsinline preload="auto"'
                 + (posterUrl ? ' poster="' + posterUrl + '"' : "")
@@ -57,7 +60,7 @@ function updateMainMedia(thumb) {
         mainImage.style.display = "none";
         mainImage.classList.add("is-hidden");
 
-        if (source !== "youtube" && source !== "vimeo") {
+        if (source !== "youtube" && source !== "tiktok" && source !== "facebook") {
             playGalleryVideo(videoContainer.querySelector("video"));
         }
         return;

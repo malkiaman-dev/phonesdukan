@@ -55,8 +55,11 @@ test('Thumbnail directory writable', is_dir($thumbDir) && is_writable($thumbDir)
 $yt = ProductMediaHelper::validateVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'youtube');
 test('YouTube URL validation', $yt['valid'] === true, $yt['message'] ?? $yt['normalized_url'] ?? '');
 
-$vm = ProductMediaHelper::validateVideoUrl('https://vimeo.com/123456789', 'vimeo');
-test('Vimeo URL validation', $vm['valid'] === true, $vm['message'] ?? $vm['normalized_url'] ?? '');
+$tt = ProductMediaHelper::validateVideoUrl('https://www.tiktok.com/@user/video/7123456789012345678', 'tiktok');
+test('TikTok URL validation', $tt['valid'] === true, $tt['message'] ?? $tt['normalized_url'] ?? '');
+
+$fb = ProductMediaHelper::validateVideoUrl('https://www.facebook.com/watch/?v=123456789', 'facebook');
+test('Facebook URL validation', $fb['valid'] === true, $fb['message'] ?? $fb['normalized_url'] ?? '');
 
 $mp4 = ProductMediaHelper::validateVideoUrl('https://example.com/video/sample.mp4', 'mp4');
 test('Direct MP4 URL validation', $mp4['valid'] === true);

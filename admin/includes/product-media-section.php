@@ -25,8 +25,12 @@ $pmHeadingTag = $pmHeadingTag ?? 'h2';
                 <span>YouTube URL</span>
             </label>
             <label class="pm-source-option">
-                <input type="radio" name="video_source" value="vimeo">
-                <span>Vimeo URL</span>
+                <input type="radio" name="video_source" value="tiktok">
+                <span>TikTok URL</span>
+            </label>
+            <label class="pm-source-option">
+                <input type="radio" name="video_source" value="facebook">
+                <span>Facebook URL</span>
             </label>
             <label class="pm-source-option">
                 <input type="radio" name="video_source" value="mp4">

@@ -12,6 +12,8 @@ class ProductMediaHelper
 
     public const ALLOWED_THUMB_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
 
+    public const VIDEO_SOURCES = ['upload', 'youtube', 'tiktok', 'facebook', 'mp4'];
+
     /**
      * @return array{valid:bool,source?:string,message?:string,normalized_url?:string}
      */
@@ -26,23 +28,11 @@ class ProductMediaHelper
             return ['valid' => false, 'message' => 'Please enter a valid URL.'];
         }
 
-        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
-        $host = preg_replace('/^www\./', '', $host);
-        $path = strtolower((string) parse_url($url, PHP_URL_PATH));
-
-        $source = null;
-        if (in_array($host, ['youtube.com', 'youtu.be', 'm.youtube.com'], true)) {
-            $source = 'youtube';
-        } elseif (in_array($host, ['vimeo.com', 'player.vimeo.com'], true)) {
-            $source = 'vimeo';
-        } elseif (preg_match('/\.mp4(\?|$)/i', $path) || preg_match('/\.mp4(\?|$)/i', $url)) {
-            $source = 'mp4';
-        }
-
+        $source = self::detectVideoSource($url);
         if ($source === null) {
             return [
                 'valid' => false,
-                'message' => 'Unsupported URL. Use YouTube, Vimeo, or a direct MP4 link.',
+                'message' => 'Unsupported URL. Use YouTube, TikTok, Facebook, or a direct MP4 link.',
             ];
         }
 
@@ -60,6 +50,31 @@ class ProductMediaHelper
         ];
     }
 
+    public static function detectVideoSource(string $url): ?string
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $host = preg_replace('/^www\./', '', $host);
+        $path = strtolower((string) parse_url($url, PHP_URL_PATH));
+
+        if (in_array($host, ['youtube.com', 'youtu.be', 'm.youtube.com'], true)) {
+            return 'youtube';
+        }
+
+        if (in_array($host, ['tiktok.com', 'vm.tiktok.com', 'vt.tiktok.com'], true)) {
+            return 'tiktok';
+        }
+
+        if (in_array($host, ['facebook.com', 'm.facebook.com', 'web.facebook.com', 'fb.watch'], true)) {
+            return 'facebook';
+        }
+
+        if (preg_match('/\.mp4(\?|$)/i', $path) || preg_match('/\.mp4(\?|$)/i', $url)) {
+            return 'mp4';
+        }
+
+        return null;
+    }
+
     public static function normalizeVideoUrl(string $url, ?string $source = null): string
     {
         $url = trim($url);
@@ -73,9 +88,16 @@ class ProductMediaHelper
             return $id ? 'https://www.youtube.com/watch?v=' . $id : $url;
         }
 
-        if ($source === 'vimeo') {
-            $id = self::extractVimeoId($url);
-            return $id ? 'https://vimeo.com/' . $id : $url;
+        if ($source === 'tiktok') {
+            $id = self::extractTikTokId($url);
+            if ($id) {
+                return 'https://www.tiktok.com/video/' . $id;
+            }
+            return $url;
+        }
+
+        if ($source === 'facebook') {
+            return $url;
         }
 
         return $url;
@@ -98,17 +120,20 @@ class ProductMediaHelper
         return null;
     }
 
-    public static function extractVimeoId(string $url): ?string
+    public static function extractTikTokId(string $url): ?string
     {
-        if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $m)) {
+        if (preg_match('/\/video\/(\d+)/', $url, $m)) {
             return $m[1];
         }
+
+        $oembed = self::fetchOembed('https://www.tiktok.com/oembed?url=' . urlencode($url));
+        if (!empty($oembed['embed_product_id'])) {
+            return (string) $oembed['embed_product_id'];
+        }
+
         return null;
     }
 
-    /**
-     * @return string|null Public URL path for auto-generated thumbnail
-     */
     public static function buildEmbedUrl(string $videoUrl, string $source): string
     {
         if ($source === 'youtube') {
@@ -116,9 +141,15 @@ class ProductMediaHelper
             return $id ? 'https://www.youtube.com/embed/' . $id : $videoUrl;
         }
 
-        if ($source === 'vimeo') {
-            $id = self::extractVimeoId($videoUrl);
-            return $id ? 'https://player.vimeo.com/video/' . $id : $videoUrl;
+        if ($source === 'tiktok') {
+            $id = self::extractTikTokId($videoUrl);
+            return $id ? 'https://www.tiktok.com/embed/v2/' . $id : $videoUrl;
+        }
+
+        if ($source === 'facebook') {
+            return 'https://www.facebook.com/plugins/video.php?href='
+                . urlencode($videoUrl)
+                . '&show_text=false&width=560';
         }
 
         return $videoUrl;
@@ -131,21 +162,38 @@ class ProductMediaHelper
             return $id ? 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg' : null;
         }
 
-        if ($source === 'vimeo') {
-            $id = self::extractVimeoId($videoUrl);
-            if (!$id) {
-                return null;
-            }
-            $oembed = @file_get_contents('https://vimeo.com/api/oembed.json?url=' . urlencode('https://vimeo.com/' . $id));
-            if ($oembed) {
-                $data = json_decode($oembed, true);
-                if (!empty($data['thumbnail_url'])) {
-                    return $data['thumbnail_url'];
-                }
-            }
+        if ($source === 'tiktok') {
+            $oembed = self::fetchOembed('https://www.tiktok.com/oembed?url=' . urlencode($videoUrl));
+            return $oembed['thumbnail_url'] ?? null;
+        }
+
+        if ($source === 'facebook') {
+            $oembed = self::fetchOembed(
+                'https://www.facebook.com/plugins/video/oembed.json/?url=' . urlencode($videoUrl)
+            );
+            return $oembed['thumbnail_url'] ?? null;
         }
 
         return null;
+    }
+
+    /**
+     * @return array<string,mixed>|null
+     */
+    private static function fetchOembed(string $endpoint): ?array
+    {
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 8,
+                'header' => "User-Agent: PhonesDukan/1.0\r\n",
+            ],
+        ]);
+        $raw = @file_get_contents($endpoint, false, $context);
+        if (!$raw) {
+            return null;
+        }
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : null;
     }
 
     public static function sanitizeFilename(string $name): string

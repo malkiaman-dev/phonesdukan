@@ -2422,7 +2422,7 @@ async function loadAttributeValues(selectElement) {
 
 <!-- AI SEO Assistant JS -->
 <script src="js/ai-seo.js?v=2.7"></script>
-<script src="js/product-media.js?v=1.1"></script>
+<script src="js/product-media.js?v=1.2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     AISeo.init({

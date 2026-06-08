@@ -16,7 +16,7 @@ class ProductMediaModel
         $this->db->exec("CREATE TABLE IF NOT EXISTS `product_videos` (
             `video_id` INT NOT NULL AUTO_INCREMENT,
             `product_id` INT NOT NULL,
-            `video_source` ENUM('upload','youtube','vimeo','mp4') NOT NULL DEFAULT 'upload',
+            `video_source` ENUM('upload','youtube','tiktok','facebook','mp4') NOT NULL DEFAULT 'upload',
             `video_url` VARCHAR(500) NOT NULL,
             `thumbnail_url` VARCHAR(500) DEFAULT NULL,
             `custom_thumbnail_url` VARCHAR(500) DEFAULT NULL,
@@ -31,6 +31,15 @@ class ProductMediaModel
         $col = $this->db->query("SHOW COLUMNS FROM `product_images` LIKE 'sort_order'")->fetch(PDO::FETCH_ASSOC);
         if (!$col) {
             $this->db->exec('ALTER TABLE `product_images` ADD COLUMN `sort_order` INT NOT NULL DEFAULT 0');
+        }
+
+        $videoSourceCol = $this->db->query("SHOW COLUMNS FROM `product_videos` LIKE 'video_source'")->fetch(PDO::FETCH_ASSOC);
+        if ($videoSourceCol && strpos((string) $videoSourceCol['Type'], 'tiktok') === false) {
+            $this->db->exec("UPDATE `product_videos` SET `video_source` = 'mp4' WHERE `video_source` = 'vimeo'");
+            $this->db->exec(
+                "ALTER TABLE `product_videos` MODIFY `video_source`
+                 ENUM('upload','youtube','tiktok','facebook','mp4') NOT NULL DEFAULT 'upload'"
+            );
         }
     }
 

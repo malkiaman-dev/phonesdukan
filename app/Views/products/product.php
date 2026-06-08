@@ -162,7 +162,7 @@ foreach ($paragraphs as $index => $para) {
                                 <?php
                                 $embedUrl = (string) ($firstItem['embed_url'] ?? $firstItem['video_url'] ?? '');
                                 $videoSource = (string) ($firstItem['video_source'] ?? 'upload');
-                                if (in_array($videoSource, ['youtube', 'vimeo'], true)):
+                                if (in_array($videoSource, ['youtube', 'tiktok', 'facebook'], true)):
                                 ?>
                                     <iframe src="<?= htmlspecialchars($embedUrl) ?>"
                                             title="Product video"

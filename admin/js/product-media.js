@@ -106,8 +106,19 @@ const ProductMedia = (function () {
     function togglePanels() {
         const uploadPanel = $('pm-upload-panel');
         const urlPanel = $('pm-url-panel');
+        const urlInput = $('pm_video_url');
         if (uploadPanel) uploadPanel.classList.toggle('is-active', state.videoSource === 'upload');
         if (urlPanel) urlPanel.classList.toggle('is-active', state.videoSource !== 'upload');
+
+        const placeholders = {
+            youtube: 'https://youtube.com/watch?v=...',
+            tiktok: 'https://www.tiktok.com/@user/video/...',
+            facebook: 'https://www.facebook.com/watch/?v=...',
+            mp4: 'https://example.com/video.mp4',
+        };
+        if (urlInput && state.videoSource !== 'upload') {
+            urlInput.placeholder = placeholders[state.videoSource] || 'https://...';
+        }
     }
 
     function bindUploadPanel() {
@@ -430,7 +441,7 @@ const ProductMedia = (function () {
             return false;
         }
 
-        const sourceMap = { youtube: 'youtube', vimeo: 'vimeo', mp4: 'mp4' };
+        const sourceMap = { youtube: 'youtube', tiktok: 'tiktok', facebook: 'facebook', mp4: 'mp4' };
         const fd = new FormData();
         fd.append('video_url', url);
         fd.append('video_source', sourceMap[state.videoSource] || state.videoSource);
@@ -486,7 +497,7 @@ const ProductMedia = (function () {
         let html = '';
         if (source === 'upload') {
             html = '<video src="' + esc(mediaUrl(embedUrl)) + '" controls playsinline></video>';
-        } else if (source === 'youtube' || source === 'vimeo') {
+        } else if (source === 'youtube' || source === 'tiktok' || source === 'facebook') {
             html = '<iframe src="' + esc(embedUrl) + '" allowfullscreen loading="lazy"></iframe>';
         } else {
             html = '<video src="' + esc(mediaUrl(embedUrl)) + '" controls playsinline></video>';
@@ -566,9 +577,12 @@ const ProductMedia = (function () {
         if (state.videoSource === 'youtube') {
             const m = state.videoUrl.match(/[?&]v=([^&]+)/) || state.videoUrl.match(/youtu\.be\/([^?]+)/);
             embed = m ? 'https://www.youtube.com/embed/' + m[1] : state.videoUrl;
-        } else if (state.videoSource === 'vimeo') {
-            const m = state.videoUrl.match(/vimeo\.com\/(\d+)/);
-            embed = m ? 'https://player.vimeo.com/video/' + m[1] : state.videoUrl;
+        } else if (state.videoSource === 'tiktok') {
+            const m = state.videoUrl.match(/\/video\/(\d+)/);
+            embed = m ? 'https://www.tiktok.com/embed/v2/' + m[1] : state.videoUrl;
+        } else if (state.videoSource === 'facebook') {
+            embed = 'https://www.facebook.com/plugins/video.php?href='
+                + encodeURIComponent(state.videoUrl) + '&show_text=false&width=560';
         }
         state.embedUrl = embed;
         showVideoPreview(state.videoSource, embed, state.customThumbnailUrl || state.thumbnailUrl);
