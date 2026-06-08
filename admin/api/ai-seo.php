@@ -45,17 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ── Config ─────────────────────────────────────────────────────────────────
-$aiSeoSecretsFile = dirname(__DIR__, 2) . '/app/config/ai-seo.secrets.php';
-if (!is_file($aiSeoSecretsFile)) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error'   => 'AI SEO secrets not configured. Copy app/config/ai-seo.secrets.example.php to ai-seo.secrets.php',
-    ]);
-    exit;
-}
-require_once $aiSeoSecretsFile;
-
+const GROQ_API_KEY        = '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';
 const GROQ_ENDPOINT       = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL          = 'llama-3.3-70b-versatile'; // Primary: 70B, best quality
 const GROQ_FALLBACK       = 'llama-3.1-8b-instant';    // Fallback: smaller but confirmed active
