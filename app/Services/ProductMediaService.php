@@ -52,6 +52,11 @@ class ProductMediaService
             $videoUrl = $validation['normalized_url'];
             if (!$thumbnailUrl) {
                 $thumbnailUrl = ProductMediaHelper::getRemoteThumbnailUrl($videoUrl, $validation['source']);
+            } elseif (preg_match('#^https?://#i', $thumbnailUrl)) {
+                $cached = ProductMediaHelper::cacheRemoteThumbnail($thumbnailUrl, $source . '_thumb');
+                if ($cached !== null) {
+                    $thumbnailUrl = $cached;
+                }
             }
         }
 

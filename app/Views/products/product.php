@@ -197,7 +197,8 @@ foreach ($paragraphs as $index => $para) {
                                             onclick="updateMainMedia(this)"
                                             aria-label="Play product video">
                                         <?php if ($thumbUrl): ?>
-                                            <img src="<?= htmlspecialchars($thumbUrl) ?>" alt="Product video">
+                                            <img src="<?= htmlspecialchars($thumbUrl) ?>" alt="Product video"
+                                                 onerror="this.style.display='none'; this.closest('.thumbnail-video')?.classList.add('is-missing-thumb');">
                                         <?php endif; ?>
                                         <span class="thumbnail-play-icon" aria-hidden="true">▶</span>
                                     </button>

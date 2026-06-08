@@ -132,18 +132,9 @@ if (!function_exists('normalizeMediaUrl')) {
             return $mediaUrl;
         }
 
+        // External URLs (e.g. signed TikTok/Facebook CDN links) must not be re-encoded.
         if (preg_match('#^https?://#i', $mediaUrl)) {
-            $parts = parse_url($mediaUrl);
-            if (!is_array($parts)) {
-                return $mediaUrl;
-            }
-            $scheme = $parts['scheme'] ?? 'https';
-            $host = $parts['host'] ?? '';
-            $port = isset($parts['port']) ? ':' . $parts['port'] : '';
-            $path = isset($parts['path']) ? encodeUrlPath($parts['path']) : '';
-            $query = isset($parts['query']) ? '?' . $parts['query'] : '';
-            $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
-            return $scheme . '://' . $host . $port . $path . $query . $fragment;
+            return $mediaUrl;
         }
 
         $query = '';

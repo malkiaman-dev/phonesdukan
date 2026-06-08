@@ -157,24 +157,67 @@ class ProductMediaHelper
 
     public static function getRemoteThumbnailUrl(string $videoUrl, string $source): ?string
     {
+        $remote = null;
+
         if ($source === 'youtube') {
             $id = self::extractYouTubeId($videoUrl);
-            return $id ? 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg' : null;
-        }
-
-        if ($source === 'tiktok') {
+            $remote = $id ? 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg' : null;
+        } elseif ($source === 'tiktok') {
             $oembed = self::fetchOembed('https://www.tiktok.com/oembed?url=' . urlencode($videoUrl));
-            return $oembed['thumbnail_url'] ?? null;
-        }
-
-        if ($source === 'facebook') {
+            $remote = $oembed['thumbnail_url'] ?? null;
+        } elseif ($source === 'facebook') {
             $oembed = self::fetchOembed(
                 'https://www.facebook.com/plugins/video/oembed.json/?url=' . urlencode($videoUrl)
             );
-            return $oembed['thumbnail_url'] ?? null;
+            $remote = $oembed['thumbnail_url'] ?? null;
         }
 
-        return null;
+        if ($remote === null) {
+            return null;
+        }
+
+        return self::cacheRemoteThumbnail($remote, $source . '_thumb') ?? $remote;
+    }
+
+    /**
+     * Download a remote thumbnail and store it locally so signed CDN URLs keep working.
+     */
+    public static function cacheRemoteThumbnail(string $remoteUrl, string $prefix = 'remote'): ?string
+    {
+        $remoteUrl = trim($remoteUrl);
+        if ($remoteUrl === '' || !preg_match('#^https?://#i', $remoteUrl)) {
+            return null;
+        }
+
+        $thumbDir = dirname(__DIR__, 2) . '/public/uploads/products/videos/thumbnails/';
+        if (!is_dir($thumbDir)) {
+            mkdir($thumbDir, 0755, true);
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 12,
+                'header' => "User-Agent: Mozilla/5.0 (compatible; PhonesDukan/1.0)\r\nAccept: image/*\r\n",
+            ],
+        ]);
+        $data = @file_get_contents($remoteUrl, false, $context);
+        if ($data === false || $data === '') {
+            return null;
+        }
+
+        $ext = 'jpg';
+        $path = (string) parse_url($remoteUrl, PHP_URL_PATH);
+        if (preg_match('/\.(jpe?g|png|webp)$/i', $path, $m)) {
+            $ext = strtolower($m[1] === 'jpeg' ? 'jpg' : $m[1]);
+        }
+
+        $filename = preg_replace('/[^a-z0-9_-]+/i', '_', $prefix) . '_' . uniqid('', true) . '.' . $ext;
+        $dest = self::uniquePath($thumbDir, $filename);
+        if (@file_put_contents($dest, $data) === false) {
+            return null;
+        }
+
+        return '/public/uploads/products/videos/thumbnails/' . basename($dest);
     }
 
     /**
@@ -184,8 +227,8 @@ class ProductMediaHelper
     {
         $context = stream_context_create([
             'http' => [
-                'timeout' => 8,
-                'header' => "User-Agent: PhonesDukan/1.0\r\n",
+                'timeout' => 10,
+                'header' => "User-Agent: Mozilla/5.0 (compatible; PhonesDukan/1.0)\r\nAccept: application/json\r\n",
             ],
         ]);
         $raw = @file_get_contents($endpoint, false, $context);
