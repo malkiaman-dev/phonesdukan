@@ -19,6 +19,12 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 }
 
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+$statusFilterLabels = [
+    'all' => 'All',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'coming_soon' => 'Coming Soon',
+];
 $search_query  = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 $whereClauses = [];
@@ -26,6 +32,8 @@ if ($status_filter === 'active') {
     $whereClauses[] = 'p.product_status = 1';
 } elseif ($status_filter === 'inactive') {
     $whereClauses[] = 'p.product_status = 0';
+} elseif ($status_filter === 'coming_soon') {
+    $whereClauses[] = 'p.product_status = 2';
 }
 
 if (!empty($search_query)) {
@@ -507,7 +515,8 @@ if (!$result) {
         }
         /* Status badge (same style as stock for visibility) */
         .status-active,
-        .status-inactive {
+        .status-inactive,
+        .status-coming-soon {
             background: var(--light-yellow) !important;
             border: 1px solid var(--yellow) !important;
             color: var(--black) !important;
@@ -784,17 +793,19 @@ if (!$result) {
                 <label for="status">Filter:</label>
                 <select name="status" id="status" class="native-filter-select">
                     <option value="all"      <?= ($status_filter === 'all')      ? 'selected' : '' ?>>All</option>
-                    <option value="active"   <?= ($status_filter === 'active')   ? 'selected' : '' ?>>Active</option>
-                    <option value="inactive" <?= ($status_filter === 'inactive') ? 'selected' : '' ?>>Inactive</option>
+                    <option value="active"       <?= ($status_filter === 'active')       ? 'selected' : '' ?>>Active</option>
+                    <option value="inactive"     <?= ($status_filter === 'inactive')     ? 'selected' : '' ?>>Inactive</option>
+                    <option value="coming_soon"  <?= ($status_filter === 'coming_soon')  ? 'selected' : '' ?>>Coming Soon</option>
                 </select>
                 <div class="filter-select-wrap" data-filter-select>
                     <button type="button" class="filter-display" data-filter-display>
-                        <?= $status_filter === 'all' ? 'All' : htmlspecialchars(ucfirst($status_filter)) ?>
+                        <?= htmlspecialchars($statusFilterLabels[$status_filter] ?? 'All') ?>
                     </button>
                     <ul class="filter-options" data-filter-options>
                         <li><button type="button" class="filter-option <?= $status_filter === 'all' ? 'is-selected' : '' ?>" data-value="all">All</button></li>
                         <li><button type="button" class="filter-option <?= $status_filter === 'active' ? 'is-selected' : '' ?>" data-value="active">Active</button></li>
                         <li><button type="button" class="filter-option <?= $status_filter === 'inactive' ? 'is-selected' : '' ?>" data-value="inactive">Inactive</button></li>
+                        <li><button type="button" class="filter-option <?= $status_filter === 'coming_soon' ? 'is-selected' : '' ?>" data-value="coming_soon">Coming Soon</button></li>
                     </ul>
                 </div>
                 <?php if (!empty($search_query)): ?>
@@ -923,8 +934,9 @@ if (!$result) {
                     <td class="prd-price" data-label="Price">Rs. <?= number_format((float)($row['sale_price'] ?? $row['regular_price']), 0) ?></td>
                     <td data-label="Stock"><span class="stock-badge <?= $stockClass ?>"><?= $stockLabel ?></span></td>
                     <td data-label="Status">
-                        <span class="status-badge <?= $row['product_status'] ? 'status-active' : 'status-inactive' ?>">
-                            <?= $row['product_status'] ? 'Active' : 'Inactive' ?>
+                        <?php $productStatusVal = (int) ($row['product_status'] ?? 0); ?>
+                        <span class="status-badge <?= getProductStatusCssClass($productStatusVal) ?>">
+                            <?= htmlspecialchars(getProductStatusLabel($productStatusVal)) ?>
                         </span>
                     </td>
                     <td data-label="Date"><?= date('d M Y', strtotime($row['created_at'])) ?></td>

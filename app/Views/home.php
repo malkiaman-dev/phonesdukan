@@ -1,5 +1,4 @@
 <?php
-$showPreloader = true;
 $pageTitle       = 'Best Mobile Deals &amp; Prices in Pakistan - Phones Dukan';
 $metaDescription = 'Shop top-rated mobiles, smartwatches, and accessories at Phones Dukan – Pakistan\'s trusted store. Best prices, quality, and fast delivery. Explore now!';
 $metaRobots      = 'index, follow';
@@ -26,15 +25,7 @@ $seen_ids = [];
 $unique_products = [];
 
 foreach ($products as $product) {
-    $product_status = strtolower(trim($product['product_status'] ?? ''));
-
-    // ✅ Skip if out of stock
-    if ($product_status === '0' || $product_status === 'out of stock') {
-        continue;
-    }
-
-    // ✅ Skip duplicates
-    if (!in_array($product['product_id'], $seen_ids)) {
+    if (!in_array($product['product_id'], $seen_ids, true)) {
         $unique_products[] = $product;
         $seen_ids[] = $product['product_id'];
     }
@@ -213,66 +204,33 @@ foreach ($latest_posts_raw as $post) {
         <div class="na-grid" data-carousel>
             <?php if (!empty($products)): ?>
                 <?php foreach (array_slice($products, 0, 4) as $product): ?>
-                <?php
-                $product_name   = !empty($product['product_name'])   ? htmlspecialchars($product['product_name'])   : 'Unnamed Product';
-                $category_slug  = !empty($product['category_slug'])  ? htmlspecialchars($product['category_slug'])  : 'unknown-category';
-                $brand_slug     = !empty($product['brand_slug'])     ? htmlspecialchars($product['brand_slug'])     : 'unknown-brand';
-                $product_slug   = !empty($product['product_slug'])   ? htmlspecialchars($product['product_slug'])   : 'unknown-product';
-                $product_image  = !empty($product['image_url']) ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url'])) : '/public/assets/images/Phones_dukan_favicon.png';
-                $product_url    = buildProductPath((string)($product['category_slug'] ?? ''), (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? ''));
-
-                $has_sale  = !empty($product['sale_price']) && !empty($product['regular_price']);
-                $unit_price = $has_sale ? $product['sale_price'] : ($product['regular_price'] ?? 0);
-                $discount_pct = $has_sale
-                    ? max(1, round((($product['regular_price'] - $product['sale_price']) / $product['regular_price']) * 100))
-                    : 0;
-                ?>
 
                 <div class="na-card">
-                    <?php if ($product['is_sold_out']): ?>
-                        <span class="na-badge na-badge--sold">Sold Out</span>
-                    <?php elseif ($discount_pct > 0): ?>
-                        <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                    <?php endif; ?>
+                    <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
-                    <a href="<?= $product_url ?>" class="na-img-link">
+                    <a href="<?= $product['product_url'] ?>" class="na-img-link">
                         <div class="na-img-box">
-                            <img src="<?= $product_image ?>" alt="<?= $product_name ?>" loading="lazy" decoding="async">
+                            <img src="<?= $product['product_image'] ?>" alt="<?= $product['product_name'] ?>" loading="lazy" decoding="async">
                         </div>
                     </a>
 
                     <div class="na-body">
                         <h3 class="na-name">
-                            <a href="<?= $product_url ?>"><?= $product_name ?></a>
+                            <a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a>
                         </h3>
 
                         <div class="na-price">
-                            <?php if ($has_sale): ?>
+                            <?php if ($product['has_sale']): ?>
                                 <span class="na-price--old">Rs.<?= number_format($product['regular_price']) ?></span>
                                 <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
-                            <?php elseif (!empty($product['regular_price'])): ?>
+                            <?php elseif ($product['regular_price'] > 0): ?>
                                 <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
                             <?php else: ?>
                                 <span class="na-price--na">Price N/A</span>
                             <?php endif; ?>
                         </div>
 
-                        <div class="na-actions">
-                            <?php if (!$product['is_sold_out']): ?>
-                                <button class="na-btn na-btn--cart"
-                                    data-product-id="<?= (int)$product['product_id'] ?>"
-                                    data-unit-price="<?= (float)$unit_price ?>">
-                                    Add to Cart
-                                </button>
-                                <button class="na-btn na-btn--buy buy-button"
-                                    data-product-id="<?= (int)$product['product_id'] ?>"
-                                    data-unit-price="<?= (float)$unit_price ?>">
-                                    Buy Now
-                                </button>
-                            <?php else: ?>
-                                <span class="na-btn na-btn--soldout">Sold Out</span>
-                            <?php endif; ?>
-                        </div>
+                        <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -401,45 +359,16 @@ foreach ($latest_posts_raw as $post) {
             $products = $productModel->getSmartWatches(20);
 
             if (!empty($products)):
-                foreach ($products as $product):
-                    $product_name = !empty($product['product_name'])
-                        ? htmlspecialchars($product['product_name'])
-                        : 'Unnamed Product';
-
-                    $brand_slug = !empty($product['brand_slug'])
-                        ? htmlspecialchars($product['brand_slug'])
-                        : 'unknown-brand';
-
-                    $product_slug = !empty($product['product_slug'])
-                        ? htmlspecialchars($product['product_slug'])
-                        : 'unknown-product';
-
-                    $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
-                        : '/public/assets/images/Phones_dukan_favicon.png';
-
-                    $product_url = buildProductPath('smart-watches', (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? ''));
-
-                    $has_sale = !empty($product['sale_price']) && !empty($product['regular_price']);
-
-                    $unit_price = $has_sale
-                        ? (float)$product['sale_price']
-                        : (float)($product['regular_price'] ?? 0);
-
-                    $discount_pct = ($has_sale && !empty($product['regular_price']) && (float)$product['regular_price'] > 0)
-                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
-                        : 0;
-
-                    $is_sold_out = (isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0)
-                        || (!empty($product['is_sold_out']));
+                foreach ($products as $row):
+                    $product = prepareProductCardFromRow($row);
+                    $product_url = $product['product_url'];
+                    $product_name = $product['product_name'];
+                    $product_image = $product['product_image'];
+                    $has_sale = $product['has_sale'];
                     ?>
 
                     <div class="na-card">
-                        <?php if ($is_sold_out): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($discount_pct > 0): ?>
-                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -463,22 +392,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$is_sold_out): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </div>
                 <?php
@@ -510,49 +424,16 @@ foreach ($latest_posts_raw as $post) {
             $products = $productModel->getCategory13Products(20);
 
             if (!empty($products)):
-                foreach ($products as $product):
-                    $product_name = !empty($product['product_name'])
-                        ? htmlspecialchars($product['product_name'])
-                        : 'Unnamed Product';
-
-                    $category_slug = !empty($product['category_slug'])
-                        ? htmlspecialchars($product['category_slug'])
-                        : 'unknown-category';
-
-                    $brand_slug = !empty($product['brand_slug'])
-                        ? htmlspecialchars($product['brand_slug'])
-                        : 'unknown-brand';
-
-                    $product_slug = !empty($product['product_slug'])
-                        ? htmlspecialchars($product['product_slug'])
-                        : 'unknown-product';
-
-                    $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
-                        : '/public/assets/images/Phones_dukan_favicon.png';
-
-                    $product_url = buildProductPath((string)($product['category_slug'] ?? ''), (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? ''));
-
-                    $has_sale = !empty($product['sale_price']) && !empty($product['regular_price']);
-
-                    $unit_price = $has_sale
-                        ? (float)$product['sale_price']
-                        : (float)($product['regular_price'] ?? 0);
-
-                    $discount_pct = ($has_sale && !empty($product['regular_price']) && (float)$product['regular_price'] > 0)
-                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
-                        : 0;
-
-                    $is_sold_out = (isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0)
-                        || (!empty($product['is_sold_out']));
+                foreach ($products as $row):
+                    $product = prepareProductCardFromRow($row);
+                    $product_url = $product['product_url'];
+                    $product_name = $product['product_name'];
+                    $product_image = $product['product_image'];
+                    $has_sale = $product['has_sale'];
                     ?>
 
                     <div class="na-card eb-card">
-                        <?php if ($is_sold_out): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($discount_pct > 0): ?>
-                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -584,22 +465,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions eb-actions">
-                                <?php if (!$is_sold_out): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </div>
                 <?php
@@ -662,31 +528,16 @@ foreach ($latest_posts_raw as $post) {
             $products = $productModel->getCategory2Products(20);
 
             if (!empty($products)):
-                foreach ($products as $product):
-                    $product_url = buildProductPath(
-                        (string)($product['category_slug'] ?? ''),
-                        (string)($product['brand_slug'] ?? ''),
-                        (string)($product['product_slug'] ?? '')
-                    );
-
-                    $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
-                    $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
-                    $discount_pct = ($has_sale && (float)$product['regular_price'] > 0)
-                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
-                        : 0;
-                    $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
-                    $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
-                    $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
-                        : '/public/assets/images/Phones_dukan_favicon.png';
+                foreach ($products as $row):
+                    $product = prepareProductCardFromRow($row);
+                    $product_url = $product['product_url'];
+                    $product_name = $product['product_name'];
+                    $product_image = $product['product_image'];
+                    $has_sale = $product['has_sale'];
                     ?>
 
                     <div class="na-card mob-card">
-                        <?php if ($is_sold_out): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($discount_pct > 0): ?>
-                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -712,22 +563,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$is_sold_out): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </div>
                 <?php
@@ -775,31 +611,16 @@ foreach ($latest_posts_raw as $post) {
             $products = $productModel->getCategory9Products(20);
 
             if (!empty($products)):
-                foreach ($products as $product):
-                    $product_url = buildProductPath(
-                        (string)($product['category_slug'] ?? ''),
-                        (string)($product['brand_slug'] ?? ''),
-                        (string)($product['product_slug'] ?? '')
-                    );
-
-                    $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
-                    $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
-                    $discount_pct = ($has_sale && (float)$product['regular_price'] > 0)
-                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
-                        : 0;
-                    $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
-                    $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
-                    $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
-                        : '/public/assets/images/Phones_dukan_favicon.png';
+                foreach ($products as $row):
+                    $product = prepareProductCardFromRow($row);
+                    $product_url = $product['product_url'];
+                    $product_name = $product['product_name'];
+                    $product_image = $product['product_image'];
+                    $has_sale = $product['has_sale'];
                     ?>
 
                     <div class="na-card">
-                        <?php if ($is_sold_out): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($discount_pct > 0): ?>
-                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -823,22 +644,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$is_sold_out): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </div>
                 <?php
@@ -870,31 +676,16 @@ foreach ($latest_posts_raw as $post) {
             $products = $productModel->getCategory10Products(20);
 
             if (!empty($products)):
-                foreach ($products as $product):
-                    $product_url = buildProductPath(
-                        (string)($product['category_slug'] ?? ''),
-                        (string)($product['brand_slug'] ?? ''),
-                        (string)($product['product_slug'] ?? '')
-                    );
-
-                    $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
-                    $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
-                    $discount_pct = ($has_sale && (float)$product['regular_price'] > 0)
-                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
-                        : 0;
-                    $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
-                    $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
-                    $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
-                        : '/public/assets/images/Phones_dukan_favicon.png';
+                foreach ($products as $row):
+                    $product = prepareProductCardFromRow($row);
+                    $product_url = $product['product_url'];
+                    $product_name = $product['product_name'];
+                    $product_image = $product['product_image'];
+                    $has_sale = $product['has_sale'];
                     ?>
 
                     <div class="na-card">
-                        <?php if ($is_sold_out): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($discount_pct > 0): ?>
-                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -918,22 +709,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$is_sold_out): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </div>
                 <?php
@@ -964,31 +740,16 @@ foreach ($latest_posts_raw as $post) {
             $products = $productModel->getCategory4Products(20);
 
             if (!empty($products)):
-                foreach ($products as $product):
-                    $product_url = buildProductPath(
-                        (string)($product['category_slug'] ?? ''),
-                        (string)($product['brand_slug'] ?? ''),
-                        (string)($product['product_slug'] ?? '')
-                    );
-
-                    $has_sale    = !empty($product['sale_price']) && !empty($product['regular_price']);
-                    $unit_price  = $has_sale ? (float)$product['sale_price'] : (float)($product['regular_price'] ?? 0);
-                    $discount_pct = ($has_sale && (float)$product['regular_price'] > 0)
-                        ? max(1, round((((float)$product['regular_price'] - (float)$product['sale_price']) / (float)$product['regular_price']) * 100))
-                        : 0;
-                    $is_sold_out  = isset($product['stock_quantity']) && (int)$product['stock_quantity'] === 0;
-                    $product_name  = htmlspecialchars($product['product_name'] ?? 'Unnamed Product');
-                    $product_image = !empty($product['image_url'])
-                        ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']))
-                        : '/public/assets/images/Phones_dukan_favicon.png';
+                foreach ($products as $row):
+                    $product = prepareProductCardFromRow($row);
+                    $product_url = $product['product_url'];
+                    $product_name = $product['product_name'];
+                    $product_image = $product['product_image'];
+                    $has_sale = $product['has_sale'];
                     ?>
 
                     <div class="na-card">
-                        <?php if ($is_sold_out): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($discount_pct > 0): ?>
-                            <span class="na-badge"><?= $discount_pct ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product_url ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -1012,22 +773,7 @@ foreach ($latest_posts_raw as $post) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$is_sold_out): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= (int)$product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$unit_price ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </div>
                 <?php

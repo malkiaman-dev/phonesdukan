@@ -21,6 +21,7 @@ $paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
 $offset = ($paged - 1) * $limit;
 
 $query = "SELECT p.product_id, p.product_slug, p.product_name, p.regular_price, p.sale_price, p.stock_quantity,
+                 p.product_status, p.product_tag,
                  pi.image_url, b.slug AS brand_slug, c.slug AS category_slug
           FROM products p
           JOIN brands b ON p.brand_id = b.brand_id
@@ -78,48 +79,29 @@ $conn = null;
     <div class="mob-products-inner">
         <?php if (!empty($products)): ?>
         <div class="mob-product-grid">
-            <?php foreach ($products as $product):
-                $product['regular_price']  = floatval($product['regular_price']);
-                $product['sale_price']     = !empty($product['sale_price']) ? floatval($product['sale_price']) : null;
-                $product['stock_quantity'] = intval($product['stock_quantity']);
-                $product['is_sold_out']    = ($product['stock_quantity'] <= 0);
-                $product['is_on_sale']     = (!$product['is_sold_out'] && $product['sale_price'] !== null && $product['sale_price'] > 0 && $product['sale_price'] < $product['regular_price']);
-                $product['unit_price']     = ($product['sale_price'] !== null && $product['sale_price'] > 0) ? $product['sale_price'] : $product['regular_price'];
-                $product['discount_pct']   = ($product['is_on_sale'] && $product['regular_price'] > 0) ? round((($product['regular_price'] - $product['sale_price']) / $product['regular_price']) * 100) : 0;
-                $product_url   = '/' . htmlspecialchars($product['category_slug']) . '/' . htmlspecialchars($product['brand_slug']) . '/' . htmlspecialchars($product['product_slug']);
-                $product_image = !empty($product['image_url']) ? $product['image_url'] : 'default-image.jpg';
+            <?php foreach ($products as $row):
+                $product = prepareProductCardFromRow($row);
             ?>
             <article class="na-card mob-na-card">
-                <?php if ($product['is_sold_out']): ?>
-                    <span class="na-badge na-badge--sold">Sold Out</span>
-                <?php elseif ($product['is_on_sale']): ?>
-                    <span class="na-badge"><?= $product['discount_pct'] ?>% OFF</span>
-                <?php endif; ?>
-                <a href="<?= $product_url ?>" class="na-img-link">
+                <?php include __DIR__ . '/../partials/na-card-badge.php'; ?>
+                <a href="<?= $product['product_url'] ?>" class="na-img-link">
                     <div class="na-img-box">
-                        <img src="<?= $product_image ?>" alt="<?= htmlspecialchars($product['product_name']) ?>" loading="lazy" decoding="async">
+                        <img src="<?= $product['product_image'] ?>" alt="<?= $product['product_name'] ?>" loading="lazy" decoding="async">
                     </div>
                 </a>
                 <div class="na-body">
-                    <h3 class="na-name"><a href="<?= $product_url ?>"><?= htmlspecialchars($product['product_name']) ?></a></h3>
+                    <h3 class="na-name"><a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a></h3>
                     <div class="na-price">
-                        <?php if ($product['is_on_sale']): ?>
+                        <?php if ($product['has_sale']): ?>
                             <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
                             <span class="na-price--new">Rs. <?= number_format($product['sale_price']) ?></span>
-                        <?php elseif (!$product['is_sold_out']): ?>
+                        <?php elseif ($product['regular_price'] > 0): ?>
                             <span class="na-price--new">Rs. <?= number_format($product['regular_price']) ?></span>
                         <?php else: ?>
                             <span class="na-price--na">Price on request</span>
                         <?php endif; ?>
                     </div>
-                    <div class="na-actions">
-                        <?php if (!$product['is_sold_out']): ?>
-                            <button class="na-btn na-btn--cart" data-product-id="<?= htmlspecialchars($product['product_id']) ?>" data-unit-price="<?= $product['unit_price'] ?>">Add to Cart</button>
-                            <button class="na-btn na-btn--buy buy-button" data-product-id="<?= htmlspecialchars($product['product_id']) ?>" data-unit-price="<?= $product['unit_price'] ?>">Buy Now</button>
-                        <?php else: ?>
-                            <span class="na-btn--soldout">Sold Out</span>
-                        <?php endif; ?>
-                    </div>
+                    <?php include __DIR__ . '/../partials/na-card-actions.php'; ?>
                 </div>
             </article>
             <?php endforeach; ?>

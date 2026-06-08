@@ -30,6 +30,8 @@ $query = "SELECT
             p.regular_price,
             p.sale_price,
             p.stock_quantity,
+            p.product_status,
+            p.product_tag,
             pi.image_url,
             b.slug AS brand_slug,
             c.slug AS category_slug
@@ -49,27 +51,7 @@ $rawProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $products = [];
 foreach ($rawProducts as $product) {
-    $regularPrice = (float)($product['regular_price'] ?? 0);
-    $salePrice = (float)($product['sale_price'] ?? 0);
-    $isSoldOut = (int)($product['stock_quantity'] ?? 0) <= 0;
-    $hasSale = !$isSoldOut && $salePrice > 0 && $regularPrice > 0 && $salePrice < $regularPrice;
-    $discountPct = $hasSale ? max(1, (int)round((($regularPrice - $salePrice) / $regularPrice) * 100)) : 0;
-    $unitPrice = $hasSale ? $salePrice : $regularPrice;
-
-    $products[] = [
-        'product_id' => (int)$product['product_id'],
-        'product_url' => buildProductPath((string)($product['category_slug'] ?? ''), (string)($product['brand_slug'] ?? ''), (string)($product['product_slug'] ?? '')),
-        'product_name' => htmlspecialchars($product['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8'),
-        'product_image' => !empty($product['image_url'])
-            ? htmlspecialchars(normalizeMediaUrl((string)$product['image_url']), ENT_QUOTES, 'UTF-8')
-            : '/public/assets/images/Phones_dukan_favicon.png',
-        'regular_price' => $regularPrice,
-        'sale_price' => $salePrice,
-        'is_sold_out' => $isSoldOut,
-        'has_sale' => $hasSale,
-        'discount_pct' => $discountPct,
-        'unit_price' => $unitPrice,
-    ];
+    $products[] = prepareProductCardFromRow($product);
 }
 ?>
 
@@ -89,11 +71,7 @@ foreach ($rawProducts as $product) {
             <div class="ma-product-grid">
                 <?php foreach ($products as $product): ?>
                     <article class="na-card ma-na-card">
-                        <?php if ($product['is_sold_out']): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($product['discount_pct'] > 0): ?>
-                            <span class="na-badge"><?= $product['discount_pct'] ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
                         <a href="<?= $product['product_url'] ?>" class="na-img-link">
                             <div class="na-img-box">
@@ -122,22 +100,7 @@ foreach ($rawProducts as $product) {
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$product['is_sold_out']): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= $product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$product['unit_price'] ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= $product['product_id'] ?>"
-                                        data-unit-price="<?= (float)$product['unit_price'] ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </article>
                 <?php endforeach; ?>

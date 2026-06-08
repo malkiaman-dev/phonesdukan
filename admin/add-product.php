@@ -403,6 +403,7 @@ select.vb-input { cursor:pointer; }
                         <select class="native-select" id="product_status" name="product_status" required>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
+                            <option value="coming_soon">Coming Soon</option>
                         </select>
                         <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
                             <span class="custom-select-value">Select status</span>
@@ -410,6 +411,11 @@ select.vb-input { cursor:pointer; }
                         </button>
                         <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
                     </div>
+                </div>
+                <div class="form-group" id="expected-coming-date-wrap" style="display:none;">
+                    <label for="expected_coming_date">Expected Coming Date <span class="field-optional">(optional)</span></label>
+                    <input type="date" class="native-input" id="expected_coming_date" name="expected_coming_date">
+                    <p class="field-hint">If set, customers will see this expected launch date on the product page.</p>
                 </div>
             </div>
         </section>
@@ -1426,6 +1432,26 @@ function generateAllVariationSkus() {
 <script>
 // Initialize the AI SEO Assistant for Add Product page
 document.addEventListener('DOMContentLoaded', function () {
+    function toggleExpectedComingDateField() {
+        const statusEl = document.getElementById('product_status');
+        const wrap = document.getElementById('expected-coming-date-wrap');
+        if (!statusEl || !wrap) return;
+
+        const isComingSoon = statusEl.value === 'coming_soon';
+        wrap.style.display = isComingSoon ? 'block' : 'none';
+
+        if (!isComingSoon) {
+            const input = document.getElementById('expected_coming_date');
+            if (input) input.value = '';
+        }
+    }
+
+    const statusEl = document.getElementById('product_status');
+    if (statusEl) {
+        statusEl.addEventListener('change', toggleExpectedComingDateField);
+        toggleExpectedComingDateField();
+    }
+
     AISeo.init({
         prefix:    '',          // field IDs have no prefix on add-product
         productId: 0,           // no product ID yet (new product)

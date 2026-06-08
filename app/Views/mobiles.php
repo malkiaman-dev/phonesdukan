@@ -29,6 +29,7 @@ $allProducts = [];
 foreach ($brandList as $brandSlug => $brandName) {
     $query = "SELECT p.product_id, p.product_slug, p.product_name,
                      p.regular_price, p.sale_price, p.stock_quantity,
+                     p.product_status, p.product_tag,
                      pi.image_url, b.slug AS brand_slug, c.slug AS category_slug
               FROM products p
               JOIN brands b ON p.brand_id = b.brand_id
@@ -43,33 +44,9 @@ foreach ($brandList as $brandSlug => $brandName) {
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($rows as $p) {
-        $regularPrice = (float)($p['regular_price'] ?? 0);
-        $salePrice    = (float)($p['sale_price'] ?? 0);
-        $hasSale      = $salePrice > 0 && $regularPrice > 0 && $salePrice < $regularPrice;
-        $isSoldOut    = (int)($p['stock_quantity'] ?? 0) <= 0;
-        $discountPct  = $hasSale ? max(1, (int)round((($regularPrice - $salePrice) / $regularPrice) * 100)) : 0;
-        $unitPrice    = $hasSale ? $salePrice : $regularPrice;
-        $productUrl   = '/' . htmlspecialchars($p['category_slug']) . '/' .
-                        htmlspecialchars($p['brand_slug']) . '/' .
-                        htmlspecialchars($p['product_slug']);
-        $productImage = !empty($p['image_url'])
-            ? htmlspecialchars($p['image_url'], ENT_QUOTES, 'UTF-8')
-            : '/public/assets/images/Phones_dukan_favicon.png';
-        $productName  = htmlspecialchars($p['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8');
-
-        $allProducts[] = [
-            'product_id'    => (int)$p['product_id'],
-            'product_url'   => $productUrl,
-            'product_image' => $productImage,
-            'product_name'  => $productName,
-            'regular_price' => $regularPrice,
-            'sale_price'    => $salePrice,
-            'has_sale'      => $hasSale,
-            'is_sold_out'   => $isSoldOut,
-            'discount_pct'  => $discountPct,
-            'unit_price'    => $unitPrice,
-            'brand_slug'    => $brandSlug,
-        ];
+        $card = prepareProductCardFromRow($p);
+        $card['brand_slug'] = $brandSlug;
+        $allProducts[] = $card;
     }
 }
 $totalProducts = count($allProducts);
@@ -104,20 +81,16 @@ $totalBrands   = count($brandList);
     <div class="mob-products-inner">
         <?php if (!empty($allProducts)): ?>
             <div class="mob-product-grid" id="mobProductGrid">
-                <?php foreach ($allProducts as $p): ?>
-                    <article class="na-card mob-na-card" data-brand="<?= htmlspecialchars($p['brand_slug'], ENT_QUOTES, 'UTF-8') ?>">
+                <?php foreach ($allProducts as $product): ?>
+                    <article class="na-card mob-na-card" data-brand="<?= htmlspecialchars($product['brand_slug'], ENT_QUOTES, 'UTF-8') ?>">
 
-                        <?php if ($p['is_sold_out']): ?>
-                            <span class="na-badge na-badge--sold">Sold Out</span>
-                        <?php elseif ($p['discount_pct'] > 0): ?>
-                            <span class="na-badge"><?= $p['discount_pct'] ?>% OFF</span>
-                        <?php endif; ?>
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
-                        <a href="<?= $p['product_url'] ?>" class="na-img-link">
+                        <a href="<?= $product['product_url'] ?>" class="na-img-link">
                             <div class="na-img-box">
                                 <img
-                                    src="<?= $p['product_image'] ?>"
-                                    alt="<?= $p['product_name'] ?>"
+                                    src="<?= $product['product_image'] ?>"
+                                    alt="<?= $product['product_name'] ?>"
                                     loading="lazy"
                                     decoding="async"
                                 >
@@ -126,36 +99,21 @@ $totalBrands   = count($brandList);
 
                         <div class="na-body">
                             <h3 class="na-name">
-                                <a href="<?= $p['product_url'] ?>"><?= $p['product_name'] ?></a>
+                                <a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a>
                             </h3>
 
                             <div class="na-price">
-                                <?php if ($p['has_sale']): ?>
-                                    <span class="na-price--old">Rs. <?= number_format($p['regular_price']) ?></span>
-                                    <span class="na-price--new">Rs.<?= number_format($p['sale_price']) ?></span>
-                                <?php elseif ($p['regular_price'] > 0): ?>
-                                    <span class="na-price--new">Rs.<?= number_format($p['regular_price']) ?></span>
+                                <?php if ($product['has_sale']): ?>
+                                    <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                                    <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                                <?php elseif ($product['regular_price'] > 0): ?>
+                                    <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
                                 <?php else: ?>
                                     <span class="na-price--na">Price N/A</span>
                                 <?php endif; ?>
                             </div>
 
-                            <div class="na-actions">
-                                <?php if (!$p['is_sold_out']): ?>
-                                    <button class="na-btn na-btn--cart"
-                                        data-product-id="<?= $p['product_id'] ?>"
-                                        data-unit-price="<?= (float)$p['unit_price'] ?>">
-                                        Add to Cart
-                                    </button>
-                                    <button class="na-btn na-btn--buy buy-button"
-                                        data-product-id="<?= $p['product_id'] ?>"
-                                        data-unit-price="<?= (float)$p['unit_price'] ?>">
-                                        Buy Now
-                                    </button>
-                                <?php else: ?>
-                                    <span class="na-btn na-btn--soldout">Sold Out</span>
-                                <?php endif; ?>
-                            </div>
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
                     </article>
                 <?php endforeach; ?>

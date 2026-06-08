@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 class AddProductModel
 {
@@ -47,7 +48,7 @@ class AddProductModel
                 $imageData = [
                     'image_url' => '/public/uploads/' . $newFileName,
                     'is_primary' => $index == 0 ? 1 : 0,
-                    'status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                    'status' => mapProductStatusFromForm($_POST['product_status'] ?? 'inactive') === 1 ? 1 : 0,
                     'product_id' => $productId  // Correctly use the last inserted product ID
                 ];
 

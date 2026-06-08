@@ -131,43 +131,17 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
             <?php if (!empty($products) && is_array($products) && isset($products[0]) && is_array($products[0])): ?>
                 <div class="product-grid-container">
                     <div class="product-grid-wrapper">
-                        <?php foreach ($products as $product): ?>
-                            <?php
-                                $productUrl = buildProductPath(
-                                    (string) ($product['category_slug'] ?? ''),
-                                    (string) ($product['brand_slug'] ?? ''),
-                                    (string) ($product['product_slug'] ?? '')
-                                );
-
-                                $productName = htmlspecialchars($product['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8');
-                                $productImage = !empty($product['image_url'])
-                                    ? htmlspecialchars(normalizeMediaUrl((string) $product['image_url']), ENT_QUOTES, 'UTF-8')
-                                    : '/public/assets/images/Phones_dukan_favicon.png';
-
-                                $regularPrice = (float) ($product['regular_price'] ?? 0);
-                                $salePrice = (float) ($product['sale_price'] ?? 0);
-                                $hasSalePrice = $salePrice > 0 && $regularPrice > 0 && $salePrice < $regularPrice;
-                                $unitPrice = $hasSalePrice ? $salePrice : $regularPrice;
-
-                                $isSoldOut = isset($product['stock_quantity']) && (int) $product['stock_quantity'] <= 0;
-                                $discountPct = $hasSalePrice
-                                    ? max(1, (int) round((($regularPrice - $salePrice) / $regularPrice) * 100))
-                                    : 0;
-
-                            ?>
-
+                        <?php foreach ($products as $row):
+                            $product = prepareProductCardFromRow($row);
+                        ?>
                             <article class="na-card shop-na-card">
-                                <?php if ($isSoldOut): ?>
-                                    <span class="na-badge na-badge--sold">Sold Out</span>
-                                <?php elseif ($discountPct > 0): ?>
-                                    <span class="na-badge"><?= (int) $discountPct ?>% OFF</span>
-                                <?php endif; ?>
+                                <?php include __DIR__ . '/../partials/na-card-badge.php'; ?>
 
-                                <a href="<?= $productUrl ?>" class="na-img-link">
+                                <a href="<?= $product['product_url'] ?>" class="na-img-link">
                                     <div class="na-img-box product-img-wrapper">
                                         <img
-                                            src="<?= $productImage ?>"
-                                            alt="<?= $productName ?>"
+                                            src="<?= $product['product_image'] ?>"
+                                            alt="<?= $product['product_name'] ?>"
                                             loading="lazy"
                                             decoding="async"
                                         >
@@ -176,36 +150,21 @@ $buildPageUrl = function (int $page) use ($queryParams): string {
 
                                 <div class="na-body">
                                     <h3 class="na-name">
-                                        <a href="<?= $productUrl ?>"><?= $productName ?></a>
+                                        <a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a>
                                     </h3>
 
                                     <div class="na-price">
-                                        <?php if ($hasSalePrice): ?>
-                                            <span class="na-price--old">Rs. <?= number_format($regularPrice) ?></span>
-                                            <span class="na-price--new">Rs.<?= number_format($salePrice) ?></span>
-                                        <?php elseif ($regularPrice > 0): ?>
-                                            <span class="na-price--new">Rs.<?= number_format($regularPrice) ?></span>
+                                        <?php if ($product['has_sale']): ?>
+                                            <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                                            <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                                        <?php elseif ($product['regular_price'] > 0): ?>
+                                            <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
                                         <?php else: ?>
                                             <span class="na-price--na">Price N/A</span>
                                         <?php endif; ?>
                                     </div>
 
-                                    <div class="na-actions">
-                                        <?php if (!$isSoldOut): ?>
-                                            <button class="na-btn na-btn--cart"
-                                                data-product-id="<?= (int) $product['product_id'] ?>"
-                                                data-unit-price="<?= (float) $unitPrice ?>">
-                                                Add to Cart
-                                            </button>
-                                            <button class="na-btn na-btn--buy buy-button"
-                                                data-product-id="<?= (int) $product['product_id'] ?>"
-                                                data-unit-price="<?= (float) $unitPrice ?>">
-                                                Buy Now
-                                            </button>
-                                        <?php else: ?>
-                                            <span class="na-btn na-btn--soldout">Sold Out</span>
-                                        <?php endif; ?>
-                                    </div>
+                                    <?php include __DIR__ . '/../partials/na-card-actions.php'; ?>
                                 </div>
                             </article>
                         <?php endforeach; ?>

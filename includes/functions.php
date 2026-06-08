@@ -389,6 +389,183 @@ if (!function_exists('isProductInStock')) {
     }
 }
 
+if (!function_exists('mapProductStatusFromForm')) {
+    function mapProductStatusFromForm($status): int
+    {
+        $status = strtolower(trim((string) $status));
+        if ($status === 'active' || $status === '1') {
+            return 1;
+        }
+        if ($status === 'coming_soon' || $status === '2') {
+            return 2;
+        }
+        return 0;
+    }
+}
+
+if (!function_exists('isProductComingSoon')) {
+    function isProductComingSoon(array $product): bool
+    {
+        if ((int) ($product['product_status'] ?? 0) === 2) {
+            return true;
+        }
+        return !empty($product['product_tag']) && stripos($product['product_tag'], 'coming_soon') !== false;
+    }
+}
+
+if (!function_exists('getProductStatusLabel')) {
+    function getProductStatusLabel($status): string
+    {
+        return match ((int) $status) {
+            1 => 'Active',
+            2 => 'Coming Soon',
+            default => 'Inactive',
+        };
+    }
+}
+
+if (!function_exists('getProductStatusCssClass')) {
+    function getProductStatusCssClass($status): string
+    {
+        return match ((int) $status) {
+            1 => 'status-active',
+            2 => 'status-coming-soon',
+            default => 'status-inactive',
+        };
+    }
+}
+
+if (!function_exists('isProductStatusIndexable')) {
+    function isProductStatusIndexable($status): bool
+    {
+        return in_array((int) $status, [1, 2], true);
+    }
+}
+
+if (!function_exists('ensureProductExpectedComingDateColumn')) {
+    function ensureProductExpectedComingDateColumn(PDO $db): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+        $checked = true;
+
+        try {
+            $stmt = $db->query("SHOW COLUMNS FROM products LIKE 'expected_coming_date'");
+            if ($stmt && $stmt->rowCount() === 0) {
+                $db->exec('ALTER TABLE products ADD COLUMN expected_coming_date DATE NULL DEFAULT NULL AFTER product_status');
+            }
+        } catch (Throwable $e) {
+            error_log('expected_coming_date migration: ' . $e->getMessage());
+        }
+    }
+}
+
+if (!function_exists('normalizeExpectedComingDate')) {
+    function normalizeExpectedComingDate($date): ?string
+    {
+        if ($date === null) {
+            return null;
+        }
+
+        $date = trim((string) $date);
+        if ($date === '') {
+            return null;
+        }
+
+        if (preg_match('/^(\d{4}-\d{2}-\d{2})/', $date, $matches)) {
+            $dateOnly = $matches[1];
+            $dt = DateTime::createFromFormat('Y-m-d', $dateOnly);
+            if ($dt && $dt->format('Y-m-d') === $dateOnly) {
+                return $dateOnly;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('getExpectedComingDateCountdownIso')) {
+    function getExpectedComingDateCountdownIso($date): ?string
+    {
+        $normalized = normalizeExpectedComingDate($date);
+        if ($normalized === null) {
+            return null;
+        }
+
+        try {
+            $tz = new DateTimeZone('Asia/Karachi');
+            $dt = DateTime::createFromFormat('Y-m-d', $normalized, $tz);
+            if (!$dt) {
+                return null;
+            }
+            $dt->setTime(23, 59, 59);
+            return $dt->format(DateTime::ATOM);
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+}
+
+if (!function_exists('formatExpectedComingDate')) {
+    function formatExpectedComingDate($date): ?string
+    {
+        $normalized = normalizeExpectedComingDate($date);
+        if ($normalized === null) {
+            return null;
+        }
+
+        $dt = DateTime::createFromFormat('Y-m-d', $normalized);
+        return $dt ? $dt->format('j M Y') : null;
+    }
+}
+
+if (!function_exists('resolveExpectedComingDateFromPost')) {
+    function resolveExpectedComingDateFromPost($status, $postedDate): ?string
+    {
+        $statusValue = mapProductStatusFromForm($status);
+        if ($statusValue !== 2) {
+            return null;
+        }
+
+        return normalizeExpectedComingDate($postedDate);
+    }
+}
+
+if (!function_exists('prepareProductCardFromRow')) {
+    function prepareProductCardFromRow(array $row): array
+    {
+        $regularPrice = (float) ($row['regular_price'] ?? 0);
+        $salePrice = (float) ($row['sale_price'] ?? 0);
+        $isComingSoon = isProductComingSoon($row);
+        $isSoldOut = !$isComingSoon && (int) ($row['stock_quantity'] ?? 0) <= 0;
+        $hasSale = !$isSoldOut && !$isComingSoon && $salePrice > 0 && $regularPrice > 0 && $salePrice < $regularPrice;
+        $discountPct = $hasSale ? max(1, (int) round((($regularPrice - $salePrice) / $regularPrice) * 100)) : 0;
+        $unitPrice = $hasSale ? $salePrice : $regularPrice;
+
+        return [
+            'product_id' => (int) ($row['product_id'] ?? 0),
+            'product_url' => buildProductPath(
+                (string) ($row['category_slug'] ?? ''),
+                (string) ($row['brand_slug'] ?? ''),
+                (string) ($row['product_slug'] ?? '')
+            ),
+            'product_name' => htmlspecialchars($row['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8'),
+            'product_image' => !empty($row['image_url'])
+                ? htmlspecialchars(normalizeMediaUrl((string) $row['image_url']), ENT_QUOTES, 'UTF-8')
+                : '/public/assets/images/Phones_dukan_favicon.png',
+            'regular_price' => $regularPrice,
+            'sale_price' => $salePrice,
+            'is_coming_soon' => $isComingSoon,
+            'is_sold_out' => $isSoldOut,
+            'has_sale' => $hasSale,
+            'discount_pct' => $discountPct,
+            'unit_price' => $unitPrice,
+        ];
+    }
+}
+
 if (!function_exists('renderBestMobilesSidebar')) {
     function renderBestMobilesSidebar($activeLimit)
     {

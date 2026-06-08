@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/app/Models/EditProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
@@ -27,6 +28,7 @@ class ProductController
     {
         $database = new Database();
         $db = $database->getConnection();
+        ensureProductExpectedComingDateColumn($db);
         $this->model = new ProductModel($db);
     }
 

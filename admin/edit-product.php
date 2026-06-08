@@ -26,6 +26,7 @@ if (isset($_SESSION['message'])) {
 }
 
 require_once dirname(__DIR__, 1) . '/app/Controllers/EditProductController.php';
+require_once dirname(__DIR__, 1) . '/includes/functions.php';
 $controller = new ProductController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_action'])) {
@@ -36,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_act
         'product_description' => $_POST['product_description'] ?? '',
         'short_description' => $_POST['short_description'] ?? '',
         'product_status' => $_POST['product_status'] ?? '0',
+        'expected_coming_date' => resolveExpectedComingDateFromPost($_POST['product_status'] ?? '0', $_POST['expected_coming_date'] ?? null),
         'stock_quantity' => $_POST['stock_quantity'] ?? 0,
         'regular_price' => $_POST['regular_price'] ?? 0,
         'sale_price' => $_POST['sale_price'] ?? null,
@@ -360,6 +362,23 @@ select.vb-input-ep { cursor:pointer; }
         color: var(--black);
         font-size: 0.9rem;
         font-weight: 700;
+    }
+
+    .ep-field-optional {
+        font-weight: 600;
+        color: #9ca3af;
+        font-size: 0.82rem;
+    }
+
+    .ep-field-hint {
+        margin: 8px 0 0;
+        font-size: 0.8rem;
+        line-height: 1.45;
+        color: #6b7280;
+    }
+
+    #expected-coming-date-section input[type="date"] {
+        color-scheme: light;
     }
 
     .ep-field input,
@@ -919,9 +938,17 @@ select.vb-input-ep { cursor:pointer; }
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
             <?php
-                $isActive = !empty($product['product_status']) && $product['product_status'] == 1;
-                $pillColor = $isActive ? '#22c55e' : 'tomato';
-                $pillLabel = $isActive ? 'Active' : 'Inactive';
+                $statusVal = (int) ($product['product_status'] ?? 0);
+                $pillLabel = match ($statusVal) {
+                    1 => 'Active',
+                    2 => 'Coming Soon',
+                    default => 'Inactive',
+                };
+                $pillColor = match ($statusVal) {
+                    1 => '#22c55e',
+                    2 => '#f59e0b',
+                    default => 'tomato',
+                };
             ?>
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
                 <?= $pillLabel ?>
@@ -982,10 +1009,16 @@ select.vb-input-ep { cursor:pointer; }
                 </div>
                 <div class="ep-field">
                     <label>Product Status</label>
-                    <select name="product_status" required data-ep-custom-dropdown>
+                    <select name="product_status" id="ep_product_status" required data-ep-custom-dropdown>
                         <option value="1" <?= $product['product_status'] == '1' ? 'selected' : '' ?>>Active</option>
                         <option value="0" <?= $product['product_status'] == '0' ? 'selected' : '' ?>>Inactive</option>
+                        <option value="2" <?= $product['product_status'] == '2' ? 'selected' : '' ?>>Coming Soon</option>
                     </select>
+                </div>
+                <div class="ep-field" id="expected-coming-date-section" style="display: <?= ((int) ($product['product_status'] ?? 0) === 2) ? 'block' : 'none' ?>;">
+                    <label for="expected_coming_date">Expected Coming Date <span class="ep-field-optional">(optional)</span></label>
+                    <input type="date" id="expected_coming_date" name="expected_coming_date" value="<?= htmlspecialchars($product['expected_coming_date'] ?? '') ?>">
+                    <p class="ep-field-hint">If set, customers will see this expected launch date on the product page.</p>
                 </div>
                 <div class="ep-field">
                     <label>B2B Available</label>
@@ -2046,6 +2079,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 b2bSection.style.display = this.checked ? 'block' : 'none';
             }
         });
+    }
+
+    function toggleExpectedComingDateField() {
+        const statusEl = document.querySelector('select[name="product_status"]');
+        const section = document.getElementById('expected-coming-date-section');
+        if (!statusEl || !section) return;
+
+        const isComingSoon = statusEl.value === '2';
+        section.style.display = isComingSoon ? 'block' : 'none';
+
+        if (!isComingSoon) {
+            const input = section.querySelector('input[type="date"]');
+            if (input) input.value = '';
+        }
+    }
+
+    const productStatusEl = document.querySelector('select[name="product_status"]');
+    if (productStatusEl) {
+        productStatusEl.addEventListener('change', toggleExpectedComingDateField);
+        toggleExpectedComingDateField();
     }
 
     const uploadInput = document.getElementById('primary_image');

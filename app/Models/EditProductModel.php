@@ -43,6 +43,7 @@ class ProductModel
         $heightCm = empty($data['height_cm']) ? null : $data['height_cm'];
         $taxClass = empty($data['tax_class']) ? null : $data['tax_class'];
         $b2bRegularPrice = empty($data['b2b_regular_price']) ? null : $data['b2b_regular_price'];
+        $expectedComingDate = normalizeExpectedComingDate($data['expected_coming_date'] ?? null);
     
         $prepaidDiscountAmount = isset($data['prepaid_discount_amount']) && is_numeric($data['prepaid_discount_amount']) ? max(0, (float)$data['prepaid_discount_amount']) : 0;
 
@@ -52,6 +53,7 @@ class ProductModel
             product_description = ?,
             short_description = ?,
             product_status = ?,
+            expected_coming_date = ?,
             stock_quantity = ?,
             regular_price = ?,
             sale_price = ?,
@@ -75,6 +77,7 @@ class ProductModel
             $data['product_description'],
             $data['short_description'],
             $data['product_status'],
+            $expectedComingDate,
             $data['stock_quantity'],
             $data['regular_price'],
             $salePrice,

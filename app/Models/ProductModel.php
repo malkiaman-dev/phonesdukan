@@ -333,9 +333,11 @@ class ProductModel
             'sku' => $sku
         ];
     
-        $availability = ($product['product_status'] == 1 && ($product['stock_quantity'] ?? 0) > 0)
-            ? 'https://schema.org/InStock'
-            : 'https://schema.org/OutOfStock';
+        $availability = isProductComingSoon($product)
+            ? 'https://schema.org/PreOrder'
+            : (($product['product_status'] == 1 && ($product['stock_quantity'] ?? 0) > 0)
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock');
     
         $attributes = $this->getProductAttributes($product_id);
     
@@ -664,6 +666,9 @@ class ProductModel
                     p.brand_id,
                     p.sale_price,
                     p.regular_price,
+                    p.stock_quantity,
+                    p.product_status,
+                    p.product_tag,
                     c.slug AS category_slug,
                     b.slug AS brand_slug,
                     (
@@ -676,7 +681,7 @@ class ProductModel
                 FROM products p
                 INNER JOIN categories c ON c.category_id = p.category_id AND c.status = 1
                 INNER JOIN brands b ON b.brand_id = p.brand_id
-                WHERE p.product_status = 1
+                WHERE p.product_status IN (1, 2)
                   AND p.category_id = :category_id
                   AND p.brand_id = :brand_id
                   AND p.product_id != :exclude_id

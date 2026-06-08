@@ -18,7 +18,7 @@ $metaDescription = SeoHelper::productDescription(
     $seo['seo_description'] ?? null
 );
 $metaKeywords = $seo['focus_keyword'] ?? '';
-$metaRobots = ($product['product_status'] == 1) ? 'index, follow' : 'noindex';
+$metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
 $pageUrl = rtrim(getBaseURL(), '/') . buildProductPath(
     (string) ($product['category_slug'] ?? ''),
     (string) ($product['brand_slug'] ?? ''),
@@ -33,8 +33,9 @@ $availabilityClass = 'out-of-stock';
 // Explicitly check stock_quantity and handle NULL or non-numeric cases
 $stockQuantity = isset($product['stock_quantity']) && is_numeric($product['stock_quantity']) ? (int)$product['stock_quantity'] : 0;
 $productStatus = isset($product['product_status']) ? (int)$product['product_status'] : 0;
+$isComingSoon = isset($isComingSoon) ? (bool) $isComingSoon : isProductComingSoon($product);
 
-if (isset($isComingSoon) && $isComingSoon === true) {
+if ($isComingSoon) {
     $productAvailability = 'comingsoon';
     $availabilityText = 'Coming Soon';
     $availabilityClass = 'coming-soon';
@@ -47,6 +48,10 @@ if (isset($isComingSoon) && $isComingSoon === true) {
     $availabilityText = 'Out of Stock';
     $availabilityClass = 'out-of-stock';
 }
+
+$expectedComingDateRaw = $product['expected_coming_date'] ?? null;
+$expectedComingDateLabel = formatExpectedComingDate($expectedComingDateRaw);
+$expectedComingDateCountdownIso = getExpectedComingDateCountdownIso($expectedComingDateRaw);
 
 // Set the product image URL (fallback to default favicon image if no image is available)
 $firstGalleryItem = $galleryMedia[0] ?? $images[0] ?? null;
@@ -134,7 +139,10 @@ foreach ($paragraphs as $index => $para) {
     <div class="product-container">
         <div class="product-content">
             <!-- Product Gallery -->
-            <div class="product-gallery">
+            <div class="product-gallery<?= $isComingSoon ? ' product-gallery--coming-soon' : '' ?>">
+                <?php if ($isComingSoon): ?>
+                    <span class="product-gallery-badge" aria-label="Coming Soon">Coming Soon</span>
+                <?php endif; ?>
                 <?php if (!empty($galleryMedia)): ?>
                     <?php
                     $firstItem = $galleryMedia[0];
@@ -269,7 +277,7 @@ foreach ($paragraphs as $index => $para) {
                     <div class="rating-count"><?php echo $reviewCount > 0 ? $reviewCount . ' Review' . ($reviewCount > 1 ? 's' : '') : 'No Reviews'; ?></div>
                 </div>
 
-                <div class="single-product-price">
+                <div class="single-product-price<?= $isComingSoon ? ' single-product-price--coming-soon' : '' ?>">
                     <div class="price-content">
                         <?php
                         $regularPrice = isset($product['regular_price']) && is_numeric($product['regular_price']) ? (float) $product['regular_price'] : 0;
@@ -305,6 +313,7 @@ foreach ($paragraphs as $index => $para) {
                             </div>
                         <?php endif; ?>
                     </div>
+                    <?php if (!$isComingSoon): ?>
                     <div class="availability-section">
                         <div class="stock-info">
                             <span class="availability-label">Availability</span>
@@ -313,13 +322,63 @@ foreach ($paragraphs as $index => $para) {
                             </span>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
+
+                <?php if ($isComingSoon): ?>
+                <div class="coming-soon-card coming-soon-card--timer">
+                    <?php if ($expectedComingDateCountdownIso): ?>
+                        <span class="availability-label">Launch Countdown</span>
+                        <div class="cs-countdown" id="pdComingSoonCountdown" data-target="<?= htmlspecialchars($expectedComingDateCountdownIso) ?>">
+                            <div class="cs-countdown__grid">
+                                <div class="cs-countdown__unit">
+                                    <span class="cs-countdown__num" data-part="days">00</span>
+                                    <span class="cs-countdown__lbl">Days</span>
+                                </div>
+                                <div class="cs-countdown__unit">
+                                    <span class="cs-countdown__num" data-part="hours">00</span>
+                                    <span class="cs-countdown__lbl">Hours</span>
+                                </div>
+                                <div class="cs-countdown__unit">
+                                    <span class="cs-countdown__num" data-part="mins">00</span>
+                                    <span class="cs-countdown__lbl">Mins</span>
+                                </div>
+                                <div class="cs-countdown__unit">
+                                    <span class="cs-countdown__num" data-part="secs">00</span>
+                                    <span class="cs-countdown__lbl">Secs</span>
+                                </div>
+                            </div>
+                            <?php if ($expectedComingDateLabel): ?>
+                                <p class="cs-countdown__date">Expected: <?= htmlspecialchars($expectedComingDateLabel) ?></p>
+                            <?php endif; ?>
+                            <p class="cs-countdown__live" hidden>Launch day is here — stay tuned!</p>
+                        </div>
+                    <?php else: ?>
+                        <span class="availability-label">Availability</span>
+                        <div class="cs-soon-visual" aria-hidden="true">
+                            <div class="cs-soon-visual__orbit">
+                                <span class="cs-soon-visual__ring cs-soon-visual__ring--1"></span>
+                                <span class="cs-soon-visual__ring cs-soon-visual__ring--2"></span>
+                                <span class="cs-soon-visual__ring cs-soon-visual__ring--3"></span>
+                                <span class="cs-soon-visual__core">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M12 7v5l3 2"/>
+                                    </svg>
+                                </span>
+                            </div>
+                            <span class="cs-soon-visual__label">Coming Soon</span>
+                            <span class="cs-soon-visual__pulse"></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
 
                 <?php
                 // ----------------------------------------------------------------
                 // For variable products: overwrite price with lowest variation price
                 // ----------------------------------------------------------------
-                if (!empty($isVariableProduct) && !empty($productVariations)) {
+                if (!empty($isVariableProduct) && !empty($productVariations) && !$isComingSoon) {
                     $activeVars = array_filter($productVariations, fn($v) => $v['status'] == 1 && $v['stock_quantity'] > 0);
                     if (!empty($activeVars)) {
                         $lowestEffective = min(array_map(fn($v) => $v['sale_price'] !== null ? $v['sale_price'] : $v['regular_price'], $activeVars));
@@ -343,7 +402,7 @@ foreach ($paragraphs as $index => $para) {
                 $validPrice = ($productAvailability === 'instock' && isset($product['sale_price']) && is_numeric($product['sale_price']) && $product['sale_price'] > 0)
                     ? $product['sale_price']
                     : ($productAvailability === 'instock' && isset($product['regular_price']) && is_numeric($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
-                $showLocationMessage = (isset($product['category_slug']) && strtolower($product['category_slug']) === 'mobiles') && !isset($isComingSoon);
+                $showLocationMessage = (isset($product['category_slug']) && strtolower($product['category_slug']) === 'mobiles') && !$isComingSoon;
                 if ($showLocationMessage): ?>
                     <p class="location-restriction-msg">
                         This product is available for delivery only in Rawalpindi and Islamabad.
@@ -819,8 +878,46 @@ if ($cartFormCondition): ?>
         </div>
     <?php endif; ?>
 <?php else: ?>
-    <?php if ($productAvailability !== 'instock'): ?>
-        <p class="status-msg">
+    <?php if ($isComingSoon || $productAvailability === 'comingsoon'): ?>
+        <?php
+        $comingSoonWaText = 'Hi, I am interested in ' . ($product['product_name'] ?? 'this product') . ' which is coming soon';
+        if ($expectedComingDateLabel) {
+            $comingSoonWaText .= ' (expected around ' . $expectedComingDateLabel . ')';
+        }
+        $comingSoonWaText .= '. Please notify me when it is available.';
+        $comingSoonWaUrl = 'https://wa.me/923116600031?text=' . rawurlencode($comingSoonWaText);
+        ?>
+        <div class="coming-soon-notice coming-soon-card coming-soon-card--notice" role="status" aria-live="polite">
+            <div class="coming-soon-notice__accent" aria-hidden="true"></div>
+            <div class="coming-soon-notice__glow" aria-hidden="true"></div>
+            <div class="coming-soon-notice__icon" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+            <div class="coming-soon-notice__body">
+                <span class="coming-soon-notice__eyebrow">Launching Soon</span>
+                <strong class="coming-soon-notice__title">Coming Soon</strong>
+                <p class="coming-soon-notice__text">
+                    This product is not available to order yet. In the meantime, you can explore photos, specifications, and reviews below, and contact us for any questions or updates.
+                </p>
+                <div class="coming-soon-notice__actions">
+                    <a href="<?= htmlspecialchars($comingSoonWaUrl) ?>" class="coming-soon-notice__btn coming-soon-notice__btn--primary" target="_blank" rel="noopener noreferrer">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.75.75 0 0 0 .917.917l4.458-1.495A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
+                        </svg>
+                        Notify on WhatsApp
+                    </a>
+                    <a href="<?= htmlspecialchars(url('coming-soon-products')) ?>" class="coming-soon-notice__btn coming-soon-notice__btn--secondary">
+                        More Coming Soon
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php elseif (!$isComingSoon && $productAvailability !== 'instock'): ?>
+        <p class="status-msg status-msg--out-of-stock">
             <?php echo htmlspecialchars($availabilityText); ?>
         </p>
     <?php endif; ?>
@@ -938,4 +1035,53 @@ if ($cartFormCondition): ?>
 </div>
 
 <?php require_once __DIR__ . '/related-products.php'; ?>
+
+<?php if ($isComingSoon && !empty($expectedComingDateCountdownIso)): ?>
+<script>
+(function () {
+    var el = document.getElementById('pdComingSoonCountdown');
+    if (!el) return;
+
+    var targetMs = Date.parse(el.dataset.target || '');
+    if (!Number.isFinite(targetMs)) return;
+
+    var parts = {
+        days: el.querySelector('[data-part="days"]'),
+        hours: el.querySelector('[data-part="hours"]'),
+        mins: el.querySelector('[data-part="mins"]'),
+        secs: el.querySelector('[data-part="secs"]')
+    };
+
+    function pad(n) {
+        return String(n).padStart(2, '0');
+    }
+
+    function tick() {
+        var diff = Math.max(0, targetMs - Date.now());
+
+        if (diff <= 0) {
+            el.classList.add('is-live');
+            return;
+        }
+
+        var days = Math.floor(diff / 86400000);
+        diff %= 86400000;
+        var hours = Math.floor(diff / 3600000);
+        diff %= 3600000;
+        var mins = Math.floor(diff / 60000);
+        diff %= 60000;
+        var secs = Math.floor(diff / 1000);
+
+        if (parts.days) parts.days.textContent = pad(days);
+        if (parts.hours) parts.hours.textContent = pad(hours);
+        if (parts.mins) parts.mins.textContent = pad(mins);
+        if (parts.secs) parts.secs.textContent = pad(secs);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
+<?php endif; ?>
+
 <?php require_once dirname(__DIR__, 3) . '/includes/footer.php'; ?>

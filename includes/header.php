@@ -283,49 +283,6 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 </head>
 <body>
 
-<?php if (!empty($showPreloader)): ?>
-<!-- Pre-loader -->
-<div id="pd-preloader" role="status" aria-label="Loading Phones Dukan">
-    <div class="pd-pl-glow"></div>
-    <div class="pd-pl-particles">
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-    </div>
-    <div class="pd-pl-card">
-        <div class="pd-pl-top-row">
-            <div class="pd-pl-phone-wrap">
-                <svg class="pd-pl-phone-svg" viewBox="0 0 48 82" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <defs>
-                        <linearGradient id="pdPhoneGrad" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#f7d117"/>
-                            <stop offset="100%" stop-color="#fd8311"/>
-                        </linearGradient>
-                        <linearGradient id="pdScreenGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#f7d117" stop-opacity="0.5"/>
-                            <stop offset="100%" stop-color="#fd8311" stop-opacity="0"/>
-                        </linearGradient>
-                    </defs>
-                    <rect x="2" y="2" width="44" height="78" rx="8" stroke="url(#pdPhoneGrad)" stroke-width="1.5"/>
-                    <rect class="pd-pl-screen" x="5" y="11" width="38" height="56" rx="2" fill="url(#pdScreenGrad)"/>
-                    <rect x="17" y="5.5" width="14" height="3" rx="1.5" fill="rgba(247,209,23,0.35)"/>
-                    <rect x="18" y="74" width="12" height="2.5" rx="1.25" fill="rgba(247,209,23,0.4)"/>
-                </svg>
-            </div>
-            <div class="pd-pl-signal">
-                <span></span><span></span><span></span><span></span>
-            </div>
-        </div>
-        <img src="<?= url('public/assets/images/phonesdukan_logo.webp'); ?>" alt="Phones Dukan" class="pd-pl-logo">
-        <div class="pd-pl-bar-wrap">
-            <div class="pd-pl-bar"></div>
-        </div>
-        <div class="pd-pl-dots">
-            <span></span><span></span><span></span>
-        </div>
-        <p class="pd-pl-tagline">Your Trusted Mobile Store</p>
-    </div>
-</div>
-<?php endif; ?>
-
     <!-- Sidebar -->
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 <div class="site-wrapper">

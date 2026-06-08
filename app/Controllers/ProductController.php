@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/helpers.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once __DIR__ . '/../Models/ProductModel.php';
 require_once __DIR__ . '/../Models/ReviewModel.php';
 require_once __DIR__ . '/../Models/VariationModel.php';
@@ -40,7 +41,7 @@ class ProductController
             $images = array_values(array_filter($galleryMedia, static function (array $item): bool {
                 return ($item['type'] ?? 'image') === 'image';
             }));
-            $isComingSoon = !empty($product['product_tag']) && stripos($product['product_tag'], 'coming_soon') !== false;
+            $isComingSoon = isProductComingSoon($product);
 
             // Fetch product attributes (legacy system)
             $productAttributes = $productModel->getProductAttributes($product['product_id']);
@@ -70,7 +71,7 @@ class ProductController
             $pageTitle = $seo['seo_title'] ?? $product['product_name'];
             $metaDescription = $seo['seo_description'] ?? $product['product_description'];
             $metaKeywords = $seo['focus_keyword'] ?? '';
-            $metaRobots = ($product['product_status'] == 1) ? 'index, follow' : 'noindex';
+            $metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
             $canonicalUrl = $seo['canonical_url'] ?? '';
             // Build product URL without relying on theme helpers that may not be loaded here yet.
             $pageUrl = rtrim(getBaseURL(), '/') . '/'
@@ -84,9 +85,13 @@ class ProductController
             $formattedProductPrice = ($productPrice > 0) ? number_format($productPrice, 2) : '0.00';
 
             // Product Availability
-            $productAvailability = ($product['product_status'] == 1 && $product['stock_quantity'] > 0)
-                ? 'instock'
-                : 'outofstock';
+            if ($isComingSoon) {
+                $productAvailability = 'comingsoon';
+            } else {
+                $productAvailability = ($product['product_status'] == 1 && $product['stock_quantity'] > 0)
+                    ? 'instock'
+                    : 'outofstock';
+            }
 
             // Generate Schema JSON
             $schema = $productModel->generateProductSchema($product['product_id']);

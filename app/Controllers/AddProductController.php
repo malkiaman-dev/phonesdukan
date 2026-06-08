@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/app/Models/AddProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
@@ -19,6 +20,7 @@ class ProductController
         if (!$this->db) {
             die('Database connection failed. Please check your database credentials.');
         }
+        ensureProductExpectedComingDateColumn($this->db);
         $this->productModel = new AddProductModel($this->db);  // Instantiate the model
     }
 
@@ -38,7 +40,8 @@ class ProductController
                     'brand_id' => $_POST['brand_id'],
                     'product_description' => $_POST['product_description'],
                     'short_description' => $_POST['short_description'],
-                    'product_status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                    'product_status' => mapProductStatusFromForm($_POST['product_status'] ?? 'inactive'),
+                    'expected_coming_date' => resolveExpectedComingDateFromPost($_POST['product_status'] ?? 'inactive', $_POST['expected_coming_date'] ?? null),
                     'stock_quantity' => $_POST['stock_quantity'],
                     'regular_price' => $_POST['regular_price'],
                     'sale_price' => $_POST['sale_price'],
@@ -88,10 +91,10 @@ class ProductController
 
                 // Insert the product into the database
                 $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description,
-                                                short_description, product_status, stock_quantity, regular_price, sale_price,
+                                                short_description, product_status, expected_coming_date, stock_quantity, regular_price, sale_price,
                                                 product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag, product_type, prepaid_discount_amount)
                           VALUES (:product_name, :product_slug, :category_id, :brand_id, :product_description,
-                                  :short_description, :product_status, :stock_quantity, :regular_price, :sale_price,
+                                  :short_description, :product_status, :expected_coming_date, :stock_quantity, :regular_price, :sale_price,
                                   :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag, :product_type, :prepaid_discount_amount)';
                 $productData['product_type'] = $product_type;
                 $stmt = $this->db->prepare($query);
@@ -184,7 +187,7 @@ class ProductController
                         $imageData = [
                             'image_url' => '/public/uploads/' . $newFileName,
                             'is_primary' => 1,  // Set primary flag to 1 for primary image
-                            'status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                            'status' => mapProductStatusFromForm($_POST['product_status'] ?? 'inactive') === 1 ? 1 : 0,
                             'product_id' => $productId
                         ];
 
@@ -251,7 +254,7 @@ class ProductController
                             $imageData = [
                                 'image_url' => '/public/uploads/' . $newFileName,
                                 'is_primary' => 0,  // Set primary flag to 0 for gallery images
-                                'status' => ($_POST['product_status'] == 'active') ? 1 : 0,
+                                'status' => mapProductStatusFromForm($_POST['product_status'] ?? 'inactive') === 1 ? 1 : 0,
                                 'product_id' => $productId
                             ];
 

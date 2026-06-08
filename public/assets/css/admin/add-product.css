@@ -112,8 +112,26 @@ body {
     font-weight: 600;
 }
 
+.admin-page .field-optional {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 0.82rem;
+}
+
+.admin-page .field-hint {
+    margin: 8px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: #6b7280;
+}
+
+.admin-page #expected-coming-date-wrap input[type="date"] {
+    color-scheme: light;
+}
+
 .admin-page .form-group input[type="text"],
 .admin-page .form-group input[type="number"],
+.admin-page .form-group input[type="date"],
 .admin-page .form-group input[type="file"],
 .admin-page .form-group select,
 .admin-page .form-group textarea,
