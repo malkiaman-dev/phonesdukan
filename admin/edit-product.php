@@ -5,6 +5,23 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 
+require_once dirname(__DIR__, 1) . '/includes/functions.php';
+
+if (!function_exists('buildProductPathFromRow')) {
+    function buildProductPathFromRow(array $product): string
+    {
+        $segments = [
+            rawurlencode(trim((string) ($product['brand_slug'] ?? ''), '/')),
+            rawurlencode(trim((string) ($product['category_slug'] ?? ''), '/')),
+        ];
+        if (!empty($product['subcategory_slug'])) {
+            $segments[] = rawurlencode(trim((string) $product['subcategory_slug'], '/'));
+        }
+        $segments[] = rawurlencode(preg_replace('/\s+/', '-', trim((string) ($product['product_slug'] ?? ''), '/')));
+        return '/' . implode('/', $segments);
+    }
+}
+
 if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     header('Location: login.php');
     exit();
@@ -22,7 +39,6 @@ if (isset($_SESSION['message'])) {
 }
 
 require_once dirname(__DIR__, 1) . '/app/Controllers/EditProductController.php';
-require_once dirname(__DIR__, 1) . '/includes/functions.php';
 $controller = new ProductController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_action'])) {
