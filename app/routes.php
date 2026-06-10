@@ -399,17 +399,23 @@ switch (true) {
             $controller = new CategoryController();
             $controller->showCategory($segments[0]);
 
-        // Brand Page (e.g., /samsung/mobiles)
+        // Brand + category listing (e.g., /samsung/mobiles)
         } elseif (count($segments) === 2) {
             require_once __DIR__ . '/Controllers/BrandController.php';
             $controller = new BrandController();
             $controller->showBrand($segments[0], $segments[1]);
 
-        // Product Page (e.g., /samsung/mobiles/galaxy-s24)
+        // Product page — new 3-segment (brand/category/product) or legacy 3-segment (category/brand/product)
         } elseif (count($segments) === 3) {
             require_once __DIR__ . '/Controllers/ProductController.php';
             $controller = new ProductController();
-            $controller->showProduct($segments[0], $segments[1], $segments[2]);
+            $controller->showProductThreeSegments($segments[0], $segments[1], $segments[2]);
+
+        // Product page with subcategory (brand/category/subcategory/product)
+        } elseif (count($segments) === 4) {
+            require_once __DIR__ . '/Controllers/ProductController.php';
+            $controller = new ProductController();
+            $controller->showProduct($segments[0], $segments[1], $segments[2], $segments[3]);
 
         // 404 Page for Invalid Routes
         } else {

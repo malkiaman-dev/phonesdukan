@@ -28,12 +28,12 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 // Header must load before any HTML output (sidebar goes inside <body>)
 include __DIR__ . '/admin_header.php';
 include __DIR__ . '/admin_sidebar.php';
-// Get categories and brands for dropdowns
-$categories_query = "SELECT category_id, category_name, slug FROM categories ORDER BY category_name";
-$categories_result = $conn->query($categories_query);
-
-$brands_query = "SELECT brand_id, brand_name, slug FROM brands ORDER BY brand_name";
-$brands_result = $conn->query($brands_query);
+require_once dirname(__DIR__, 1) . '/app/Models/CatalogModel.php';
+$catalogModel = new CatalogModel();
+$parentCategories = $catalogModel->getParentCategories();
+$allBrands = $catalogModel->getAllBrands();
+usort($parentCategories, static fn($a, $b) => strcasecmp((string) $a['category_name'], (string) $b['category_name']));
+usort($allBrands, static fn($a, $b) => strcasecmp((string) $a['brand_name'], (string) $b['brand_name']));
 ?>
 
 <style>
@@ -92,11 +92,15 @@ input#enableVariations:checked + .vb-toggle-track .vb-toggle-thumb { left:25px; 
 .vb-swatch { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
 .vb-btn {
     display:inline-flex; align-items:center; height:40px; padding:0 16px;
-    border:1px solid #111; border-radius:10px; background:#111 !important; color:#fff !important;
+    border:1px solid #e6bd00; border-radius:10px; background:#f7cf04 !important; color:#111 !important;
     font-size:.86rem; font-weight:700; cursor:pointer; text-decoration:none;
-    transition:color .12s,transform .12s,box-shadow .12s;
+    box-shadow:0 4px 14px rgba(247,207,4,.22);
+    transition:background .2s,border-color .2s,color .2s,transform .12s,box-shadow .2s;
 }
-.vb-btn:hover { color:#facc15 !important; transform:translateY(-1px); box-shadow:0 6px 14px rgba(17,17,17,.14); }
+.vb-btn:hover {
+    background:#e6bd00 !important; color:#111 !important; border-color:#d4af00;
+    transform:translateY(-1px); box-shadow:0 8px 20px rgba(247,207,4,.28);
+}
 .vb-btn-outline { background:#fff !important; color:#111 !important; border-color:#e5e7eb; }
 .vb-btn-outline:hover { border-color:#facc15; color:#111 !important; background:#fffbeb !important; }
 .vb-btn-sm { height:30px; padding:0 10px; font-size:.78rem; border-radius:8px; }
@@ -147,18 +151,24 @@ select.vb-input { cursor:pointer; }
     flex-shrink: 0;
     height: 48px;
     padding: 0 12px;
-    background: #111;
-    color: #fff;
-    border: none;
+    background: #ffffff;
+    color: #111111;
+    border: 1.5px solid #e5e7eb;
     border-radius: 10px;
     font-size: .78rem;
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
-    transition: color .15s;
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .12s ease;
     align-self: flex-start;
 }
-.seo-auto-btn:hover { color: #facc15; }
+.seo-auto-btn:hover {
+    background: #fffef8;
+    color: #111111;
+    border-color: #f7cf04;
+    box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
+    transform: translateY(-1px);
+}
 .seo-field-hint { display: block; color: #9ca3af !important; font-size: 0.72rem !important; margin-top: 4px; line-height: 1.4; }
 /* SEO field header: label LEFT, buttons RIGHT on same row */
 .ap-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
@@ -238,10 +248,25 @@ select.vb-input { cursor:pointer; }
                     </div>
                 </div>
                 <div class="form-group">
+                    <label for="brand_id">Brand</label>
+                    <div class="custom-select" data-select-id="brand_id">
+                        <select class="native-select" id="brand_id" name="brand_id" required>
+                            <?php foreach ($allBrands as $row) { ?>
+                                <option value="<?php echo $row['brand_id']; ?>" data-slug="<?php echo htmlspecialchars($row['slug'] ?? ''); ?>"><?php echo htmlspecialchars($row['brand_name']); ?></option>
+                            <?php } ?>
+                        </select>
+                        <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-value">Select brand</span>
+                            <span class="custom-select-arrow" aria-hidden="true"></span>
+                        </button>
+                        <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label for="category_id">Category</label>
                     <div class="custom-select" data-select-id="category_id">
                         <select class="native-select" id="category_id" name="category_id" required>
-                            <?php while ($row = $categories_result->fetch(PDO::FETCH_ASSOC)) { ?>
+                            <?php foreach ($parentCategories as $row) { ?>
                                 <option value="<?php echo $row['category_id']; ?>" data-slug="<?php echo htmlspecialchars($row['slug'] ?? ''); ?>"><?php echo htmlspecialchars($row['category_name']); ?></option>
                             <?php } ?>
                         </select>
@@ -253,19 +278,21 @@ select.vb-input { cursor:pointer; }
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="brand_id">Brand</label>
-                    <div class="custom-select" data-select-id="brand_id">
-                        <select class="native-select" id="brand_id" name="brand_id" required>
-                            <?php while ($row = $brands_result->fetch(PDO::FETCH_ASSOC)) { ?>
-                                <option value="<?php echo $row['brand_id']; ?>" data-slug="<?php echo htmlspecialchars($row['slug'] ?? ''); ?>"><?php echo htmlspecialchars($row['brand_name']); ?></option>
-                            <?php } ?>
+                    <label for="subcategory_id">Subcategory <span style="font-weight:400;color:#6b7280">(optional)</span></label>
+                    <div class="custom-select" data-select-id="subcategory_id">
+                        <select class="native-select" id="subcategory_id" name="subcategory_id">
+                            <option value="">— None —</option>
                         </select>
                         <button class="custom-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                            <span class="custom-select-value">Select brand</span>
+                            <span class="custom-select-value">Select subcategory</span>
                             <span class="custom-select-arrow" aria-hidden="true"></span>
                         </button>
                         <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
                     </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="permalink_preview">Permalink Preview</label>
+                    <input type="text" id="permalink_preview" readonly style="background:#f8fafc;color:#374151" placeholder="/brand/category/subcategory/product-slug/">
                 </div>
             </div>
         </section>
@@ -526,9 +553,9 @@ select.vb-input { cursor:pointer; }
         </section>
 
         <!-- === AI SEO SCORE & ANALYSIS === -->
-        <section class="form-card">
-            <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-                <h2><i class="fas fa-robot"></i> AI SEO Analysis</h2>
+        <section class="form-card ap-seo-analysis-card">
+            <div class="ap-seo-analysis-header">
+                <h3 class="ap-seo-analysis-title"><i class="fas fa-robot"></i> AI SEO Analysis</h3>
                 <button type="button" class="seo-auto-btn" onclick="AISeo.runScore()" style="height:36px;font-size:.78rem"><i class="fas fa-sync-alt"></i> Refresh Score</button>
             </div>
             <div id="ai-seo-score-section"></div>
@@ -867,7 +894,7 @@ function renderRow(v, i) {
         </td>
         <td style="min-width:80px">
             ${imgThumb}
-            <label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #111;border-radius:8px;background:#111;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">
+            <label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#111;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Upload
                 <input type="file" accept="image/*" style="display:none" onchange="uploadVarImage(this,${i})">
@@ -1233,12 +1260,26 @@ function initCustomSelect(root) {
 
     select.addEventListener('change', syncFromNative);
 
+    root._customSelectRefresh = function () {
+        renderOptions();
+        syncFromNative();
+    };
+
     document.addEventListener('click', function (e) {
         if (!root.contains(e.target)) {
             closeMenu();
         }
     });
 }
+
+window.refreshCustomSelect = function (selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    const root = select.closest('.custom-select');
+    if (root && typeof root._customSelectRefresh === 'function') {
+        root._customSelectRefresh();
+    }
+};
 
 document.querySelectorAll('.custom-select').forEach(initCustomSelect);
 
@@ -1272,8 +1313,42 @@ document.getElementById('product_name').addEventListener('blur', function() {
     }
 });
 
-document.getElementById('category_id').addEventListener('change', seoUpdateCanonicalUrl);
+document.getElementById('category_id').addEventListener('change', function() {
+    loadSubcategoriesForAddProduct();
+    seoUpdateCanonicalUrl();
+});
 document.getElementById('brand_id').addEventListener('change', seoUpdateCanonicalUrl);
+document.getElementById('subcategory_id').addEventListener('change', seoUpdateCanonicalUrl);
+
+async function loadSubcategoriesForAddProduct() {
+    const catSelect = document.getElementById('category_id');
+    const subSelect = document.getElementById('subcategory_id');
+    const catId = catSelect ? catSelect.value : '';
+    subSelect.innerHTML = '<option value="">— None —</option>';
+    if (!catId) {
+        seoUpdateCanonicalUrl();
+        return;
+    }
+    try {
+        const res = await fetch('ajax-get-subcategories.php?category_id=' + encodeURIComponent(catId));
+        const data = await res.json();
+        const subs = (data.subcategories || []).slice().sort(function(a, b) {
+            return String(a.category_name || '').localeCompare(String(b.category_name || ''), undefined, { sensitivity: 'base' });
+        });
+        subs.forEach(function(sub) {
+            const opt = document.createElement('option');
+            opt.value = sub.category_id;
+            opt.setAttribute('data-slug', sub.slug || '');
+            opt.textContent = sub.category_name;
+            subSelect.appendChild(opt);
+        });
+    } catch (e) {
+        console.error('Failed to load subcategories', e);
+    }
+    refreshCustomSelect('subcategory_id');
+    subSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    seoUpdateCanonicalUrl();
+}
 document.getElementById('regular_price').addEventListener('input', seoUpdateDiscountBadge);
 document.getElementById('sale_price').addEventListener('input', seoUpdateDiscountBadge);
 
@@ -1333,9 +1408,19 @@ function seoUpdateCanonicalUrl() {
     const slug = document.getElementById('product_slug').value.trim() || 'product-slug';
     const catSelect = document.getElementById('category_id');
     const brandSelect = document.getElementById('brand_id');
+    const subSelect = document.getElementById('subcategory_id');
     const catSlug = catSelect.options[catSelect.selectedIndex]?.getAttribute('data-slug') || 'category';
     const brandSlug = brandSelect.options[brandSelect.selectedIndex]?.getAttribute('data-slug') || 'brand';
-    const canonical = 'https://www.phonesdukan.com/' + catSlug + '/' + brandSlug + '/' + slug + '/';
+    const subSlug = subSelect && subSelect.value
+        ? (subSelect.options[subSelect.selectedIndex]?.getAttribute('data-slug') || '')
+        : '';
+    const pathParts = [brandSlug, catSlug];
+    if (subSlug) pathParts.push(subSlug);
+    pathParts.push(slug);
+    const path = '/' + pathParts.join('/') + '/';
+    const preview = document.getElementById('permalink_preview');
+    if (preview) preview.value = path;
+    const canonical = 'https://www.phonesdukan.com' + path;
     document.getElementById('canonical_url').value = canonical;
     seoUpdateSnippetPreview();
 }
@@ -1343,7 +1428,7 @@ function seoUpdateCanonicalUrl() {
 function seoUpdateSnippetPreview() {
     const title = document.getElementById('seo_title').value.trim() || document.getElementById('product_name').value.trim() || 'Product Title';
     const desc = document.getElementById('seo_description').value.trim() || 'Product meta description will appear here...';
-    const canonical = document.getElementById('canonical_url').value || 'https://www.phonesdukan.com/category/brand/product-slug/';
+    const canonical = document.getElementById('canonical_url').value || 'https://www.phonesdukan.com/brand/category/product-slug/';
     const urlDisplay = canonical.replace('https://', '').replace(/\/$/, '') + '/';
     const tEl = document.getElementById('snippet_title');
     const dEl = document.getElementById('snippet_desc');
@@ -1380,8 +1465,10 @@ function seoUpdateDiscountBadge() {
 }
 
 // Initialize SEO UI on load
-seoUpdateCanonicalUrl();
-seoUpdateSnippetPreview();
+loadSubcategoriesForAddProduct().then(function() {
+    seoUpdateCanonicalUrl();
+    seoUpdateSnippetPreview();
+});
 
 // ===== SKU Auto-generation =====
 function generateProductSku() {

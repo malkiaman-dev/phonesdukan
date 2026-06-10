@@ -89,8 +89,9 @@ include __DIR__ . '/admin_header.php';
 
     .mu-title {
         margin: 0;
-        font-size: 1.7rem;
-        font-weight: 800;
+        font-size: clamp(1.5rem, 2vw, 1.75rem);
+        font-weight: 600;
+        line-height: 1.25;
         color: var(--mu-black) !important;
         letter-spacing: -0.02em;
     }
@@ -98,7 +99,9 @@ include __DIR__ . '/admin_header.php';
     .mu-subtitle {
         margin: 6px 0 0;
         color: var(--mu-muted);
-        font-size: 0.93rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
     }
 
     .mu-toolbar {

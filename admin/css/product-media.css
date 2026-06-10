@@ -170,18 +170,23 @@
     gap: 6px;
     height: 36px;
     padding: 0 14px;
-    border-radius: 8px;
-    border: 1px solid #111;
-    background: #111;
-    color: #fff;
+    border-radius: 10px;
+    border: 1px solid #e6bd00;
+    background: #f7cf04;
+    color: #111111;
     font-size: .8rem;
     font-weight: 700;
     cursor: pointer;
-    transition: color .12s;
+    box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .12s ease;
 }
 
 .pm-btn:hover {
-    color: #facc15;
+    background: #e6bd00;
+    color: #111111;
+    border-color: #d4af00;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
 }
 
 .pm-btn-outline {
@@ -191,8 +196,10 @@
 }
 
 .pm-btn-outline:hover {
-    border-color: #ef4444;
-    color: #ef4444;
+    border-color: #f7cf04;
+    background: #fffef8;
+    color: #111111;
+    box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
 }
 
 .pm-url-field {

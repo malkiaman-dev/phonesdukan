@@ -96,10 +96,20 @@ class ProductController
                 $brandS->execute([$data['brand_id']]);
                 $brandSlugRow = $brandS->fetch(PDO::FETCH_ASSOC);
 
-                $seoData['canonical_url'] = 'https://www.phonesdukan.com/'
-                    . ($catSlugRow['slug'] ?? '') . '/'
-                    . ($brandSlugRow['slug'] ?? '') . '/'
-                    . $data['product_slug'] . '/';
+                $subSlug = null;
+                if (!empty($data['subcategory_id'])) {
+                    $subS = $dbSlug->prepare('SELECT slug FROM categories WHERE category_id = ? AND parent_id IS NOT NULL LIMIT 1');
+                    $subS->execute([(int) $data['subcategory_id']]);
+                    $subSlugRow = $subS->fetch(PDO::FETCH_ASSOC);
+                    $subSlug = $subSlugRow['slug'] ?? null;
+                }
+
+                $seoData['canonical_url'] = buildProductCanonicalUrl(
+                    (string) ($brandSlugRow['slug'] ?? ''),
+                    (string) ($catSlugRow['slug'] ?? ''),
+                    (string) ($data['product_slug'] ?? ''),
+                    $subSlug
+                );
             } catch (Exception $eSlug) {
                 // Fall back to client-provided value
             }

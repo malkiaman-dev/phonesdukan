@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/app/Models/AddProductModel.php';
+require_once dirname(__DIR__, 2) . '/app/Models/CatalogModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
 
@@ -35,10 +36,22 @@ class ProductController
             try {
                 // Collect POST data (product data)
                 $product_type = in_array($_POST['product_type'] ?? 'simple', ['simple','variable']) ? ($_POST['product_type'] ?? 'simple') : 'simple';
+                $subcategoryId = !empty($_POST['subcategory_id']) ? (int) $_POST['subcategory_id'] : null;
+                $categoryId = (int) ($_POST['category_id'] ?? 0);
+                $catalogModel = new CatalogModel();
+                if ($subcategoryId && !$catalogModel->validateSubcategoryForParent($subcategoryId, $categoryId)) {
+                    $this->rollbackIfActive();
+                    $_SESSION['message'] = 'Error: Selected subcategory does not belong to the chosen category.';
+                    $_SESSION['message_type'] = 'error';
+                    header('Location: ' . url('admin/add-product.php'));
+                    exit();
+                }
+
                 $productData = [
                     'product_name' => $_POST['product_name'],
                     'product_slug' => trim(preg_replace('/-+/', '-', str_replace(' ', '-', trim($_POST['product_slug']))), '-'),
-                    'category_id' => $_POST['category_id'],
+                    'category_id' => $categoryId,
+                    'subcategory_id' => $subcategoryId,
                     'brand_id' => $_POST['brand_id'],
                     'product_description' => $_POST['product_description'],
                     'short_description' => $_POST['short_description'],
@@ -91,11 +104,19 @@ class ProductController
                 $brandStmt->execute([$productData['brand_id']]);
                 $brandRow = $brandStmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
+                $subSlug = null;
+                if ($subcategoryId) {
+                    $subStmt = $this->db->prepare('SELECT slug FROM categories WHERE category_id = ? AND parent_id IS NOT NULL LIMIT 1');
+                    $subStmt->execute([$subcategoryId]);
+                    $subRow = $subStmt->fetch(PDO::FETCH_ASSOC);
+                    $subSlug = $subRow['slug'] ?? null;
+                }
+
                 // Insert the product into the database
-                $query = 'INSERT INTO products (product_name, product_slug, category_id, brand_id, product_description,
+                $query = 'INSERT INTO products (product_name, product_slug, category_id, subcategory_id, brand_id, product_description,
                                                 short_description, product_status, expected_coming_date, stock_quantity, regular_price, sale_price,
                                                 product_sku, weight_kg, length_cm, width_cm, height_cm, tax_class, created_at, updated_at, product_tag, product_type, prepaid_discount_amount)
-                          VALUES (:product_name, :product_slug, :category_id, :brand_id, :product_description,
+                          VALUES (:product_name, :product_slug, :category_id, :subcategory_id, :brand_id, :product_description,
                                   :short_description, :product_status, :expected_coming_date, :stock_quantity, :regular_price, :sale_price,
                                   :product_sku, :weight_kg, :length_cm, :width_cm, :height_cm, :tax_class, NOW(), NOW(), :product_tag, :product_type, :prepaid_discount_amount)';
                 $productData['product_type'] = $product_type;
@@ -131,10 +152,12 @@ class ProductController
 
                 $canonicalUrl = !empty(trim($_POST['canonical_url'] ?? ''))
                     ? trim($_POST['canonical_url'])
-                    : ('https://www.phonesdukan.com/'
-                        . ($catRow['slug'] ?? '') . '/'
-                        . ($brandRow['slug'] ?? '') . '/'
-                        . $productData['product_slug'] . '/');
+                    : buildProductCanonicalUrl(
+                        (string) ($brandRow['slug'] ?? ''),
+                        (string) ($catRow['slug'] ?? ''),
+                        (string) $productData['product_slug'],
+                        $subSlug
+                    );
 
                 $secondaryKeywords = trim($_POST['secondary_keywords'] ?? '');
 

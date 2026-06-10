@@ -15,21 +15,26 @@ class ProductModel
 
     public function getProductById($id)
     {
-        $stmt = $this->db->prepare('SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug FROM products p LEFT JOIN categories c ON p.category_id = c.category_id LEFT JOIN brands b ON p.brand_id = b.brand_id WHERE p.product_id = ? LIMIT 1');
+        $stmt = $this->db->prepare('SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, sc.slug AS subcategory_slug
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+            LEFT JOIN brands b ON p.brand_id = b.brand_id
+            WHERE p.product_id = ? LIMIT 1');
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getAllCategories()
     {
-        $stmt = $this->db->prepare('SELECT * FROM categories');
+        $stmt = $this->db->prepare('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY category_name ASC');
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAllBrands()
     {
-        $stmt = $this->db->prepare('SELECT * FROM brands');
+        $stmt = $this->db->prepare('SELECT * FROM brands ORDER BY brand_name ASC');
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -65,6 +70,7 @@ class ProductModel
             tax_class = ?,
             product_tag = ?,
             category_id = ?,
+            subcategory_id = ?,
             brand_id = ?,
             is_b2b_available = ?,
             b2b_regular_price = ?,
@@ -89,6 +95,7 @@ class ProductModel
             $taxClass,
             $data['product_tag'],
             $data['category_id'],
+            !empty($data['subcategory_id']) ? (int) $data['subcategory_id'] : null,
             $data['brand_id'],
             $data['is_b2b_available'],
             $b2bRegularPrice,

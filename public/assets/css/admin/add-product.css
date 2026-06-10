@@ -48,14 +48,19 @@ body {
 
 .admin-page .page-header h1 {
     margin: 0;
-    font-size: clamp(28px, 3vw, 34px);
+    font-size: clamp(1.5rem, 2vw, 1.75rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
     color: #111111;
 }
 
 .admin-page .page-header p {
     margin: 6px 0 0;
     color: #6b7280;
-    font-size: 14px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .admin-page .product-form {
@@ -73,8 +78,18 @@ body {
     margin-bottom: 0;
 }
 
-/* Neutralize legacy global span badges in admin.css */
-.admin-page span {
+/* Neutralize legacy global span badges in admin.css (scoped — keep AI SEO widget intact) */
+.admin-page .form-group span:not(.req-star),
+.admin-page .form-card-header span:not(.req-star),
+.admin-page .page-header span:not(.req-star),
+.admin-page .upload-box span:not(.req-star),
+.admin-page .custom-select-btn span:not(.req-star),
+.admin-page .gallery-image-section span:not(.req-star),
+.admin-page .seo-preview-box span:not(.req-star),
+.admin-page .ap-seo-field-hdr span:not(.req-star),
+.admin-page .seo-char-counter,
+.admin-page .seo-field-hint,
+.admin-page label > span:not(.req-star) {
     background: transparent !important;
     color: inherit !important;
     padding: 0 !important;
@@ -87,9 +102,38 @@ body {
     margin-bottom: 16px;
 }
 
+.admin-page .ap-seo-analysis-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.admin-page .ap-seo-analysis-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: #111111;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-page .ap-seo-analysis-title i {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
 .admin-page .form-card-header h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
     color: #111111;
 }
 
@@ -370,23 +414,24 @@ body {
 }
 
 .admin-page .submit-btn {
-    border: 1px solid #111111;
-    background: #111111;
-    color: #ffffff;
+    border: 1px solid #e6bd00;
+    background: #f7cf04;
+    color: #111111;
     border-radius: 10px;
     min-height: 46px;
     padding: 0 18px;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
     transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .admin-page .submit-btn:hover {
-    background: #111111;
-    color: #facc15;
-    border-color: #111111;
-    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
+    background: #e6bd00;
+    color: #111111;
+    border-color: #d4af00;
+    box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
     transform: translateY(-1px);
 }
 

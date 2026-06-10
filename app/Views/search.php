@@ -4,6 +4,7 @@ $metaRobots = 'noindex, follow';
 
 require_once __DIR__ . '/../../includes/header.php';
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/app/Models/ProductModel.php';
 
 // Initialize Database & Product Model
@@ -45,7 +46,7 @@ if (!empty($searchQuery)) {
                 <?php if (!empty($results)): ?>
                     <?php foreach ($results as $product): ?>
                         <div class="product-card">
-                            <a href="/<?php echo htmlspecialchars($product['category_slug']); ?>/<?php echo htmlspecialchars($product['brand_slug']); ?>/<?php echo htmlspecialchars($product['product_slug']); ?>">
+                            <a href="<?php echo htmlspecialchars(buildProductPathFromRow($product)); ?>">
                                 <div class="product-img-wrapper">
                                     <div class="product-img">
                                         <img alt="<?php echo htmlspecialchars($product['product_name']); ?>" width="300" height="300" src="<?php echo htmlspecialchars($product['image_url']); ?>">
@@ -53,7 +54,7 @@ if (!empty($searchQuery)) {
                                 </div>
                             </a>
                             <h3 class="product-title">
-                                <a href="/<?php echo htmlspecialchars($product['category_slug']); ?>/<?php echo htmlspecialchars($product['brand_slug']); ?>/<?php echo htmlspecialchars($product['product_slug']); ?>">
+                                <a href="<?php echo htmlspecialchars(buildProductPathFromRow($product)); ?>">
                                     <?php echo htmlspecialchars($product['product_name']); ?>
                                 </a>
                             </h3>

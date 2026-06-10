@@ -8,6 +8,18 @@ window.pdWithBase = window.pdWithBase || function (path) {
     return pdBasePath + '/' + path;
 };
 
+window.pdBuildProductPath = window.pdBuildProductPath || function (product) {
+    const parts = [
+        product.brand_slug || '',
+        product.category_slug || '',
+    ];
+    if (product.subcategory_slug) {
+        parts.push(product.subcategory_slug);
+    }
+    parts.push(product.product_slug || '');
+    return '/' + parts.filter(Boolean).join('/');
+};
+
 document.addEventListener("DOMContentLoaded", function () {
 
     // Desktop sidebar elements
@@ -261,7 +273,7 @@ if (mobileSearchInput && mobileSearchResults) {
                     if (data.length > 0) {
                         mobileSearchResults.style.display = "block";
                         data.forEach(product => {
-                            const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
+                            const productUrl = window.pdWithBase(window.pdBuildProductPath(product));
                             const resultItem = document.createElement("div");
                             resultItem.classList.add("search-item");
                             const link = document.createElement('a');
@@ -323,7 +335,7 @@ mobileSearchInput.addEventListener("keypress", function (event) {
                     if (data.length > 0) {
                         closeButton.style.display = "flex";
                         data.forEach(product => {
-                            const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
+                            const productUrl = window.pdWithBase(window.pdBuildProductPath(product));
                             const li = document.createElement("li");
                             const link = document.createElement('a');
                             link.href = productUrl;

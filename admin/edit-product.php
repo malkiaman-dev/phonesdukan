@@ -10,12 +10,8 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     exit();
 }
 
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
-
-// AI SEO CSS
-echo '<link rel="stylesheet" href="css/ai-seo.css?v=2.8">';
-echo '<link rel="stylesheet" href="css/product-media.css?v=1.1">';
+include __DIR__ . '/admin_sidebar.php';
 
 $flashMessage = null;
 $flashType = 'success';
@@ -31,6 +27,16 @@ $controller = new ProductController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_action'])) {
     error_log('POST data: ' . print_r($_POST, true));
+    require_once dirname(__DIR__, 1) . '/app/Models/CatalogModel.php';
+    $subcategoryId = !empty($_POST['subcategory_id']) ? (int) $_POST['subcategory_id'] : null;
+    $categoryId = (int) ($_POST['category_id'] ?? 0);
+    $catalogCheck = new CatalogModel();
+    if ($subcategoryId && !$catalogCheck->validateSubcategoryForParent($subcategoryId, $categoryId)) {
+        $_SESSION['message'] = 'Error: Selected subcategory does not belong to the chosen category.';
+        $_SESSION['message_type'] = 'error';
+        header('Location: edit-product.php?id=' . urlencode((string) ($_GET['id'] ?? '')));
+        exit();
+    }
     $productData = [
         'product_name' => $_POST['product_name'] ?? '',
         'product_slug' => trim(preg_replace('/-+/', '-', str_replace(' ', '-', trim($_POST['product_slug'] ?? ''))), '-'),
@@ -49,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_act
         'tax_class' => $_POST['tax_class'] ?? null,
         'product_tag' => $_POST['product_tag'] ?? null,
         'category_id' => $_POST['category_id'] ?? null,
+        'subcategory_id' => !empty($_POST['subcategory_id']) ? (int) $_POST['subcategory_id'] : null,
         'brand_id' => $_POST['brand_id'] ?? null,
         'is_b2b_available' => isset($_POST['is_b2b_available']) ? 1 : 0,
         'b2b_regular_price' => $_POST['b2b_regular_price'] ?? null,
@@ -85,6 +92,10 @@ if (!isset($data['product']) || !$data['product']) {
 $product = $data['product'];
 $categories = $data['categories'];
 $brands = $data['brands'];
+require_once dirname(__DIR__, 1) . '/app/Models/CatalogModel.php';
+$catalogModel = new CatalogModel();
+$productSubcategories = $catalogModel->getSubcategories((int) ($product['category_id'] ?? 0));
+$productPermalink = buildProductPathFromRow($product);
 $seoData = $controller->getSeoData($product['product_id']);
 $productImages = $controller->getProductImages($product['product_id']);
 require_once dirname(__DIR__, 1) . '/database/db.php';
@@ -194,11 +205,15 @@ input#enableVariationsEP:checked + .vb-toggle-track .vb-toggle-thumb { left:25px
 .vb-swatch { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.12); flex-shrink:0; }
 .vb-btn-ep {
     display:inline-flex; align-items:center; height:40px; padding:0 16px;
-    border:1px solid #111; border-radius:10px; background:#111 !important;
-    color:#fff !important; font-size:.86rem; font-weight:700; cursor:pointer;
-    transition:color .12s,transform .12s;
+    border:1px solid #e6bd00; border-radius:10px; background:#f7cf04 !important;
+    color:#111 !important; font-size:.86rem; font-weight:700; cursor:pointer;
+    box-shadow:0 4px 14px rgba(247,207,4,.22);
+    transition:background .2s,border-color .2s,color .2s,transform .12s,box-shadow .2s;
 }
-.vb-btn-ep:hover { color:#facc15 !important; transform:translateY(-1px); }
+.vb-btn-ep:hover {
+    background:#e6bd00 !important; color:#111 !important; border-color:#d4af00;
+    transform:translateY(-1px); box-shadow:0 8px 20px rgba(247,207,4,.28);
+}
 .vb-btn-ep-outline { background:#fff !important; color:#111 !important; border-color:#e5e7eb; }
 .vb-btn-ep-outline:hover { border-color:#facc15; color:#111 !important; background:#fffbeb !important; transform:none; }
 .vb-btn-ep-sm { height:30px; padding:0 10px; font-size:.78rem; border-radius:8px; }
@@ -249,12 +264,17 @@ select.vb-input-ep { cursor:pointer; }
         overflow: visible !important;
     }
 
-    .ep-wrap span,
+    .ep-wrap span:not(.req-star),
     .ep-wrap strong,
     .ep-wrap small,
     .ep-wrap p {
         background: transparent !important;
         color: inherit !important;
+    }
+
+    .ep-wrap .req-star {
+        color: #ef4444 !important;
+        font-weight: 700;
     }
 
     .ep-toast {
@@ -282,9 +302,9 @@ select.vb-input-ep { cursor:pointer; }
     }
 
     .ep-toast-success {
-        background: #111111;
-        color: #ffffff;
-        border-color: #111111;
+        background: #ecfdf3;
+        color: #166534;
+        border-color: #bbf7d0;
     }
 
     .ep-toast-error {
@@ -314,14 +334,18 @@ select.vb-input-ep { cursor:pointer; }
     .ep-header h2 {
         margin: 0;
         color: var(--black);
-        font-size: 1.85rem;
+        font-size: clamp(1.5rem, 2vw, 1.75rem);
+        font-weight: 600;
+        line-height: 1.25;
         letter-spacing: -0.02em;
     }
 
     .ep-header p {
-        margin: 5px 0 0;
+        margin: 6px 0 0;
         color: var(--muted);
-        font-size: 0.92rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
     }
 
     .ep-card {
@@ -332,8 +356,10 @@ select.vb-input-ep { cursor:pointer; }
     .ep-card h3 {
         margin: 0 0 14px;
         color: var(--black);
-        font-size: 1.05rem;
-        font-weight: 800;
+        font-size: 1.125rem;
+        font-weight: 600;
+        line-height: 1.35;
+        letter-spacing: -0.01em;
     }
 
     .ep-grid {
@@ -619,21 +645,57 @@ select.vb-input-ep { cursor:pointer; }
         justify-content: center;
         height: 44px;
         padding: 0 16px;
-        border: 1px solid var(--black);
-        border-radius: 12px;
-        background: var(--black);
-        color: #fff !important;
+        border-radius: 10px;
         font-size: 0.9rem;
         font-weight: 700;
         text-decoration: none !important;
         cursor: pointer;
-        transition: color .15s ease, box-shadow .15s ease, transform .12s ease;
+        transition: background .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .12s ease;
     }
 
-    .ep-btn:hover {
-        color: var(--yellow) !important;
+    .ep-btn-primary {
+        background: #f7cf04;
+        color: #111111 !important;
+        border: 1px solid #e6bd00;
+        box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
+    }
+
+    .ep-btn-primary:hover {
+        background: #e6bd00;
+        color: #111111 !important;
+        border-color: #d4af00;
         transform: translateY(-1px);
-        box-shadow: 0 10px 20px rgba(17, 17, 17, 0.14);
+        box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
+    }
+
+    .ep-btn-secondary {
+        background: #ffffff;
+        color: #111111 !important;
+        border: 1.5px solid #e5e7eb;
+        box-shadow: none;
+    }
+
+    .ep-btn-secondary:hover {
+        background: #fffef8;
+        color: #111111 !important;
+        border-color: #f7cf04;
+        transform: translateY(-1px);
+        box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
+    }
+
+    .ep-btn-danger {
+        background: #ffffff;
+        color: #ef4444 !important;
+        border: 1.5px solid #fecaca;
+        box-shadow: none;
+    }
+
+    .ep-btn-danger:hover {
+        background: #ef4444;
+        color: #ffffff !important;
+        border-color: #ef4444;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.22);
     }
 
     .ep-upload-input {
@@ -749,43 +811,12 @@ select.vb-input-ep { cursor:pointer; }
         min-width: 130px;
     }
 
-    /* ── Image AI buttons ── */
-    .ep-ai-btn {
-        display: inline-flex;
+    .ep-footer-actions {
+        display: flex;
+        gap: 10px;
         align-items: center;
-        gap: 5px;
-        margin-top: 6px;
-        padding: 5px 12px;
-        background: #111111;
-        color: #facc15;
-        border: 1px solid #facc15;
-        border-radius: 6px;
-        font-size: 0.76rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background .15s, color .15s;
-        font-family: inherit;
-    }
-    .ep-ai-btn:hover {
-        background: #facc15;
-        color: #111111;
-    }
-    .ep-ai-btn:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-    }
-    .ep-ai-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        background: #111;
-        color: #facc15;
-        font-size: 0.64rem;
-        font-weight: 700;
-        padding: 1px 6px;
-        border-radius: 4px;
-        margin-left: 6px;
-        vertical-align: middle;
+        flex-wrap: wrap;
+        padding: 16px 0 8px;
     }
 
     #product-attributes {
@@ -895,18 +926,24 @@ select.vb-input-ep { cursor:pointer; }
         flex-shrink: 0;
         height: 48px;
         padding: 0 12px;
-        background: #111;
-        color: #fff;
-        border: none;
+        background: #ffffff;
+        color: #111111;
+        border: 1.5px solid #e5e7eb;
         border-radius: 10px;
         font-size: .78rem;
         font-weight: 700;
         cursor: pointer;
         white-space: nowrap;
-        transition: color .15s;
+        transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .12s ease;
         align-self: flex-start;
     }
-    .ep-seo-auto-btn:hover { color: #facc15; }
+    .ep-seo-auto-btn:hover {
+        background: #fffef8;
+        color: #111111;
+        border-color: #f7cf04;
+        box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
+        transform: translateY(-1px);
+    }
     .ep-seo-field-hint { display: block; color: #9ca3af; font-size: .76rem; margin-top: 4px; }
     /* SEO field header: label LEFT, buttons RIGHT — on the same row directly above input */
     .ep-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
@@ -953,8 +990,8 @@ select.vb-input-ep { cursor:pointer; }
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
                 <?= $pillLabel ?>
             </span>
-            <a href="<?= htmlspecialchars('/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/') ?>" target="_blank" class="ep-btn" style="text-decoration:none;">View Product</a>
-            <button type="submit" class="ep-btn" form="product-form">Update Product</button>
+            <a href="<?= htmlspecialchars($productPermalink . '/') ?>" target="_blank" class="ep-btn ep-btn-secondary" style="text-decoration:none;">View Product</a>
+            <button type="submit" class="ep-btn ep-btn-primary" form="product-form">Update Product</button>
         </div>
     </div>
 
@@ -988,24 +1025,39 @@ select.vb-input-ep { cursor:pointer; }
                     </div>
                 </div>
                 <div class="ep-field">
+                    <label>Brand</label>
+                    <select name="brand_id" id="ep_brand_id" required data-ep-custom-dropdown>
+                        <?php foreach ($brands as $row): ?>
+                            <option value="<?= $row['brand_id'] ?>" data-slug="<?= htmlspecialchars($row['slug'] ?? '') ?>" <?= $product['brand_id'] == $row['brand_id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($row['brand_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="ep-field">
                     <label>Category</label>
-                    <select name="category_id" required data-ep-custom-dropdown>
+                    <select name="category_id" id="ep_category_id" required data-ep-custom-dropdown>
                         <?php foreach ($categories as $row): ?>
-                            <option value="<?= $row['category_id'] ?>" <?= $product['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
+                            <option value="<?= $row['category_id'] ?>" data-slug="<?= htmlspecialchars($row['slug'] ?? '') ?>" <?= $product['category_id'] == $row['category_id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($row['category_name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="ep-field">
-                    <label>Brand</label>
-                    <select name="brand_id" required data-ep-custom-dropdown>
-                        <?php foreach ($brands as $row): ?>
-                            <option value="<?= $row['brand_id'] ?>" <?= $product['brand_id'] == $row['brand_id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($row['brand_name']) ?>
+                    <label>Subcategory <span class="ep-field-optional">(optional)</span></label>
+                    <select name="subcategory_id" id="ep_subcategory_id" data-ep-custom-dropdown>
+                        <option value="">— None —</option>
+                        <?php foreach ($productSubcategories as $row): ?>
+                            <option value="<?= $row['category_id'] ?>" data-slug="<?= htmlspecialchars($row['slug'] ?? '') ?>" <?= (int)($product['subcategory_id'] ?? 0) === (int)$row['category_id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($row['category_name']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+                <div class="ep-field ep-field-full">
+                    <label for="ep_permalink_preview">Permalink Preview</label>
+                    <input type="text" id="ep_permalink_preview" readonly value="<?= htmlspecialchars($productPermalink . '/') ?>" style="background:#f8fafc;color:#374151">
                 </div>
                 <div class="ep-field">
                     <label>Product Status</label>
@@ -1180,7 +1232,7 @@ select.vb-input-ep { cursor:pointer; }
             <!-- Google Search Snippet Preview -->
             <div class="ep-seo-preview-box">
                 <span class="ep-seo-preview-label">Google Search Preview</span>
-                <div class="ep-seo-preview-url" id="ep_snippet_url"><?= htmlspecialchars('www.phonesdukan.com/' . ($product['category_slug'] ?? 'category') . '/' . ($product['brand_slug'] ?? 'brand') . '/' . ($product['product_slug'] ?? 'product-slug') . '/') ?></div>
+                <div class="ep-seo-preview-url" id="ep_snippet_url"><?= htmlspecialchars('www.phonesdukan.com' . $productPermalink . '/') ?></div>
                 <div class="ep-seo-preview-title" id="ep_snippet_title"><?= htmlspecialchars($seoData['seo_title'] ?? $product['product_name'] ?? 'Product Title') ?></div>
                 <div class="ep-seo-preview-desc" id="ep_snippet_desc"><?= htmlspecialchars($seoData['seo_description'] ?? 'Product meta description will appear here...') ?></div>
             </div>
@@ -1262,7 +1314,7 @@ select.vb-input-ep { cursor:pointer; }
                 <div class="ep-field full">
                     <label>Canonical URL <small style="color:#9ca3af;font-weight:400">(auto-regenerated on save)</small></label>
                     <input type="text" id="ep_canonical_url" name="canonical_url" readonly
-                        value="<?= htmlspecialchars($seoData['canonical_url'] ?? ('https://www.phonesdukan.com/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/')) ?>"
+                        value="<?= htmlspecialchars($seoData['canonical_url'] ?? ('https://www.phonesdukan.com' . $productPermalink . '/')) ?>"
                         style="background:#f8fafc;color:#6b7280;cursor:default;font-size:.88rem">
                 </div>
             </div>
@@ -1379,7 +1431,7 @@ select.vb-input-ep { cursor:pointer; }
                                     <input type="radio" name="primary_image_id" value="<?= $image['image_id'] ?>" <?= $image['is_primary'] ? 'checked' : '' ?>>
                                     Primary
                                 </label>
-                                <button class="ep-btn" type="button" onclick="confirmRemoval(<?= $image['image_id'] ?>)">Remove</button>
+                                <button class="ep-btn ep-btn-danger" type="button" onclick="confirmRemoval(<?= $image['image_id'] ?>)">Remove</button>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -1432,11 +1484,11 @@ select.vb-input-ep { cursor:pointer; }
                             <label>Sale Price</label>
                             <input type="number" name="attributes[<?= $index ?>][sale_price]" value="<?= htmlspecialchars($attribute['sale_price'] ?? '') ?>" placeholder="Sale Price">
                         </div>
-                        <button type="button" class="ep-btn remove-attribute-btn" data-index="<?= $index ?>" data-attribute-id="<?= $attribute['attribute_id'] ?>" data-value-id="<?= $attribute['value_id'] ?>">Remove Attribute Value</button>
+                        <button type="button" class="ep-btn ep-btn-danger remove-attribute-btn" data-index="<?= $index ?>" data-attribute-id="<?= $attribute['attribute_id'] ?>" data-value-id="<?= $attribute['value_id'] ?>">Remove Attribute Value</button>
                     </div>
                 <?php endforeach; ?>
             </div>
-            <button class="ep-btn add-attribute" type="button" onclick="addNewAttribute()">Add New Attribute</button>
+            <button class="ep-btn ep-btn-secondary add-attribute" type="button" onclick="addNewAttribute()">Add New Attribute</button>
         </div>
 
         <!-- ============================================================
@@ -1453,7 +1505,7 @@ select.vb-input-ep { cursor:pointer; }
                         <input type="checkbox" id="enableVariationsEP" style="display:none" <?= $currentProductType === 'variable' ? 'checked' : '' ?>>
                         <div class="vb-toggle-track"><div class="vb-toggle-thumb"></div></div>
                     </div>
-                    <span id="epVarToggleText" style="display:inline-flex;align-items:center;height:36px;padding:0 14px;background:#111111 !important;color:#facc15 !important;border:1.5px solid #facc15;border-radius:10px;font-weight:700;font-size:.85rem;white-space:nowrap;"><?= $currentProductType === 'variable' ? 'Variable Product (ON)' : 'Variable Product' ?></span>
+                    <span id="epVarToggleText" style="display:inline-flex;align-items:center;height:36px;padding:0 14px;background:#fffbeb !important;color:#111111 !important;border:1.5px solid #fde68a;border-radius:10px;font-weight:700;font-size:.85rem;white-space:nowrap;"><?= $currentProductType === 'variable' ? 'Variable Product (ON)' : 'Variable Product' ?></span>
                 </label>
             </div>
 
@@ -1496,12 +1548,12 @@ select.vb-input-ep { cursor:pointer; }
             </div>
         </div>
 
-        <div style="display:flex;gap:10px;align-items:center;padding:16px 0 16px 20px;">
+        <div class="ep-footer-actions">
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
                 <?= $pillLabel ?>
             </span>
-            <a href="<?= htmlspecialchars('/' . ($product['category_slug'] ?? '') . '/' . ($product['brand_slug'] ?? '') . '/' . ($product['product_slug'] ?? '') . '/') ?>" target="_blank" class="ep-btn" style="text-decoration:none;">View Product</a>
-            <button type="submit" class="ep-btn">Update Product</button>
+            <a href="<?= htmlspecialchars($productPermalink . '/') ?>" target="_blank" class="ep-btn ep-btn-secondary" style="text-decoration:none;">View Product</a>
+            <button type="submit" class="ep-btn ep-btn-primary">Update Product</button>
         </div>
     </form>
 </div>
@@ -1657,11 +1709,12 @@ function epToast(message, type) {
         'position:fixed', 'bottom:24px', 'right:24px', 'z-index:99999',
         'display:flex', 'align-items:center',
         'padding:13px 20px',
-        'background:#111111',
-        'color:#fff',
-        'border-left:4px solid ' + (borders[type] || '#6b7280'),
+        'background:#ffffff',
+        'color:#111111',
+        'border:1px solid #e5e7eb',
+        'border-left:4px solid ' + (borders[type] || '#facc15'),
         'border-radius:12px',
-        'box-shadow:0 8px 28px rgba(0,0,0,.28)',
+        'box-shadow:0 8px 24px rgba(17,17,17,.12)',
         'font-size:.88rem', 'font-weight:700',
         'min-width:260px', 'max-width:380px',
         'animation:epSlideIn .25s ease',
@@ -1851,7 +1904,7 @@ function epRenderRow(v, i) {
         </td>
         <td style="min-width:80px">
             ${imgThumb}
-            <label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid #111;border-radius:8px;background:#111;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">
+            <label style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1.5px solid #e5e7eb;border-radius:8px;background:#fff;color:#111;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Upload
                 <input type="file" accept="image/*" style="display:none" onchange="epUploadVarImage(this,${i})">
@@ -2267,7 +2320,7 @@ function addNewAttribute() {
             <label>Sale Price</label>
             <input type="number" name="attributes[${attributeIndex}][sale_price]">
         </div>
-        <button type="button" class="ep-btn remove-attribute-btn" data-index="${attributeIndex}" data-attribute-id="0" data-value-id="0">Remove Attribute Value</button>
+        <button type="button" class="ep-btn ep-btn-danger remove-attribute-btn" data-index="${attributeIndex}" data-attribute-id="0" data-value-id="0">Remove Attribute Value</button>
     `;
     document.getElementById('product-attributes').appendChild(newAttributeDiv);
     initCustomDropdowns(newAttributeDiv);
@@ -2367,6 +2420,62 @@ function epSeoAutoFillAll() {
     epSeoGenerateTitle();
     epSeoGenerateDescription();
     epSeoGenerateFocusKeyword();
+    epSeoUpdateCanonicalUrl();
+}
+
+function epSeoUpdateCanonicalUrl() {
+    const slugField = document.getElementById('ep_product_slug');
+    const slug = slugField ? slugField.value.trim() || 'product-slug' : 'product-slug';
+    const brandSelect = document.getElementById('ep_brand_id');
+    const catSelect = document.getElementById('ep_category_id');
+    const subSelect = document.getElementById('ep_subcategory_id');
+    const brandSlug = brandSelect?.options[brandSelect.selectedIndex]?.getAttribute('data-slug') || 'brand';
+    const catSlug = catSelect?.options[catSelect.selectedIndex]?.getAttribute('data-slug') || 'category';
+    const subSlug = subSelect && subSelect.value
+        ? (subSelect.options[subSelect.selectedIndex]?.getAttribute('data-slug') || '')
+        : '';
+    const pathParts = [brandSlug, catSlug];
+    if (subSlug) pathParts.push(subSlug);
+    pathParts.push(slug);
+    const path = '/' + pathParts.join('/') + '/';
+    const preview = document.getElementById('ep_permalink_preview');
+    if (preview) preview.value = path;
+    const canonicalField = document.getElementById('ep_canonical_url');
+    if (canonicalField) canonicalField.value = 'https://www.phonesdukan.com' + path;
+    epSeoUpdateSnippetPreview();
+}
+
+async function epLoadSubcategories(preserveSelected) {
+    const catSelect = document.getElementById('ep_category_id');
+    const subSelect = document.getElementById('ep_subcategory_id');
+    if (!catSelect || !subSelect) return;
+    const current = preserveSelected ? subSelect.value : '';
+    const catId = catSelect.value;
+    subSelect.innerHTML = '<option value="">— None —</option>';
+    if (!catId) {
+        subSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        epSeoUpdateCanonicalUrl();
+        return;
+    }
+    try {
+        const res = await fetch('ajax-get-subcategories.php?category_id=' + encodeURIComponent(catId));
+        const data = await res.json();
+        const subs = (data.subcategories || []).slice().sort(function(a, b) {
+            return String(a.category_name || '').localeCompare(String(b.category_name || ''), undefined, { sensitivity: 'base' });
+        });
+        subs.forEach(function(sub) {
+            const opt = document.createElement('option');
+            opt.value = sub.category_id;
+            opt.setAttribute('data-slug', sub.slug || '');
+            opt.textContent = sub.category_name;
+            if (String(sub.category_id) === String(current)) opt.selected = true;
+            subSelect.appendChild(opt);
+        });
+    } catch (e) {
+        console.error('Failed to load subcategories', e);
+    }
+    subSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    epSeoUpdateCanonicalUrl();
 }
 
 function epSeoUpdateSnippetPreview() {
@@ -2375,10 +2484,14 @@ function epSeoUpdateSnippetPreview() {
     const nameEl     = document.querySelector('input[name="product_name"]');
     const title = (titleField ? titleField.value.trim() : '') || (nameEl ? nameEl.value.trim() : '') || 'Product Title';
     const desc  = (descField  ? descField.value.trim()  : '') || 'Product meta description will appear here...';
+    const canonical = document.getElementById('ep_canonical_url')?.value || 'https://www.phonesdukan.com/brand/category/product-slug/';
+    const urlDisplay = canonical.replace('https://', '').replace(/\/$/, '') + '/';
     const tEl = document.getElementById('ep_snippet_title');
     const dEl = document.getElementById('ep_snippet_desc');
+    const uEl = document.getElementById('ep_snippet_url');
     if (tEl) tEl.textContent = title.length > 60 ? title.substring(0, 60) + '...' : title;
     if (dEl) dEl.textContent = desc.length > 160  ? desc.substring(0, 160) + '...' : desc;
+    if (uEl) uEl.textContent = urlDisplay;
 }
 
 function epSeoUpdateCharCounter(fieldId, limit) {
@@ -2402,6 +2515,14 @@ document.addEventListener('DOMContentLoaded', function() {
     epSeoUpdateCharCounter('ep_seo_title', 60);
     epSeoUpdateCharCounter('ep_seo_description', 160);
     epSeoUpdateSnippetPreview();
+    const catSelect = document.getElementById('ep_category_id');
+    const brandSelect = document.getElementById('ep_brand_id');
+    const subSelect = document.getElementById('ep_subcategory_id');
+    const slugField = document.getElementById('ep_product_slug');
+    if (catSelect) catSelect.addEventListener('change', function() { epLoadSubcategories(false); });
+    if (brandSelect) brandSelect.addEventListener('change', epSeoUpdateCanonicalUrl);
+    if (subSelect) subSelect.addEventListener('change', epSeoUpdateCanonicalUrl);
+    if (slugField) slugField.addEventListener('input', epSeoUpdateCanonicalUrl);
 });
 
 // ===== Edit Product - SKU Auto-generation =====

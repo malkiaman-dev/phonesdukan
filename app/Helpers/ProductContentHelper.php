@@ -333,6 +333,7 @@ class ProductContentHelper
         $map = [
             'Brand' => $product['brand_name'] ?? '',
             'Category' => $product['category_name'] ?? '',
+            'Sub Category' => $product['subcategory_name'] ?? '',
             'SKU' => $product['product_sku'] ?? '',
             'Weight' => isset($product['weight_kg']) && is_numeric($product['weight_kg']) && (float) $product['weight_kg'] > 0
                 ? rtrim(rtrim(number_format((float) $product['weight_kg'], 2, '.', ''), '0'), '.') . ' kg'
@@ -403,7 +404,7 @@ class ProductContentHelper
             $merged[] = ['label' => $label, 'value' => $value];
         }
 
-        $metaSkipIfParsed = ['brand', 'category', 'sku', 'weight', 'dimensions'];
+        $metaSkipIfParsed = ['brand', 'category', 'sub category', 'sku', 'weight', 'dimensions'];
 
         foreach ($metaRows as $row) {
             $label = self::normalizeText($row['label'] ?? '');

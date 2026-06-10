@@ -28,10 +28,12 @@ class ProductModel
         p.product_tag,
         pi.image_url,
         c.slug AS category_slug,
-        b.slug AS brand_slug
+        b.slug AS brand_slug,
+        sc.slug AS subcategory_slug
  FROM products p
  LEFT JOIN product_images pi ON p.product_id = pi.product_id
- LEFT JOIN categories c ON p.category_id = c.category_id 
+ LEFT JOIN categories c ON p.category_id = c.category_id
+ LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
  LEFT JOIN brands b ON p.brand_id = b.brand_id
  WHERE p.product_id IN ($placeholders)
    AND p.product_status != '0'
@@ -67,10 +69,12 @@ class ProductModel
                    p.expected_coming_date,
                    pi.image_url,
                    c.slug AS category_slug, 
-                   b.slug AS brand_slug
+                   b.slug AS brand_slug,
+                   sc.slug AS subcategory_slug
             FROM products p
             LEFT JOIN product_images pi ON p.product_id = pi.product_id
             LEFT JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
             WHERE (p.product_status = 2 OR p.product_tag LIKE '%coming_soon%')
             AND p.product_status != '0'

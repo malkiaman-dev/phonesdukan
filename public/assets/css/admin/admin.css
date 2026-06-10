@@ -162,9 +162,9 @@ html, body {
 
 #sidebar ul.nav li .nav-link:hover,
 #sidebar ul.nav li .nav-link.active {
-    background: #495057 ;
-    border-left: 4px solid #ffcc00 ; /* Gold highlight */
-    color: #fff ;
+    background: #fffbeb;
+    border-left: 3px solid #f7cf04;
+    color: #111111;
 }
 
 #sidebar {
@@ -337,10 +337,11 @@ span.admin-name {
     margin: 0;
 }
 
-/* ===== Modern Admin Theme Override ===== */
+/* ===== Modern Admin Theme Override (storefront-aligned) ===== */
 :root {
     --ad-dark: #111111;
-    --ad-yellow: #facc15;
+    --ad-yellow: #f7cf04;
+    --ad-yellow-hover: #e6bd00;
     --ad-bg: #f8fafc;
     --ad-card: #ffffff;
     --ad-border: #e5e7eb;
@@ -352,6 +353,11 @@ span.admin-name {
     --ad-info: #2563eb;
     --ad-sidebar-w: 248px;
     --ad-topbar-h: 56px;
+    --ad-navbar-bg: #ffffff;
+    --ad-navbar-border: #e5e7eb;
+    --ad-sidebar-bg: #ffffff;
+    --ad-sidebar-text: #4b5563;
+    --ad-sidebar-active-bg: #fffbeb;
 }
 
 html,
@@ -390,9 +396,9 @@ body {
 
 .navbar {
     height: var(--ad-topbar-h);
-    background: var(--ad-dark);
-    border-bottom: 1px solid rgba(250, 204, 21, 0.4);
-    box-shadow: 0 8px 24px rgba(17, 17, 17, 0.16);
+    background: var(--ad-navbar-bg);
+    border-bottom: 1px solid var(--ad-navbar-border);
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
 }
 
 .container {
@@ -411,27 +417,27 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    border: 1px solid rgba(250, 204, 21, 0.45);
-    background: rgba(250, 204, 21, 0.1);
-    color: #fff;
+    border: 1px solid var(--ad-border);
+    background: #fff;
+    color: var(--ad-text);
     cursor: pointer;
 }
 
 .sidebar-toggle:hover {
     border-color: var(--ad-yellow);
-    color: var(--ad-yellow);
-    background: rgba(250, 204, 21, 0.18);
+    color: var(--ad-text);
+    background: var(--ad-sidebar-active-bg);
 }
 
 .navbar-brand {
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
+    color: var(--ad-text);
     text-decoration: none;
 }
 
 .navbar-brand:hover {
-    color: var(--ad-yellow);
+    color: var(--ad-dark);
 }
 
 .admin-logo {
@@ -456,15 +462,17 @@ body {
     gap: 8px;
     font-size: 14px;
     font-weight: 600;
-    color: #f3f4f6;
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--ad-text);
+    background: #f9fafb;
+    border: 1px solid var(--ad-border);
     border-radius: 12px;
     text-decoration: none !important;
 }
 
 .admin-name:hover {
-    color: var(--ad-yellow);
-    background: #1f1f1f;
+    color: var(--ad-dark);
+    background: var(--ad-sidebar-active-bg);
+    border-color: rgba(247, 207, 4, 0.45);
 }
 
 .admin-dropdown {
@@ -481,10 +489,10 @@ body {
     margin: 0;
     padding: 10px;
     list-style: none;
-    border: 1px solid rgba(250, 204, 21, 0.15);
+    border: 1px solid var(--ad-border);
     border-radius: 16px;
-    background: #111111;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
     display: block;
     opacity: 0;
     visibility: hidden;
@@ -518,7 +526,7 @@ body {
     min-height: 48px;
     padding: 14px 16px;
     border-radius: 12px;
-    color: #f5f5f5 !important;
+    color: var(--ad-text) !important;
     font-weight: 500;
     font-size: 14px;
     text-decoration: none !important;
@@ -532,17 +540,18 @@ body {
 }
 
 .dropdown-item:hover {
-    background: rgba(250, 204, 21, 0.12);
-    color: var(--ad-yellow) !important;
+    background: var(--ad-sidebar-active-bg);
+    color: var(--ad-dark) !important;
     text-decoration: none !important;
 }
 
 .dropdown-item.logout {
-    color: #f5f5f5 !important;
+    color: var(--ad-danger) !important;
 }
 
 .dropdown-item.logout:hover {
-    color: var(--ad-yellow) !important;
+    background: #fef2f2;
+    color: var(--ad-danger) !important;
 }
 
 #sidebar {
@@ -550,9 +559,9 @@ body {
     width: var(--ad-sidebar-w);
     height: calc(100vh - var(--ad-topbar-h));
     padding: 16px 10px 20px;
-    background: #161616;
-    border-right: 1px solid #252525;
-    box-shadow: 16px 0 40px rgba(0, 0, 0, 0.22);
+    background: var(--ad-sidebar-bg);
+    border-right: 1px solid var(--ad-border);
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.04);
     z-index: 5000;
     overflow: visible !important;
     isolation: isolate;
@@ -575,31 +584,38 @@ body {
     padding: 10px 12px;
     margin: 2px 0;
     font-size: 13px;
-    color: #d1d5db;
+    font-weight: 600;
+    color: var(--ad-sidebar-text);
     transition: all 0.25s ease;
 }
 
-#sidebar .nav-link:hover {
-    color: #facc15;
-    background: rgba(250, 204, 21, 0.12);
+#sidebar .nav-link:hover,
+#sidebar ul.nav li .nav-link:hover {
+    color: var(--ad-dark) !important;
+    background: var(--ad-sidebar-active-bg) !important;
+    border-left: 3px solid var(--ad-yellow) !important;
     text-decoration: none;
 }
 
-#sidebar ul.nav li .nav-link.active {
-    color: #fff !important;
-    background: rgba(250, 204, 21, 0.14) !important;
+#sidebar ul.nav li .nav-link.active,
+#sidebar .nav-link.active {
+    color: var(--ad-dark) !important;
+    background: var(--ad-sidebar-active-bg) !important;
     border-left: 3px solid var(--ad-yellow) !important;
 }
 
 #sidebar .nav-link i {
     width: 16px;
     text-align: center;
-    color: #a5adb7;
+    color: #6b7280;
+    transition: color 0.2s ease;
 }
 
+#sidebar ul.nav li .nav-link:hover i,
+#sidebar ul.nav li .nav-link.active i,
 #sidebar .nav-link.active i,
 #sidebar .nav-link:hover i {
-    color: var(--ad-yellow);
+    color: #111111 !important;
 }
 
 #sidebar .logout {
@@ -607,26 +623,30 @@ body {
 }
 
 #sidebar .logout:hover {
-    background: rgba(239, 68, 68, 0.18);
-    color: #fff !important;
+    background: #fef2f2;
+    color: var(--ad-danger) !important;
+}
+
+#sidebar .logout:hover i {
+    color: var(--ad-danger) !important;
 }
 
 .nav-badge {
     margin-left: auto !important;
-    background: rgba(250, 204, 21, 0.2) !important;
-    color: #fef08a !important;
-    border: 1px solid rgba(250, 204, 21, 0.35);
+    background: var(--ad-yellow) !important;
+    color: var(--ad-dark) !important;
+    border: 1px solid var(--ad-yellow-hover);
     border-radius: 999px !important;
     padding: 2px 8px !important;
     font-size: 11px !important;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .submenu {
-    border: 1px solid #2c2c2c;
-    background: #1b1b1b;
+    border: 1px solid var(--ad-border);
+    background: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1);
     z-index: 7000;
 }
 
@@ -635,12 +655,12 @@ body {
 }
 
 .submenu .nav-link {
-    color: #d1d5db;
+    color: var(--ad-sidebar-text);
 }
 
 .submenu .nav-link:hover {
-    background: rgba(250, 204, 21, 0.12);
-    color: #fff;
+    background: var(--ad-sidebar-active-bg);
+    color: var(--ad-dark);
 }
 
 .content,
@@ -676,14 +696,19 @@ body {
 
 .dashboard-page-header h1 {
     margin: 0;
-    font-size: clamp(28px, 2.6vw, 34px);
-    line-height: 1.2;
+    font-size: clamp(1.5rem, 2vw, 1.75rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: #111111;
 }
 
 .dashboard-page-header p {
-    margin: 8px 0 0;
+    margin: 6px 0 0;
     color: var(--ad-muted);
-    font-size: 14px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
 .dashboard-header-actions {
@@ -701,22 +726,23 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px;
-    border-radius: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
     text-decoration: none;
-    background: #111111 !important;
-    color: #ffffff !important;
+    background: var(--ad-yellow) !important;
+    color: var(--ad-dark) !important;
     font-weight: 700;
-    border: 1px solid #111111;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--ad-yellow-hover);
+    box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .dashboard-content .quick-btn:hover {
     transform: translateY(-2px);
-    background: #111111;
-    color: #facc15 !important;
-    border-color: #111111;
-    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
+    background: var(--ad-yellow-hover) !important;
+    color: var(--ad-dark) !important;
+    border-color: #d4af00;
+    box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
 }
 
 .dashboard-content .quick-btn:active {
@@ -782,10 +808,13 @@ body {
     font-weight: 600;
 }
 
-.kpi-meta h3 {
+.kpi-meta h3.kpi-value {
     margin: 6px 0 4px;
-    font-size: clamp(28px, 2.2vw, 34px);
+    font-size: clamp(1.5rem, 2vw, 1.875rem);
+    font-weight: 700;
     line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #111111;
 }
 
 .kpi-value {
@@ -843,7 +872,11 @@ body {
 
 .panel-header h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: #111111;
 }
 
 .panel-header a {
@@ -923,9 +956,9 @@ body {
 }
 
 .table-action:hover {
-    border-color: #111111;
-    background: #111111;
-    color: #facc15;
+    border-color: var(--ad-yellow);
+    background: var(--ad-sidebar-active-bg);
+    color: var(--ad-dark);
 }
 
 .empty-state {
@@ -1223,10 +1256,19 @@ body {
 }
 
 .dashboard-content a:hover,
-.navbar a:hover,
-#sidebar a:hover {
-    color: var(--ad-yellow);
+.navbar a:hover {
+    color: var(--ad-dark);
     text-decoration: none;
+}
+
+#sidebar a:hover {
+    color: var(--ad-dark);
+    text-decoration: none;
+}
+
+#sidebar a.nav-link:hover i,
+#sidebar a.nav-link.active i {
+    color: #111111 !important;
 }
 
 .dashboard-content a:focus-visible,

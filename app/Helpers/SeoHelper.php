@@ -35,30 +35,42 @@ class SeoHelper
         ];
     }
 
-    /** Brand page, e.g. /mobiles/samsung/ */
+    /** Brand + category page, e.g. /samsung/mobiles/ */
     public static function brandBreadcrumbs(
-        string $categorySlug, string $categoryName,
-        string $brandSlug,    string $brandName
+        string $brandSlug, string $brandName,
+        string $categorySlug, string $categoryName
     ): array {
         return [
-            ['name' => 'Home',         'url' => self::BASE],
-            ['name' => $categoryName,  'url' => self::BASE . $categorySlug . '/'],
-            ['name' => $brandName,     'url' => self::BASE . $categorySlug . '/' . $brandSlug . '/'],
+            ['name' => 'Home', 'url' => self::BASE],
+            ['name' => $brandName, 'url' => self::BASE . $brandSlug . '/'],
+            ['name' => $categoryName, 'url' => self::BASE . $brandSlug . '/' . $categorySlug . '/'],
         ];
     }
 
     /** Product page — last item has no URL (current page). */
     public static function productBreadcrumbs(
+        string $brandSlug, string $brandName,
         string $categorySlug, string $categoryName,
-        string $brandSlug,    string $brandName,
-        string $productName,  string $productSlug
+        string $productName, string $productSlug,
+        ?string $subcategorySlug = null,
+        ?string $subcategoryName = null
     ): array {
-        return [
-            ['name' => 'Home',         'url' => self::BASE],
-            ['name' => $categoryName,  'url' => self::BASE . $categorySlug . '/'],
-            ['name' => $brandName,     'url' => self::BASE . $categorySlug . '/' . $brandSlug . '/'],
-            ['name' => $productName,   'url' => self::BASE . $categorySlug . '/' . $brandSlug . '/' . $productSlug . '/'],
+        $items = [
+            ['name' => 'Home', 'url' => self::BASE],
+            ['name' => $brandName, 'url' => self::BASE . $brandSlug . '/'],
+            ['name' => $categoryName, 'url' => self::BASE . $brandSlug . '/' . $categorySlug . '/'],
         ];
+        if ($subcategorySlug) {
+            $items[] = [
+                'name' => $subcategoryName ?: ucwords(str_replace('-', ' ', $subcategorySlug)),
+                'url' => self::BASE . $brandSlug . '/' . $categorySlug . '/' . $subcategorySlug . '/',
+            ];
+        }
+        $path = $subcategorySlug
+            ? $brandSlug . '/' . $categorySlug . '/' . $subcategorySlug . '/' . $productSlug
+            : $brandSlug . '/' . $categorySlug . '/' . $productSlug;
+        $items[] = ['name' => $productName, 'url' => self::BASE . $path . '/'];
+        return $items;
     }
 
     /** Blog post page. */

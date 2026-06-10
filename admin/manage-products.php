@@ -112,41 +112,44 @@ if (!$result) {
         }
 
         .prd-title {
-            font-size: 2rem;
-            font-weight: 800;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
             color: var(--black);
             letter-spacing: -0.02em;
-            line-height: 1.15;
+            line-height: 1.25;
             margin: 0;
         }
 
         .prd-subtitle {
             margin-top: 6px;
             color: var(--muted);
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
         }
 
         .btn-add {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: var(--black);
-            color: var(--white);
-            border: 1px solid var(--black);
+            background: #f7cf04;
+            color: #111111;
+            border: 1px solid #e6bd00;
             font-size: 0.95rem;
             font-weight: 700;
             padding: 14px 24px;
-            border-radius: 14px;
+            border-radius: 12px;
             text-decoration: none;
-            box-shadow: 0 12px 24px rgba(17, 17, 17, 0.14);
-            transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             white-space: nowrap;
         }
         .btn-add:hover {
-            color: var(--yellow);
+            background: #e6bd00;
+            color: #111111;
+            border-color: #d4af00;
             transform: translateY(-1px);
-            box-shadow: 0 16px 30px rgba(17, 17, 17, 0.18);
+            box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
         }
 
         .prd-controls {
@@ -320,20 +323,23 @@ if (!$result) {
             font-family: 'DM Sans', sans-serif;
             font-size: 0.95rem;
             font-weight: 800;
-            color: var(--white);
-            background: var(--black);
-            border: 1px solid var(--black);
-            border-radius: 14px;
+            color: #111111;
+            background: #f7cf04;
+            border: 1px solid #e6bd00;
+            border-radius: 12px;
             padding: 0 18px;
             height: 52px;
             cursor: pointer;
-            transition: color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             white-space: nowrap;
         }
         .btn-search:hover {
-            color: var(--yellow);
+            background: #e6bd00;
+            color: #111111;
+            border-color: #d4af00;
             transform: translateY(-1px);
-            box-shadow: 0 12px 24px rgba(17, 17, 17, 0.14);
+            box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
         }
 
         .btn-export {
@@ -558,21 +564,38 @@ if (!$result) {
         .prd-btn:link,
         .prd-btn:visited,
         .prd-btn:active {
-            color: var(--white);
             text-decoration: none !important;
         }
         .prd-btn:hover { transform: translateY(-1px); }
         .prd-btn:active { transform: translateY(0); }
 
-        .prd-btn-edit { background: var(--black); color: var(--white); }
-        .prd-btn-edit:hover { color: var(--yellow); box-shadow: 0 10px 18px rgba(17, 17, 17, 0.14); }
+        .prd-btn-edit,
+        .prd-btn-view {
+            background: #f7cf04;
+            color: #111111;
+            border-color: #e6bd00;
+            box-shadow: 0 2px 8px rgba(247, 207, 4, 0.18);
+        }
+        .prd-btn-edit:hover,
+        .prd-btn-view:hover {
+            background: #e6bd00;
+            color: #111111;
+            border-color: #d4af00;
+            box-shadow: 0 6px 16px rgba(247, 207, 4, 0.26);
+        }
 
-        /* Delete button (no red; palette-safe) */
-        .prd-btn-delete { background: var(--black); color: var(--white); border-color: var(--black); }
-        .prd-btn-delete:hover { color: var(--yellow); box-shadow: 0 10px 18px rgba(17, 17, 17, 0.14); }
-
-        .prd-btn-view { background: var(--black); color: var(--white); border-color: var(--black); }
-        .prd-btn-view:hover { color: var(--yellow); box-shadow: 0 10px 18px rgba(17, 17, 17, 0.14); }
+        .prd-btn-delete {
+            background: #ffffff;
+            color: #ef4444;
+            border-color: #fecaca;
+            box-shadow: none;
+        }
+        .prd-btn-delete:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.22);
+        }
 
         /* Remove any default link underline/blue in this page */
         .prd-wrap a:not(.prd-btn):not(.btn-add),
@@ -586,24 +609,28 @@ if (!$result) {
         .btn-add,
         .btn-add:link,
         .btn-add:visited,
-        .btn-add:active {
-            color: var(--white) !important;
-            text-decoration: none !important;
-        }
+        .btn-add:active,
         .btn-add:hover {
-            color: var(--yellow) !important;
+            text-decoration: none !important;
         }
 
         .prd-btn,
         .prd-btn:link,
         .prd-btn:visited,
-        .prd-btn:active {
-            color: var(--white) !important;
+        .prd-btn:active,
+        .prd-btn:hover {
             text-decoration: none !important;
         }
-        .prd-btn:hover {
-            color: var(--yellow) !important;
-            text-decoration: none !important;
+
+        .prd-btn-edit,
+        .prd-btn-edit:hover,
+        .prd-btn-view,
+        .prd-btn-view:hover {
+            color: #111111 !important;
+        }
+
+        .prd-btn-delete:hover {
+            color: #ffffff !important;
         }
 
         /* Ensure badges are never affected by global span rules */
@@ -651,20 +678,20 @@ if (!$result) {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
             margin-top: 14px;
         }
 
         .prd-page-info {
             color: var(--muted);
-            font-size: 0.95rem;
-            font-weight: 800;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .prd-page-links {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -673,29 +700,30 @@ if (!$result) {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 40px;
-            height: 40px;
-            padding: 0 14px;
-            border-radius: 999px;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+            border-radius: 10px;
             border: 1px solid var(--border);
             background: var(--white);
             color: var(--black);
-            font-weight: 900;
+            font-size: 14px;
+            font-weight: 700;
             text-decoration: none;
             cursor: pointer;
             transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
         }
 
-        .prd-page-link:hover {
-            background: var(--light-yellow);
+        .prd-page-link:hover:not(.is-disabled):not(.is-active) {
             border-color: var(--yellow);
-            transform: translateY(-1px);
+            background: var(--light-yellow);
+            color: var(--yellow);
         }
 
         .prd-page-link.is-active {
-            background: var(--black);
-            border-color: var(--black);
-            color: var(--yellow);
+            border-color: var(--yellow);
+            background: var(--yellow);
+            color: var(--black);
         }
 
         .prd-page-link.is-disabled {

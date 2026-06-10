@@ -6,7 +6,7 @@ $metaDescription = "Find the latest OPPO mobile prices in Pakistan for " . date(
 $metaKeywords = "OPPO mobiles Pakistan, OPPO lowest prices, OPPO mobiles prices in Pakistan, OPPO mobile specifications, OPPO mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'oppo', 'Oppo');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('oppo', 'Oppo', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';

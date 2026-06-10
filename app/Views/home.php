@@ -292,11 +292,7 @@ foreach ($latest_posts_raw as $post) {
 
     if (!empty($products)):
         foreach ($products as $product):
-            $product_url = buildProductPath(
-                (string)($product['category_slug'] ?? ''),
-                (string)($product['brand_slug'] ?? ''),
-                (string)($product['product_slug'] ?? '')
-            );
+            $product_url = buildProductPathFromRow($product);
             $product_price = ($product['sale_price']) ? '<del>' . htmlspecialchars($product['regular_price']) . '</del> ' . htmlspecialchars($product['sale_price']) : htmlspecialchars($product['regular_price']);
             ?>
 

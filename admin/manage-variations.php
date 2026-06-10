@@ -161,11 +161,11 @@ include __DIR__ . '/admin_header.php';
 .vp span { background:transparent!important; background-color:transparent!important;
     color:inherit!important; padding:0!important; margin:0!important; border-radius:0!important; }
 .vp-header { padding:22px 26px; margin-bottom:24px; }
-.vp-header h1 { margin:0; font-size:1.9rem; font-weight:900; color:var(--black); }
-.vp-header p { margin:6px 0 0; color:var(--muted); font-size:.95rem; }
+.vp-header h1 { margin:0; font-size:clamp(1.5rem,2vw,1.75rem); font-weight:600; line-height:1.25; letter-spacing:-0.02em; color:var(--black); }
+.vp-header p { margin:6px 0 0; color:var(--muted); font-size:.875rem; font-weight:400; line-height:1.5; }
 .vp-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
 .vp-form { padding:24px; }
-.vp-form h2 { margin:0 0 18px; font-size:1.05rem; font-weight:800; color:var(--black); }
+.vp-form h2 { margin:0 0 18px; font-size:1.125rem; font-weight:600; line-height:1.35; letter-spacing:-0.01em; color:var(--black); }
 .vp-field { margin-bottom:14px; }
 .vp-field label { display:block; margin-bottom:6px; font-size:.88rem; font-weight:700; color:var(--black); }
 .vp-field input[type=text],
@@ -247,7 +247,7 @@ include __DIR__ . '/admin_header.php';
     width:100%; max-width:480px; background:#fff; border:1px solid var(--border);
     border-radius:16px; box-shadow:0 24px 48px rgba(17,17,17,.22); padding:24px;
 }
-.vp-modal h3 { margin:0 0 18px; font-size:1.1rem; font-weight:800; color:var(--black); }
+.vp-modal h3 { margin:0 0 18px; font-size:1.125rem; font-weight:600; line-height:1.35; letter-spacing:-0.01em; color:var(--black); }
 .modal-actions { margin-top:16px; display:flex; justify-content:flex-end; gap:8px; }
 /* Confirm */
 #confirmOverlay .vp-modal { max-width:400px; }
@@ -264,7 +264,7 @@ include __DIR__ . '/admin_header.php';
 .dtype-hint { font-size:.8rem; color:var(--muted); margin-top:4px; }
 /* Section heading */
 .section-head { padding:22px 24px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.section-head h2 { margin:0; font-size:1.08rem; font-weight:800; color:var(--black); }
+.section-head h2 { margin:0; font-size:1.125rem; font-weight:600; line-height:1.35; letter-spacing:-0.01em; color:var(--black); }
 .section-head p { margin:4px 0 0; color:var(--muted); font-size:.88rem; }
 @media(max-width:900px) { .vp-grid { grid-template-columns:1fr; } .vp { padding:14px; } }
 @media(max-width:600px) {
@@ -291,7 +291,7 @@ include __DIR__ . '/admin_header.php';
             <h2>Add Variation Type</h2>
             <form method="POST">
                 <div class="vp-field">
-                    <label>Variation Name *</label>
+                    <label>Variation Name <span class="req-star" aria-hidden="true">*</span></label>
                     <input type="text" name="type_name" placeholder="e.g. Color, RAM, Storage, Size" required>
                 </div>
                 <div class="vp-field">
@@ -316,7 +316,7 @@ include __DIR__ . '/admin_header.php';
             <h2>Add Variation Value</h2>
             <form method="POST">
                 <div class="vp-field">
-                    <label>Select Variation Type *</label>
+                    <label>Select Variation Type <span class="req-star" aria-hidden="true">*</span></label>
                     <select name="value_type_id" id="addValueTypeSelect" onchange="updateColorFieldVisibility()" required>
                         <option value="">— Select Type —</option>
                         <?php foreach ($allTypes as $t): ?>
@@ -327,7 +327,7 @@ include __DIR__ . '/admin_header.php';
                     </select>
                 </div>
                 <div class="vp-field">
-                    <label>Value Name *</label>
+                    <label>Value Name <span class="req-star" aria-hidden="true">*</span></label>
                     <input type="text" name="value_name" placeholder="e.g. Black, 8GB, 256GB, 1 Pack" required>
                 </div>
                 <div class="vp-field" id="colorFieldWrap" style="display:none">
@@ -437,7 +437,7 @@ include __DIR__ . '/admin_header.php';
         <form method="POST">
             <input type="hidden" name="edit_type_id" id="etId">
             <div class="vp-field">
-                <label>Variation Name *</label>
+                <label>Variation Name <span class="req-star" aria-hidden="true">*</span></label>
                 <input type="text" name="edit_type_name" id="etName" required>
             </div>
             <div class="vp-field">
@@ -467,7 +467,7 @@ include __DIR__ . '/admin_header.php';
         <form method="POST">
             <input type="hidden" name="edit_value_id" id="evId">
             <div class="vp-field">
-                <label>Value Name *</label>
+                <label>Value Name <span class="req-star" aria-hidden="true">*</span></label>
                 <input type="text" name="edit_value_name" id="evName" required>
             </div>
             <div class="vp-field" id="evColorWrap" style="display:none">

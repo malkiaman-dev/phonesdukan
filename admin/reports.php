@@ -130,8 +130,20 @@ include __DIR__ . '/admin_header.php';
             flex-wrap: wrap;
         }
 
-        .rep-title { margin: 0; font-size: 1.8rem; letter-spacing: -0.02em; }
-        .rep-subtitle { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
+        .rep-title {
+            margin: 0;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+        }
+        .rep-subtitle {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
 
         .rep-range-form { display: flex; align-items: center; gap: 10px; }
         .rep-native-select {
@@ -206,26 +218,36 @@ include __DIR__ . '/admin_header.php';
         .rep-btn {
             height: 44px;
             padding: 0 14px;
-            border-radius: 12px;
-            border: 1px solid var(--black);
-            background: var(--black);
-            color: #fff !important;
+            border-radius: 10px;
+            border: 1px solid #e6bd00;
+            background: #f7cf04;
+            color: #111111 !important;
             font-size: 0.88rem;
             font-weight: 800;
             cursor: pointer;
-            transition: color .15s ease;
+            box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
+            transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .12s ease;
         }
-        .rep-btn:hover { color: var(--yellow) !important; }
+        .rep-btn:hover {
+            background: #e6bd00;
+            color: #111111 !important;
+            border-color: #d4af00;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
+        }
 
         .rep-btn-outline {
-            border: 1px solid var(--border);
+            border: 1.5px solid var(--border);
             background: #fff;
             color: var(--black) !important;
+            box-shadow: none;
         }
         .rep-btn-outline:hover {
-            border-color: var(--yellow);
-            box-shadow: 0 0 0 3px rgba(250,204,21,0.18);
+            background: #fffef8;
+            border-color: #f7cf04;
+            box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
             color: var(--black) !important;
+            transform: translateY(-1px);
         }
 
         .rep-grid {

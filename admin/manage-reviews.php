@@ -96,8 +96,21 @@ include __DIR__ . '/admin_header.php';
             flex-wrap: wrap;
         }
 
-        .rev-title { margin: 0; font-size: 1.8rem; letter-spacing: -0.02em; }
-        .rev-subtitle { margin: 6px 0 0; color: var(--muted); font-size: 0.92rem; }
+        .rev-title {
+            margin: 0;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+            color: var(--black);
+        }
+        .rev-subtitle {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
+        }
 
         .rev-toolbar {
             display: flex;

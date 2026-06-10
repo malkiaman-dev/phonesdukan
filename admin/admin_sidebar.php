@@ -12,6 +12,9 @@ $bulkInquiryModel = new BulkInquiryModel();
 $pending_reviews_count = $reviewModel->getPendingReviewsCount();
 $pending_orders_count = $orderModel->getPendingOrdersCount();
 $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
+$componentsCss = assetFilePath('public/assets/css/admin/admin-components.css');
+$componentsVer = file_exists($componentsCss) ? filemtime($componentsCss) : time();
+echo '<link rel="stylesheet" href="' . htmlspecialchars(url('public/assets/css/admin/admin-components.css') . '?v=' . $componentsVer, ENT_QUOTES, 'UTF-8') . '">';
 ?>
 
 <!-- Sidebar Navigation -->
@@ -65,13 +68,18 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             </ul>
         </li>
         <li class="nav-item has-submenu">
-            <a class="nav-link <?= in_array($current_page, ['manage-products.php', 'manage-attributes.php', 'manage-variations.php']) ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
+            <a class="nav-link <?= in_array($current_page, ['manage-products.php', 'manage-catalog.php', 'manage-attributes.php', 'manage-variations.php']) ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
                 <i class="fas fa-box"></i> Products
             </a>
             <ul class="submenu">
                 <li class="nav-item">
                     <a class="nav-link <?= ($current_page == 'manage-products.php') ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
                         Manage Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= ($current_page == 'manage-catalog.php') ? 'active' : '' ?>" href="<?= url('admin/manage-catalog.php'); ?>">
+                        Manage Catalog
                     </a>
                 </li>
                 <li class="nav-item">

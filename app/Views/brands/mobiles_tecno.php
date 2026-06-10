@@ -6,7 +6,7 @@ $metaDescription = "Find updated Tecno mobile prices in Pakistan starting at 21,
 $metaKeywords = "Tecno mobiles Pakistan, Tecno lowest prices, Tecno mobiles prices in Pakistan, Tecno mobile specifications, Tecno mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'tecno', 'Tecno');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('tecno', 'Tecno', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';

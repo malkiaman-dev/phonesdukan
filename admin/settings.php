@@ -107,15 +107,18 @@ include __DIR__ . '/admin_header.php';
         }
         .set-title {
             margin: 0 0 6px;
-            font-size: 1.38rem;
-            font-weight: 800;
-            letter-spacing: .2px;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
             color: #ffffff !important;
         }
         .set-sub {
             margin: 0;
             color: rgba(255, 255, 255, 0.78);
-            font-size: .93rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
         }
         .set-card {
             background: var(--white);

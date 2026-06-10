@@ -20,11 +20,7 @@ $metaDescription = SeoHelper::productDescription(
 );
 $metaKeywords = $seo['focus_keyword'] ?? '';
 $metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
-$pageUrl = rtrim(getBaseURL(), '/') . buildProductPath(
-    (string) ($product['category_slug'] ?? ''),
-    (string) ($product['brand_slug'] ?? ''),
-    (string) ($product['product_slug'] ?? '')
-);
+$pageUrl = rtrim(getBaseURL(), '/') . buildProductPathFromRow($product);
 
 // Determine product availability with stricter checks
 $productAvailability = 'outofstock'; // Default to out of stock
@@ -80,12 +76,14 @@ if ($reviewCount > 0) {
 
 // Breadcrumbs for BreadcrumbList schema (consumed by header.php)
 $breadcrumbs = SeoHelper::productBreadcrumbs(
+    (string)($product['brand_slug'] ?? ''),
+    (string)($product['brand_name'] ?? ucwords(str_replace('-', ' ', $product['brand_slug'] ?? ''))),
     (string)($product['category_slug'] ?? ''),
     (string)($product['category_name'] ?? ucwords(str_replace('-', ' ', $product['category_slug'] ?? ''))),
-    (string)($product['brand_slug']    ?? ''),
-    (string)($product['brand_name']    ?? ucwords(str_replace('-', ' ', $product['brand_slug']    ?? ''))),
-    (string)($product['product_name']  ?? ''),
-    (string)($product['product_slug']  ?? '')
+    (string)($product['product_name'] ?? ''),
+    (string)($product['product_slug'] ?? ''),
+    !empty($product['subcategory_slug']) ? (string) $product['subcategory_slug'] : null,
+    !empty($product['subcategory_name']) ? (string) $product['subcategory_name'] : null
 );
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
@@ -93,21 +91,26 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
 <div class="main-wrapper">
     <div class="nav-path">
         <span>
-            <a href="<?php echo getBaseURL(); ?>">Home</a> > 
+            <a href="<?php echo getBaseURL(); ?>">Home</a> >
+            <?php if (isset($product['brand_slug']) && !empty($product['brand_slug'])): ?>
+                <a href="<?php echo getBaseURL() . buildBrandCategoryPath((string) ($product['brand_slug'] ?? ''), (string) ($product['category_slug'] ?? '')); ?>/">
+                    <?php echo htmlspecialchars($product['brand_name'] ?? ucwords(str_replace('-', ' ', $product['brand_slug']))); ?>
+                </a> >
+            <?php endif; ?>
             <?php if (isset($product['category_slug']) && !empty($product['category_slug'])): ?>
                 <a href="<?php echo getBaseURL() . encodeUrlPath((string) ($product['category_slug'] ?? '')); ?>">
-                    <?php 
+                    <?php
                     $categoryDisplay = !empty($product['category_name']) ? $product['category_name'] : ucwords(str_replace('-', ' ', $product['category_slug']));
                     echo htmlspecialchars($categoryDisplay);
                     ?>
-                </a> > 
+                </a> >
             <?php endif; ?>
-            <?php if (isset($product['brand_slug']) && !empty($product['brand_slug'])): ?>
-                <a href="<?php echo getBaseURL() . buildProductPath((string) ($product['category_slug'] ?? ''), (string) ($product['brand_slug'] ?? ''), ''); ?>">
-                    <?php echo htmlspecialchars($product['brand_name'] ?? ucwords(str_replace('-', ' ', $product['brand_slug']))); ?>
-                </a> > 
+            <?php if (!empty($product['subcategory_slug'])): ?>
+                <a href="<?php echo getBaseURL() . encodeUrlPath((string) ($product['brand_slug'] ?? '') . '/' . (string) ($product['category_slug'] ?? '') . '/' . (string) $product['subcategory_slug']); ?>/">
+                    <?php echo htmlspecialchars($product['subcategory_name'] ?? ucwords(str_replace('-', ' ', $product['subcategory_slug']))); ?>
+                </a> >
             <?php endif; ?>
-            <a href="<?php echo getBaseURL() . buildProductPath((string) ($product['category_slug'] ?? ''), (string) ($product['brand_slug'] ?? ''), (string) ($product['product_slug'] ?? '')); ?>">
+            <a href="<?php echo getBaseURL() . buildProductPathFromRow($product); ?>/">
                 <?php echo htmlspecialchars($product['product_name']); ?>
             </a>
         </span>
@@ -949,7 +952,7 @@ if ($cartFormCondition): ?>
             <p>We deal in both Chinese products and Pakistani brands in bulk. To know the retailer prices, click the button below.</p>
             <p>ہم چینی مصنوعات اور پاکستانی برانڈز بلک میں فراہم کرتے ہیں۔ ریٹیلر قیمتوں کی معلومات کے لیے نیچے دیے گئے بٹن پر کلک کریں۔</p>
             <button type="button" class="chat-button" data-product-name="<?php echo htmlspecialchars($product['product_name']); ?>">
-                <img src="/public/assets/images/whatsapp.svg" alt="WhatsApp" class="whatsapp-icon">
+                <img src="<?php echo htmlspecialchars(url('public/assets/images/whatsapp.svg')); ?>" alt="WhatsApp" class="whatsapp-icon">
                 Chat Us
             </button>
         </div>

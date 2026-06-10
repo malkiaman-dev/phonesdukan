@@ -11,8 +11,16 @@ $currentAdminPage = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
 $adminPageCssMap = [
     'add-product.php' => [
         '/public/assets/css/admin/add-product.css',
-        '/admin/css/ai-seo.css?v=2.8',
-        '/admin/css/product-media.css?v=1.1',
+        '/admin/css/ai-seo.css?v=3.0',
+        '/admin/css/product-media.css?v=1.2',
+    ],
+    'edit-product.php' => [
+        '/public/assets/css/admin/add-product.css',
+        '/admin/css/ai-seo.css?v=3.0',
+        '/admin/css/product-media.css?v=1.2',
+    ],
+    'manage-catalog.php' => [
+        '/public/assets/css/admin/manage-catalog.css',
     ],
 ];
 ?>
@@ -26,9 +34,9 @@ $adminPageCssMap = [
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="/public/assets/css/admin/admin.css">
-    <link rel="stylesheet" href="/public/assets/css/style.css">
-    <link rel="stylesheet" href="/public/assets/css/frontend/ui-controls.css">
+    <link rel="stylesheet" href="<?= url('public/assets/css/admin/admin.css'); ?>">
+    <link rel="stylesheet" href="<?= url('public/assets/css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= url('public/assets/css/frontend/ui-controls.css'); ?>">
     <?php if (isset($adminPageCssMap[$currentAdminPage])): ?>
         <?php
         $adminPageStylesheets = $adminPageCssMap[$currentAdminPage];
@@ -64,9 +72,10 @@ $adminPageCssMap = [
             right: 0;
             height: 56px;
             z-index: 1000;
-            background: #111111;
-            color: #fff;
-            border-bottom: 1px solid rgba(250, 204, 21, 0.35);
+            background: #ffffff;
+            color: #111111;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
         }
         #sidebar {
             position: fixed;
@@ -75,7 +84,8 @@ $adminPageCssMap = [
             width: 248px;
             height: calc(100vh - 56px);
             z-index: 5000;
-            background: #161616;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
             overflow: visible;
             isolation: isolate;
         }
@@ -105,7 +115,7 @@ $adminPageCssMap = [
         .admin-sidebar a,
         .sidebar a {
             text-decoration: none !important;
-            color: #e5e7eb;
+            color: #4b5563;
         }
         .content,
         .dashboard-content {
@@ -119,8 +129,9 @@ $adminPageCssMap = [
             #sidebar.is-open { left: 0; }
         }
     </style>
-    <script src="/public/assets/js/common.js" defer></script>
-    <script src="/public/assets/js/faqs.js" defer></script>
+    <script src="<?= url('public/assets/js/common.js'); ?>" defer></script>
+    <script src="<?= url('public/assets/js/faqs.js'); ?>" defer></script>
+    <script src="<?= url('public/assets/js/admin/required-fields.js'); ?>" defer></script>
 </head>
 <body>
 <!-- Navbar -->

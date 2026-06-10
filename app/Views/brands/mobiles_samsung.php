@@ -6,7 +6,7 @@ $metaDescription = "Check out the latest Samsung mobile price in Pakistan for " 
 $metaKeywords = "Samsung mobiles Pakistan, Samsung lowest prices, lowest prices for Samsung mobiles, Samsung mobiles prices in Pakistan, Samsung mobile specifications, Samsung mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'samsung', 'Samsung');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('samsung', 'Samsung', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';

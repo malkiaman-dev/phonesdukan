@@ -77,14 +77,18 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
     .page-header-card h1 {
         margin: 0;
         color: var(--black);
-        font-size: 1.9rem;
+        font-size: clamp(1.5rem, 2vw, 1.75rem);
+        font-weight: 600;
+        line-height: 1.25;
         letter-spacing: -0.02em;
     }
 
     .page-subtitle {
-        margin-top: 4px;
+        margin-top: 6px;
         color: var(--muted);
-        font-size: 0.95rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
     }
 
     .section-card {
@@ -504,11 +508,11 @@ include dirname(__DIR__, 1) . '/admin/admin_header.php';
             <h3 class="section-title">Post Information</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="title">Title *</label>
+                    <label for="title">Title <span class="req-star" aria-hidden="true">*</span></label>
                     <input type="text" name="title" id="title" placeholder="Enter post title" value="<?php echo htmlspecialchars($_POST['title'] ?? ''); ?>" required>
                 </div>
                 <div class="form-group">
-                    <label for="slug">Slug *</label>
+                    <label for="slug">Slug <span class="req-star" aria-hidden="true">*</span></label>
                     <input type="text" name="slug" id="slug" placeholder="post-title-slug" value="<?php echo htmlspecialchars($_POST['slug'] ?? ''); ?>" required>
                 </div>
                 <div class="form-group span-2">

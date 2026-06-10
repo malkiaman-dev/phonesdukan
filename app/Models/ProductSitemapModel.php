@@ -19,9 +19,11 @@ class ProductSitemapModel {
                 p.product_name,
                 p.product_slug, 
                 c.slug AS category_slug, 
-                b.slug AS brand_slug
+                b.slug AS brand_slug,
+                sc.slug AS subcategory_slug
             FROM products p
             INNER JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             INNER JOIN brands b ON p.brand_id = b.brand_id
             WHERE p.product_status = 1
         ";

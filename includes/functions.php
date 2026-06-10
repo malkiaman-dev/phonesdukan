@@ -114,16 +114,56 @@ if (!function_exists('encodeUrlPath')) {
 }
 
 if (!function_exists('buildProductPath')) {
-    function buildProductPath(string $categorySlug, string $brandSlug, string $productSlug): string
-    {
-        return '/' . implode('/', [
-            rawurlencode(trim($categorySlug, '/')),
+    function buildProductPath(
+        string $brandSlug,
+        string $categorySlug,
+        string $productSlug,
+        ?string $subcategorySlug = null
+    ): string {
+        $segments = [
             rawurlencode(trim($brandSlug, '/')),
-            rawurlencode(str_replace('�', '-', trim($productSlug, '/'))),
-        ]);
+            rawurlencode(trim($categorySlug, '/')),
+        ];
+        if ($subcategorySlug !== null && trim($subcategorySlug) !== '') {
+            $segments[] = rawurlencode(trim($subcategorySlug, '/'));
+        }
+        $segments[] = rawurlencode(preg_replace('/\s+/', '-', trim($productSlug, '/')));
+        return '/' . implode('/', $segments);
     }
 }
 
+if (!function_exists('buildProductPathFromRow')) {
+    function buildProductPathFromRow(array $product): string
+    {
+        $subcategorySlug = !empty($product['subcategory_slug']) ? (string) $product['subcategory_slug'] : null;
+        return buildProductPath(
+            (string) ($product['brand_slug'] ?? ''),
+            (string) ($product['category_slug'] ?? ''),
+            (string) ($product['product_slug'] ?? ''),
+            $subcategorySlug
+        );
+    }
+}
+
+if (!function_exists('buildBrandCategoryPath')) {
+    function buildBrandCategoryPath(string $brandSlug, string $categorySlug): string
+    {
+        return '/' . rawurlencode(trim($brandSlug, '/')) . '/' . rawurlencode(trim($categorySlug, '/'));
+    }
+}
+
+if (!function_exists('buildProductCanonicalUrl')) {
+    function buildProductCanonicalUrl(
+        string $brandSlug,
+        string $categorySlug,
+        string $productSlug,
+        ?string $subcategorySlug = null,
+        string $domain = 'https://www.phonesdukan.com'
+    ): string {
+        $path = buildProductPath($brandSlug, $categorySlug, $productSlug, $subcategorySlug);
+        return rtrim($domain, '/') . $path . '/';
+    }
+}
 if (!function_exists('normalizeMediaUrl')) {
     function normalizeMediaUrl(string $mediaUrl): string
     {
@@ -175,6 +215,29 @@ if (!function_exists('getRequestPath')) {
 
         $requestPath = '/' . ltrim($requestPath, '/');
         return $requestPath === '//' ? '/' : $requestPath;
+    }
+}
+
+if (!function_exists('isProductDetailPath')) {
+    /**
+     * True for storefront product permalinks (3- or 4-segment paths).
+     * Excludes blog posts and other reserved multi-segment routes.
+     */
+    function isProductDetailPath(?string $uri = null): bool
+    {
+        $path = trim($uri ?? getRequestPath(), '/');
+        if ($path === '') {
+            return false;
+        }
+
+        if (strpos($path, 'blog/') === 0) {
+            return false;
+        }
+
+        $segments = explode('/', $path);
+        $count = count($segments);
+
+        return $count === 3 || $count === 4;
     }
 }
 
@@ -272,7 +335,14 @@ if (!function_exists('loadCSS')) {
         ];
 
         foreach ($cssMap as $pathPrefix => $cssFile) {
-            if (strpos($uri, rtrim($pathPrefix, '/')) === 0) {
+            if (str_ends_with($pathPrefix, '/')) {
+                if (strpos($uri, $pathPrefix) === 0) {
+                    emitCss($cssFile);
+                }
+                continue;
+            }
+
+            if ($uri === rtrim($pathPrefix, '/')) {
                 emitCss($cssFile);
             }
         }
@@ -293,8 +363,8 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/mobile_brands.css');
         }
 
-        // Product detail pages: /{category}/{brand}/{product}
-        if (substr_count(trim($uri, '/'), '/') === 2) {
+        // Product detail pages: /{brand}/{category}/{product} or /{brand}/{category}/{subcategory}/{product}
+        if (isProductDetailPath($uri)) {
             emitCss('public/assets/css/frontend/product.css');
         }
 
@@ -326,7 +396,7 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/sweetalert2.all.min.js');
         }
 
-        if (substr_count(trim($uri, '/'), '/') === 2) {
+        if (isProductDetailPath($uri)) {
             emitJs('public/assets/js/jquery-3.6.0.min.js');
             emitJs('public/assets/js/sweetalert2.all.min.js');
             emitJs('public/assets/js/frontend/product.js');
@@ -452,8 +522,12 @@ if (!function_exists('ensureProductExpectedComingDateColumn')) {
         $checked = true;
 
         try {
-            $stmt = $db->query("SHOW COLUMNS FROM products LIKE 'expected_coming_date'");
-            if ($stmt && $stmt->rowCount() === 0) {
+            $stmt = $db->prepare(
+                'SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?'
+            );
+            $stmt->execute(['products', 'expected_coming_date']);
+            if ((int) $stmt->fetchColumn() === 0) {
                 $db->exec('ALTER TABLE products ADD COLUMN expected_coming_date DATE NULL DEFAULT NULL AFTER product_status');
             }
         } catch (Throwable $e) {
@@ -472,8 +546,12 @@ if (!function_exists('ensureProductPrepaidDiscountColumn')) {
         $checked = true;
 
         try {
-            $stmt = $db->query("SHOW COLUMNS FROM products LIKE 'prepaid_discount_amount'");
-            if ($stmt && $stmt->rowCount() === 0) {
+            $stmt = $db->prepare(
+                'SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?'
+            );
+            $stmt->execute(['products', 'prepaid_discount_amount']);
+            if ((int) $stmt->fetchColumn() === 0) {
                 $db->exec('ALTER TABLE products ADD COLUMN prepaid_discount_amount DECIMAL(12,2) NOT NULL DEFAULT 0 AFTER sale_price');
             }
         } catch (Throwable $e) {
@@ -567,9 +645,10 @@ if (!function_exists('prepareProductCardFromRow')) {
         return [
             'product_id' => (int) ($row['product_id'] ?? 0),
             'product_url' => buildProductPath(
-                (string) ($row['category_slug'] ?? ''),
                 (string) ($row['brand_slug'] ?? ''),
-                (string) ($row['product_slug'] ?? '')
+                (string) ($row['category_slug'] ?? ''),
+                (string) ($row['product_slug'] ?? ''),
+                !empty($row['subcategory_slug']) ? (string) $row['subcategory_slug'] : null
             ),
             'product_name' => htmlspecialchars($row['product_name'] ?? 'Unnamed Product', ENT_QUOTES, 'UTF-8'),
             'product_image' => !empty($row['image_url'])

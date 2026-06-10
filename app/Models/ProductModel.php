@@ -31,17 +31,83 @@ class ProductModel
         return trim(preg_replace('/-+/', '-', str_replace(' ', '-', $slug)), '-');
     }
 
-    public function getProductBySlug(string $category_slug, string $brand_slug, string $product_slug): ?array
+    private function productSelectSql(): string
     {
-        // Normalize: spaces → hyphens so URL and DB slugs always match
-        $product_slug  = self::normalizeSlug($product_slug);
-        $category_slug = self::normalizeSlug($category_slug);
-        $brand_slug    = self::normalizeSlug($brand_slug);
+        return 'SELECT p.*, c.slug AS category_slug, c.category_name,
+                       b.slug AS brand_slug, b.brand_name,
+                       sc.slug AS subcategory_slug, sc.category_name AS subcategory_name,
+                       p.regular_price, p.sale_price
+                FROM products p
+                INNER JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+                INNER JOIN brands b ON p.brand_id = b.brand_id';
+    }
 
-        $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
-                  FROM products p
-                  INNER JOIN categories c ON p.category_id = c.category_id
-                  INNER JOIN brands b ON p.brand_id = b.brand_id
+    public function getProductByPermalink(
+        string $brand_slug,
+        string $category_slug,
+        string $subcategory_slug,
+        string $product_slug
+    ): ?array {
+        $product_slug = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug = self::normalizeSlug($brand_slug);
+        $subcategory_slug = self::normalizeSlug($subcategory_slug);
+
+        $query = $this->productSelectSql() . '
+                  WHERE REPLACE(b.slug, " ", "-") = :brand_slug
+                  AND REPLACE(c.slug, " ", "-") = :category_slug
+                  AND REPLACE(sc.slug, " ", "-") = :subcategory_slug
+                  AND REPLACE(p.product_slug, " ", "-") = :product_slug
+                  AND p.subcategory_id IS NOT NULL
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':subcategory_slug', $subcategory_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function getProductByPermalinkNoSub(
+        string $brand_slug,
+        string $category_slug,
+        string $product_slug
+    ): ?array {
+        $product_slug = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug = self::normalizeSlug($brand_slug);
+
+        $query = $this->productSelectSql() . '
+                  WHERE REPLACE(b.slug, " ", "-") = :brand_slug
+                  AND REPLACE(c.slug, " ", "-") = :category_slug
+                  AND REPLACE(p.product_slug, " ", "-") = :product_slug
+                  AND p.subcategory_id IS NULL
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /** Legacy URL order: /category/brand/product */
+    public function getProductByLegacyPermalink(
+        string $category_slug,
+        string $brand_slug,
+        string $product_slug
+    ): ?array {
+        $product_slug = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug = self::normalizeSlug($brand_slug);
+
+        $query = $this->productSelectSql() . '
                   WHERE REPLACE(c.slug, " ", "-") = :category_slug
                   AND REPLACE(b.slug, " ", "-") = :brand_slug
                   AND REPLACE(p.product_slug, " ", "-") = :product_slug
@@ -54,6 +120,12 @@ class ProductModel
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /** @deprecated Use getProductByLegacyPermalink or getProductByPermalinkNoSub */
+    public function getProductBySlug(string $category_slug, string $brand_slug, string $product_slug): ?array
+    {
+        return $this->getProductByLegacyPermalink($category_slug, $brand_slug, $product_slug);
     }
 
     /**
@@ -86,10 +158,7 @@ class ProductModel
      */
     public function getProductByProductSlugOnly(string $product_slug): ?array
     {
-        $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
-                  FROM products p
-                  INNER JOIN categories c ON p.category_id = c.category_id
-                  INNER JOIN brands b ON p.brand_id = b.brand_id
+        $query = $this->productSelectSql() . '
                   WHERE p.product_slug = :product_slug
                   LIMIT 1';
 
@@ -164,11 +233,13 @@ class ProductModel
                 p.product_name, 
                 p.product_slug, 
                 c.slug AS category_slug, 
-                b.slug AS brand_slug, 
+                b.slug AS brand_slug,
+                sc.slug AS subcategory_slug,
                 pi.image_url 
             FROM products p
             LEFT JOIN product_images pi ON p.product_id = pi.product_id
             LEFT JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
             WHERE p.product_status = 1
             AND p.product_name LIKE :query
@@ -204,14 +275,17 @@ class ProductModel
      */
     public function getProductDetails(int $product_id): ?array
     {
-        $query = 'SELECT p.*, 
-                         b.brand_name, 
-                         c.category_name, 
-                         c.slug AS category_slug, 
-                         b.slug AS brand_slug
+        $query = 'SELECT p.*,
+                         b.brand_name,
+                         c.category_name,
+                         c.slug AS category_slug,
+                         b.slug AS brand_slug,
+                         sc.slug AS subcategory_slug,
+                         sc.category_name AS subcategory_name
                   FROM products p
                   LEFT JOIN brands b ON p.brand_id = b.brand_id
                   LEFT JOIN categories c ON p.category_id = c.category_id
+                  LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
                   WHERE p.product_id = :product_id';
 
         $stmt = $this->db->prepare($query);
@@ -284,10 +358,8 @@ class ProductModel
             $description = $product['product_name'] . ' is a high-quality mobile phone with advanced features.';
         }
     
-        $category_slug = $product['category_slug'] ?? 'mobiles';
-        $brand_slug = $product['brand_slug'] ?? 'brand';
-        $product_slug = $product['product_slug'] ?? $this->slugify($product['product_name']);
-        $product_url = "{$baseUrl}/{$category_slug}/{$brand_slug}/{$product_slug}";
+        require_once dirname(__DIR__, 2) . '/includes/functions.php';
+        $product_url = rtrim($baseUrl, '/') . buildProductPathFromRow($product);
     
         // Get reviews
         $reviews = $this->getProductReviews($product_id);
@@ -562,35 +634,33 @@ class ProductModel
         }
     
         // Add BreadcrumbList schema
+        $brand_slug = $product['brand_slug'] ?? 'brand';
+        $category_slug = $product['category_slug'] ?? 'mobiles';
+        $subcategory_slug = $product['subcategory_slug'] ?? null;
+        $breadcrumbItems = [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $baseUrl],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $product['brand_name'] ?? ucwords(str_replace('-', ' ', $brand_slug)), 'item' => $baseUrl . '/' . $brand_slug],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $product['category_name'] ?? ucwords(str_replace('-', ' ', $category_slug)), 'item' => $baseUrl . '/' . $brand_slug . '/' . $category_slug],
+        ];
+        $position = 4;
+        if ($subcategory_slug) {
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => $position++,
+                'name' => $product['subcategory_name'] ?? ucwords(str_replace('-', ' ', $subcategory_slug)),
+                'item' => $baseUrl . '/' . $brand_slug . '/' . $category_slug . '/' . $subcategory_slug,
+            ];
+        }
+        $breadcrumbItems[] = [
+            '@type' => 'ListItem',
+            'position' => $position,
+            'name' => $product['product_name'],
+            'item' => $product_url,
+        ];
         $breadcrumb_schema = [
             '@context' => 'https://schema.org',
             '@type' => 'BreadcrumbList',
-            'itemListElement' => [
-                [
-                    '@type' => 'ListItem',
-                    'position' => 1,
-                    'name' => 'Home',
-                    'item' => $baseUrl
-                ],
-                [
-                    '@type' => 'ListItem',
-                    'position' => 2,
-                    'name' => $product['category_name'] ?? ucwords(str_replace('-', ' ', $category_slug)),
-                    'item' => $baseUrl . '/' . $category_slug
-                ],
-                [
-                    '@type' => 'ListItem',
-                    'position' => 3,
-                    'name' => $product['brand_name'] ?? ucwords(str_replace('-', ' ', $brand_slug)),
-                    'item' => $baseUrl . '/' . $category_slug . '/' . $brand_slug
-                ],
-                [
-                    '@type' => 'ListItem',
-                    'position' => 4,
-                    'name' => $product['product_name'],
-                    'item' => $product_url
-                ]
-            ]
+            'itemListElement' => $breadcrumbItems,
         ];
     
         // Output schema
@@ -671,15 +741,17 @@ class ProductModel
                     p.product_tag,
                     c.slug AS category_slug,
                     b.slug AS brand_slug,
+                    sc.slug AS subcategory_slug,
                     (
-                        SELECT pi.image_url 
-                        FROM product_images pi 
-                        WHERE pi.product_id = p.product_id 
-                        ORDER BY pi.is_primary DESC, pi.image_id ASC 
+                        SELECT pi.image_url
+                        FROM product_images pi
+                        WHERE pi.product_id = p.product_id
+                        ORDER BY pi.is_primary DESC, pi.image_id ASC
                         LIMIT 1
                     ) AS image_url
                 FROM products p
                 INNER JOIN categories c ON c.category_id = p.category_id AND c.status = 1
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
                 INNER JOIN brands b ON b.brand_id = p.brand_id
                 WHERE p.product_status IN (1, 2)
                   AND p.category_id = :category_id

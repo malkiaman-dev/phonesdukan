@@ -71,11 +71,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         html,
-        body {
+        body.admin-login-page {
             min-height: 100%;
             margin: 0;
             font-family: "Inter", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-            background: var(--black);
+            background: #f8fafc;
             color: var(--black);
             overflow-x: hidden;
         }
@@ -260,13 +260,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .btn {
-            border: 0;
+            border: 1px solid #e6bd00;
             width: 100%;
             height: 54px;
             margin-top: 6px;
-            border-radius: 14px;
-            background: var(--black);
-            color: var(--white);
+            border-radius: 12px;
+            background: #f7cf04;
+            color: #111111;
             font-size: 1rem;
             font-weight: 700;
             letter-spacing: 0.2px;
@@ -275,14 +275,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             justify-content: center;
             gap: 10px;
             cursor: pointer;
-            transition: color 0.24s ease, transform 0.2s ease, box-shadow 0.22s ease;
-            box-shadow: 0 12px 26px rgba(17, 17, 17, 0.28);
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22);
         }
 
         .btn:hover {
-            color: var(--yellow);
+            background: #e6bd00;
+            color: #111111;
+            border-color: #d4af00;
             transform: translateY(-1px);
-            box-shadow: 0 16px 32px rgba(17, 17, 17, 0.34);
+            box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28);
         }
 
         .btn:active {
@@ -293,6 +295,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .btn:focus-visible {
             outline: none;
             box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.3), 0 10px 24px rgba(17, 17, 17, 0.22);
+        }
+
+        .req-star {
+            color: #ef4444;
+            font-weight: 700;
+            margin-left: 2px;
         }
 
         .btn[disabled] {
@@ -373,7 +381,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </style>
 </head>
 
-<body>
+<body class="admin-login-page">
 
     <main class="auth-shell">
         <div class="login-container">
@@ -454,6 +462,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         })();
     </script>
+    <script src="<?= htmlspecialchars(url('public/assets/js/admin/required-fields.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 
 </body>
 

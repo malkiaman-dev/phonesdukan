@@ -8,108 +8,129 @@ require_once __DIR__ . '/../Models/VariationModel.php';
 
 class ProductController
 {
-    public function showProduct($category_slug, $brand_slug, $product_slug)
+    private function redirectToCanonical(array $product, int $status = 301): void
     {
+        $baseUrl = rtrim(getBaseURL(), '/');
+        header('Location: ' . $baseUrl . buildProductPathFromRow($product) . '/', true, $status);
+        exit();
+    }
+
+    public function showProductThreeSegments(string $seg1, string $seg2, string $seg3): void
+    {
+        $productModel = new ProductModel();
+
+        // New canonical: /brand/category/product
+        $product = $productModel->getProductByPermalinkNoSub($seg1, $seg2, $seg3);
+        if ($product) {
+            $this->renderProduct($product, $seg1, $seg2, $seg3);
+            return;
+        }
+
+        // Legacy: /category/brand/product → 301 to canonical
+        $legacy = $productModel->getProductByLegacyPermalink($seg1, $seg2, $seg3);
+        if ($legacy) {
+            $this->redirectToCanonical($legacy);
+        }
+
+        // Slug-only fallback
+        $product = $productModel->getProductByProductSlugOnly($seg3);
+        if ($product) {
+            $this->redirectToCanonical($product);
+        }
+
+        http_response_code(404);
+        include __DIR__ . '/../Views/404.php';
+    }
+
+    public function showProduct(string $brand_slug, string $category_slug, string $subcategory_slug, string $product_slug): void
+    {
+        $productModel = new ProductModel();
+        $product = $productModel->getProductByPermalink($brand_slug, $category_slug, $subcategory_slug, $product_slug);
+
+        if (!$product) {
+            $product = $productModel->getProductByProductSlugOnly($product_slug);
+            if ($product) {
+                $this->redirectToCanonical($product);
+            }
+            http_response_code(404);
+            include __DIR__ . '/../Views/404.php';
+            return;
+        }
+
+        $this->renderProduct($product, $brand_slug, $category_slug, $product_slug, $subcategory_slug);
+    }
+
+    private function renderProduct(
+        array $product,
+        string $brand_slug,
+        string $category_slug,
+        string $product_slug,
+        ?string $subcategory_slug = null
+    ): void {
         $dbInstance = new Database();
         $db = $dbInstance->getConnection();
 
         $productModel = new ProductModel();
         $reviewModel = new ReviewModel();
 
-        // Primary lookup: all three slugs must match
-        $product = $productModel->getProductBySlug($category_slug, $brand_slug, $product_slug);
+        $galleryMedia = $productModel->getProductGalleryMedia($product['product_id']);
+        $images = array_values(array_filter($galleryMedia, static function (array $item): bool {
+            return ($item['type'] ?? 'image') === 'image';
+        }));
+        $isComingSoon = isProductComingSoon($product);
 
-        // Fallback: match only by product_slug. If found, the category/brand
-        // part of the URL is wrong — redirect to the canonical URL (301).
-        if (!$product) {
-            $product = $productModel->getProductByProductSlugOnly($product_slug);
-            if ($product) {
-                $correctCat   = (string)($product['category_slug'] ?? '');
-                $correctBrand = (string)($product['brand_slug']   ?? '');
-                $correctSlug  = (string)($product['product_slug'] ?? $product_slug);
-                $baseUrl = rtrim(getBaseURL(), '/');
-                header('Location: ' . $baseUrl . '/' . ltrim($correctCat . '/' . $correctBrand . '/' . $correctSlug, '/'), true, 301);
-                exit();
-            }
-            // Also try case-insensitive match on product_slug
-            $product = $productModel->getProductBySlugCaseInsensitive($category_slug, $brand_slug, $product_slug);
+        $productAttributes = $productModel->getProductAttributes($product['product_id']);
+
+        $productVariations = [];
+        $variationTypes = [];
+        $isVariableProduct = false;
+        try {
+            $variationModel = new VariationModel();
+            $productVariations = $variationModel->getProductVariationsForFrontend($product['product_id']);
+            $variationTypes = $variationModel->getVariationTypesWithValues();
+            $isVariableProduct = !empty($product['product_type'])
+                && $product['product_type'] === 'variable'
+                && !empty($productVariations);
+        } catch (\Throwable $e) {
+            error_log('ProductController variation load error: ' . $e->getMessage());
         }
 
-        if ($product) {
-            // Get product gallery (images + video), reviews, and attributes
-            $galleryMedia = $productModel->getProductGalleryMedia($product['product_id']);
-            $images = array_values(array_filter($galleryMedia, static function (array $item): bool {
-                return ($item['type'] ?? 'image') === 'image';
-            }));
-            $isComingSoon = isProductComingSoon($product);
+        $stmt = $db->prepare('SELECT * FROM product_seo WHERE product_id = :product_id LIMIT 1');
+        $stmt->bindParam(':product_id', $product['product_id'], PDO::PARAM_INT);
+        $stmt->execute();
+        $seo = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Fetch product attributes (legacy system)
-            $productAttributes = $productModel->getProductAttributes($product['product_id']);
+        $pageTitle = $seo['seo_title'] ?? $product['product_name'];
+        $metaDescription = $seo['seo_description'] ?? $product['product_description'];
+        $metaKeywords = $seo['focus_keyword'] ?? '';
+        $metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
+        $canonicalUrl = $seo['canonical_url'] ?? '';
+        $pageUrl = rtrim(getBaseURL(), '/') . buildProductPathFromRow($product);
 
-            // Fetch new variation system data — wrapped so any DB error never kills the page
-            $productVariations = [];
-            $variationTypes    = [];
-            $isVariableProduct = false;
-            try {
-                $variationModel    = new VariationModel();
-                $productVariations = $variationModel->getProductVariationsForFrontend($product['product_id']);
-                $variationTypes    = $variationModel->getVariationTypesWithValues();
-                $isVariableProduct = !empty($product['product_type'])
-                    && $product['product_type'] === 'variable'
-                    && !empty($productVariations);
-            } catch (\Throwable $e) {
-                error_log('ProductController variation load error: ' . $e->getMessage());
-            }
+        $productPrice = (isset($product['sale_price']) && $product['sale_price'] > 0)
+            ? $product['sale_price']
+            : (isset($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
+        $productPrice = is_numeric($productPrice) ? (float) $productPrice : 0;
+        $formattedProductPrice = ($productPrice > 0) ? number_format($productPrice, 2) : '0.00';
 
-            // Fetch SEO data
-            $stmt = $db->prepare('SELECT * FROM product_seo WHERE product_id = :product_id LIMIT 1');
-            $stmt->bindParam(':product_id', $product['product_id'], PDO::PARAM_INT);
-            $stmt->execute();
-            $seo = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // SEO and Meta Tags
-            $pageTitle = $seo['seo_title'] ?? $product['product_name'];
-            $metaDescription = $seo['seo_description'] ?? $product['product_description'];
-            $metaKeywords = $seo['focus_keyword'] ?? '';
-            $metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
-            $canonicalUrl = $seo['canonical_url'] ?? '';
-            // Build product URL without relying on theme helpers that may not be loaded here yet.
-            $pageUrl = rtrim(getBaseURL(), '/') . '/'
-                . ltrim($category_slug . '/' . $brand_slug . '/' . $product_slug, '/');
-
-            // Product Price
-            $productPrice = (isset($product['sale_price']) && $product['sale_price'] > 0)
-                ? $product['sale_price']
-                : (isset($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
-            $productPrice = is_numeric($productPrice) ? (float)$productPrice : 0;
-            $formattedProductPrice = ($productPrice > 0) ? number_format($productPrice, 2) : '0.00';
-
-            // Product Availability
-            if ($isComingSoon) {
-                $productAvailability = 'comingsoon';
-            } else {
-                $productAvailability = ($product['product_status'] == 1 && $product['stock_quantity'] > 0)
-                    ? 'instock'
-                    : 'outofstock';
-            }
-
-            // Generate Schema JSON
-            $schema = $productModel->generateProductSchema($product['product_id']);
-
-            // Related Products
-            $relatedProducts = $productModel->getRelatedProducts(
-                $product['category_id'],
-                $product['brand_id'],
-                $product['product_id']
-            );
-
-            // Include View
-            require_once __DIR__ . '/../Views/products/product.php';
-            require_once __DIR__ . '/../Views/products/related-products.php';
+        if ($isComingSoon) {
+            $productAvailability = 'comingsoon';
         } else {
-            http_response_code(404);
-            include __DIR__ . '/../Views/404.php';
+            $productAvailability = ($product['product_status'] == 1 && $product['stock_quantity'] > 0)
+                ? 'instock'
+                : 'outofstock';
         }
+
+        $schema = $productModel->generateProductSchema($product['product_id']);
+
+        $relatedProducts = $productModel->getRelatedProducts(
+            $product['category_id'],
+            $product['brand_id'],
+            $product['product_id']
+        );
+
+        require_once __DIR__ . '/../Views/products/product.php';
+        require_once __DIR__ . '/../Views/products/related-products.php';
     }
 }
 ?>

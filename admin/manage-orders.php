@@ -39,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     exit();
 }
 
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 
 // Pagination (safe + minimal backend change)
 $allowedLimits = [20, 50, 100];
@@ -122,15 +122,18 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         .orders-page-header h2 {
             margin: 0;
-            font-size: 1.8rem;
-            font-weight: 800;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
             color: var(--primary);
             letter-spacing: -0.02em;
+            line-height: 1.25;
         }
         .orders-page-header p {
             margin: 6px 0 0;
             color: var(--muted);
-            font-size: 0.92rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
         }
 
         /* ===== Header section ===== */

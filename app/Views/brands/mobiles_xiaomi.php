@@ -6,7 +6,7 @@ $metaDescription = "Discover Xiaomi mobiles prices in Pakistan starting at PKR 3
 $metaKeywords = "Xiaomi mobiles Pakistan, Xiaomi lowest prices, Xiaomi mobiles prices in Pakistan, Xiaomi mobile specifications, Xiaomi mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'xiaomi', 'Xiaomi');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('xiaomi', 'Xiaomi', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';

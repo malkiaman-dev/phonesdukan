@@ -560,11 +560,11 @@ $_postViewUrl = 'https://www.phonesdukan.com/blog/'
         <?php endif; ?>
         <form method="POST" action="<?= htmlspecialchars(url('admin/edit_post.php?id=' . (int)$post['id'] . '&action=update')); ?>" enctype="multipart/form-data" id="edit-post-form">
         <div class="form-group">
-            <label for="title">Title *</label>
+            <label for="title">Title <span class="req-star" aria-hidden="true">*</span></label>
             <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
         </div>
         <div class="form-group">
-            <label for="slug">Slug *</label>
+            <label for="slug">Slug <span class="req-star" aria-hidden="true">*</span></label>
             <input type="text" name="slug" id="slug" value="<?php echo htmlspecialchars($post['slug'] ?? ''); ?>" required>
         </div>
         <div class="form-group">

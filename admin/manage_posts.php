@@ -79,8 +79,10 @@ include __DIR__ . '/admin_header.php';
         }
 
         .content-wrapper h2 {
-            font-size: 30px;
-            margin-bottom: 14px;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
+            line-height: 1.25;
+            margin: 0 0 14px;
             color: var(--black);
             letter-spacing: -0.02em;
         }
@@ -94,36 +96,47 @@ include __DIR__ . '/admin_header.php';
             font-weight: 700;
             text-align: center;
             text-decoration: none;
-            border-radius: 8px;
-            transition: color .15s ease, background .15s ease, border-color .15s ease;
+            border-radius: 10px;
+            transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
             cursor: pointer;
-            background: var(--black);
-            color: var(--white);
-            border: 1px solid var(--black);
+            background: #f7cf04;
+            color: #111111;
+            border: 1px solid #e6bd00;
             line-height: 1.2;
+            box-shadow: 0 2px 8px rgba(247, 207, 4, 0.18);
         }
         .custom-btn:link,
         .custom-btn:visited,
         .custom-btn:active {
-            color: var(--white) !important;
             text-decoration: none;
         }
 
         .custom-btn:hover {
-            color: var(--yellow) !important;
-            background: var(--black);
-            border-color: var(--black);
+            background: #e6bd00;
+            color: #111111;
+            border-color: #d4af00;
             transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(17, 17, 17, 0.12);
+            box-shadow: 0 6px 16px rgba(247, 207, 4, 0.26);
         }
 
         .custom-btn-warning,
-        .custom-btn-danger,
         .custom-btn-primary,
         .custom-btn-success {
-            background: var(--black);
-            color: var(--white);
-            border: 1px solid var(--black);
+            background: #f7cf04;
+            color: #111111;
+            border: 1px solid #e6bd00;
+        }
+
+        .custom-btn-danger {
+            background: #ffffff;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            box-shadow: none;
+        }
+        .custom-btn-danger:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
         }
 
         .filter-search-container {
@@ -353,13 +366,9 @@ include __DIR__ . '/admin_header.php';
         }
         .action-buttons a:link,
         .action-buttons a:visited,
-        .action-buttons a:active {
-            color: var(--white) !important;
-        }
-        .action-buttons a:hover,
-        .action-buttons a:hover:visited,
-        .action-buttons .custom-btn:hover {
-            color: var(--yellow) !important;
+        .action-buttons a:active,
+        .action-buttons a:hover {
+            text-decoration: none !important;
         }
 
         .pagination-wrap {

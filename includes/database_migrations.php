@@ -210,6 +210,13 @@ if (!function_exists('ensureAiSeoTables')) {
     }
 }
 
+if (!function_exists('schemaMigrationLockPath')) {
+    function schemaMigrationLockPath(): string
+    {
+        return dirname(__DIR__) . '/storage/.schema_migration_v4.lock';
+    }
+}
+
 if (!function_exists('ensureDatabaseSchema')) {
     function ensureDatabaseSchema(PDO $db): void
     {
@@ -218,6 +225,11 @@ if (!function_exists('ensureDatabaseSchema')) {
             return;
         }
         $done = true;
+
+        $lockFile = schemaMigrationLockPath();
+        if (is_file($lockFile)) {
+            return;
+        }
 
         $functionsFile = dirname(__DIR__) . '/includes/functions.php';
         if (is_file($functionsFile)) {
@@ -248,5 +260,19 @@ if (!function_exists('ensureDatabaseSchema')) {
                 VariationModel::ensureSchema($db);
             }
         }
+
+        $catalogModelFile = dirname(__DIR__) . '/app/Models/CatalogModel.php';
+        if (is_file($catalogModelFile)) {
+            require_once $catalogModelFile;
+            if (class_exists('CatalogModel') && method_exists('CatalogModel', 'ensureSchema')) {
+                CatalogModel::ensureSchema($db);
+            }
+        }
+
+        $storageDir = dirname($lockFile);
+        if (!is_dir($storageDir)) {
+            @mkdir($storageDir, 0755, true);
+        }
+        @file_put_contents($lockFile, date('c'));
     }
 }

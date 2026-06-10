@@ -3,27 +3,29 @@ require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 class BrandController {
-    public function showBrand($category, $brand) {
-        // Keep existing static brand pages working first (e.g. mobiles_samsung.php).
-        $view_file = __DIR__ . "/../Views/brands/{$category}_{$brand}.php";
-        if (file_exists($view_file)) {
-            include $view_file;
-            return;
+    public function showBrand($brand, $category) {
+        // Static brand pages: try brand_category and legacy category_brand filenames.
+        foreach ([$brand . '_' . $category, $category . '_' . $brand] as $viewKey) {
+            $view_file = __DIR__ . "/../Views/brands/{$viewKey}.php";
+            if (file_exists($view_file)) {
+                include $view_file;
+                return;
+            }
         }
 
-        // Fallback: resolve category + brand slugs and open filtered shop listing.
+        // Fallback: resolve brand + category slugs and open filtered shop listing.
         try {
             $db = (new Database())->getConnection();
-
-            $catStmt = $db->prepare('SELECT category_id FROM categories WHERE slug = :slug LIMIT 1');
-            $catStmt->bindValue(':slug', (string)$category, PDO::PARAM_STR);
-            $catStmt->execute();
-            $categoryId = (int)$catStmt->fetchColumn();
 
             $brandStmt = $db->prepare('SELECT brand_id FROM brands WHERE slug = :slug LIMIT 1');
             $brandStmt->bindValue(':slug', (string)$brand, PDO::PARAM_STR);
             $brandStmt->execute();
             $brandId = (int)$brandStmt->fetchColumn();
+
+            $catStmt = $db->prepare('SELECT category_id FROM categories WHERE slug = :slug AND parent_id IS NULL LIMIT 1');
+            $catStmt->bindValue(':slug', (string)$category, PDO::PARAM_STR);
+            $catStmt->execute();
+            $categoryId = (int)$catStmt->fetchColumn();
 
             if ($categoryId > 0 && $brandId > 0) {
                 $query = http_build_query([

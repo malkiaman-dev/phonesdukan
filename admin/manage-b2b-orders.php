@@ -79,15 +79,18 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         }
         .orders-page-header h2 {
             margin: 0;
-            font-size: 1.8rem;
-            font-weight: 800;
+            font-size: clamp(1.5rem, 2vw, 1.75rem);
+            font-weight: 600;
             color: var(--brand-black);
             letter-spacing: -0.02em;
+            line-height: 1.25;
         }
         .orders-page-header p {
             margin: 6px 0 0;
             color: var(--brand-muted);
-            font-size: 0.92rem;
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.5;
         }
 
         .orders-head {

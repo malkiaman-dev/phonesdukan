@@ -6,7 +6,7 @@ $metaDescription = "Discover the latest Realme mobile price in Pakistan for " . 
 $metaKeywords = "Realme mobiles Pakistan, Realme lowest prices, Realme mobiles prices in Pakistan, Realme mobile specifications, Realme mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'realme', 'Realme');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('realme', 'Realme', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';

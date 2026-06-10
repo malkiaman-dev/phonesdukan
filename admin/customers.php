@@ -60,7 +60,9 @@ include __DIR__ . '/admin_header.php';
 
     .cus-title {
         margin: 0;
-        font-size: 1.8rem;
+        font-size: clamp(1.5rem, 2vw, 1.75rem);
+        font-weight: 600;
+        line-height: 1.25;
         color: var(--black);
         letter-spacing: -0.02em;
     }
@@ -68,7 +70,9 @@ include __DIR__ . '/admin_header.php';
     .cus-subtitle {
         margin: 6px 0 0;
         color: var(--muted);
-        font-size: 0.92rem;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
     }
 
     .cus-toolbar {

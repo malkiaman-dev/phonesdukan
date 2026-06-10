@@ -6,7 +6,7 @@ $metaDescription = "Check Vivo mobile price in Pakistan at Phones Dukan. Get the
 $metaKeywords = "Vivo mobiles Pakistan, Vivo lowest prices, Vivo mobiles prices in Pakistan, Vivo mobile specifications, Vivo mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'vivo', 'Vivo');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('vivo', 'Vivo', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';

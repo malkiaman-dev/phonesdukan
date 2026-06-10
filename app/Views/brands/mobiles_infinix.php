@@ -6,7 +6,7 @@ $metaDescription = "Explore Infinix mobile prices in Pakistan for " . date('F Y'
 $metaKeywords = "Infinix mobiles Pakistan, Infinix lowest prices, lowest prices for Infinix mobiles, Infinix mobiles prices in Pakistan, Infinix mobile specifications, Infinix mobile features";
 $metaRobots = "index, follow";
 
-$breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'infinix', 'Infinix');
+$breadcrumbs = SeoHelper::brandBreadcrumbs('infinix', 'Infinix', 'mobiles', 'Mobiles');
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
