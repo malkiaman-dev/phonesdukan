@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__, 3) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+require_once dirname(__DIR__, 2) . '/Helpers/ProductContentHelper.php';
 
 // ── SEO meta ──────────────────────────────────────────────────────────────
 $productPrice = isset($product['sale_price']) && is_numeric($product['sale_price']) && (float)$product['sale_price'] > 0
@@ -114,25 +115,19 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
     </div>
 </div>
 <?php
-$description = $product['product_description'];
+ob_start();
+include_once __DIR__ . '/../ad/display1.php';
+$descriptionAdHtml = ob_get_clean();
 
-// Split by paragraph tags to inject after 2nd paragraph
-$paragraphs = explode('</p>', $description);
-$modifiedDescription = '';
-foreach ($paragraphs as $index => $para) {
-    if (trim($para) == '')
-        continue;
-
-    $modifiedDescription .= $para . '</p>';
-
-    // Inject ad after 2nd paragraph
-    if ($index == 1) {
-        ob_start();
-        include_once (__DIR__ . '/../ad/display1.php');
-        $adContent = ob_get_clean();
-        $modifiedDescription .= $adContent;
-    }
-}
+$renderedDescription = ProductContentHelper::renderDescription(
+    (string) ($product['product_description'] ?? ''),
+    $descriptionAdHtml,
+    1
+);
+$renderedSpecifications = ProductContentHelper::renderSpecifications(
+    (string) ($product['short_description'] ?? ''),
+    $product
+);
 ?>
 
 <div class="p-page-container">
@@ -908,19 +903,19 @@ if ($cartFormCondition): ?>
 
 <?php include_once (__DIR__ . '/../ad/display1.php'); ?>
 
-<div class="custom-tabs">
+<div class="custom-tabs pd-product-tabs">
     <ul class="custom-tab-titles">
         <li class="custom-tab-title description active" data-tab="tab-description">Description</li>
-        <li class="custom-tab-title specification" data-tab="tab-specification">Specification</li>
+        <li class="custom-tab-title specification" data-tab="tab-specification">Specifications</li>
         <li class="custom-tab-title reviews" data-tab="tab-reviews">Reviews (<?php echo $reviewCount; ?>)</li>
     </ul>
 
     <div class="custom-tab-content">
         <div id="tab-description" class="custom-tab description active">
-            <?php echo $modifiedDescription; ?>
+            <?php echo $renderedDescription; ?>
         </div>
         <div id="tab-specification" class="custom-tab specification" style="display: none;">
-            <?php echo !empty($product['short_description']) ? $product['short_description'] : '<p>No specification available</p>'; ?>
+            <?php echo $renderedSpecifications; ?>
         </div>
         <div id="tab-reviews" class="custom-tab reviews" style="display: none;">
             <div class="reviews-section-wrapper">

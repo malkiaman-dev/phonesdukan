@@ -1722,11 +1722,257 @@ li.custom-tab-title h2 {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Description content */
-#tab-description {
-  line-height: 1.8;
+/* ---- PRODUCT CONTENT (Description + Specifications) ---- */
+.pd-product-tabs .custom-tab-content {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+#tab-description,
+#tab-specification {
+  line-height: 1.75;
   color: #333;
   font-size: 15px;
+}
+
+/* Rich description — Amazon-style clean editorial layout */
+.pd-rich-content,
+.pd-rich-content--amazon {
+  max-width: 100%;
+  color: #0f1111;
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
+.pd-rich-content > *:first-child,
+.pd-rich-content--amazon > *:first-child {
+  margin-top: 0;
+}
+
+.pd-rich-content > *:last-child,
+.pd-rich-content--amazon > *:last-child {
+  margin-bottom: 0;
+}
+
+.pd-rich-content h2,
+.pd-rich-content--amazon h2,
+.pd-rich-content h3,
+.pd-rich-content--amazon h3,
+.pd-rich-content h4,
+.pd-rich-content--amazon h4 {
+  color: #0f1111;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.pd-rich-content h2,
+.pd-rich-content--amazon h2 {
+  font-size: 1.25rem;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f7cf04;
+}
+
+.pd-rich-content h3,
+.pd-rich-content--amazon h3 {
+  font-size: 1.05rem;
+  margin: 1.35rem 0 0.6rem;
+}
+
+.pd-rich-content h4,
+.pd-rich-content--amazon h4 {
+  font-size: 0.95rem;
+  margin: 1rem 0 0.45rem;
+}
+
+.pd-rich-content p,
+.pd-rich-content--amazon p {
+  margin: 0 0 0.9rem;
+  color: #333;
+}
+
+.pd-rich-content ul,
+.pd-rich-content--amazon ul,
+.pd-rich-content ol,
+.pd-rich-content--amazon ol {
+  margin: 0 0 1.1rem;
+  padding-left: 1.25rem;
+}
+
+.pd-rich-content li,
+.pd-rich-content--amazon li {
+  margin-bottom: 0.45rem;
+  color: #333;
+}
+
+.pd-rich-content ul,
+.pd-rich-content--amazon ul {
+  list-style-type: disc;
+}
+
+.pd-rich-content ul li::marker,
+.pd-rich-content--amazon ul li::marker {
+  color: #555;
+}
+
+.pd-rich-content li strong,
+.pd-rich-content--amazon li strong,
+.pd-rich-content li b,
+.pd-rich-content--amazon li b {
+  display: inline;
+  color: #0f1111;
+  font-weight: 700;
+}
+
+.pd-rich-content strong,
+.pd-rich-content b {
+  color: #111;
+  font-weight: 700;
+}
+
+.pd-rich-content a {
+  color: #111;
+  text-decoration: underline;
+  text-decoration-color: #f7cf04;
+  text-underline-offset: 2px;
+}
+
+.pd-rich-content a:hover {
+  color: #000;
+}
+
+.pd-rich-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.25rem 0;
+  border-radius: 12px;
+  border: 1px solid #ebebeb;
+}
+
+.pd-rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0 1.5rem;
+  font-size: 14px;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pd-rich-content th,
+.pd-rich-content td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.pd-rich-content th {
+  background: #fafafa;
+  color: #111;
+  font-weight: 700;
+}
+
+.pd-rich-content tr:last-child td,
+.pd-rich-content tr:last-child th {
+  border-bottom: none;
+}
+
+.pd-rich-content blockquote {
+  margin: 1.25rem 0;
+  padding: 14px 18px;
+  border-left: 4px solid #f7cf04;
+  background: #fffbeb;
+  border-radius: 0 10px 10px 0;
+  color: #444;
+}
+
+.pd-rich-content hr {
+  border: none;
+  border-top: 1px solid #ececec;
+  margin: 1.75rem 0;
+}
+
+.pd-rich-content--empty p,
+.pd-spec-sheet--empty p {
+  color: #777;
+  margin: 0;
+}
+
+/* Specifications — key/value sheet like Amazon/Daraz */
+.pd-spec-sheet {
+  max-width: 860px;
+}
+
+.pd-spec-group {
+  margin-bottom: 1.5rem;
+}
+
+.pd-spec-group-title {
+  margin: 0 0 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.pd-spec-grid {
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.pd-spec-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 34%) 1fr;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pd-spec-row:last-child {
+  border-bottom: none;
+}
+
+.pd-spec-row:nth-child(even) {
+  background: #fafafa;
+}
+
+.pd-spec-label {
+  padding: 13px 16px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  border-right: 1px solid #f0f0f0;
+}
+
+.pd-spec-value {
+  padding: 13px 16px;
+  color: #111;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.pd-spec-fallback {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.pd-rich-content--spec h2,
+.pd-rich-content--spec h3,
+.pd-rich-content--spec h4 {
+  font-size: 1rem;
+  margin-top: 1rem;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pd-rich-content--spec ul,
+.pd-rich-content--spec ol {
+  margin-bottom: 0.85rem;
 }
 
 /* ---- REVIEWS SECTION (inside tab) ---- */
@@ -2417,6 +2663,27 @@ li.custom-tab-title h2 {
 
   .custom-tab-title h2,
   li.custom-tab-title h2 {
+    font-size: 13px;
+  }
+
+  .pd-rich-content h2,
+  .pd-rich-content--amazon h2 {
+    font-size: 1.15rem;
+  }
+
+  .pd-spec-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-spec-label {
+    border-right: none;
+    border-bottom: 1px solid #f3f3f3;
+    padding-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .pd-spec-value {
+    padding-top: 4px;
     font-size: 13px;
   }
 

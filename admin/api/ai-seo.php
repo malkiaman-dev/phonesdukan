@@ -118,6 +118,41 @@ function cleanAiOutput(string $text): string {
     return trim($text);
 }
 
+/** Normalize AI-generated HTML product descriptions for the storefront renderer */
+function normalizeDescriptionOutput(string $text): string
+{
+    $text = cleanAiOutput($text);
+    $text = preg_replace('/^```(?:html)?\s*/i', '', $text) ?? $text;
+    $text = preg_replace('/\s*```\s*$/', '', $text) ?? $text;
+
+    return trim($text);
+}
+
+/**
+ * Normalize AI-generated specifications into plain Label: Value lines
+ * for the product page Specifications tab (Daraz/Amazon-style spec sheet).
+ */
+function normalizeSpecificationOutput(string $text): string
+{
+    require_once dirname(__DIR__, 2) . '/app/Helpers/ProductContentHelper.php';
+
+    $text = cleanAiOutput($text);
+    $text = preg_replace('/^```(?:txt|text)?\s*/i', '', $text) ?? $text;
+    $text = preg_replace('/\s*```\s*$/', '', $text) ?? $text;
+
+    $rows = ProductContentHelper::extractAllKeyValuePairs($text);
+    if ($rows === []) {
+        return '';
+    }
+
+    $lines = [];
+    foreach ($rows as $row) {
+        $lines[] = $row['label'] . ': ' . $row['value'];
+    }
+
+    return implode("\n", $lines);
+}
+
 /**
  * Check if AI is available today (not over daily limit).
  * Returns ['ok'=>true] or ['ok'=>false, 'reason'=>'...'].
@@ -588,10 +623,20 @@ Naturally use high-intent Pakistan phrases like "price in Pakistan", "buy online
 AI SEARCH OPTIMIZATION:
 Optimize content for ChatGPT-style AI search, Google AI Overviews, Bing Copilot, and voice assistants. Use clear answers, direct explanations, natural language, and context-rich sentences.
 
-HTML DESCRIPTION RULES (for description and short_description fields):
-When generating descriptions, use clean semantic HTML: h2, h3, p, ul, li, strong tags only.
-Never use inline CSS, tables, div tags, span tags, or any attributes inside HTML tags.
-Never use markdown (no asterisks, no hashes, no backticks).
+CONTENT FORMAT RULES (two different fields — never mix them):
+1) product_description (Description tab): Amazon-style clean HTML only — h2, h3, p, ul, li, strong tags.
+   Structure: h2 product title, intro paragraph, h3 "Key features and benefits", ul with 5-6 bullets.
+   Each bullet MUST be inline on one line: <li><strong>Feature name:</strong> benefit sentence</li>
+   Then 1-2 optional h3 sections with short paragraphs. No cards, no div wrappers, no tables.
+   Never use inline CSS, div tags, span tags, or attributes inside HTML tags.
+2) short_description (Specifications tab): PLAIN TEXT ONLY. No HTML. No paragraphs.
+   CRITICAL: put EACH spec on its OWN line with a newline character between them.
+   Format: Label: Value (one per line). Example:
+   Display: 6.7 inch AMOLED
+   RAM: 12GB
+   Storage: 256GB
+   Never put multiple specs on one line. 8-14 lines. Spec values only. No marketing copy.
+Never use markdown (no asterisks, no hashes, no backticks) in either field.
 
 CONTENT DEPTH RULES:
 Descriptions must be detailed enough to rank, concise enough to read, structured for mobile users with short paragraphs, and written for featured snippet capture.
@@ -958,44 +1003,83 @@ TPL,
     };
 }
 
+// ── Amazon-style product description template ─────────────────────────────
+function getAmazonDescriptionTemplate(string $cat, string $productName): string
+{
+    $section2 = match ($cat) {
+        'speaker'    => 'Sound quality and performance',
+        'earbuds'    => 'Audio experience and comfort',
+        'smartwatch' => 'Health tracking and smart features',
+        'smartphone' => 'Display and performance',
+        'powerbank'  => 'Charging power and portability',
+        'charger'    => 'Fast charging and safety',
+        'cable'      => 'Durability and charging speed',
+        'cover'      => 'Protection and design',
+        'tablet'     => 'Display and productivity',
+        default      => 'Performance and design',
+    };
+    $section3 = match ($cat) {
+        'speaker'    => 'Battery life and connectivity',
+        'earbuds'    => 'Battery and connectivity',
+        'smartwatch' => 'Battery and daily use',
+        'smartphone' => 'Camera and battery life',
+        'powerbank'  => 'Ports and compatibility',
+        'charger'    => 'Compatibility and build',
+        'cable'      => 'Compatibility and build',
+        'cover'      => 'Fit and functionality',
+        'tablet'     => 'Battery and connectivity',
+        default      => 'Build quality and compatibility',
+    };
+    $name = htmlspecialchars($productName);
+
+    return <<<TPL
+Amazon-style product description. Clean, scannable, buyer-focused. HTML tags only: h2, h3, p, ul, li, strong.
+
+<h2>{$name}</h2>
+<p>[2-3 sentence intro: what it is, who it is for, the main reason to buy. Natural helpful tone.]</p>
+
+<h3>Key features and benefits</h3>
+<ul>
+<li><strong>[Feature 1]:</strong> [One clear benefit sentence.]</li>
+<li><strong>[Feature 2]:</strong> [One clear benefit sentence.]</li>
+<li><strong>[Feature 3]:</strong> [One clear benefit sentence.]</li>
+<li><strong>[Feature 4]:</strong> [One clear benefit sentence.]</li>
+<li><strong>[Feature 5]:</strong> [One clear benefit sentence.]</li>
+<li><strong>[Feature 6]:</strong> [One clear benefit sentence.]</li>
+</ul>
+
+<h3>{$section2}</h3>
+<p>[2-3 sentences with specific product detail. Real specs where known.]</p>
+
+<h3>{$section3}</h3>
+<p>[2-3 sentences with specific product detail. Real-world usage benefits.]</p>
+TPL;
+}
+
 // ── Category HTML Short Description Template ──────────────────────────────
 function getCategoryShortTemplate(string $cat, string $productName): string {
     $specLabels = match ($cat) {
-        'smartphone' => ['Display', 'Processor', 'RAM & Storage', 'Camera', 'Battery', 'Key Feature'],
-        'smartwatch' => ['Display', 'Calling', 'Health Tracking', 'Battery', 'Sports Modes', 'Connectivity'],
-        'earbuds'    => ['Audio', 'Noise Cancellation', 'Battery', 'Low Latency', 'Connectivity', 'Water Resistance'],
-        'speaker'    => ['Audio Output', 'Battery', 'Connectivity', 'Water Resistance', 'Portability', 'Key Feature'],
-        'powerbank'  => ['Capacity', 'Fast Charging', 'Ports', 'Weight', 'Safety', 'Compatibility'],
-        'charger'    => ['Output Power', 'Protocol', 'Ports', 'Compatibility', 'Protection', 'Design'],
-        'cable'      => ['Charging Speed', 'Data Transfer', 'Length', 'Material', 'Connector Type', 'Compatibility'],
-        'cover'      => ['Material', 'Protection', 'Compatibility', 'Design', 'Cutouts', 'Weight'],
-        'tablet'     => ['Display', 'Processor', 'RAM & Storage', 'Battery', 'Connectivity', 'Key Feature'],
-        default      => ['Performance', 'Design', 'Compatibility', 'Key Feature', 'Build', 'Package'],
+        'smartphone' => ['Display', 'Processor', 'RAM', 'Storage', 'Camera', 'Battery', 'OS', 'Warranty'],
+        'smartwatch' => ['Display', 'Bluetooth Calling', 'Health Tracking', 'Battery Life', 'Sports Modes', 'Water Resistance', 'Compatibility', 'Warranty'],
+        'earbuds'    => ['Driver Size', 'Noise Cancellation', 'Battery Life', 'Charging Case', 'Bluetooth Version', 'Water Resistance', 'Latency', 'Warranty'],
+        'speaker'    => ['Audio Output', 'Battery Life', 'Connectivity', 'Water Resistance', 'Portability', 'Charging Port', 'Compatibility', 'Warranty'],
+        'powerbank'  => ['Capacity', 'Fast Charging', 'Input Port', 'Output Ports', 'Weight', 'Safety Features', 'Compatibility', 'Warranty'],
+        'charger'    => ['Output Power', 'Charging Protocol', 'Port Type', 'Compatibility', 'Protection Features', 'Cable Included', 'Material', 'Warranty'],
+        'cable'      => ['Charging Speed', 'Data Transfer', 'Length', 'Connector Type', 'Material', 'Compatibility', 'Durability', 'Warranty'],
+        'cover'      => ['Material', 'Protection Level', 'Phone Model', 'Design', 'Cutouts', 'Wireless Charging', 'Weight', 'Warranty'],
+        'tablet'     => ['Display', 'Processor', 'RAM', 'Storage', 'Battery', 'Connectivity', 'Camera', 'Warranty'],
+        default      => ['Type', 'Performance', 'Compatibility', 'Material', 'Dimensions', 'Key Feature', 'Package Contents', 'Warranty'],
     };
 
-    $items = array_map(fn($label) => "<li><strong>{$label}:</strong> [Write specific value from product data]</li>", $specLabels);
-    $listItems = implode("\n", $items);
-    $name = htmlspecialchars($productName);
-    $buyPhrase = match ($cat) {
-        'smartphone' => "Available in Pakistan with official warranty and fast delivery from PhonesDukan.",
-        'smartwatch' => "Get the {$name} in Pakistan with genuine warranty and same-day dispatch from PhonesDukan.",
-        'earbuds'    => "Buy {$name} in Pakistan at the best price with official warranty from PhonesDukan.",
-        'speaker'    => "Order {$name} online in Pakistan with official warranty and fast delivery from PhonesDukan.",
-        'powerbank'  => "Buy {$name} in Pakistan with official warranty. Fast delivery across Pakistan.",
-        'charger'    => "Available at PhonesDukan with official warranty and fast delivery across Pakistan.",
-        'cable'      => "Order the {$name} in Pakistan with official warranty from PhonesDukan.",
-        default      => "Available at PhonesDukan with official warranty and fast delivery across Pakistan.",
-    };
+    $lines = array_map(
+        fn(string $label): string => "{$label}: [specific value from product data]",
+        $specLabels
+    );
 
-    return <<<TPL
-Fill the list below with REAL values from the product data. Replace every [Write specific value...] placeholder with the actual spec. Do NOT leave any placeholder text.
-
-<ul>
-{$listItems}
-</ul>
-
-<p>{$buyPhrase}</p>
-TPL;
+    return "Fill each line with a real spec value for {$productName}. "
+        . "Replace every [specific value from product data] placeholder. "
+        . "Return ONLY plain text lines in Label: Value format, one per line. No HTML.\n\n"
+        . implode("\n", $lines);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1425,10 +1509,10 @@ if ($action === 'refine') {
             => 'SEO TITLE FIELD. Return plain text only, no HTML. Exactly 50-60 characters total. Pattern: "Product Name Price in Pakistan Month Year, Phones Dukan". Comma before Phones Dukan. No pipes, no dashes. Count characters — must be between 50 and 60.',
 
         $isShortDesc
-            => 'SHORT DESCRIPTION FIELD. May return HTML using only <ul><li><strong> tags, or plain text. 2-3 short sentences or a spec list. Lead with the strongest selling point. End with a buying confidence sentence. No em dashes, no pipes.',
+            => 'SPECIFICATIONS FIELD (short_description). Return PLAIN TEXT ONLY. No HTML. One spec per line in Label: Value format. 8-14 lines. Example: Display: 6.7 inch AMOLED. Include real specs for this product category. No marketing sentences, no warranty copy, no paragraphs.',
 
         $isProductDesc
-            => 'PRODUCT DESCRIPTION FIELD. Return clean HTML using only h2, h3, p, ul, li, strong tags. Minimum 200 words. Deepen entity coverage, improve semantic keyword variation, strengthen the opening hook. No inline CSS. No em dashes, no pipes.',
+            => 'PRODUCT DESCRIPTION FIELD. Amazon-style HTML: h2 product title, intro p, h3 "Key features and benefits", ul with 5-6 inline bullets <li><strong>Name:</strong> benefit</li>, then 1-2 h3 sections with p paragraphs. Bullets must keep bold label and text on the SAME line. Minimum 180 words. No div, span, table, or inline CSS. No em dashes, no pipes.',
 
         $isFocusKw
             => 'FOCUS KEYWORD FIELD. Return plain text only. One keyword phrase, 3-6 words, all lowercase. Must include "price in pakistan". No pipes, no dashes, no HTML.',
@@ -1484,6 +1568,10 @@ if ($action === 'refine') {
     if ($isMetaDesc || $isSeoTitle) {
         $text = trim(strip_tags($text));
         $text = preg_replace('/\s+/', ' ', $text); // collapse any extra whitespace left by stripped tags
+    } elseif ($isShortDesc) {
+        $text = normalizeSpecificationOutput($text);
+    } elseif ($isProductDesc) {
+        $text = normalizeDescriptionOutput($text);
     }
 
     setCache($conn, $cacheKey, 'refine', $field, $text);
@@ -1529,14 +1617,22 @@ if ($action === 'generate') {
     $systemPrompt = buildSystemPrompt();
 
     if ($target === 'all') {
+        $detectedCatAll = detectCategory($category ?: $productName);
+        $htmlTemplateAll = getAmazonDescriptionTemplate($detectedCatAll, $productName);
+        $shortTemplateAll = getCategoryShortTemplate($detectedCatAll, $productName);
+
         $userMessage = $contextBlock . "\n"
             . "You are the PhonesDukan Ranking Engine. Generate ALL fields for this product to maximize Google Pakistan rankings, CTR, and ecommerce conversions. Return ONLY valid JSON with these exact keys, no extra text, no markdown:\n"
-            . '{"seo_title":"...","meta_description":"...","focus_keyword":"...","short_description":"...","tags":"..."}'
+            . '{"seo_title":"...","meta_description":"...","focus_keyword":"...","product_description":"...","short_description":"...","tags":"..."}'
             . "\n\nCRITICAL LENGTH AND FORMAT RULES — count characters before finalizing each field:"
             . "\nseo_title: MUST be 50-60 characters total. MUST start with Brand + Model (e.g. 'Samsung S24 Ultra'). MUST include 'Price in Pakistan' and current month/year. End with comma then Phones Dukan. Never use pipe. No dashes. Example of correct length: 'Samsung S24 Ultra Price in Pakistan May 2026, Phones Dukan' = 58 chars. If over 60, trim model name not the price/date/brand part."
             . "\nmeta_description: MUST be 150-160 characters total. Start with Buy or Shop. Include product short name, strongest benefit OR key spec, a Pakistan trust phrase. End with 'Shop now at Phones Dukan.' If your draft is under 150 chars, extend the benefit phrase or add 'with official warranty'. Aim for exactly 155 chars."
             . "\nfocus_keyword: MUST be 4-6 words all lowercase. MUST include full brand name, model identifier, and 'price in pakistan'. Example: 'samsung galaxy s24 ultra price in pakistan'."
-            . "\nshort_description: 2-3 short human sentences. Open with a benefit. Add key spec. End with a trust signal. No dashes, no bullet points, no buzzwords."
+            . "\nproduct_description: Amazon-style HTML (h2, h3, p, ul, li, strong only). Follow this structure:\n"
+            . $htmlTemplateAll
+            . "\nBullets MUST be <li><strong>Feature:</strong> benefit on one line. Minimum 180 words. No div, span, table, or inline CSS."
+            . "\nshort_description: PLAIN TEXT ONLY. No HTML. Specifications for the Specs tab. One line per spec in Label: Value format. Use these lines and fill real values:\n"
+            . $shortTemplateAll
             . "\ntags: 8-10 comma-separated all-lowercase tags. Mix brand, model, category, specs, features, and buyer phrases like 'buy online pakistan'.";
 
         $result = callGroq($systemPrompt, $userMessage);
@@ -1556,6 +1652,13 @@ if ($action === 'generate') {
 
         if (!$parsed) {
             $parsed = ['raw' => $text];
+        } else {
+            if (!empty($parsed['product_description'])) {
+                $parsed['product_description'] = normalizeDescriptionOutput((string) $parsed['product_description']);
+            }
+            if (!empty($parsed['short_description'])) {
+                $parsed['short_description'] = normalizeSpecificationOutput((string) $parsed['short_description']);
+            }
         }
 
         $outputStr = json_encode($parsed);
@@ -1569,37 +1672,82 @@ if ($action === 'generate') {
     // Detect category for template-aware generation
     $detectedCat = detectCategory($category ?: $productName);
 
+    if ($target === 'descriptions') {
+        $htmlTemplate = getAmazonDescriptionTemplate($detectedCat, $productName);
+        $shortTemplate = getCategoryShortTemplate($detectedCat, $productName);
+        $userMessage = "Generate BOTH product page content blocks for PhonesDukan (Amazon-style description + spec sheet).\n\n"
+            . "PRODUCT DATA:\n" . $contextBlock
+            . "DETECTED CATEGORY: {$detectedCat}\n\n"
+            . "Return ONLY valid JSON with exactly these keys. No markdown fences, no extra text:\n"
+            . '{"product_description":"...","short_description":"..."}' . "\n\n"
+            . "product_description rules:\n"
+            . "- HTML only: h2, h3, p, ul, li, strong tags\n"
+            . "- Fill this template with real, specific content. Replace ALL bracket placeholders:\n"
+            . $htmlTemplate . "\n"
+            . "- h3 must be \"Key features and benefits\" then ul with inline bullets <li><strong>Name:</strong> benefit</li>\n"
+            . "- Minimum 180 words. Natural Amazon tone. No em dashes, no pipes, no div/span/table tags\n\n"
+            . "short_description rules:\n"
+            . "- PLAIN TEXT ONLY for the Specifications tab\n"
+            . "- One spec per line, Label: Value format, no HTML, no marketing copy\n"
+            . "- Fill these lines with real values:\n"
+            . $shortTemplate;
+
+        $result = callGroq($systemPrompt, $userMessage, GROQ_MODEL, 3000);
+        if (!$result['success']) {
+            $classified = $result['classified'] ?? classifyAiError($result['http_code'] ?? 0, $result['raw_error'] ?? $result['error'] ?? '', []);
+            logAiError($conn, $classified, $result['raw_error'] ?? '', $result['http_code'] ?? 0,
+                       'generate', 'descriptions', $productId, mb_substr($userMessage, 0, 500), GROQ_MODEL, $result['latency'] ?? 0);
+            logRequest($conn, 'generate', 'descriptions', $contextBlock, '', GROQ_MODEL, 0, $result['latency'] ?? 0, 'error', $classified['user_message'], $productId);
+            echo errorResponse($classified);
+            exit;
+        }
+
+        $text = $result['text'];
+        preg_match('/\{.*\}/s', $text, $jsonMatch);
+        $parsed = $jsonMatch ? json_decode($jsonMatch[0], true) : null;
+
+        if (!$parsed || empty($parsed['product_description']) || empty($parsed['short_description'])) {
+            echo json_encode(['success' => false, 'error' => 'AI response could not be parsed into description fields. Try again.']);
+            exit;
+        }
+
+        $parsed['product_description'] = normalizeDescriptionOutput((string) $parsed['product_description']);
+        $parsed['short_description'] = normalizeSpecificationOutput((string) $parsed['short_description']);
+        $outputStr = json_encode($parsed);
+        setCache($conn, $cacheKey, 'generate', 'descriptions', $outputStr);
+        incrementCredits($conn, $result['tokens']);
+        logRequest($conn, 'generate', 'descriptions', $contextBlock, $outputStr, $result['model'], $result['tokens'], $result['latency'], 'success', '', $productId);
+        echo json_encode(['success' => true, 'result' => $parsed, 'tokens' => $result['tokens']]);
+        exit;
+    }
+
     // Single field generation — each instruction is a ranking engineering brief
     if ($target === 'description') {
-        $htmlTemplate    = getCategoryDescriptionTemplate($detectedCat, $productName);
-        $targetInstructions = "You are generating a FULL HTML product description for the PhonesDukan ecommerce store.\n\n"
+        $htmlTemplate    = getAmazonDescriptionTemplate($detectedCat, $productName);
+        $targetInstructions = "You are generating an Amazon-style HTML product description for PhonesDukan.\n\n"
             . "PRODUCT DATA:\n" . $contextBlock . "\n"
             . "DETECTED CATEGORY: {$detectedCat}\n\n"
             . "YOUR TASK:\n"
-            . "Fill the HTML template below with real, specific, SEO-optimized content based on the product data.\n"
-            . "Replace every [bracketed placeholder] with actual relevant content.\n"
-            . "Do NOT copy the placeholder text. Do NOT leave any placeholder unfilled.\n"
-            . "Write naturally, like a product expert who has used this product.\n"
-            . "Each paragraph must add unique ranking value: entity coverage, semantic depth, user intent satisfaction.\n"
-            . "For the key features list: use exactly 5-6 real features from the product data.\n"
-            . "No em dashes, no en dashes, no pipes, no inline CSS, no div tags.\n"
+            . "Fill the template below with real, specific content. Replace every [bracket] placeholder.\n"
+            . "Write like Amazon \"About this item\": clear intro, scannable feature bullets, short detail sections.\n"
+            . "Feature bullets MUST stay on one line: <li><strong>Feature name:</strong> benefit sentence</li>\n"
+            . "Use h3 \"Key features and benefits\" exactly for the bullet section heading.\n"
+            . "No em dashes, no pipes, no div/span/table tags, no inline CSS.\n"
             . "Return ONLY the completed HTML, nothing else.\n\n"
             . "HTML TEMPLATE TO FILL:\n\n"
             . $htmlTemplate;
         $userMessage = $targetInstructions;
     } elseif ($target === 'short_description') {
         $shortTemplate   = getCategoryShortTemplate($detectedCat, $productName);
-        $targetInstructions = "You are generating an HTML short description (specs summary) for a PhonesDukan product page.\n\n"
+        $targetInstructions = "You are generating product SPECIFICATIONS for the PhonesDukan Specifications tab (Daraz/Amazon style).\n\n"
             . "PRODUCT DATA:\n" . $contextBlock . "\n"
             . "DETECTED CATEGORY: {$detectedCat}\n\n"
             . "YOUR TASK:\n"
-            . "Fill the HTML template below with REAL specs from the product data.\n"
-            . "Replace every [Write specific value from product data] with the actual spec value.\n"
-            . "If a spec is not known from the data, write a realistic typical value for this product category and model.\n"
-            . "Never leave placeholder text. Never add extra HTML tags.\n"
-            . "The output must look like a clean product spec card buyers can scan in 3 seconds.\n"
-            . "Return ONLY the completed HTML, nothing else.\n\n"
-            . "HTML TEMPLATE TO FILL:\n\n"
+            . "Fill the spec lines below with REAL values from the product data.\n"
+            . "If a spec is unknown, write a realistic value for this product category and model.\n"
+            . "Never leave placeholder text.\n"
+            . "Return PLAIN TEXT ONLY. One spec per line. Label: Value format. No HTML. No paragraphs. No marketing copy.\n\n"
+            . "SPEC LINES TO FILL:\n\n"
             . $shortTemplate;
         $userMessage = $targetInstructions;
     } else {
@@ -1638,6 +1786,12 @@ if ($action === 'generate') {
     }
 
     $text = $result['text'];
+    if ($target === 'description') {
+        $text = normalizeDescriptionOutput($text);
+    } elseif ($target === 'short_description') {
+        $text = normalizeSpecificationOutput($text);
+    }
+
     setCache($conn, $cacheKey, 'generate', $target, $text);
     incrementCredits($conn, $result['tokens']);
     logRequest($conn, 'generate', $target, $contextBlock, $text, $result['model'], $result['tokens'], $result['latency'], 'success', '', $productId);

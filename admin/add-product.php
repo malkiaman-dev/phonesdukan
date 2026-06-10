@@ -274,11 +274,14 @@ select.vb-input { cursor:pointer; }
             <div class="form-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
                 <h2>Description</h2>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <button type="button" class="ai-gen-btn primary" style="padding:8px 14px;border-radius:8px;font-size:.82rem" onclick="AISeo.generateDescriptions(this)">
+                        <i class="fas fa-robot"></i> AI Generate Description &amp; Specs
+                    </button>
                     <button type="button" class="ai-gen-btn ghost" style="background:#f1f5f9;color:#111;border:1px solid #e5e7eb;font-size:.78rem" onclick="AISeo.generateField('description', this)">
-                        <i class="fas fa-robot"></i> Generate Description
+                        <i class="fas fa-file-alt"></i> Description Only
                     </button>
                     <button type="button" class="ai-gen-btn ghost" style="background:#f1f5f9;color:#111;border:1px solid #e5e7eb;font-size:.78rem" onclick="AISeo.generateField('short_description', this)">
-                        <i class="fas fa-magic"></i> Generate Short Desc
+                        <i class="fas fa-list"></i> Specs Only
                     </button>
                 </div>
             </div>
@@ -301,12 +304,12 @@ select.vb-input { cursor:pointer; }
                         </div>
                     </label>
                     <div class="ai-field-relative">
-                        <textarea id="product_description" name="product_description" placeholder="Write full product description" required oninput="AISeo.runScore()"></textarea>
+                        <textarea id="product_description" name="product_description" placeholder="Write a detailed description using HTML. Example: &lt;h2&gt;Overview&lt;/h2&gt;&lt;p&gt;...&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;strong&gt;Feature:&lt;/strong&gt; detail&lt;/li&gt;&lt;/ul&gt;" required oninput="AISeo.runScore()"></textarea>
                     </div>
                 </div>
                 <div class="form-group full-width">
                     <label for="short_description" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-                        <span>Short Description</span>
+                        <span>Specifications <small style="font-weight:400;color:#6b7280">(shown in Specs tab)</small></span>
                         <div style="display:flex;gap:6px">
                             <button type="button" class="ai-refine-btn" data-ai-refine="short_description" onclick="AISeo.refineField('short_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
                             <div class="ai-btn-group">
@@ -320,7 +323,7 @@ select.vb-input { cursor:pointer; }
                         </div>
                     </label>
                     <div class="ai-field-relative">
-                        <textarea id="short_description" name="short_description" placeholder="Write short product summary" required oninput="AISeo.runScore()"></textarea>
+                        <textarea id="short_description" name="short_description" placeholder="Specifications (shown in Specs tab). Use key:value lines or HTML table. Example: Display: 6.7 inch AMOLED&#10;RAM: 12GB&#10;Storage: 256GB&#10;Battery: 5000mAh" required oninput="AISeo.runScore()"></textarea>
                     </div>
                 </div>
             </div>
@@ -1421,7 +1424,7 @@ function generateAllVariationSkus() {
 </script>
 
 <!-- AI SEO Assistant JS -->
-<script src="js/ai-seo.js?v=2.7"></script>
+<script src="js/ai-seo.js?v=2.8"></script>
 <script src="js/product-media.js?v=1.2"></script>
 <script>
 // Initialize the AI SEO Assistant for Add Product page

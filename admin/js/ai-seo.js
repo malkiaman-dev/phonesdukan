@@ -991,6 +991,76 @@ window.AISeo = (function () {
     });
   }
 
+  /** Generate product description (HTML) + specifications (Label: Value) together */
+  async function generateDescriptions(btn) {
+    if (fallbackActive) { toast('AI credits exhausted. Please use manual editing.', 'limit', 5000); return; }
+
+    const data = collectData();
+    if (!data.productName) {
+      toast('Enter a product name first, then generate description and specifications.', 'warning');
+      return;
+    }
+
+    if (btn) setLoading(btn, true);
+    clearErrorPanel();
+    toast('Generating description and specifications with AI...', 'info', 3000);
+
+    const descEl = $id(fieldId('product_description'));
+    const specEl = $id(fieldId('short_description'));
+    if (descEl) showFieldGenerating(descEl);
+    if (specEl) showFieldGenerating(specEl);
+    startSlowTimer('descriptions');
+
+    const reqPayload = {
+      target:           'descriptions',
+      product_name:     data.productName,
+      brand:            getSelectText('brand_id'),
+      category:         getSelectText('category_id'),
+      tags:             data.tags,
+      existing_content: data.productDescription || data.shortDescription,
+      price:            val('regular_price') || val('sale_price'),
+    };
+    lastRequest = { type: 'generateDescriptions', btn, reqPayload };
+
+    const res = await api('generate', reqPayload);
+
+    clearSlowTimer();
+    if (descEl) hideFieldGenerating(descEl);
+    if (specEl) hideFieldGenerating(specEl);
+    if (btn) setLoading(btn, false);
+
+    if (!res.success) {
+      handleAiError(res, descEl, function () { generateDescriptions(btn); });
+      return;
+    }
+
+    clearErrorPanel();
+
+    const r = res.result || {};
+    let applied = 0;
+
+    if (r.product_description && descEl) {
+      applyToField(descEl, r.product_description, 'product_description');
+      applied++;
+    }
+    if (r.short_description && specEl) {
+      applyToField(specEl, r.short_description, 'short_description');
+      applied++;
+    }
+
+    if (applied) {
+      toast('AI generated description and specifications. Review before saving.', 'success', 5000);
+      runScore();
+    } else {
+      handleAiError({
+        success: false,
+        error: 'AI response could not be parsed into description fields. Try again.',
+        error_type: 'invalid_response',
+        retry: true,
+      }, descEl, function () { generateDescriptions(btn); });
+    }
+  }
+
   /** Auto-fill ALL SEO fields with one click */
   async function generateAll(btn) {
     if (fallbackActive) { toast('AI credits exhausted. Please use manual editing.', 'limit', 5000); return; }
@@ -998,7 +1068,7 @@ window.AISeo = (function () {
     clearErrorPanel();
     toast('Generating all SEO fields with AI...', 'info', 3000);
 
-    ['seo_title','seo_description','focus_keyword','product_tag','short_description'].forEach(function(n) {
+    ['seo_title','seo_description','focus_keyword','product_tag','product_description','short_description'].forEach(function(n) {
       var el = $id(fieldId(n)); if (el) showFieldGenerating(el);
     });
     startSlowTimer('all');
@@ -1019,7 +1089,7 @@ window.AISeo = (function () {
 
     clearSlowTimer();
     if (btn) setLoading(btn, false);
-    ['seo_title','seo_description','focus_keyword','product_tag','short_description'].forEach(function(n) {
+    ['seo_title','seo_description','focus_keyword','product_tag','product_description','short_description'].forEach(function(n) {
       var el = $id(fieldId(n)); if (el) hideFieldGenerating(el);
     });
 
@@ -1034,11 +1104,12 @@ window.AISeo = (function () {
     // Apply to fields
     const appliedFields = [];
     const applies = [
-      ['seo_title',        r.seo_title],
-      ['seo_description',  r.meta_description],
-      ['focus_keyword',    r.focus_keyword],
-      ['short_description',r.short_description],
-      ['product_tag',      r.tags],
+      ['seo_title',          r.seo_title],
+      ['seo_description',    r.meta_description],
+      ['focus_keyword',      r.focus_keyword],
+      ['product_description',r.product_description],
+      ['short_description',  r.short_description],
+      ['product_tag',        r.tags],
     ];
 
     applies.forEach(function ([fieldName, content]) {
@@ -1806,7 +1877,8 @@ window.AISeo = (function () {
     clearErrorPanel();
     if (lastRequest.type === 'refine')       return refineField(lastRequest.fieldName, lastRequest.style);
     if (lastRequest.type === 'generate')     return generateField(lastRequest.target, lastRequest.btn);
-    if (lastRequest.type === 'generateAll')  return generateAll(lastRequest.btn);
+    if (lastRequest.type === 'generateAll')         return generateAll(lastRequest.btn);
+    if (lastRequest.type === 'generateDescriptions') return generateDescriptions(lastRequest.btn);
   }
 
   /* ── Fix Context Store — avoids HTML injection in onclick attributes ──── */
@@ -1840,6 +1912,7 @@ window.AISeo = (function () {
     runScoreNow,
     refineField,
     generateField,
+    generateDescriptions,
     generateAll,
     smartSuggest,
     closeSuggestions,
