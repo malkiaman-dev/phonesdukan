@@ -20,13 +20,15 @@ class ProductController
         if (!$this->db) {
             die('Database connection failed. Please check your database credentials.');
         }
-        ensureProductExpectedComingDateColumn($this->db);
         $this->productModel = new AddProductModel($this->db);  // Instantiate the model
     }
 
     public function addProduct()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Schema DDL must run before beginTransaction(); MySQL implicitly commits active transactions for DDL.
+            $mediaService = new ProductMediaService($this->db);
+
             // Start a database transaction to ensure data integrity
             $this->db->beginTransaction();
 
@@ -72,10 +74,10 @@ class ProductController
                     $skuCheck = $this->db->prepare('SELECT product_id FROM products WHERE product_sku = ?');
                     $skuCheck->execute([$productData['product_sku']]);
                     if ($skuCheck->fetch()) {
-                        $this->db->rollBack();
+                        $this->rollbackIfActive();
                         $_SESSION['message'] = 'Error: SKU "' . htmlspecialchars($productData['product_sku']) . '" is already used by another product.';
                         $_SESSION['message_type'] = 'error';
-                        header('Location: /admin/add-product.php');
+                        header('Location: ' . url('admin/add-product.php'));
                         exit();
                     }
                 }
@@ -154,7 +156,6 @@ class ProductController
                 $seoStmt->execute($seoData);
 
                 $keyToImageId = [];
-                $mediaService = new ProductMediaService($this->db);
 
                 // Handle Primary Image Upload
                 if (isset($_FILES['primary_image']) && $_FILES['primary_image']['error'] == 0) {
@@ -214,10 +215,11 @@ class ProductController
                         $metaStmt = $this->db->prepare($metaQuery);
                         $metaStmt->execute($primaryImageMetaData);
                     } else {
+                        $this->rollbackIfActive();
                         $_SESSION['message'] = 'There was an error uploading the primary image.';
                         $_SESSION['message_type'] = 'error';
-                        $this->db->rollBack();
-                        return false;
+                        header('Location: ' . url('admin/add-product.php'));
+                        exit();
                     }
                 }
 
@@ -280,10 +282,11 @@ class ProductController
                             $metaStmt = $this->db->prepare($metaQuery);
                             $metaStmt->execute($galleryImageMetaData);
                         } else {
+                            $this->rollbackIfActive();
                             $_SESSION['message'] = 'There was an error uploading a gallery image.';
                             $_SESSION['message_type'] = 'error';
-                            $this->db->rollBack();
-                            return false;
+                            header('Location: ' . url('admin/add-product.php'));
+                            exit();
                         }
                     }
                 }
@@ -307,24 +310,38 @@ class ProductController
                 }
 
                 // Commit the transaction
-                $this->db->commit();
+                $this->commitIfActive();
 
                 // Redirect after successful addition
                 $_SESSION['message'] = 'Product added successfully!';
                 $_SESSION['message_type'] = 'success';
-                header('Location: /admin/manage-products.php');
+                header('Location: ' . url('admin/manage-products.php'));
                 exit();
             } catch (Exception $e) {
-                // Rollback transaction if any exception occurs
-                $this->db->rollBack();
+                // Rollback only when the transaction is still open
+                $this->rollbackIfActive();
                 $_SESSION['message'] = 'There was an error: ' . $e->getMessage();
                 $_SESSION['message_type'] = 'error';
-                header('Location: /admin/manage-products.php');
+                header('Location: ' . url('admin/add-product.php'));
                 exit();
             }
         }
 
         // Load the view for adding a product
         require_once 'add-product.php';
+    }
+
+    private function commitIfActive(): void
+    {
+        if ($this->db->inTransaction()) {
+            $this->db->commit();
+        }
+    }
+
+    private function rollbackIfActive(): void
+    {
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
     }
 }

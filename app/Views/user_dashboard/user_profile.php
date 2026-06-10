@@ -11,9 +11,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'] ?? 0;
 
-// Ensure profile_photo column exists
-try { $conn->exec("ALTER TABLE users ADD COLUMN profile_photo VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
-
 $stmt = $conn->prepare("SELECT full_name, email, phone, profile_photo FROM users WHERE user_id = :user_id");
 $stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 $stmt->execute();

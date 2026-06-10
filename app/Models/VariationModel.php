@@ -6,50 +6,85 @@ class VariationModel {
 
     public function __construct() {
         $this->db = (new Database())->getConnection();
-        self::runMigrationOnce($this->db);
+        self::ensureSchema($this->db);
+    }
+
+    public static function ensureSchema(PDO $db): void
+    {
+        self::runMigrationOnce($db);
     }
 
     // Run DDL exactly once per PHP process (request). Never throws.
     private static bool $migrationDone = false;
     private const MIGRATION_SESSION_KEY = 'var_migration_v3';
 
-    private static function runMigrationOnce(\PDO $db): void {
-        if (self::$migrationDone) return;
-        self::$migrationDone = true;
-
-        // Fast path: skip if already confirmed complete this session
-        if (session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION[self::MIGRATION_SESSION_KEY])) {
-            return;
-        }
-
-        // Quick DB check: if all 4 tables + critical columns exist, mark done & skip DDL
+    private static function tablesAreReady(\PDO $db): bool {
         try {
             $tblCheck = $db->query(
                 "SELECT COUNT(*) FROM information_schema.TABLES
                  WHERE TABLE_SCHEMA = DATABASE()
                  AND TABLE_NAME IN ('variation_types','variation_values','product_variations','product_variation_values')"
             );
-            if ((int)$tblCheck->fetchColumn() === 4) {
-                $colCheck = $db->query(
-                    "SELECT COUNT(*) FROM information_schema.COLUMNS
-                     WHERE TABLE_SCHEMA = DATABASE()
-                     AND TABLE_NAME = 'product_variations'
-                     AND COLUMN_NAME IN ('is_default','sku','stock_quantity')"
-                );
-                if ((int)$colCheck->fetchColumn() === 3) {
-                    // All required structure exists — cache in session and skip
-                    if (session_status() === PHP_SESSION_ACTIVE) {
-                        $_SESSION[self::MIGRATION_SESSION_KEY] = true;
-                    }
-                    return;
-                }
+            if ((int) $tblCheck->fetchColumn() !== 4) {
+                return false;
             }
+
+            $colCheck = $db->query(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                 AND TABLE_NAME = 'product_variations'
+                 AND COLUMN_NAME IN ('id','is_default','sku','stock_quantity')"
+            );
+
+            return (int) $colCheck->fetchColumn() === 4;
         } catch (\Throwable $e) {
-            // info_schema unavailable — fall through to full migration
+            return false;
+        }
+    }
+
+    private static function migrateLegacyProductVariations(\PDO $db): void {
+        try {
+            $legacyCol = $db->query(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE()
+                 AND TABLE_NAME = 'product_variations'
+                 AND COLUMN_NAME = 'variation_id'"
+            );
+            if ((int) $legacyCol->fetchColumn() === 0) {
+                return;
+            }
+
+            $rowCount = (int) $db->query('SELECT COUNT(*) FROM product_variations')->fetchColumn();
+            if ($rowCount > 0) {
+                $db->exec('RENAME TABLE product_variations TO product_variations_legacy');
+                return;
+            }
+
+            $db->exec('DROP TABLE product_variations');
+        } catch (\Throwable $e) {
+            error_log('VariationModel legacy migration warning: ' . $e->getMessage());
+        }
+    }
+
+    private static function runMigrationOnce(\PDO $db): void {
+        if (self::$migrationDone) return;
+        self::$migrationDone = true;
+
+        if (self::tablesAreReady($db)) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                $_SESSION[self::MIGRATION_SESSION_KEY] = true;
+            }
+            return;
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION[self::MIGRATION_SESSION_KEY]);
         }
 
         try {
             $db->exec("SET FOREIGN_KEY_CHECKS=0");
+
+            self::migrateLegacyProductVariations($db);
 
             $db->exec("CREATE TABLE IF NOT EXISTS `variation_types` (
               `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -105,6 +140,10 @@ class VariationModel {
               KEY `idx_pvv_vv` (`variation_value_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+            if (!self::tablesAreReady($db)) {
+                throw new \RuntimeException('Variation tables migration incomplete');
+            }
+
             $db->exec("SET FOREIGN_KEY_CHECKS=1");
 
             // Add missing columns — each wrapped individually so one failure doesn't stop the rest
@@ -117,6 +156,7 @@ class VariationModel {
                     'image          VARCHAR(500)  NULL DEFAULT NULL',
                     'status         TINYINT(1)    NOT NULL DEFAULT 1',
                     'is_default     TINYINT(1)    NOT NULL DEFAULT 0',
+                    'prepaid_discount_amount DECIMAL(12,2) NOT NULL DEFAULT 0',
                 ],
                 'product_variation_values' => [
                     'variation_type_id  INT UNSIGNED NOT NULL DEFAULT 0',
@@ -163,6 +203,15 @@ class VariationModel {
     // ----------------------------------------------------------------
 
     public function getAllVariationTypes() {
+        if (!self::tablesAreReady($this->db)) {
+            self::$migrationDone = false;
+            self::runMigrationOnce($this->db);
+        }
+
+        if (!self::tablesAreReady($this->db)) {
+            return [];
+        }
+
         $stmt = $this->db->query(
             "SELECT * FROM variation_types ORDER BY sort_order ASC, id ASC"
         );
@@ -440,7 +489,11 @@ class VariationModel {
     }
 
     public function getVariationTypesWithValues() {
-        $types  = $this->getAllVariationTypes();
+        $types = $this->getAllVariationTypes();
+        if (empty($types) || !self::tablesAreReady($this->db)) {
+            return [];
+        }
+
         $allVal = $this->getAllValuesGrouped();
 
         $byType = [];

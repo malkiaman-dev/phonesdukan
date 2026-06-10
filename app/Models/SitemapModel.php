@@ -9,13 +9,30 @@ class SitemapModel {
     }
 
     public function getProducts() {
-        $stmt = $this->conn->query("SELECT slug, updated_at FROM products WHERE status = 1");
+        $stmt = $this->conn->query(
+            "SELECT product_slug AS slug, updated_at
+             FROM products
+             WHERE product_status = 1"
+        );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getPages() {
-        $stmt = $this->conn->query("SELECT slug, updated_at FROM pages WHERE status = 1");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $check = $this->conn->query(
+                "SELECT COUNT(*) FROM information_schema.TABLES
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pages'"
+            );
+            if ((int) $check->fetchColumn() === 0) {
+                return [];
+            }
+
+            $stmt = $this->conn->query("SELECT slug, updated_at FROM pages WHERE status = 1");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            error_log('SitemapModel getPages: ' . $e->getMessage());
+            return [];
+        }
     }
     
     // Get images from product_images table with status = 1

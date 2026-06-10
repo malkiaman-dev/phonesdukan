@@ -10,7 +10,7 @@ class Database {
         $isLocal = $this->isLocalEnvironment();
 
         $defaultHost = 'localhost';
-        $defaultDbName = $isLocal ? 'phonesdukan' : 'u972962277_custom_pd';
+        $defaultDbName = $isLocal ? 'u903950600_custom_pd' : 'u972962277_custom_pd';
         $defaultUsername = $isLocal ? 'root' : 'u972962277_custom_pd';
         $defaultPassword = $isLocal ? '' : 'Phones&Dukan12!';
 
@@ -24,9 +24,7 @@ class Database {
         $this->conn = null;
         $dbCandidates = [$this->db_name];
 
-        if ($this->isLocalEnvironment()) {
-            $dbCandidates[] = 'phonesdukan';
-            $dbCandidates[] = 'u972962277_custom_pd';
+        if ($this->isLocalEnvironment() && $this->db_name !== 'u903950600_custom_pd') {
             $dbCandidates[] = 'u903950600_custom_pd';
         }
 
@@ -47,6 +45,15 @@ class Database {
                 );
                 $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $this->db_name = $dbName;
+
+                $migrationsFile = dirname(__DIR__) . '/includes/database_migrations.php';
+                if (is_file($migrationsFile)) {
+                    require_once $migrationsFile;
+                    if (function_exists('ensureDatabaseSchema')) {
+                        ensureDatabaseSchema($this->conn);
+                    }
+                }
+
                 return $this->conn;
             } catch (PDOException $exception) {
                 $lastException = $exception;

@@ -41,16 +41,14 @@ if (isset($_GET['edit_id'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_attribute'])) {
     $attribute_id = $_POST['attribute_id'];
     $attribute_name = $_POST['attribute_name'];
-    $attribute_value = $_POST['attribute_value'];
 
     // Update the attribute in the database
     $conn = (new Database())->getConnection();
-    $query = "UPDATE product_attributes SET attribute_name = :attribute_name, attribute_value = :attribute_value WHERE attribute_id = :attribute_id";
+    $query = "UPDATE product_attributes SET attribute_name = :attribute_name WHERE attribute_id = :attribute_id";
     $stmt = $conn->prepare($query);
 
     $stmt->bindParam(':attribute_id', $attribute_id);
     $stmt->bindParam(':attribute_name', $attribute_name);
-    $stmt->bindParam(':attribute_value', $attribute_value);
 
     if ($stmt->execute()) {
         $_SESSION['attr_toast'] = ['type' => 'success', 'message' => 'Attribute updated successfully.'];
@@ -211,11 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_attribute'])) {
                     <label for="attribute_name">Attribute Name</label>
                     <input id="attribute_name" type="text" name="attribute_name" placeholder="Enter attribute name, example: Storage" value="<?php echo htmlspecialchars($attribute['attribute_name']); ?>" required>
                 </div>
-
-                <div class="field">
-                    <label for="attribute_value">Attribute Value</label>
-                    <input id="attribute_value" type="text" name="attribute_value" placeholder="Enter value, example: 256GB - 8GB RAM" value="<?php echo htmlspecialchars($attribute['attribute_value'] ?? ''); ?>" required>
-                </div>
+                <p class="subtext">Manage attribute values from <a href="manage-attributes.php">Manage Attributes</a>.</p>
 
                 <button class="btn" type="submit" name="edit_attribute">Update Attribute</button>
             </form>

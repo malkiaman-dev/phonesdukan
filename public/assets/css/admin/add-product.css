@@ -11,13 +11,24 @@ body {
     overflow-x: hidden;
 }
 
+/* Keep main content clear of the fixed admin sidebar */
+body {
+    padding-left: var(--ad-sidebar-w, 248px) !important;
+    padding-top: var(--ad-topbar-h, 56px) !important;
+}
+
+.content.admin-page,
 .admin-page {
-    max-width: 1320px;
+    width: 100%;
+    max-width: 1480px;
     margin: 0 auto;
     padding: 24px 24px 32px;
     background: #f8fafc;
     overflow: visible;
     overflow-x: hidden;
+    min-height: calc(100vh - var(--ad-topbar-h, 56px));
+    position: relative;
+    z-index: 1;
 }
 
 .admin-page .product-form,
@@ -450,6 +461,12 @@ body {
 @media (max-width: 1200px) {
     .admin-page .form-grid.cols-4 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    body {
+        padding-left: 0 !important;
     }
 }
 

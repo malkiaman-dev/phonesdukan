@@ -462,6 +462,26 @@ if (!function_exists('ensureProductExpectedComingDateColumn')) {
     }
 }
 
+if (!function_exists('ensureProductPrepaidDiscountColumn')) {
+    function ensureProductPrepaidDiscountColumn(PDO $db): void
+    {
+        static $checked = false;
+        if ($checked) {
+            return;
+        }
+        $checked = true;
+
+        try {
+            $stmt = $db->query("SHOW COLUMNS FROM products LIKE 'prepaid_discount_amount'");
+            if ($stmt && $stmt->rowCount() === 0) {
+                $db->exec('ALTER TABLE products ADD COLUMN prepaid_discount_amount DECIMAL(12,2) NOT NULL DEFAULT 0 AFTER sale_price');
+            }
+        } catch (Throwable $e) {
+            error_log('prepaid_discount_amount migration: ' . $e->getMessage());
+        }
+    }
+}
+
 if (!function_exists('normalizeExpectedComingDate')) {
     function normalizeExpectedComingDate($date): ?string
     {

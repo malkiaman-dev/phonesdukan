@@ -4,6 +4,8 @@ require_once dirname(__DIR__) . '/Helpers/ProductMediaHelper.php';
 
 class ProductMediaModel
 {
+    private static bool $schemaReady = false;
+
     private PDO $db;
 
     public function __construct(PDO $db)
@@ -13,6 +15,10 @@ class ProductMediaModel
 
     public function ensureSchema(): void
     {
+        if (self::$schemaReady) {
+            return;
+        }
+
         $this->db->exec("CREATE TABLE IF NOT EXISTS `product_videos` (
             `video_id` INT NOT NULL AUTO_INCREMENT,
             `product_id` INT NOT NULL,
@@ -41,6 +47,8 @@ class ProductMediaModel
                  ENUM('upload','youtube','tiktok','facebook','mp4') NOT NULL DEFAULT 'upload'"
             );
         }
+
+        self::$schemaReady = true;
     }
 
     public function getProductVideo(int $productId): ?array

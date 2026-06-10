@@ -28,7 +28,6 @@ class ProductController
     {
         $database = new Database();
         $db = $database->getConnection();
-        ensureProductExpectedComingDateColumn($db);
         $this->model = new ProductModel($db);
     }
 

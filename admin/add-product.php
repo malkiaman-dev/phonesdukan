@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 1) . '/database/db.php';
 require_once dirname(__DIR__, 1) . '/app/Controllers/AddProductController.php';
 
 // Check if the form was submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_GET['action']) && $_GET['action'] === 'add') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_GET['action']) && $_GET['action'] === 'add') {
     // Initialize the controller and add the product
     $controller = new ProductController();
     $controller->addProduct();
@@ -24,11 +24,10 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     header("Location: login.php");
     exit();
 }
-// Include the sidebar only if the admin is logged in
-include __DIR__ . '/admin_sidebar.php';
 
-// Include the header
+// Header must load before any HTML output (sidebar goes inside <body>)
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 // Get categories and brands for dropdowns
 $categories_query = "SELECT category_id, category_name, slug FROM categories ORDER BY category_name";
 $categories_result = $conn->query($categories_query);
@@ -36,19 +35,6 @@ $categories_result = $conn->query($categories_query);
 $brands_query = "SELECT brand_id, brand_name, slug FROM brands ORDER BY brand_name";
 $brands_result = $conn->query($brands_query);
 ?>
-
-<!-- Display Session Messages -->
-<?php if (isset($_SESSION['message'])): ?>
-    <div class="add-product-alert <?php echo $_SESSION['message_type']; ?>">
-        <?php echo $_SESSION['message']; ?>
-    </div>
-    <?php unset($_SESSION['message']);
-    unset($_SESSION['message_type']); ?>
-<?php endif; ?>
-
-<!-- AI SEO Assistant Styles -->
-<link rel="stylesheet" href="css/ai-seo.css?v=2.8">
-<link rel="stylesheet" href="css/product-media.css?v=1.1">
 
 <style>
 /* ---- Variation Builder styles ---- */
@@ -205,7 +191,15 @@ select.vb-input { cursor:pointer; }
 }
 </style>
 
-<div class="admin-page">
+<div class="content admin-page">
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="add-product-alert <?php echo $_SESSION['message_type']; ?>">
+            <?php echo $_SESSION['message']; ?>
+        </div>
+        <?php unset($_SESSION['message']);
+        unset($_SESSION['message_type']); ?>
+    <?php endif; ?>
+
     <div class="page-header form-card">
         <div>
             <h1>Add New Product</h1>
@@ -1465,6 +1459,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+</body>
+</html>
 
 
 

@@ -40,6 +40,23 @@ CREATE TABLE IF NOT EXISTS `variation_values` (
 -- 3. One row per variation combination for a product
 --    (e.g. iPhone / Black / 8GB / 256GB)
 -- ------------------------------------------------------------
+-- If an old legacy product_variations table exists (variation_id column),
+-- archive or drop it before creating the new structure.
+SET @legacy_pv := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'product_variations'
+    AND COLUMN_NAME = 'variation_id'
+);
+SET @sql_legacy_pv := IF(
+  @legacy_pv > 0,
+  'RENAME TABLE `product_variations` TO `product_variations_legacy`',
+  'SELECT 1'
+);
+PREPARE stmt_legacy_pv FROM @sql_legacy_pv;
+EXECUTE stmt_legacy_pv;
+DEALLOCATE PREPARE stmt_legacy_pv;
+
 CREATE TABLE IF NOT EXISTS `product_variations` (
   `id`             INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   `product_id`     INT             NOT NULL,

@@ -56,22 +56,24 @@ class User {
         }
     
         // Register new user
-        $query = "INSERT INTO users (full_name, email, password_hash, phone, user_role, otp_code, otp_expires_at, is_verified, created_at) 
-                  VALUES (:full_name, :email, :password_hash, :phone, 'user', :otp_code, :otp_expires_at, 0, NOW())";
-    
+        $salt = $this->generateSalt();
+        $query = "INSERT INTO users (full_name, email, password_hash, phone, user_role, salt, otp_code, otp_expires_at, is_verified, created_at)
+                  VALUES (:full_name, :email, :password_hash, :phone, 'customer', :salt, :otp_code, :otp_expires_at, 0, NOW())";
+
         $stmt = $this->conn->prepare($query);
-    
+
         // Sanitize inputs
         $full_name = htmlspecialchars(strip_tags($full_name));
         $email = htmlspecialchars(strip_tags($email));
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $phone = htmlspecialchars(strip_tags($phone));
-    
+
         // Bind parameters
         $stmt->bindParam(':full_name', $full_name);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password_hash', $password_hash);
         $stmt->bindParam(':phone', $phone);
+        $stmt->bindParam(':salt', $salt);
         $stmt->bindParam(':otp_code', $otp);
         $stmt->bindParam(':otp_expires_at', $otp_expires_at);
     

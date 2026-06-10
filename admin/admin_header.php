@@ -9,7 +9,11 @@ if (!isset($_SESSION['admin_logged_in'])) {
 $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
 $currentAdminPage = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
 $adminPageCssMap = [
-    'add-product.php' => '/public/assets/css/admin/add-product.css',
+    'add-product.php' => [
+        '/public/assets/css/admin/add-product.css',
+        '/admin/css/ai-seo.css?v=2.8',
+        '/admin/css/product-media.css?v=1.1',
+    ],
 ];
 ?>
 
@@ -26,7 +30,14 @@ $adminPageCssMap = [
     <link rel="stylesheet" href="/public/assets/css/style.css">
     <link rel="stylesheet" href="/public/assets/css/frontend/ui-controls.css">
     <?php if (isset($adminPageCssMap[$currentAdminPage])): ?>
-        <link rel="stylesheet" href="<?= htmlspecialchars($adminPageCssMap[$currentAdminPage], ENT_QUOTES, 'UTF-8'); ?>">
+        <?php
+        $adminPageStylesheets = $adminPageCssMap[$currentAdminPage];
+        if (!is_array($adminPageStylesheets)) {
+            $adminPageStylesheets = [$adminPageStylesheets];
+        }
+        foreach ($adminPageStylesheets as $adminStylesheet): ?>
+            <link rel="stylesheet" href="<?= htmlspecialchars($adminStylesheet, ENT_QUOTES, 'UTF-8'); ?>">
+        <?php endforeach; ?>
     <?php endif; ?>
     <style>
         /* Critical shell styles to prevent FOUC */
