@@ -52,11 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Fetch all reviews from the controller
 $reviews = $controller->getAllReviews();
 
-// Include the sidebar only if the admin is logged in
-include __DIR__ . '/admin_sidebar.php';
-
 // Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar only if the admin is logged in
+include __DIR__ . '/admin_sidebar.php';
 ?>
 
     <meta charset="UTF-8">

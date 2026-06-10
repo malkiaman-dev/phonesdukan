@@ -24,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     exit();
 }
 
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 
 $bulkInquiryModel = new BulkInquiryModel();
 $b2b_orders = $bulkInquiryModel->getAllB2BOrders();

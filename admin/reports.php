@@ -93,8 +93,8 @@ try {
     $reportError = $e->getMessage();
 }
 
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

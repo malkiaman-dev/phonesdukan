@@ -182,8 +182,8 @@ $brands = $model->getAllBrands();
 $categoriesWithSubs = $model->getCategoriesWithSubcounts();
 $parentCategories = $model->getParentCategories();
 
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

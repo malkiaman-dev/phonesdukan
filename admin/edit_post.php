@@ -54,8 +54,8 @@ foreach ($images as $image) {
     }
 }
 
-include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
 include dirname(__DIR__, 1) . '/admin/admin_header.php';
+include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
 ?>
 
 <style>

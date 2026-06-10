@@ -129,8 +129,8 @@ $values_stmt->execute();
 $attribute_values = $values_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Include layout after all redirect-capable logic to avoid "headers already sent".
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 ?>
 
 <!DOCTYPE html>

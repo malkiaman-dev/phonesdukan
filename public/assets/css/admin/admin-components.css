@@ -143,7 +143,11 @@ body h3.kpi-value {
   color: var(--ad-heading-color) !important;
 }
 
-/* ── Sidebar ── */
+/* ── Sidebar (high-contrast — must win on live/cached CSS) ── */
+#sidebar .nav-link {
+  color: #374151 !important;
+}
+
 #sidebar ul.nav li .nav-link:hover,
 #sidebar ul.nav li .nav-link.active,
 #sidebar .nav-link:hover,
@@ -161,8 +165,32 @@ body h3.kpi-value {
   opacity: 1 !important;
 }
 
-#sidebar .nav-link i { color: #6b7280 !important; }
-#sidebar .logout:hover i { color: #ef4444 !important; }
+#sidebar .nav-link i {
+  color: #6b7280 !important;
+}
+
+#sidebar .nav-link.logout {
+  color: #ef4444 !important;
+}
+
+#sidebar .nav-link.logout:hover {
+  color: #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+#sidebar .logout:hover i {
+  color: #ef4444 !important;
+}
+
+#sidebar .submenu .nav-link {
+  color: #374151 !important;
+}
+
+#sidebar .submenu .nav-link:hover,
+#sidebar .submenu .nav-link.active {
+  color: #111111 !important;
+  background: #fffbeb !important;
+}
 
 /* ── Primary buttons ── */
 body .btn-add,

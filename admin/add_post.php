@@ -24,8 +24,8 @@ $conn = $database->getConnection();
 $categories_query = "SELECT id, category_name FROM post_categories WHERE status = 1 ORDER BY category_name";
 $categories_result = $conn->query($categories_query);
 
-include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
 include dirname(__DIR__, 1) . '/admin/admin_header.php';
+include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
 ?>
 
 <style>

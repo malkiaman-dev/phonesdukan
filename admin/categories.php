@@ -66,10 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action'])) {
     exit;
 }
 
-include __DIR__ . '/admin_sidebar.php';
-
-// Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar
+include __DIR__ . '/admin_sidebar.php';
 
 ?>
 

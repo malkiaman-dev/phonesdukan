@@ -8,6 +8,10 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
 $currentAdminPage = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+$adminCssPath = assetFilePath('public/assets/css/admin/admin.css');
+$adminCssVer = file_exists($adminCssPath) ? filemtime($adminCssPath) : time();
+$componentsCssPath = assetFilePath('public/assets/css/admin/admin-components.css');
+$componentsCssVer = file_exists($componentsCssPath) ? filemtime($componentsCssPath) : time();
 $adminPageCssMap = [
     'add-product.php' => [
         '/public/assets/css/admin/add-product.css',
@@ -34,7 +38,8 @@ $adminPageCssMap = [
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="<?= url('public/assets/css/admin/admin.css'); ?>">
+    <link rel="stylesheet" href="<?= url('public/assets/css/admin/admin.css') . '?v=' . $adminCssVer; ?>">
+    <link rel="stylesheet" href="<?= url('public/assets/css/admin/admin-components.css') . '?v=' . $componentsCssVer; ?>">
     <link rel="stylesheet" href="<?= url('public/assets/css/style.css'); ?>">
     <link rel="stylesheet" href="<?= url('public/assets/css/frontend/ui-controls.css'); ?>">
     <?php if (isset($adminPageCssMap[$currentAdminPage])): ?>
@@ -115,7 +120,29 @@ $adminPageCssMap = [
         .admin-sidebar a,
         .sidebar a {
             text-decoration: none !important;
-            color: #4b5563;
+        }
+        #sidebar .nav-link {
+            color: #374151 !important;
+        }
+        #sidebar .nav-link:hover,
+        #sidebar .nav-link.active {
+            color: #111111 !important;
+            background: #fffbeb !important;
+            border-left: 3px solid #f7cf04 !important;
+        }
+        #sidebar .nav-link i {
+            color: #6b7280 !important;
+        }
+        #sidebar .nav-link:hover i,
+        #sidebar .nav-link.active i {
+            color: #111111 !important;
+        }
+        #sidebar .nav-link.logout {
+            color: #ef4444 !important;
+        }
+        #sidebar .nav-link.logout:hover {
+            color: #ef4444 !important;
+            background: #fef2f2 !important;
         }
         .content,
         .dashboard-content {

@@ -11,11 +11,11 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 // Ensure the controller is included
 require_once dirname(__DIR__, 1) . '/app/Controllers/AdminReviewController.php';
 require_once dirname(__DIR__, 1) . '/includes/functions.php';
-// Include the sidebar only if the admin is logged in
-include __DIR__ . '/admin_sidebar.php';
-
 // Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar only if the admin is logged in
+include __DIR__ . '/admin_sidebar.php';
 // Initialize the controller
 $controller = new AdminReviewController();
 

@@ -12,9 +12,6 @@ $bulkInquiryModel = new BulkInquiryModel();
 $pending_reviews_count = $reviewModel->getPendingReviewsCount();
 $pending_orders_count = $orderModel->getPendingOrdersCount();
 $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
-$componentsCss = assetFilePath('public/assets/css/admin/admin-components.css');
-$componentsVer = file_exists($componentsCss) ? filemtime($componentsCss) : time();
-echo '<link rel="stylesheet" href="' . htmlspecialchars(url('public/assets/css/admin/admin-components.css') . '?v=' . $componentsVer, ENT_QUOTES, 'UTF-8') . '">';
 ?>
 
 <!-- Sidebar Navigation -->

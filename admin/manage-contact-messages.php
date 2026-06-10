@@ -16,8 +16,8 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 }
 
 // Include the sidebar and header
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 
 // Fetch all contact messages
 $query = "SELECT id, name, email, subject, message, created_at FROM contact_messages ORDER BY created_at DESC";

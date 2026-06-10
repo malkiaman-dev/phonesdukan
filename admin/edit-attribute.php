@@ -5,11 +5,11 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     header('Location: login.php');
     exit();
 }
-// Include the sidebar only if the admin is logged in
-include __DIR__ . '/admin_sidebar.php';
-
 // Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar only if the admin is logged in
+include __DIR__ . '/admin_sidebar.php';
 // Include the database connection file
 require_once __DIR__ . '/../database/db.php';
 $toastMessage = '';

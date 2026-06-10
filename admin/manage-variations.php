@@ -137,8 +137,8 @@ if (isset($_GET['edit_value'])) { $editValue = $model->getValueById((int)$_GET['
 $typesWithValues = $model->getVariationTypesWithValues();
 $allTypes        = $model->getAllVariationTypes();
 
-include __DIR__ . '/admin_sidebar.php';
 include __DIR__ . '/admin_header.php';
+include __DIR__ . '/admin_sidebar.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

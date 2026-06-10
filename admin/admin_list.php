@@ -4,10 +4,10 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['admin_role'] !== 'superadmin') {
     header('Location: login.php');
     exit;
 }
-include __DIR__ . '/admin_sidebar.php';
-
-// Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar
+include __DIR__ . '/admin_sidebar.php';
 require_once __DIR__ . '/../database/db.php';
 
 $database = new Database();
