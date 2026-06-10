@@ -344,6 +344,12 @@ if (!function_exists('loadCSS')) {
 
             if ($uri === rtrim($pathPrefix, '/')) {
                 emitCss($cssFile);
+                continue;
+            }
+
+            // e.g. brand slug "login" must not load /login styles on product URLs (/login/category/product)
+            if (isProductDetailPath($uri) && str_starts_with($uri, $pathPrefix . '/')) {
+                continue;
             }
         }
 
@@ -372,8 +378,11 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/best-mobiles-page.css');
         }
 
-        $pageCss = 'public/assets/css/frontend/' . getCurrentPage() . '.css';
-        emitCss($pageCss);
+        // Only single-segment routes (e.g. /cart, /login) — not product or nested paths
+        if (!isProductDetailPath($uri) && strpos($uri, '/') === strrpos($uri, '/')) {
+            $pageCss = 'public/assets/css/frontend/' . getCurrentPage() . '.css';
+            emitCss($pageCss);
+        }
     }
 }
 
@@ -427,7 +436,10 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/sweetalert2.all.min.js');
         }
 
-        emitJs('public/assets/js/frontend/' . getCurrentPage() . '.js');
+        $jsUri = getRequestPath();
+        if (!isProductDetailPath($jsUri) && strpos($jsUri, '/') === strrpos($jsUri, '/')) {
+            emitJs('public/assets/js/frontend/' . getCurrentPage() . '.js');
+        }
     }
 }
 

@@ -3,6 +3,16 @@ if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', realpath(dirname(__DIR__, 2)) ?: dirname(__DIR__, 2));
 }
 
+$functionsFile = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'functions.php';
+if (is_file($functionsFile)) {
+    require_once $functionsFile;
+}
+
+$helpersFile = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'helpers.php';
+if (is_file($helpersFile)) {
+    require_once $helpersFile;
+}
+
 if (!defined('BASE_PATH') || !defined('BASE_URL')) {
     $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
     $scriptFilename = realpath($_SERVER['SCRIPT_FILENAME'] ?? '') ?: '';
