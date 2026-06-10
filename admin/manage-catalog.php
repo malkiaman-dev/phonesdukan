@@ -241,12 +241,19 @@ include __DIR__ . '/admin_sidebar.php';
             <form method="POST">
                 <div class="cp-field">
                     <label>Parent Category <span class="req-star" aria-hidden="true">*</span></label>
-                    <select name="sub_parent_id" required>
-                        <option value="">Select parent category</option>
-                        <?php foreach ($parentCategories as $pc): ?>
-                            <option value="<?= (int) $pc['category_id'] ?>"><?= htmlspecialchars($pc['category_name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div class="custom-select" data-select-id="sub_parent_id">
+                        <select class="native-select" name="sub_parent_id" id="sub_parent_id" required>
+                            <option value="">Select parent category</option>
+                            <?php foreach ($parentCategories as $pc): ?>
+                                <option value="<?= (int) $pc['category_id'] ?>"><?= htmlspecialchars($pc['category_name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="button" class="custom-select-btn" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-value">Select parent category</span>
+                            <span class="custom-select-arrow" aria-hidden="true"></span>
+                        </button>
+                        <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
+                    </div>
                 </div>
                 <div class="cp-field">
                     <label>Subcategory Name <span class="req-star" aria-hidden="true">*</span></label>
@@ -378,11 +385,18 @@ include __DIR__ . '/admin_sidebar.php';
             <input type="hidden" name="edit_sub_id" value="<?= (int) $editSub['category_id'] ?>">
             <div class="cp-field">
                 <label>Parent Category</label>
-                <select name="edit_sub_parent_id" required>
-                    <?php foreach ($parentCategories as $pc): ?>
-                        <option value="<?= (int) $pc['category_id'] ?>" <?= (int) $pc['category_id'] === (int) $editSub['parent_id'] ? 'selected' : '' ?>><?= htmlspecialchars($pc['category_name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <div class="custom-select" data-select-id="edit_sub_parent_id">
+                    <select class="native-select" name="edit_sub_parent_id" id="edit_sub_parent_id" required>
+                        <?php foreach ($parentCategories as $pc): ?>
+                            <option value="<?= (int) $pc['category_id'] ?>" <?= (int) $pc['category_id'] === (int) $editSub['parent_id'] ? 'selected' : '' ?>><?= htmlspecialchars($pc['category_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="button" class="custom-select-btn" aria-haspopup="listbox" aria-expanded="false">
+                        <span class="custom-select-value">Select parent category</span>
+                        <span class="custom-select-arrow" aria-hidden="true"></span>
+                    </button>
+                    <div class="custom-select-menu" role="listbox" tabindex="-1"></div>
+                </div>
             </div>
             <div class="cp-field"><label>Name</label><input type="text" name="edit_sub_name" value="<?= htmlspecialchars($editSub['category_name']) ?>" required></div>
             <div class="cp-field"><label>Slug</label><input type="text" name="edit_sub_slug" value="<?= htmlspecialchars($editSub['slug']) ?>"></div>
@@ -397,6 +411,7 @@ include __DIR__ . '/admin_sidebar.php';
 <?php endif; ?>
 
 <div class="cp-toast <?= $toastType === 'error' ? 'is-error' : '' ?> <?= $toast ? 'show' : '' ?>" id="catalogToast"><?= htmlspecialchars($toast) ?></div>
+<script src="<?= htmlspecialchars(url('public/assets/js/admin/custom-select.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 <script>
 if (document.getElementById('catalogToast')?.classList.contains('show')) {
     setTimeout(function() { document.getElementById('catalogToast').classList.remove('show'); }, 4000);
