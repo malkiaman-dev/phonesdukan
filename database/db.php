@@ -104,7 +104,7 @@ class Database {
     private function env($key, $default = null) {
         $value = getenv($key);
         if ($value !== false && $value !== '') {
-            return $value;l
+            return $value;
         }
 
         if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
