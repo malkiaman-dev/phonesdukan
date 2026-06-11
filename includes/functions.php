@@ -309,6 +309,16 @@ if (!function_exists('loadCSS')) {
 
         if (defined('CATEGORY_LISTING_PAGE') && CATEGORY_LISTING_PAGE) {
             emitCss('public/assets/css/frontend/category-listing.css');
+
+            // When a category uses the dynamic fallback, still load its dedicated
+            // stylesheet if one exists (e.g. headphones.css on /headphones).
+            $categorySlug = trim($uri, '/');
+            if ($categorySlug !== '' && strpos($categorySlug, '/') === false) {
+                $categoryCss = 'public/assets/css/frontend/' . $categorySlug . '.css';
+                if (is_file(assetFilePath($categoryCss))) {
+                    emitCss($categoryCss);
+                }
+            }
         }
 
         if (defined('BRAND_LISTING_PAGE') && BRAND_LISTING_PAGE) {
@@ -322,6 +332,7 @@ if (!function_exists('loadCSS')) {
             '/power-banks' => 'public/assets/css/frontend/power-banks.css',
             '/smart-watches' => 'public/assets/css/frontend/smart-watches.css',
             '/wireless-earbuds' => 'public/assets/css/frontend/wireless-earbuds.css',
+            '/headphones' => 'public/assets/css/frontend/headphones.css',
             '/bluetooth-speakers' => 'public/assets/css/frontend/bluetooth-speakers.css',
             '/mobile-accessories' => 'public/assets/css/frontend/mobile-accessories.css',
             '/coming-soon-products' => 'public/assets/css/frontend/coming-soon.css',
@@ -414,6 +425,11 @@ if (!function_exists('loadJS')) {
         }
 
         if (defined('CATEGORY_LISTING_PAGE') && CATEGORY_LISTING_PAGE) {
+            emitJs('public/assets/js/frontend/buy-now.js');
+        }
+
+        $listingSlug = trim(getRequestPath(), '/');
+        if ($listingSlug !== '' && strpos($listingSlug, '/') === false && is_file(assetFilePath('public/assets/css/frontend/' . $listingSlug . '.css'))) {
             emitJs('public/assets/js/frontend/buy-now.js');
         }
 
