@@ -43,7 +43,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             </a>
         </li>
         <li class="nav-item has-submenu">
-            <a class="nav-link <?= in_array($current_page, ['manage_posts.php', 'manage-attributes.php']) ? 'active' : '' ?>" href="<?= url('admin/manage_posts.php'); ?>">
+            <a class="nav-link" href="<?= url('admin/manage_posts.php'); ?>">
                 <i class="fas fa-blog"></i> Posts
             </a>
             <ul class="submenu">
@@ -65,7 +65,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
             </ul>
         </li>
         <li class="nav-item has-submenu">
-            <a class="nav-link <?= in_array($current_page, ['manage-products.php', 'manage-catalog.php', 'manage-attributes.php', 'manage-variations.php']) ? 'active' : '' ?>" href="<?= url('admin/manage-products.php'); ?>">
+            <a class="nav-link" href="<?= url('admin/manage-products.php'); ?>">
                 <i class="fas fa-box"></i> Products
             </a>
             <ul class="submenu">
@@ -128,7 +128,7 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
         </li>
         <?php if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superadmin'): ?>
             <li class="nav-item has-submenu">
-                <a class="nav-link <?= in_array($current_page, ['admin_list.php', 'add_admin_form.php']) ? 'active' : '' ?>" href="<?= url('admin/admin_list.php'); ?>">
+                <a class="nav-link" href="<?= url('admin/admin_list.php'); ?>">
                     <i class="fas fa-user"></i> Admins
                 </a>
                 <ul class="submenu">

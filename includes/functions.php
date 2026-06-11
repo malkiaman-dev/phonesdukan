@@ -307,6 +307,14 @@ if (!function_exists('loadCSS')) {
 
         emitCss('public/assets/css/frontend/ui-controls.css');
 
+        if (defined('CATEGORY_LISTING_PAGE') && CATEGORY_LISTING_PAGE) {
+            emitCss('public/assets/css/frontend/category-listing.css');
+        }
+
+        if (defined('BRAND_LISTING_PAGE') && BRAND_LISTING_PAGE) {
+            emitCss('public/assets/css/frontend/brand-listing.css');
+        }
+
         $cssMap = [
             '/admin/' => 'public/assets/css/admin/admin.css',
             '/admin/add-product' => 'public/assets/css/admin/add-product.css',
@@ -365,7 +373,7 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/post-category.css');
         }
 
-        if (preg_match('#^/mobiles/[^/]+$#', $uri)) {
+        if (preg_match('#^/mobiles/[^/]+$#', $uri) && !(defined('BRAND_LISTING_PAGE') && BRAND_LISTING_PAGE)) {
             emitCss('public/assets/css/frontend/mobile_brands.css');
         }
 
@@ -403,6 +411,18 @@ if (!function_exists('loadJS')) {
         if (strpos($uri, '/wholesale') === 0) {
             emitJs('public/assets/js/jquery-3.6.0.min.js');
             emitJs('public/assets/js/sweetalert2.all.min.js');
+        }
+
+        if (defined('CATEGORY_LISTING_PAGE') && CATEGORY_LISTING_PAGE) {
+            emitJs('public/assets/js/frontend/buy-now.js');
+        }
+
+        if (defined('BRAND_LISTING_PAGE') && BRAND_LISTING_PAGE) {
+            emitJs('public/assets/js/frontend/buy-now.js');
+        }
+
+        if (defined('SEARCH_RESULTS_PAGE') && SEARCH_RESULTS_PAGE) {
+            emitJs('public/assets/js/frontend/buy-now.js');
         }
 
         if (isProductDetailPath($uri)) {

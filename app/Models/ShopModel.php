@@ -14,11 +14,66 @@ class ProductModel {
     }
     
     public function getAllCategories() {
-        // Fetch categories with status 1
-        $query = "SELECT category_id, category_name, slug FROM categories WHERE status = 1";
+        $query = "SELECT c.category_id, c.category_name, c.slug
+                  FROM categories c
+                  WHERE c.status = 1
+                    AND c.parent_id IS NULL
+                    AND EXISTS (
+                        SELECT 1
+                        FROM products p
+                        WHERE p.product_status != '0'
+                          AND LOWER(p.product_status) != 'out of stock'
+                          AND (
+                              p.category_id = c.category_id
+                              OR p.subcategory_id IN (
+                                  SELECT sc.category_id
+                                  FROM categories sc
+                                  WHERE sc.parent_id = c.category_id
+                              )
+                          )
+                    )
+                  ORDER BY c.category_name ASC";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC); // Return active categories
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Map selected category IDs to parent IDs (legacy subcategory filter URLs).
+     *
+     * @param array<int|string> $categoryIds
+     * @return int[]
+     */
+    public function normalizeCategoryFilterIds(array $categoryIds): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $categoryIds))));
+        if ($ids === []) {
+            return [];
+        }
+
+        $placeholders = [];
+        $params = [];
+        foreach ($ids as $index => $id) {
+            $key = ':cat_' . $index;
+            $placeholders[] = $key;
+            $params[$key] = $id;
+        }
+
+        $query = 'SELECT category_id, parent_id
+                  FROM categories
+                  WHERE category_id IN (' . implode(', ', $placeholders) . ')';
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $parentIds = [];
+        foreach ($rows as $row) {
+            $parentIds[] = !empty($row['parent_id'])
+                ? (int) $row['parent_id']
+                : (int) $row['category_id'];
+        }
+
+        return array_values(array_unique($parentIds));
     }
     
     public function getAllBrands() {
@@ -97,24 +152,30 @@ class ProductModel {
     }
     
     public function applyCategoryFilter($filters, &$whereClauses, &$params) {
-        if (!empty($filters['category'])) {
-            $categoryConditions = [];
-            $index = 0;
-    
-            // Loop through each selected category_id and bind a parameter for each
-            foreach ($filters['category'] as $categoryId) {
-                // Dynamically create placeholders for each selected category_id
-                $categoryConditions[] = "p.category_id = :category_id_$index";
-                $params[":category_id_$index"] = $categoryId; // Bind the category_id
-    
-                $index++;
-            }
-    
-            // If we have category conditions, add them to the WHERE clause
-            if (!empty($categoryConditions)) {
-                $whereClauses[] = '(' . implode(' OR ', $categoryConditions) . ')';
-            }
+        if (empty($filters['category'])) {
+            return;
         }
+
+        $parentCategoryIds = $this->normalizeCategoryFilterIds((array) $filters['category']);
+        if ($parentCategoryIds === []) {
+            return;
+        }
+
+        $categoryConditions = [];
+        foreach ($parentCategoryIds as $index => $parentCategoryId) {
+            $categoryConditions[] = "(
+                p.category_id = :category_id_$index
+                OR p.subcategory_id IN (
+                    SELECT category_id
+                    FROM categories
+                    WHERE parent_id = :parent_category_id_$index AND status = 1
+                )
+            )";
+            $params[":category_id_$index"] = $parentCategoryId;
+            $params[":parent_category_id_$index"] = $parentCategoryId;
+        }
+
+        $whereClauses[] = '(' . implode(' OR ', $categoryConditions) . ')';
     }
     
     public function getPaginatedProducts($limit, $offset, $filters = []) {

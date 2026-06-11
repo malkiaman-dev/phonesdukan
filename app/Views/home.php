@@ -12,8 +12,73 @@ $breadcrumbs = [['name' => 'Home', 'url' => 'https://www.phonesdukan.com/']];
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 require_once __DIR__ . '/../Models/ProductCategoryModel.php';  // Correct path
 require_once __DIR__ . '/../Models/PostModel.php';
+require_once __DIR__ . '/../Models/CatalogModel.php';
 
 $productModel = new ProductModel();
+$catalogModel = new CatalogModel();
+
+$homepageCategoryCards = $catalogModel->getHomepageCategories();
+$homepageCardColors = CatalogModel::homepageCardColors();
+
+$staticHomepageCategories = [
+    ['slug' => 'mobiles', 'category_name' => 'Mobiles', 'homepage_image' => 'public/assets/images/mobile_category.png', 'bg' => '#dbeafe'],
+    ['slug' => 'smart-watches', 'category_name' => 'Smart Watches', 'homepage_image' => 'public/assets/images/smartwatches_category.webp', 'bg' => '#d1fae5'],
+    ['slug' => 'wireless-earbuds', 'category_name' => 'Wireless Earbuds', 'homepage_image' => 'public/assets/images/wireless_earbuds.webp', 'bg' => '#ede9fe'],
+    ['slug' => 'mobile-accessories', 'category_name' => 'Mobile Accessories', 'homepage_image' => 'public/assets/images/mobile_accessories.webp', 'bg' => '#fde8d8'],
+    ['slug' => 'power-banks', 'category_name' => 'Fast Charging Power Banks', 'homepage_image' => 'public/assets/images/power-banks.webp', 'bg' => '#fef9c3'],
+    ['slug' => 'bluetooth-speakers', 'category_name' => 'Portable Bluetooth Speakers', 'homepage_image' => 'public/assets/images/bluetooth-speakers.webp', 'bg' => '#fce7f3'],
+];
+
+$dynamicSlugs = array_map(static function (array $row): string {
+    return (string) ($row['slug'] ?? '');
+}, $homepageCategoryCards);
+
+$carouselCategories = $homepageCategoryCards;
+foreach ($staticHomepageCategories as $staticCategory) {
+    if (!in_array($staticCategory['slug'], $dynamicSlugs, true)) {
+        $carouselCategories[] = $staticCategory;
+    }
+}
+
+if (empty($homepageCategoryCards)) {
+    $carouselCategories = $staticHomepageCategories;
+}
+
+usort($carouselCategories, static function (array $a, array $b): int {
+    return strcasecmp((string) ($a['category_name'] ?? ''), (string) ($b['category_name'] ?? ''));
+});
+
+$homepageBrandCards = $catalogModel->getHomepageBrands();
+
+$staticHomepageBrands = [
+    ['slug' => 'apple', 'brand_name' => 'Apple', 'homepage_logo' => 'public/assets/images/apple_logo.webp'],
+    ['slug' => 'infinix', 'brand_name' => 'Infinix', 'homepage_logo' => 'public/assets/images/infinix_logo.webp'],
+    ['slug' => 'oppo', 'brand_name' => 'Oppo', 'homepage_logo' => 'public/assets/images/oppo_logo.webp'],
+    ['slug' => 'realme', 'brand_name' => 'Realme', 'homepage_logo' => 'public/assets/images/realme_logo.webp'],
+    ['slug' => 'samsung', 'brand_name' => 'Samsung', 'homepage_logo' => 'public/assets/images/samsung_logo.webp'],
+    ['slug' => 'tecno', 'brand_name' => 'Tecno', 'homepage_logo' => 'public/assets/images/tecno_logo.webp'],
+    ['slug' => 'vivo', 'brand_name' => 'Vivo', 'homepage_logo' => 'public/assets/images/vivo_logo.webp'],
+    ['slug' => 'xiaomi', 'brand_name' => 'Xiaomi', 'homepage_logo' => 'public/assets/images/xiaomi_logo.webp'],
+];
+
+$dynamicBrandSlugs = array_map(static function (array $row): string {
+    return (string) ($row['slug'] ?? '');
+}, $homepageBrandCards);
+
+$marqueeBrands = $homepageBrandCards;
+foreach ($staticHomepageBrands as $staticBrand) {
+    if (!in_array($staticBrand['slug'], $dynamicBrandSlugs, true)) {
+        $marqueeBrands[] = $staticBrand;
+    }
+}
+
+if (empty($homepageBrandCards)) {
+    $marqueeBrands = $staticHomepageBrands;
+}
+
+usort($marqueeBrands, static function (array $a, array $b): int {
+    return strcasecmp((string) ($a['brand_name'] ?? ''), (string) ($b['brand_name'] ?? ''));
+});
 
 // Define specific product IDs
 $product_ids = [1, 178, 177, 176, 175, 174, 1819];
@@ -151,42 +216,25 @@ foreach ($latest_posts_raw as $post) {
             <button class="cat-arrow cat-prev" aria-label="Previous categories">&#8249;</button>
             <div class="cat-viewport" data-carousel data-carousel-mode="marquee" data-carousel-speed="42" data-carousel-content="#cat-track" data-carousel-item=".cat-card" data-carousel-prev=".cat-prev" data-carousel-next=".cat-next">
             <div class="cat-track" id="cat-track">
-                <a href="mobiles" class="cat-card" style="--cat-bg:#dbeafe;">
-                    <div class="cat-img-box">
-                        <img src="/public/assets/images/mobile_category.png" alt="Mobiles" loading="lazy" decoding="async">
-                    </div>
-                    <p class="cat-label">Mobiles</p>
-                </a>
-                <a href="smart-watches" class="cat-card" style="--cat-bg:#d1fae5;">
-                    <div class="cat-img-box">
-                        <img src="/public/assets/images/smartwatches_category.webp" alt="Smartwatches" loading="lazy" decoding="async">
-                    </div>
-                    <p class="cat-label">Smart Watches</p>
-                </a>
-                <a href="wireless-earbuds" class="cat-card" style="--cat-bg:#ede9fe;">
-                    <div class="cat-img-box">
-                        <img src="/public/assets/images/wireless_earbuds.webp" alt="Wireless Earbuds" loading="lazy" decoding="async">
-                    </div>
-                    <p class="cat-label">Wireless Earbuds</p>
-                </a>
-                <a href="mobile-accessories" class="cat-card" style="--cat-bg:#fde8d8;">
-                    <div class="cat-img-box">
-                        <img src="/public/assets/images/mobile_accessories.webp" alt="Accessories" loading="lazy" decoding="async">
-                    </div>
-                    <p class="cat-label">Mobile Accessories</p>
-                </a>
-                <a href="power-banks" class="cat-card" style="--cat-bg:#fef9c3;">
-                    <div class="cat-img-box">
-                        <img src="/public/assets/images/power-banks.webp" alt="Power Banks" loading="lazy" decoding="async">
-                    </div>
-                    <p class="cat-label">Fast Charging Power Banks</p>
-                </a>
-                <a href="bluetooth-speakers" class="cat-card" style="--cat-bg:#fce7f3;">
-                    <div class="cat-img-box">
-                        <img src="/public/assets/images/bluetooth-speakers.webp" alt="Bluetooth Speakers">
-                    </div>
-                    <p class="cat-label">Portable Bluetooth Speakers</p>
-                </a>
+                <?php foreach ($carouselCategories as $index => $homeCategory): ?>
+                    <?php
+                    $cardSlug = (string) ($homeCategory['slug'] ?? '');
+                    $cardName = (string) ($homeCategory['category_name'] ?? '');
+                    $cardImage = !empty($homeCategory['homepage_image'])
+                        ? normalizeMediaUrl((string) $homeCategory['homepage_image'])
+                        : '';
+                    $cardBg = $homeCategory['bg'] ?? ($homepageCardColors[$index % count($homepageCardColors)] ?? '#f0f4ff');
+                    $cardHref = url(ltrim($cardSlug, '/'));
+                    ?>
+                    <a href="<?= htmlspecialchars($cardHref, ENT_QUOTES, 'UTF-8') ?>" class="cat-card" style="--cat-bg:<?= htmlspecialchars($cardBg, ENT_QUOTES, 'UTF-8') ?>;">
+                        <div class="cat-img-box">
+                            <?php if ($cardImage !== ''): ?>
+                                <img src="<?= htmlspecialchars($cardImage, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($cardName, ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async">
+                            <?php endif; ?>
+                        </div>
+                        <p class="cat-label"><?= htmlspecialchars($cardName, ENT_QUOTES, 'UTF-8') ?></p>
+                    </a>
+                <?php endforeach; ?>
             </div>
             </div><!-- /cat-viewport -->
             <button class="cat-arrow cat-next" aria-label="Next categories">&#8250;</button>
@@ -443,12 +491,6 @@ foreach ($latest_posts_raw as $post) {
                             <h3 class="na-name">
                                 <a href="<?= $product_url ?>"><?= $product_name ?></a>
                             </h3>
-                            
-                            <div class="eb-colors">
-                                <span class="eb-color-label">Colors:</span>
-                                <span class="eb-color-circle" style="background: #f0f0f0;"></span>
-                                <span class="eb-color-circle" style="background: #222;"></span>
-                            </div>
 
                             <div class="na-price">
                                 <?php if ($has_sale): ?>
@@ -791,24 +833,27 @@ foreach ($latest_posts_raw as $post) {
     </div>
     <div class="brand-marquee-outer">
         <div class="brand-marquee-track" id="brandMarqueeTrack">
-            <!-- Set 1 — real items -->
-            <a href="/mobiles/samsung" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="Samsung" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/infinix/" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="Infinix" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/oppo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="Oppo" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/xiaomi" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="Xiaomi" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/vivo" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="Vivo" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/tecno" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="Tecno" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/realme" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="Realme" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/apple" class="brandItem"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="Apple" draggable="false" loading="lazy" decoding="async"></div></a>
-            <!-- Set 2 — duplicate for seamless loop, hidden from assistive tech -->
-            <a href="/mobiles/samsung" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/samsung_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/infinix/" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/infinix_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/oppo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/oppo_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/xiaomi" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/xiaomi_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/vivo" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/vivo_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/tecno" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/tecno_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/realme" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/realme_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
-            <a href="/mobiles/apple" class="brandItem" aria-hidden="true" tabindex="-1"><div class="brandLogo"><img src="/public/assets/images/apple_logo.webp" alt="" draggable="false" loading="lazy" decoding="async"></div></a>
+            <?php foreach ([false, true] as $isDuplicateSet): ?>
+                <?php foreach ($marqueeBrands as $homeBrand): ?>
+                    <?php
+                    $brandSlug = (string) ($homeBrand['slug'] ?? '');
+                    $brandName = (string) ($homeBrand['brand_name'] ?? ucwords(str_replace('-', ' ', $brandSlug)));
+                    $brandLogo = !empty($homeBrand['homepage_logo'])
+                        ? normalizeMediaUrl((string) $homeBrand['homepage_logo'])
+                        : '';
+                    $brandHref = url('mobiles/' . rawurlencode($brandSlug));
+                    $ariaHidden = $isDuplicateSet ? ' aria-hidden="true" tabindex="-1"' : '';
+                    $imgAlt = $isDuplicateSet ? '' : htmlspecialchars($brandName, ENT_QUOTES, 'UTF-8');
+                    ?>
+                    <?php if ($brandLogo !== ''): ?>
+                        <a href="<?= htmlspecialchars($brandHref, ENT_QUOTES, 'UTF-8') ?>" class="brandItem"<?= $ariaHidden ?>>
+                            <div class="brandLogo">
+                                <img src="<?= htmlspecialchars($brandLogo, ENT_QUOTES, 'UTF-8') ?>" alt="<?= $imgAlt ?>" draggable="false" loading="lazy" decoding="async">
+                            </div>
+                        </a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>

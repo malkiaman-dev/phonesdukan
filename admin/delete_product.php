@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-// Include the database connection file
 require_once __DIR__ . '/../database/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: login.php");
+    header('Location: ' . url('admin/login.php'));
     exit();
 }
 
@@ -53,15 +53,17 @@ if (isset($_GET['id'])) {
         $_SESSION['message_type'] = 'success';
 
         // Redirect to the manage products page
-        header("Location: /admin/manage-products.php");
+        header('Location: ' . url('admin/manage-products.php'));
         exit();
     } catch (Exception $e) {
         // Rollback the transaction if something goes wrong
         $conn->rollBack();
         $_SESSION['message'] = 'Error: ' . $e->getMessage();
         $_SESSION['message_type'] = 'error';
-        header("Location: /admin/manage-products.php");
+        header('Location: ' . url('admin/manage-products.php'));
         exit();
     }
 }
-?>
+
+header('Location: ' . url('admin/manage-products.php'));
+exit();

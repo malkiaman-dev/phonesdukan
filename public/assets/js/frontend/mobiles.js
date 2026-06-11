@@ -305,46 +305,73 @@
 
     /* ── Collapse unfilled AdSense containers ──────────────── */
     (function () {
+        function markCollapsed(container) {
+            container.classList.remove('is-visible');
+            container.classList.add('is-collapsed');
+            container.style.setProperty('display', 'none', 'important');
+            container.style.setProperty('height', '0', 'important');
+            container.style.setProperty('margin', '0', 'important');
+            container.style.setProperty('padding', '0', 'important');
+            container.style.setProperty('overflow', 'hidden', 'important');
+        }
+
+        function markVisible(container) {
+            container.classList.remove('is-collapsed');
+            container.classList.add('is-visible');
+            container.style.removeProperty('display');
+            container.style.removeProperty('height');
+            container.style.removeProperty('margin');
+            container.style.removeProperty('padding');
+            container.style.removeProperty('overflow');
+        }
+
         function collapseContainer(ins) {
             var c = ins.closest ? ins.closest('.ad-container') : null;
             if (!c) return;
-            c.style.setProperty('display',  'none',    'important');
-            c.style.setProperty('height',   '0',       'important');
-            c.style.setProperty('margin',   '0',       'important');
-            c.style.setProperty('padding',  '0',       'important');
-            c.style.setProperty('overflow', 'hidden',  'important');
+            markCollapsed(c);
         }
 
-        function checkUnfilled() {
+        function revealContainer(ins) {
+            var c = ins.closest ? ins.closest('.ad-container') : null;
+            if (!c) return;
+            if (ins.getAttribute('data-ad-status') === 'filled') {
+                markVisible(c);
+            }
+        }
+
+        function initAdContainers() {
+            document.querySelectorAll('.ad-container').forEach(function (container) {
+                markCollapsed(container);
+            });
+
             document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
+                if (ins.getAttribute('data-ad-status') === 'filled') {
+                    revealContainer(ins);
+                    return;
+                }
                 if (ins.getAttribute('data-ad-status') === 'unfilled') {
                     collapseContainer(ins);
+                    return;
                 }
-            });
-        }
 
-        function watchAds() {
-            document.querySelectorAll('ins.adsbygoogle').forEach(function (ins) {
-                /* MutationObserver fires the instant AdSense sets data-ad-status */
                 new MutationObserver(function (mutations) {
                     mutations.forEach(function (m) {
-                        if (m.attributeName === 'data-ad-status' &&
-                            ins.getAttribute('data-ad-status') === 'unfilled') {
+                        if (m.attributeName !== 'data-ad-status') return;
+                        var status = ins.getAttribute('data-ad-status');
+                        if (status === 'unfilled') {
                             collapseContainer(ins);
+                        } else if (status === 'filled') {
+                            revealContainer(ins);
                         }
                     });
                 }).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
             });
-
-            /* Fallback polls in case the mutation fires before observer is attached */
-            setTimeout(checkUnfilled, 1500);
-            setTimeout(checkUnfilled, 5000);
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', watchAds);
+            document.addEventListener('DOMContentLoaded', initAdContainers);
         } else {
-            watchAds();
+            initAdContainers();
         }
     }());
 

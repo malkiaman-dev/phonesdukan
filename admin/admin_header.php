@@ -130,12 +130,22 @@ $adminPageCssMap = [
             background: #fffbeb !important;
             border-left: 3px solid #f7cf04 !important;
         }
+        #sidebar .nav-item.has-submenu > .nav-link:hover,
+        #sidebar .nav-item.has-submenu > .nav-link.active {
+            color: #374151 !important;
+            background: transparent !important;
+            border-left-color: transparent !important;
+        }
         #sidebar .nav-link i {
             color: #6b7280 !important;
         }
         #sidebar .nav-link:hover i,
         #sidebar .nav-link.active i {
             color: #111111 !important;
+        }
+        #sidebar .nav-item.has-submenu > .nav-link:hover i,
+        #sidebar .nav-item.has-submenu > .nav-link.active i {
+            color: #6b7280 !important;
         }
         #sidebar .nav-link.logout {
             color: #ef4444 !important;

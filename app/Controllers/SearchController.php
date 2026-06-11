@@ -1,13 +1,11 @@
 <?php
 require_once __DIR__ . '/../Models/ProductModel.php';
-require_once __DIR__ . '/../../database/db.php';
 
 class SearchController {
     private $productModel;
 
     public function __construct() {
-        $database = new Database(); // Initialize Database class
-        $this->productModel = new ProductModel($database->getConnection()); // Pass connection
+        $this->productModel = new ProductModel();
     }
 
     public function search() {

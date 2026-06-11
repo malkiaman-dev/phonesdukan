@@ -32,17 +32,136 @@ function catalogUniqueSlug(callable $existsFn, string $base): string
     return $slug;
 }
 
+function catalogSaveHomepageImage(array $file): ?string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+    if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    $tmp = $file['tmp_name'] ?? '';
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return null;
+    }
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/gif' => 'gif',
+    ];
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = $finfo ? finfo_file($finfo, $tmp) : '';
+    if ($finfo) {
+        finfo_close($finfo);
+    }
+
+    if (!isset($allowed[$mime])) {
+        return null;
+    }
+
+    $uploadDir = dirname(__DIR__) . '/public/uploads/category-home';
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+        return null;
+    }
+
+    $filename = 'cat_' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
+    $destination = $uploadDir . DIRECTORY_SEPARATOR . $filename;
+
+    if (!move_uploaded_file($tmp, $destination)) {
+        return null;
+    }
+
+    return 'public/uploads/category-home/' . $filename;
+}
+
+function catalogSaveBrandLogo(array $file): ?string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return null;
+    }
+    if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    $tmp = $file['tmp_name'] ?? '';
+    if ($tmp === '' || !is_uploaded_file($tmp)) {
+        return null;
+    }
+
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/gif' => 'gif',
+    ];
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = $finfo ? finfo_file($finfo, $tmp) : '';
+    if ($finfo) {
+        finfo_close($finfo);
+    }
+
+    if (!isset($allowed[$mime])) {
+        return null;
+    }
+
+    $uploadDir = dirname(__DIR__) . '/public/uploads/brand-home';
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+        return null;
+    }
+
+    $filename = 'brand_' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
+    $destination = $uploadDir . DIRECTORY_SEPARATOR . $filename;
+
+    if (!move_uploaded_file($tmp, $destination)) {
+        return null;
+    }
+
+    return 'public/uploads/brand-home/' . $filename;
+}
+
+function catalogDeleteUploadedAsset(?string $relativePath): void
+{
+    if ($relativePath === null || $relativePath === '') {
+        return;
+    }
+
+    $fullPath = dirname(__DIR__) . '/' . ltrim(str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $relativePath), DIRECTORY_SEPARATOR);
+    if (is_file($fullPath)) {
+        @unlink($fullPath);
+    }
+}
+
+function catalogDeleteHomepageImage(?string $relativePath): void
+{
+    catalogDeleteUploadedAsset($relativePath);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_brand'])) {
         $name = trim($_POST['brand_name'] ?? '');
         $slug = trim($_POST['brand_slug'] ?? '') ?: catalogMakeSlug($name);
+        $showOnHome = !empty($_POST['brand_show_on_homepage']);
+        $logoPath = catalogSaveBrandLogo($_FILES['brand_homepage_logo'] ?? []);
+
         if ($name === '') {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Brand name is required.'];
+        } elseif ($showOnHome && $logoPath === null) {
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Upload a logo when "Show on home page" is checked.'];
         } else {
             $slug = catalogUniqueSlug(fn ($s) => $model->brandSlugExists($s), catalogMakeSlug($slug));
-            $model->addBrand($name, $slug)
-                ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Brand "' . $name . '" added.']
-                : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error adding brand.'];
+            if ($model->addBrand($name, $slug, $showOnHome, $logoPath)) {
+                $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Brand "' . $name . '" added.'];
+            } else {
+                if ($logoPath !== null) {
+                    catalogDeleteUploadedAsset($logoPath);
+                }
+                $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error adding brand.'];
+            }
         }
         header('Location: manage-catalog.php');
         exit;
@@ -52,13 +171,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['edit_brand_id'] ?? 0);
         $name = trim($_POST['edit_brand_name'] ?? '');
         $slug = trim($_POST['edit_brand_slug'] ?? '') ?: catalogMakeSlug($name);
-        if (!$id || $name === '') {
+        $showOnHome = !empty($_POST['edit_brand_show_on_homepage']);
+        $existing = $id ? $model->getBrandById($id) : null;
+        $logoPath = catalogSaveBrandLogo($_FILES['edit_brand_homepage_logo'] ?? []);
+        $updateLogo = $logoPath !== null;
+
+        if (!$id || $name === '' || !$existing) {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Invalid brand data.'];
+        } elseif ($showOnHome && !$updateLogo && empty($existing['homepage_logo'])) {
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Upload a logo when "Show on home page" is checked.'];
         } else {
+            if ($updateLogo && !empty($existing['homepage_logo'])) {
+                catalogDeleteUploadedAsset((string) $existing['homepage_logo']);
+            }
+
+            $finalLogo = $updateLogo ? $logoPath : ($existing['homepage_logo'] ?? null);
+            if (!$showOnHome) {
+                if (!empty($existing['homepage_logo'])) {
+                    catalogDeleteUploadedAsset((string) $existing['homepage_logo']);
+                }
+                $finalLogo = null;
+                $updateLogo = true;
+            }
+
             $slug = catalogUniqueSlug(fn ($s) => $model->brandSlugExists($s, $id), catalogMakeSlug($slug));
-            $model->updateBrand($id, $name, $slug)
-                ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Brand updated.']
-                : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error updating brand.'];
+            if ($model->updateBrand($id, $name, $slug, $showOnHome, $finalLogo, $updateLogo)) {
+                $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Brand updated.'];
+            } else {
+                if ($updateLogo && $logoPath !== null) {
+                    catalogDeleteUploadedAsset($logoPath);
+                }
+                $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error updating brand.'];
+            }
         }
         header('Location: manage-catalog.php');
         exit;
@@ -67,14 +211,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_category'])) {
         $name = trim($_POST['category_name'] ?? '');
         $slug = trim($_POST['category_slug'] ?? '') ?: catalogMakeSlug($name);
-        $sort = (int) ($_POST['category_sort_order'] ?? 0);
+        $showOnHome = !empty($_POST['category_show_on_homepage']);
+        $imagePath = catalogSaveHomepageImage($_FILES['category_homepage_image'] ?? []);
+
         if ($name === '') {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Category name is required.'];
+        } elseif ($showOnHome && $imagePath === null) {
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Upload a homepage image when "Show on home page" is checked.'];
+        } elseif ($model->categoryNameExists($name)) {
+            if ($imagePath !== null) {
+                catalogDeleteHomepageImage($imagePath);
+            }
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'A category named "' . $name . '" already exists. Use a different name.'];
         } else {
             $slug = catalogUniqueSlug(fn ($s) => $model->categorySlugExists($s, null), catalogMakeSlug($slug));
-            $model->addCategory($name, $slug, null, $sort, 1)
-                ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category "' . $name . '" added.']
-                : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error adding category.'];
+            if ($model->addCategory($name, $slug, null, 0, 1, $showOnHome, $imagePath)) {
+                $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category "' . $name . '" added.'];
+            } else {
+                if ($imagePath !== null) {
+                    catalogDeleteHomepageImage($imagePath);
+                }
+                $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Could not add category. The name or slug may already be in use.'];
+            }
         }
         header('Location: manage-catalog.php');
         exit;
@@ -84,14 +242,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int) ($_POST['edit_category_id'] ?? 0);
         $name = trim($_POST['edit_category_name'] ?? '');
         $slug = trim($_POST['edit_category_slug'] ?? '') ?: catalogMakeSlug($name);
-        $sort = (int) ($_POST['edit_category_sort_order'] ?? 0);
-        if (!$id || $name === '') {
+        $showOnHome = !empty($_POST['edit_category_show_on_homepage']);
+        $existing = $id ? $model->getCategoryById($id) : null;
+        $imagePath = catalogSaveHomepageImage($_FILES['edit_category_homepage_image'] ?? []);
+        $updateImage = $imagePath !== null;
+
+        if (!$id || $name === '' || !$existing) {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Invalid category data.'];
+        } elseif ($showOnHome && !$updateImage && empty($existing['homepage_image'])) {
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Upload a homepage image when "Show on home page" is checked.'];
+        } elseif ($model->categoryNameExists($name, $id)) {
+            if ($updateImage && $imagePath !== null) {
+                catalogDeleteHomepageImage($imagePath);
+            }
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'A category named "' . $name . '" already exists. Use a different name.'];
         } else {
+            if ($updateImage && !empty($existing['homepage_image'])) {
+                catalogDeleteHomepageImage((string) $existing['homepage_image']);
+            }
+
+            $finalImage = $updateImage ? $imagePath : ($existing['homepage_image'] ?? null);
+            if (!$showOnHome) {
+                if (!empty($existing['homepage_image'])) {
+                    catalogDeleteHomepageImage((string) $existing['homepage_image']);
+                }
+                $finalImage = null;
+                $updateImage = true;
+            }
+
             $slug = catalogUniqueSlug(fn ($s) => $model->categorySlugExists($s, null, $id), catalogMakeSlug($slug));
-            $model->updateCategory($id, $name, $slug, null, $sort, 1)
-                ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category updated.']
-                : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error updating category.'];
+            if ($model->updateCategory($id, $name, $slug, null, 0, 1, $showOnHome, $finalImage, $updateImage)) {
+                $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category updated.'];
+            } else {
+                $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Could not update category. The name or slug may already be in use.'];
+            }
         }
         header('Location: manage-catalog.php');
         exit;
@@ -101,14 +285,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $parentId = (int) ($_POST['sub_parent_id'] ?? 0);
         $name = trim($_POST['subcategory_name'] ?? '');
         $slug = trim($_POST['subcategory_slug'] ?? '') ?: catalogMakeSlug($name);
-        $sort = (int) ($_POST['sub_sort_order'] ?? 0);
         if (!$parentId || $name === '') {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Select a parent category and enter a subcategory name.'];
+        } elseif ($model->categoryNameExists($name)) {
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'A category named "' . $name . '" already exists. Use a different name.'];
         } else {
             $slug = catalogUniqueSlug(fn ($s) => $model->categorySlugExists($s, $parentId), catalogMakeSlug($slug));
-            $model->addCategory($name, $slug, $parentId, $sort, 1)
-                ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Subcategory "' . $name . '" added.']
-                : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error adding subcategory.'];
+            if ($model->addCategory($name, $slug, $parentId, 0, 1)) {
+                $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Subcategory "' . $name . '" added.'];
+            } else {
+                $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Could not add subcategory. The name or slug may already be in use.'];
+            }
         }
         header('Location: manage-catalog.php');
         exit;
@@ -119,14 +306,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $parentId = (int) ($_POST['edit_sub_parent_id'] ?? 0);
         $name = trim($_POST['edit_sub_name'] ?? '');
         $slug = trim($_POST['edit_sub_slug'] ?? '') ?: catalogMakeSlug($name);
-        $sort = (int) ($_POST['edit_sub_sort_order'] ?? 0);
         if (!$id || !$parentId || $name === '') {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Invalid subcategory data.'];
+        } elseif ($model->categoryNameExists($name, $id)) {
+            $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'A category named "' . $name . '" already exists. Use a different name.'];
         } else {
             $slug = catalogUniqueSlug(fn ($s) => $model->categorySlugExists($s, $parentId, $id), catalogMakeSlug($slug));
-            $model->updateCategory($id, $name, $slug, $parentId, $sort, 1)
-                ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Subcategory updated.']
-                : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error updating subcategory.'];
+            if ($model->updateCategory($id, $name, $slug, $parentId, 0, 1)) {
+                $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Subcategory updated.'];
+            } else {
+                $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Could not update subcategory. The name or slug may already be in use.'];
+            }
         }
         header('Location: manage-catalog.php');
         exit;
@@ -135,9 +325,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['delete_brand'])) {
     $id = (int) $_GET['delete_brand'];
+    $existingBrand = $model->getBrandById($id);
     if ($model->countProductsUsingBrand($id) > 0) {
         $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Cannot delete: products still use this brand.'];
     } else {
+        if ($existingBrand && !empty($existingBrand['homepage_logo'])) {
+            catalogDeleteUploadedAsset((string) $existingBrand['homepage_logo']);
+        }
         $model->deleteBrand($id)
             ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Brand deleted.']
             : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error deleting brand.'];
@@ -148,11 +342,15 @@ if (isset($_GET['delete_brand'])) {
 
 if (isset($_GET['delete_category'])) {
     $id = (int) $_GET['delete_category'];
+    $existingCategory = $model->getCategoryById($id);
     if ($model->countChildCategories($id) > 0) {
         $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Cannot delete: category has subcategories.'];
     } elseif ($model->countProductsUsingCategory($id) > 0) {
         $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Cannot delete: products still use this category.'];
     } else {
+        if ($existingCategory && !empty($existingCategory['homepage_image'])) {
+            catalogDeleteHomepageImage((string) $existingCategory['homepage_image']);
+        }
         $model->deleteCategory($id)
             ? $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category deleted.']
             : $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Error deleting category.'];
@@ -204,7 +402,7 @@ include __DIR__ . '/admin_sidebar.php';
     <div class="cp-grid">
         <div class="ccard cp-form">
             <h2>Add Brand</h2>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="cp-field">
                     <label>Brand Name <span class="req-star" aria-hidden="true">*</span></label>
                     <input type="text" name="brand_name" placeholder="e.g. Samsung, Apple" required>
@@ -213,13 +411,32 @@ include __DIR__ . '/admin_sidebar.php';
                     <label>Slug (optional)</label>
                     <input type="text" name="brand_slug" placeholder="auto-generated from name">
                 </div>
+                <div class="cp-field cp-check-field">
+                    <label class="cp-check-label">
+                        <input type="checkbox" name="brand_show_on_homepage" value="1" data-home-toggle="brand-home-fields">
+                        Show on home page
+                    </label>
+                    <p class="cp-field-hint">Display this brand in the homepage brands marquee.</p>
+                </div>
+                <div class="cp-field cp-home-fields" id="brand-home-fields" hidden>
+                    <label for="brand_homepage_logo">Brand Logo <span class="req-star" aria-hidden="true">*</span></label>
+                    <div class="cp-file-upload">
+                        <input type="file" class="cp-file-native" id="brand_homepage_logo" name="brand_homepage_logo" accept="image/jpeg,image/png,image/webp,image/gif">
+                        <label for="brand_homepage_logo" class="cp-file-btn">
+                            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                            <span class="cp-file-btn-text">Upload logo</span>
+                            <span class="cp-file-name">No file selected</span>
+                        </label>
+                    </div>
+                    <p class="cp-field-hint">Transparent PNG or WEBP works best for brand logos.</p>
+                </div>
                 <button class="cp-btn" type="submit" name="add_brand">Add Brand</button>
             </form>
         </div>
 
         <div class="ccard cp-form">
             <h2>Add Category</h2>
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="cp-field">
                     <label>Category Name <span class="req-star" aria-hidden="true">*</span></label>
                     <input type="text" name="category_name" placeholder="e.g. Mobiles, Tablets" required>
@@ -228,9 +445,24 @@ include __DIR__ . '/admin_sidebar.php';
                     <label>Slug (optional)</label>
                     <input type="text" name="category_slug" placeholder="auto-generated">
                 </div>
-                <div class="cp-field">
-                    <label>Sort Order</label>
-                    <input type="number" name="category_sort_order" value="0" min="0">
+                <div class="cp-field cp-check-field">
+                    <label class="cp-check-label">
+                        <input type="checkbox" name="category_show_on_homepage" value="1" data-home-toggle="category-home-fields">
+                        Show on home page
+                    </label>
+                    <p class="cp-field-hint">Display this category in the homepage carousel.</p>
+                </div>
+                <div class="cp-field cp-home-fields" id="category-home-fields" hidden>
+                    <label for="category_homepage_image">Homepage Image <span class="req-star" aria-hidden="true">*</span></label>
+                    <div class="cp-file-upload">
+                        <input type="file" class="cp-file-native" id="category_homepage_image" name="category_homepage_image" accept="image/jpeg,image/png,image/webp,image/gif">
+                        <label for="category_homepage_image" class="cp-file-btn">
+                            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                            <span class="cp-file-btn-text">Upload image</span>
+                            <span class="cp-file-name">No file selected</span>
+                        </label>
+                    </div>
+                    <p class="cp-field-hint">Square image works best (PNG, JPG, WEBP, or GIF).</p>
                 </div>
                 <button class="cp-btn" type="submit" name="add_category">Add Category</button>
             </form>
@@ -263,10 +495,6 @@ include __DIR__ . '/admin_sidebar.php';
                     <label>Slug (optional)</label>
                     <input type="text" name="subcategory_slug" placeholder="auto-generated">
                 </div>
-                <div class="cp-field">
-                    <label>Sort Order</label>
-                    <input type="number" name="sub_sort_order" value="0" min="0">
-                </div>
                 <button class="cp-btn" type="submit" name="add_subcategory">Add Subcategory</button>
             </form>
         </div>
@@ -277,15 +505,22 @@ include __DIR__ . '/admin_sidebar.php';
         <div class="ctable-wrap">
             <table class="ctable">
                 <thead>
-                    <tr><th>Name</th><th>Slug</th><th>Actions</th></tr>
+                    <tr><th>Name</th><th>Slug</th><th>Home</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <?php if (empty($brands)): ?>
-                    <tr><td colspan="3"><div class="empty-state">No brands yet.</div></td></tr>
+                    <tr><td colspan="4"><div class="empty-state">No brands yet.</div></td></tr>
                 <?php else: foreach ($brands as $brand): ?>
                     <tr>
                         <td><?= htmlspecialchars($brand['brand_name']) ?></td>
                         <td><code><?= htmlspecialchars($brand['slug']) ?></code></td>
+                        <td>
+                            <?php if (!empty($brand['show_on_homepage'])): ?>
+                                <span class="home-badge" title="Shown on homepage brands"><i class="fas fa-house" aria-hidden="true"></i> Yes</span>
+                            <?php else: ?>
+                                <span class="cp-empty-mark">—</span>
+                            <?php endif; ?>
+                        </td>
                         <td>
                             <div class="row-actions">
                                 <a class="cp-btn-sm" href="?edit_brand=<?= (int) $brand['brand_id'] ?>">Edit</a>
@@ -304,25 +539,32 @@ include __DIR__ . '/admin_sidebar.php';
         <div class="ctable-wrap">
             <table class="ctable">
                 <thead>
-                    <tr><th>Category</th><th>Slug</th><th>Subcategories</th><th>Actions</th></tr>
+                    <tr><th>Category</th><th>Slug</th><th>Home</th><th>Subcategories</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <?php if (empty($categoriesWithSubs)): ?>
-                    <tr><td colspan="4"><div class="empty-state">No categories yet.</div></td></tr>
+                    <tr><td colspan="5"><div class="empty-state">No categories yet.</div></td></tr>
                 <?php else: foreach ($categoriesWithSubs as $cat): ?>
                     <tr>
                         <td><strong><?= htmlspecialchars($cat['category_name']) ?></strong></td>
                         <td><code><?= htmlspecialchars($cat['slug']) ?></code></td>
                         <td>
+                            <?php if (!empty($cat['show_on_homepage'])): ?>
+                                <span class="home-badge" title="Shown on homepage carousel"><i class="fas fa-house" aria-hidden="true"></i> Yes</span>
+                            <?php else: ?>
+                                <span class="cp-empty-mark">—</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
                             <?php if (empty($cat['subcategories'])): ?>
-                                <span style="color:var(--muted)">—</span>
+                                <span class="cp-empty-mark">—</span>
                             <?php else: ?>
                                 <div class="sub-chips">
                                 <?php foreach ($cat['subcategories'] as $sub): ?>
                                     <span class="sub-chip">
-                                        <?= htmlspecialchars($sub['category_name']) ?>
-                                        <a href="?edit_sub=<?= (int) $sub['category_id'] ?>" style="color:inherit">✎</a>
-                                        <a href="?delete_subcategory=<?= (int) $sub['category_id'] ?>" onclick="return confirm('Delete subcategory?')" style="color:inherit">×</a>
+                                        <span class="sub-chip-name"><?= htmlspecialchars($sub['category_name']) ?></span>
+                                        <a class="sub-chip-action sub-chip-edit" href="?edit_sub=<?= (int) $sub['category_id'] ?>" title="Edit subcategory" aria-label="Edit subcategory"><i class="fas fa-pen" aria-hidden="true"></i></a>
+                                        <a class="sub-chip-action sub-chip-delete" href="?delete_subcategory=<?= (int) $sub['category_id'] ?>" title="Delete subcategory" aria-label="Delete subcategory" onclick="return confirm('Delete subcategory?')"><i class="fas fa-xmark" aria-hidden="true"></i></a>
                                     </span>
                                 <?php endforeach; ?>
                                 </div>
@@ -346,12 +588,35 @@ include __DIR__ . '/admin_sidebar.php';
 <div class="cp-overlay open" id="editBrandOverlay">
     <div class="cp-modal">
         <h3>Edit Brand</h3>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="edit_brand_id" value="<?= (int) $editBrand['brand_id'] ?>">
             <div class="cp-field"><label>Name</label><input type="text" name="edit_brand_name" value="<?= htmlspecialchars($editBrand['brand_name']) ?>" required></div>
             <div class="cp-field"><label>Slug</label><input type="text" name="edit_brand_slug" value="<?= htmlspecialchars($editBrand['slug']) ?>"></div>
+            <div class="cp-field cp-check-field">
+                <label class="cp-check-label">
+                    <input type="checkbox" name="edit_brand_show_on_homepage" value="1" data-home-toggle="edit-brand-home-fields" <?= !empty($editBrand['show_on_homepage']) ? 'checked' : '' ?>>
+                    Show on home page
+                </label>
+            </div>
+            <div class="cp-field cp-home-fields" id="edit-brand-home-fields" <?= empty($editBrand['show_on_homepage']) ? 'hidden' : '' ?>>
+                <label>Brand Logo<?= empty($editBrand['homepage_logo']) ? ' <span class="req-star" aria-hidden="true">*</span>' : '' ?></label>
+                <?php if (!empty($editBrand['homepage_logo'])): ?>
+                    <div class="cp-image-preview">
+                        <img src="<?= htmlspecialchars(url($editBrand['homepage_logo']), ENT_QUOTES, 'UTF-8') ?>" alt="Current brand logo">
+                    </div>
+                <?php endif; ?>
+                <div class="cp-file-upload">
+                    <input type="file" class="cp-file-native" id="edit_brand_homepage_logo" name="edit_brand_homepage_logo" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <label for="edit_brand_homepage_logo" class="cp-file-btn">
+                        <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                        <span class="cp-file-btn-text">Upload logo</span>
+                        <span class="cp-file-name">No file selected</span>
+                    </label>
+                </div>
+                <p class="cp-field-hint">Upload a new logo to replace the current one.</p>
+            </div>
             <div class="modal-actions">
-                <a class="cp-btn-sm" href="manage-catalog.php">Cancel</a>
+                <a class="cp-btn cp-btn-outline" href="manage-catalog.php">Cancel</a>
                 <button class="cp-btn" type="submit" name="edit_brand">Save</button>
             </div>
         </form>
@@ -363,13 +628,35 @@ include __DIR__ . '/admin_sidebar.php';
 <div class="cp-overlay open">
     <div class="cp-modal">
         <h3>Edit Category</h3>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="edit_category_id" value="<?= (int) $editCategory['category_id'] ?>">
             <div class="cp-field"><label>Name</label><input type="text" name="edit_category_name" value="<?= htmlspecialchars($editCategory['category_name']) ?>" required></div>
             <div class="cp-field"><label>Slug</label><input type="text" name="edit_category_slug" value="<?= htmlspecialchars($editCategory['slug']) ?>"></div>
-            <div class="cp-field"><label>Sort Order</label><input type="number" name="edit_category_sort_order" value="<?= (int) ($editCategory['sort_order'] ?? 0) ?>" min="0"></div>
+            <div class="cp-field cp-check-field">
+                <label class="cp-check-label">
+                    <input type="checkbox" name="edit_category_show_on_homepage" value="1" data-home-toggle="edit-category-home-fields" <?= !empty($editCategory['show_on_homepage']) ? 'checked' : '' ?>>
+                    Show on home page
+                </label>
+            </div>
+            <div class="cp-field cp-home-fields" id="edit-category-home-fields" <?= empty($editCategory['show_on_homepage']) ? 'hidden' : '' ?>>
+                <label>Homepage Image<?= empty($editCategory['homepage_image']) ? ' <span class="req-star" aria-hidden="true">*</span>' : '' ?></label>
+                <?php if (!empty($editCategory['homepage_image'])): ?>
+                    <div class="cp-image-preview">
+                        <img src="<?= htmlspecialchars(url($editCategory['homepage_image']), ENT_QUOTES, 'UTF-8') ?>" alt="Current homepage image">
+                    </div>
+                <?php endif; ?>
+                <div class="cp-file-upload">
+                    <input type="file" class="cp-file-native" id="edit_category_homepage_image" name="edit_category_homepage_image" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <label for="edit_category_homepage_image" class="cp-file-btn">
+                        <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                        <span class="cp-file-btn-text">Upload image</span>
+                        <span class="cp-file-name">No file selected</span>
+                    </label>
+                </div>
+                <p class="cp-field-hint">Upload a new image to replace the current one.</p>
+            </div>
             <div class="modal-actions">
-                <a class="cp-btn-sm" href="manage-catalog.php">Cancel</a>
+                <a class="cp-btn cp-btn-outline" href="manage-catalog.php">Cancel</a>
                 <button class="cp-btn" type="submit" name="edit_category">Save</button>
             </div>
         </form>
@@ -400,9 +687,8 @@ include __DIR__ . '/admin_sidebar.php';
             </div>
             <div class="cp-field"><label>Name</label><input type="text" name="edit_sub_name" value="<?= htmlspecialchars($editSub['category_name']) ?>" required></div>
             <div class="cp-field"><label>Slug</label><input type="text" name="edit_sub_slug" value="<?= htmlspecialchars($editSub['slug']) ?>"></div>
-            <div class="cp-field"><label>Sort Order</label><input type="number" name="edit_sub_sort_order" value="<?= (int) ($editSub['sort_order'] ?? 0) ?>" min="0"></div>
             <div class="modal-actions">
-                <a class="cp-btn-sm" href="manage-catalog.php">Cancel</a>
+                <a class="cp-btn cp-btn-outline" href="manage-catalog.php">Cancel</a>
                 <button class="cp-btn" type="submit" name="edit_subcategory">Save</button>
             </div>
         </form>
@@ -416,6 +702,37 @@ include __DIR__ . '/admin_sidebar.php';
 if (document.getElementById('catalogToast')?.classList.contains('show')) {
     setTimeout(function() { document.getElementById('catalogToast').classList.remove('show'); }, 4000);
 }
+
+document.querySelectorAll('[data-home-toggle]').forEach(function (checkbox) {
+    var targetId = checkbox.getAttribute('data-home-toggle');
+    var panel = document.getElementById(targetId);
+    if (!panel) return;
+
+    function sync() {
+        panel.hidden = !checkbox.checked;
+    }
+
+    checkbox.addEventListener('change', sync);
+    sync();
+});
+
+document.querySelectorAll('.cp-file-native').forEach(function (input) {
+    var nameEl = input.closest('.cp-file-upload')?.querySelector('.cp-file-name');
+    if (!nameEl) return;
+
+    input.addEventListener('change', function () {
+        nameEl.textContent = input.files && input.files[0] ? input.files[0].name : 'No file selected';
+    });
+});
+
+(function () {
+    var overlay = document.querySelector('.cp-overlay.open');
+    if (!overlay) return;
+
+    document.body.appendChild(overlay);
+    document.documentElement.classList.add('cp-modal-open');
+    document.body.classList.add('cp-modal-open');
+})();
 </script>
 </body>
 </html>

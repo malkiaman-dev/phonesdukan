@@ -8,11 +8,13 @@ $metaRobots = $hasFilters ? 'noindex, follow' : 'index, follow';
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 
-$selectedCategoryIds = $_GET['category'] ?? [];
-if (!is_array($selectedCategoryIds)) {
-    $selectedCategoryIds = array_filter(explode(',', (string) $selectedCategoryIds));
+if (!isset($selectedCategoryIds)) {
+    $selectedCategoryIds = $_GET['category'] ?? [];
+    if (!is_array($selectedCategoryIds)) {
+        $selectedCategoryIds = array_filter(explode(',', (string) $selectedCategoryIds));
+    }
+    $selectedCategoryIds = array_map('strval', $selectedCategoryIds);
 }
-$selectedCategoryIds = array_map('strval', $selectedCategoryIds);
 
 $selectedSort = $_GET['sort_by'] ?? 'latest';
 $selectedSort = $selectedSort === '' ? 'latest' : $selectedSort;

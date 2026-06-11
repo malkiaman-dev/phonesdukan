@@ -648,21 +648,34 @@
   }
 }
 
-/* ── Ad container — prevent blank space from unfilled ads ─── */
+/* ── Ad container — hidden until filled; no layout jump on refresh ─── */
 .ad-container {
-  min-height: 0;
+  display: none;
+  height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden;
+  min-height: 0;
 }
 
-/* Modern browsers: collapse instantly via CSS when AdSense marks unfilled */
-.ad-container:has(.adsbygoogle[data-ad-status="unfilled"]) {
+.ad-container.is-visible,
+.ad-container:has(.adsbygoogle[data-ad-status="filled"]) {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.ad-container.is-collapsed,
+.ad-container:has(.adsbygoogle[data-ad-status="unfilled"]),
+.ad-container:has(.adsbygoogle[data-ad-slot="8736670293"] iframe[height="1"]),
+.ad-container:has(.adsbygoogle[data-ad-slot="4555776348"] iframe[height="1"]) {
   display: none !important;
   height: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  overflow: hidden !important;
 }
 
-/* Also hide the ins element itself when unfilled */
 .adsbygoogle[data-ad-status="unfilled"] {
   display: none !important;
   height: 0 !important;

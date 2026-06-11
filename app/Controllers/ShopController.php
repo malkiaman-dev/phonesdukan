@@ -8,14 +8,21 @@ $paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
 $offset = ($paged - 1) * $limit;
 
 // Collect filters from GET parameters
+$rawCategories = $_GET['category'] ?? [];
+if (!is_array($rawCategories)) {
+    $rawCategories = array_filter(explode(',', (string) $rawCategories));
+}
+
 $filters = [
     'sort_by' => $_GET['sort_by'] ?? null,         // Sorting options (low to high, high to low)
     'price_range' => $_GET['price_range'] ?? [],   // Price range filter
     'min_price' => $_GET['min_price'] ?? null,     // Min price (slider)
     'max_price' => $_GET['max_price'] ?? null,     // Max price (slider)
-    'category' => $_GET['category'] ?? [],         // Selected categories
+    'category' => $productModel->normalizeCategoryFilterIds($rawCategories),
     'brand' => $_GET['brand'] ?? []                // Selected brands
 ];
+
+$selectedCategoryIds = array_map('strval', $filters['category']);
 
 // Fetch filtered & paginated products based on the filters
 $products = $productModel->getPaginatedProducts($limit, $offset, $filters);

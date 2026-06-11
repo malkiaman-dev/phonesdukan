@@ -225,32 +225,40 @@ class ProductModel
     public function searchProducts(string $query, int $limit = 10): array
     {
         $query = trim($query);
-        $query = htmlspecialchars($query, ENT_QUOTES, 'UTF-8');
-        $limit = max(1, $limit);
+        if ($query === '') {
+            return [];
+        }
+
+        $limit = max(1, min($limit, 100));
 
         $stmt = $this->db->prepare('
-            SELECT 
-                p.product_name, 
-                p.product_slug, 
-                c.slug AS category_slug, 
-                b.slug AS brand_slug,
-                sc.slug AS subcategory_slug,
-                pi.image_url 
+            SELECT p.product_id, p.product_name, p.product_slug,
+                   COALESCE(p.regular_price, 0) AS regular_price,
+                   NULLIF(p.sale_price, \'\') AS sale_price,
+                   COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                   p.product_status, p.product_tag,
+                   pi.image_url,
+                   c.slug AS category_slug,
+                   b.slug AS brand_slug,
+                   sc.slug AS subcategory_slug
             FROM products p
-            LEFT JOIN product_images pi ON p.product_id = pi.product_id
             LEFT JOIN categories c ON p.category_id = c.category_id
             LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
-            WHERE p.product_status = 1
-            AND p.product_name LIKE :query
-            AND pi.is_primary = 1
+            LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+            WHERE p.product_status != 0
+              AND LOWER(p.product_status) != \'out of stock\'
+              AND p.product_name LIKE :query
+            GROUP BY p.product_id
+            ORDER BY p.created_at DESC
             LIMIT :limit
         ');
 
-        $stmt->bindValue(':query', "%$query%", PDO::PARAM_STR);
+        $stmt->bindValue(':query', '%' . $query . '%', PDO::PARAM_STR);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
@@ -768,6 +776,132 @@ class ProductModel
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getListingProductsForCategory(int $categoryId, int $limit, int $offset): array
+    {
+        $sql = 'SELECT p.product_id, p.product_name, p.product_slug,
+                       COALESCE(p.regular_price, 0) AS regular_price,
+                       NULLIF(p.sale_price, \'\') AS sale_price,
+                       COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                       p.product_status, p.product_tag,
+                       pi.image_url,
+                       c.slug AS category_slug,
+                       b.slug AS brand_slug,
+                       sc.slug AS subcategory_slug
+                FROM products p
+                INNER JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+                INNER JOIN brands b ON p.brand_id = b.brand_id
+                LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+                WHERE p.product_status != 0
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+                LIMIT :limit OFFSET :offset';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function countListingProductsForCategory(int $categoryId): int
+    {
+        $sql = 'SELECT COUNT(DISTINCT p.product_id)
+                FROM products p
+                WHERE p.product_status != 0
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getListingProductsForBrandAndCategory(int $brandId, int $categoryId, int $limit, int $offset): array
+    {
+        $sql = 'SELECT p.product_id, p.product_name, p.product_slug,
+                       COALESCE(p.regular_price, 0) AS regular_price,
+                       NULLIF(p.sale_price, \'\') AS sale_price,
+                       COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                       p.product_status, p.product_tag,
+                       pi.image_url,
+                       c.slug AS category_slug,
+                       b.slug AS brand_slug,
+                       sc.slug AS subcategory_slug
+                FROM products p
+                INNER JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+                INNER JOIN brands b ON p.brand_id = b.brand_id
+                LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+                WHERE p.product_status != 0
+                  AND LOWER(p.product_status) != \'out of stock\'
+                  AND p.brand_id = :brand_id
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+                LIMIT :limit OFFSET :offset';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':brand_id', $brandId, PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function countListingProductsForBrandAndCategory(int $brandId, int $categoryId): int
+    {
+        $sql = 'SELECT COUNT(DISTINCT p.product_id)
+                FROM products p
+                WHERE p.product_status != 0
+                  AND LOWER(p.product_status) != \'out of stock\'
+                  AND p.brand_id = :brand_id
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':brand_id', $brandId, PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
     }
 
     /**

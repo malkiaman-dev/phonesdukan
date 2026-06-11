@@ -192,6 +192,19 @@ body h3.kpi-value {
   background: #fffbeb !important;
 }
 
+/* Parent submenu labels stay neutral — only sub-items show active/hover state */
+#sidebar .nav-item.has-submenu > .nav-link:hover,
+#sidebar .nav-item.has-submenu > .nav-link.active {
+  background: transparent !important;
+  border-left-color: transparent !important;
+  color: #374151 !important;
+}
+
+#sidebar .nav-item.has-submenu > .nav-link:hover i,
+#sidebar .nav-item.has-submenu > .nav-link.active i {
+  color: #6b7280 !important;
+}
+
 /* ── Primary buttons ── */
 body .btn-add,
 body .btn-search,

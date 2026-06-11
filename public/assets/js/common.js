@@ -288,7 +288,7 @@ if (mobileSearchInput && mobileSearchResults) {
                         });
                     } else {
                         mobileSearchResults.style.display = "block";
-                        mobileSearchResults.innerHTML = "<div class='search-item'>No results found</div>";
+                        mobileSearchResults.innerHTML = "<div class='search-item search-no-results'>No results found</div>";
                     }
                 })
                 .catch(error => console.error("Error fetching mobile search results:", error));
@@ -349,7 +349,7 @@ mobileSearchInput.addEventListener("keypress", function (event) {
                             searchResults.appendChild(li);
                         });
                     } else {
-                        searchResults.innerHTML = "<li>No results found</li>";
+                        searchResults.innerHTML = "<li class=\"search-no-results\">No results found</li>";
                     }
                 })
                 .catch(error => console.error("Error fetching search results:", error));

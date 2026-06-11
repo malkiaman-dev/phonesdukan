@@ -1,5 +1,5 @@
 <!-- views/products/product_detail.php -->
-<div class="ad-container">
+<div class="ad-container is-collapsed" style="display:none!important;height:0!important;margin:0!important;padding:0!important;overflow:hidden!important;">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4182308742558451"
      crossorigin="anonymous"></script>
 <!-- Large banner -->

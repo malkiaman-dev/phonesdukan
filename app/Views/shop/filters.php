@@ -3,7 +3,7 @@ $selectedSort = $_GET['sort_by'] ?? 'latest';
 $selectedSort = $selectedSort === '' ? 'latest' : $selectedSort;
 
 $selectedPriceRanges = $_GET['price_range'] ?? [];
-$selectedCategories = $_GET['category'] ?? [];
+$selectedCategories = $selectedCategoryIds ?? ($_GET['category'] ?? []);
 $selectedBrands = $_GET['brand'] ?? [];
 
 if (!is_array($selectedPriceRanges)) {

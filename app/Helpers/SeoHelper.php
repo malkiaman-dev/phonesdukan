@@ -47,6 +47,18 @@ class SeoHelper
         ];
     }
 
+    /** Category + brand page, e.g. /mobiles/samsung/ */
+    public static function categoryBrandBreadcrumbs(
+        string $categorySlug, string $categoryName,
+        string $brandSlug, string $brandName
+    ): array {
+        return [
+            ['name' => 'Home', 'url' => self::BASE],
+            ['name' => $categoryName, 'url' => self::BASE . $categorySlug . '/'],
+            ['name' => $brandName, 'url' => self::BASE . $categorySlug . '/' . $brandSlug . '/'],
+        ];
+    }
+
     /** Product page — last item has no URL (current page). */
     public static function productBreadcrumbs(
         string $brandSlug, string $brandName,
