@@ -89,7 +89,7 @@
     margin-bottom: 14px;
 }
 
-.cp-field label {
+.cp-field label:not(.cp-check-label) {
     display: block;
     margin-bottom: 6px;
     font-size: 0.88rem;
@@ -131,6 +131,8 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    margin: 0;
+    line-height: 1;
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--black);
@@ -140,9 +142,11 @@
 .cp-check-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
+    margin: 0;
     accent-color: var(--yellow);
     cursor: pointer;
     flex-shrink: 0;
+    vertical-align: middle;
 }
 
 .cp-field-hint {
