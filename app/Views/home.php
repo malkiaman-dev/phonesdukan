@@ -19,66 +19,10 @@ $catalogModel = new CatalogModel();
 
 $homepageCategoryCards = $catalogModel->getHomepageCategories();
 $homepageCardColors = CatalogModel::homepageCardColors();
-
-$staticHomepageCategories = [
-    ['slug' => 'mobiles', 'category_name' => 'Mobiles', 'homepage_image' => 'public/assets/images/mobile_category.png', 'bg' => '#dbeafe'],
-    ['slug' => 'smart-watches', 'category_name' => 'Smart Watches', 'homepage_image' => 'public/assets/images/smartwatches_category.webp', 'bg' => '#d1fae5'],
-    ['slug' => 'wireless-earbuds', 'category_name' => 'Wireless Earbuds', 'homepage_image' => 'public/assets/images/wireless_earbuds.webp', 'bg' => '#ede9fe'],
-    ['slug' => 'mobile-accessories', 'category_name' => 'Mobile Accessories', 'homepage_image' => 'public/assets/images/mobile_accessories.webp', 'bg' => '#fde8d8'],
-    ['slug' => 'power-banks', 'category_name' => 'Fast Charging Power Banks', 'homepage_image' => 'public/assets/images/power-banks.webp', 'bg' => '#fef9c3'],
-    ['slug' => 'bluetooth-speakers', 'category_name' => 'Portable Bluetooth Speakers', 'homepage_image' => 'public/assets/images/bluetooth-speakers.webp', 'bg' => '#fce7f3'],
-];
-
-$dynamicSlugs = array_map(static function (array $row): string {
-    return (string) ($row['slug'] ?? '');
-}, $homepageCategoryCards);
-
-$carouselCategories = $homepageCategoryCards;
-foreach ($staticHomepageCategories as $staticCategory) {
-    if (!in_array($staticCategory['slug'], $dynamicSlugs, true)) {
-        $carouselCategories[] = $staticCategory;
-    }
-}
-
-if (empty($homepageCategoryCards)) {
-    $carouselCategories = $staticHomepageCategories;
-}
-
-usort($carouselCategories, static function (array $a, array $b): int {
-    return strcasecmp((string) ($a['category_name'] ?? ''), (string) ($b['category_name'] ?? ''));
-});
+$carouselCategories = $catalogModel->getHomepageCarouselCategories();
 
 $homepageBrandCards = $catalogModel->getHomepageBrands();
-
-$staticHomepageBrands = [
-    ['slug' => 'apple', 'brand_name' => 'Apple', 'homepage_logo' => 'public/assets/images/apple_logo.webp'],
-    ['slug' => 'infinix', 'brand_name' => 'Infinix', 'homepage_logo' => 'public/assets/images/infinix_logo.webp'],
-    ['slug' => 'oppo', 'brand_name' => 'Oppo', 'homepage_logo' => 'public/assets/images/oppo_logo.webp'],
-    ['slug' => 'realme', 'brand_name' => 'Realme', 'homepage_logo' => 'public/assets/images/realme_logo.webp'],
-    ['slug' => 'samsung', 'brand_name' => 'Samsung', 'homepage_logo' => 'public/assets/images/samsung_logo.webp'],
-    ['slug' => 'tecno', 'brand_name' => 'Tecno', 'homepage_logo' => 'public/assets/images/tecno_logo.webp'],
-    ['slug' => 'vivo', 'brand_name' => 'Vivo', 'homepage_logo' => 'public/assets/images/vivo_logo.webp'],
-    ['slug' => 'xiaomi', 'brand_name' => 'Xiaomi', 'homepage_logo' => 'public/assets/images/xiaomi_logo.webp'],
-];
-
-$dynamicBrandSlugs = array_map(static function (array $row): string {
-    return (string) ($row['slug'] ?? '');
-}, $homepageBrandCards);
-
-$marqueeBrands = $homepageBrandCards;
-foreach ($staticHomepageBrands as $staticBrand) {
-    if (!in_array($staticBrand['slug'], $dynamicBrandSlugs, true)) {
-        $marqueeBrands[] = $staticBrand;
-    }
-}
-
-if (empty($homepageBrandCards)) {
-    $marqueeBrands = $staticHomepageBrands;
-}
-
-usort($marqueeBrands, static function (array $a, array $b): int {
-    return strcasecmp((string) ($a['brand_name'] ?? ''), (string) ($b['brand_name'] ?? ''));
-});
+$marqueeBrands = $catalogModel->getHomepageBrandCarousel();
 
 // Define specific product IDs
 $product_ids = [1, 178, 177, 176, 175, 174, 1819];

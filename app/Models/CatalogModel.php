@@ -415,6 +415,132 @@ class CatalogModel
     }
 
     /** @return array<int, array<string, mixed>> */
+    public static function staticHomepageCategories(): array
+    {
+        return [
+            ['slug' => 'mobiles', 'category_name' => 'Mobiles', 'homepage_image' => 'public/assets/images/mobile_category.png', 'bg' => '#dbeafe'],
+            ['slug' => 'smart-watches', 'category_name' => 'Smart Watches', 'homepage_image' => 'public/assets/images/smartwatches_category.webp', 'bg' => '#d1fae5'],
+            ['slug' => 'wireless-earbuds', 'category_name' => 'Wireless Earbuds', 'homepage_image' => 'public/assets/images/wireless_earbuds.webp', 'bg' => '#ede9fe'],
+            ['slug' => 'mobile-accessories', 'category_name' => 'Mobile Accessories', 'homepage_image' => 'public/assets/images/mobile_accessories.webp', 'bg' => '#fde8d8'],
+            ['slug' => 'power-banks', 'category_name' => 'Fast Charging Power Banks', 'homepage_image' => 'public/assets/images/power-banks.webp', 'bg' => '#fef9c3'],
+            ['slug' => 'bluetooth-speakers', 'category_name' => 'Portable Bluetooth Speakers', 'homepage_image' => 'public/assets/images/bluetooth-speakers.webp', 'bg' => '#fce7f3'],
+        ];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function staticHomepageBrands(): array
+    {
+        return [
+            ['slug' => 'apple', 'brand_name' => 'Apple', 'homepage_logo' => 'public/assets/images/apple_logo.webp'],
+            ['slug' => 'infinix', 'brand_name' => 'Infinix', 'homepage_logo' => 'public/assets/images/infinix_logo.webp'],
+            ['slug' => 'oppo', 'brand_name' => 'Oppo', 'homepage_logo' => 'public/assets/images/oppo_logo.webp'],
+            ['slug' => 'realme', 'brand_name' => 'Realme', 'homepage_logo' => 'public/assets/images/realme_logo.webp'],
+            ['slug' => 'samsung', 'brand_name' => 'Samsung', 'homepage_logo' => 'public/assets/images/samsung_logo.webp'],
+            ['slug' => 'tecno', 'brand_name' => 'Tecno', 'homepage_logo' => 'public/assets/images/tecno_logo.webp'],
+            ['slug' => 'vivo', 'brand_name' => 'Vivo', 'homepage_logo' => 'public/assets/images/vivo_logo.webp'],
+            ['slug' => 'xiaomi', 'brand_name' => 'Xiaomi', 'homepage_logo' => 'public/assets/images/xiaomi_logo.webp'],
+        ];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function getHomepageCarouselCategories(): array
+    {
+        $dynamic = $this->getHomepageCategories();
+        $dynamicSlugs = array_map(static fn(array $row): string => (string) ($row['slug'] ?? ''), $dynamic);
+
+        $carousel = $dynamic;
+        foreach (self::staticHomepageCategories() as $staticCategory) {
+            $staticSlug = (string) ($staticCategory['slug'] ?? '');
+            if ($staticSlug !== '' && !in_array($staticSlug, $dynamicSlugs, true)) {
+                $carousel[] = $staticCategory;
+            }
+        }
+
+        if ($dynamic === []) {
+            $carousel = self::staticHomepageCategories();
+        }
+
+        usort($carousel, static function (array $a, array $b): int {
+            return strcasecmp((string) ($a['category_name'] ?? ''), (string) ($b['category_name'] ?? ''));
+        });
+
+        return $carousel;
+    }
+
+    /** @return array<int, string> */
+    public function getHomepageCarouselSlugs(): array
+    {
+        $slugs = [];
+        foreach ($this->getHomepageCarouselCategories() as $row) {
+            $slug = (string) ($row['slug'] ?? '');
+            if ($slug !== '') {
+                $slugs[] = $slug;
+            }
+        }
+
+        return array_values(array_unique($slugs));
+    }
+
+    public function categoryShowsOnHomepage(array $category): bool
+    {
+        if ((int) ($category['show_on_homepage'] ?? 0) === 1) {
+            return true;
+        }
+
+        $slug = (string) ($category['slug'] ?? '');
+        return $slug !== '' && in_array($slug, $this->getHomepageCarouselSlugs(), true);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function getHomepageBrandCarousel(): array
+    {
+        $dynamic = $this->getHomepageBrands();
+        $dynamicSlugs = array_map(static fn(array $row): string => (string) ($row['slug'] ?? ''), $dynamic);
+
+        $carousel = $dynamic;
+        foreach (self::staticHomepageBrands() as $staticBrand) {
+            $staticSlug = (string) ($staticBrand['slug'] ?? '');
+            if ($staticSlug !== '' && !in_array($staticSlug, $dynamicSlugs, true)) {
+                $carousel[] = $staticBrand;
+            }
+        }
+
+        if ($dynamic === []) {
+            $carousel = self::staticHomepageBrands();
+        }
+
+        usort($carousel, static function (array $a, array $b): int {
+            return strcasecmp((string) ($a['brand_name'] ?? ''), (string) ($b['brand_name'] ?? ''));
+        });
+
+        return $carousel;
+    }
+
+    /** @return array<int, string> */
+    public function getHomepageBrandCarouselSlugs(): array
+    {
+        $slugs = [];
+        foreach ($this->getHomepageBrandCarousel() as $row) {
+            $slug = (string) ($row['slug'] ?? '');
+            if ($slug !== '') {
+                $slugs[] = $slug;
+            }
+        }
+
+        return array_values(array_unique($slugs));
+    }
+
+    public function brandShowsOnHomepage(array $brand): bool
+    {
+        if ((int) ($brand['show_on_homepage'] ?? 0) === 1) {
+            return true;
+        }
+
+        $slug = (string) ($brand['slug'] ?? '');
+        return $slug !== '' && in_array($slug, $this->getHomepageBrandCarouselSlugs(), true);
+    }
+
+    /** @return array<int, array<string, mixed>> */
     public function getHomepageCategories(): array
     {
         $sql = 'SELECT c.category_id, c.category_name, c.slug, c.sort_order, c.homepage_image

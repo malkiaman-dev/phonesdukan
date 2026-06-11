@@ -515,7 +515,7 @@ include __DIR__ . '/admin_sidebar.php';
                         <td><?= htmlspecialchars($brand['brand_name']) ?></td>
                         <td><code><?= htmlspecialchars($brand['slug']) ?></code></td>
                         <td>
-                            <?php if (!empty($brand['show_on_homepage'])): ?>
+                            <?php if ($model->brandShowsOnHomepage($brand)): ?>
                                 <span class="home-badge" title="Shown on homepage brands"><i class="fas fa-house" aria-hidden="true"></i> Yes</span>
                             <?php else: ?>
                                 <span class="cp-empty-mark">—</span>
@@ -549,7 +549,7 @@ include __DIR__ . '/admin_sidebar.php';
                         <td><strong><?= htmlspecialchars($cat['category_name']) ?></strong></td>
                         <td><code><?= htmlspecialchars($cat['slug']) ?></code></td>
                         <td>
-                            <?php if (!empty($cat['show_on_homepage'])): ?>
+                            <?php if ($model->categoryShowsOnHomepage($cat)): ?>
                                 <span class="home-badge" title="Shown on homepage carousel"><i class="fas fa-house" aria-hidden="true"></i> Yes</span>
                             <?php else: ?>
                                 <span class="cp-empty-mark">—</span>
