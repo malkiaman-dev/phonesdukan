@@ -260,8 +260,8 @@ include __DIR__ . '/admin_sidebar.php';
 }
 .vp-toast.show { display:block; }
 .vp-toast.is-error { border-left-color:#facc15; }
-/* Display type hint */
-.dtype-hint { font-size:.8rem; color:var(--muted); margin-top:4px; }
+/* Display type hint moved to label tooltip */
+.dtype-hint { display: none; }
 /* Section heading */
 .section-head { padding:22px 24px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .section-head h2 { margin:0; font-size:1.125rem; font-weight:600; line-height:1.35; letter-spacing:-0.01em; color:var(--black); }
@@ -295,13 +295,12 @@ include __DIR__ . '/admin_sidebar.php';
                     <input type="text" name="type_name" placeholder="e.g. Color, RAM, Storage, Size" required>
                 </div>
                 <div class="vp-field">
-                    <label>Display Type</label>
+                    <label>Display Type <?= adminTooltipIcon('Values show as clickable pill buttons.', 'addDtypeTooltip') ?></label>
                     <select name="display_type" id="addDisplayType" onchange="toggleAddColorHint(this.value)">
                         <option value="button">Button / Text</option>
                         <option value="color">Color Swatch</option>
                         <option value="image">Image Swatch</option>
                     </select>
-                    <div class="dtype-hint" id="addDtypeHint">Values show as clickable pill buttons.</div>
                 </div>
                 <div class="vp-field">
                     <label>Sort Order</label>
@@ -527,7 +526,10 @@ function evSyncPicker(input) {
 // ---- Display type hint ----
 const hints = {button:'Values show as clickable pill buttons.',color:'Values show as circular color swatches.',image:'Values show as small image swatches.'};
 function toggleAddColorHint(val) {
-    document.getElementById('addDtypeHint').textContent = hints[val] || hints.button;
+    const tooltip = document.getElementById('addDtypeTooltip');
+    if (tooltip) {
+        tooltip.setAttribute('data-tooltip', hints[val] || hints.button);
+    }
 }
 
 // ---- Show/hide color field in "Add Value" form ----

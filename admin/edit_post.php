@@ -461,7 +461,7 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
         white-space:nowrap; transition:color .15s; align-self:flex-start;
     }
     .post-seo-auto-btn:hover { color:#facc15; }
-    .post-seo-field-hint { display:block; color:#9ca3af; font-size:.76rem; margin-top:4px; }
+    .post-seo-field-hint { display: none !important; }
     .post-seo-fill-btn {
         background:#facc15; color:#111; border:none; border-radius:8px;
         padding:7px 14px; font-size:.82rem; font-weight:800;
@@ -499,7 +499,7 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
     .post-seo-preview-title { color: #1a0dab !important; font-size: 1.05rem !important; }
     .post-seo-preview-desc  { color: #4d5156 !important; font-size: .85rem !important; }
     .post-seo-preview-label { color: #6b7280 !important; font-size: .72rem !important; text-transform: uppercase; letter-spacing: .06em; }
-    .post-seo-field-hint    { color: #9ca3af !important; font-size: .76rem !important; display: block; margin-top: 4px; }
+    .post-seo-field-hint    { display: none !important; }
     /* Character counters — styled with a subtle pill, no red */
     .post-seo-char-counter {
         font-size: .75rem !important;
@@ -616,7 +616,7 @@ $_postViewUrl = 'https://www.phonesdukan.com/blog/'
 
             <div class="form-group">
                 <label for="meta_title" style="display:flex;justify-content:space-between;align-items:center">
-                    <span>Meta Title</span>
+                    <span>Meta Title <?= adminTooltipIcon('Recommended: 50–60 characters. Pattern: "{Post Title} | Phones Dukan"') ?></span>
                     <span id="meta_title_counter" class="post-seo-char-counter too-short">0/60</span>
                 </label>
                 <div class="post-seo-field-wrap">
@@ -626,12 +626,11 @@ $_postViewUrl = 'https://www.phonesdukan.com/blog/'
                         oninput="postSeoUpdateCharCounter('meta_title',60);postSeoUpdateSnippetPreview()">
                     <button type="button" class="post-seo-auto-btn" onclick="postSeoGenerateTitle()" title="Auto-generate from post title">Auto</button>
                 </div>
-                <span class="post-seo-field-hint">Recommended: 50–60 characters. Pattern: "{Post Title} | Phones Dukan"</span>
             </div>
 
             <div class="form-group">
                 <label for="meta_description" style="display:flex;justify-content:space-between;align-items:center">
-                    <span>Meta Description</span>
+                    <span>Meta Description <?= adminTooltipIcon('Recommended: 140–160 characters. Auto-generates from the Excerpt field.') ?></span>
                     <span id="meta_description_counter" class="post-seo-char-counter too-short">0/160</span>
                 </label>
                 <div class="post-seo-field-wrap">
@@ -640,7 +639,6 @@ $_postViewUrl = 'https://www.phonesdukan.com/blog/'
                         oninput="postSeoUpdateCharCounter('meta_description',160);postSeoUpdateSnippetPreview()"><?php echo htmlspecialchars($post['meta_description'] ?? ''); ?></textarea>
                     <button type="button" class="post-seo-auto-btn" onclick="postSeoGenerateDescription()" title="Auto-generate from excerpt" style="align-self:flex-start">Auto</button>
                 </div>
-                <span class="post-seo-field-hint">Recommended: 140–160 characters. Auto-generates from the Excerpt field.</span>
             </div>
 
             <div class="form-group" style="margin-bottom:0">

@@ -607,7 +607,7 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
             <h3 class="section-title">SEO Settings</h3>
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="meta_title">Meta Title</label>
+                    <label for="meta_title">Meta Title <?= adminTooltipIcon('Recommended: 50–60 characters. Pattern: "{Post Title} | Phones Dukan"') ?></label>
                     <input type="text" name="meta_title" id="meta_title" placeholder="SEO title for this post" value="<?php echo htmlspecialchars($_POST['meta_title'] ?? ''); ?>">
                 </div>
                 <div class="form-group">
@@ -615,7 +615,7 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
                     <input type="text" name="meta_keywords" id="meta_keywords" placeholder="keyword1, keyword2, keyword3" value="<?php echo htmlspecialchars($_POST['meta_keywords'] ?? ''); ?>">
                 </div>
                 <div class="form-group span-2">
-                    <label for="meta_description">Meta Description</label>
+                    <label for="meta_description">Meta Description <?= adminTooltipIcon('Recommended: 140–160 characters. Brief summary for Google search results.') ?></label>
                     <textarea name="meta_description" id="meta_description" placeholder="SEO description for search engines"><?php echo htmlspecialchars($_POST['meta_description'] ?? ''); ?></textarea>
                 </div>
                 <div class="form-group span-2">

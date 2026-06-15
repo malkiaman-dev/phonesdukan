@@ -454,3 +454,193 @@ body.admin-login-page .btn:hover {
   background: var(--ad-btn-primary-hover) !important;
   color: var(--ad-btn-primary-text) !important;
 }
+
+/* ── Admin field tooltips (hover / focus) ── */
+.ad-tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.ad-tooltip--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  color: #9ca3af;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.ad-tooltip--icon i {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.ad-tooltip--label {
+  display: inline;
+}
+
+.ad-tooltip:focus-visible {
+  outline: 2px solid var(--ad-btn-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ad-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 15000;
+  min-width: 200px;
+  max-width: 300px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: normal;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  transform: translateY(4px);
+  box-shadow: 0 10px 24px rgba(17, 17, 17, 0.18);
+}
+
+.ad-tooltip::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: calc(100% + 4px);
+  z-index: 15000;
+  border: 6px solid transparent;
+  border-top-color: #111111;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  transform: translateY(4px);
+}
+
+.ad-tooltip--icon::after {
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+
+.ad-tooltip--icon::before {
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+
+.cp-check-label:hover .ad-tooltip::after,
+.cp-check-label:hover .ad-tooltip::before,
+label:hover .ad-tooltip::after,
+label:hover .ad-tooltip::before,
+.ad-tooltip:hover::after,
+.ad-tooltip:hover::before,
+.ad-tooltip:focus-visible::after,
+.ad-tooltip:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.ad-tooltip--icon:hover::after,
+.ad-tooltip--icon:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+.ad-tooltip--icon:hover::before,
+.ad-tooltip--icon:focus-visible::before {
+  transform: translateX(-50%) translateY(0);
+}
+
+.cp-check-field,
+.form-group,
+.ep-field,
+.vp-field,
+.cp-field,
+.pm-thumb-section {
+  overflow: visible;
+}
+
+/* ── Admin enable/disable toggles ── */
+.ad-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ad-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ad-toggle-track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: #ff6347;
+  box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.35);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ad-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(17, 17, 17, 0.22);
+  transition: transform 0.2s ease;
+}
+
+.ad-toggle-input:checked + .ad-toggle-track {
+  background: #22c55e;
+  box-shadow: inset 0 0 0 1px rgba(21, 128, 61, 0.45);
+}
+
+.ad-toggle-input:checked + .ad-toggle-track::after {
+  transform: translateX(20px);
+}
+
+.ad-toggle-input:focus-visible + .ad-toggle-track {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
+.ad-toggle-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dc2626;
+  min-width: 58px;
+}
+
+.ad-toggle-input:checked ~ .ad-toggle-text {
+  color: #15803d;
+}
+
+.ad-toggle.is-busy {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.ad-toggle.is-error .ad-toggle-track {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}

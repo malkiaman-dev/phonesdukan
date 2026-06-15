@@ -72,8 +72,7 @@ $pmHeadingTag = $pmHeadingTag ?? 'h2';
     </div>
 
     <div class="pm-thumb-section form-group full-width">
-        <label>Video Thumbnail <small style="color:#9ca3af;font-weight:400">(optional poster)</small></label>
-        <p class="pm-thumb-hint">Upload a custom poster image, or use the auto-generated frame from your video.</p>
+        <label>Video Thumbnail <small style="color:#9ca3af;font-weight:400">(optional poster)</small> <?= adminTooltipIcon('Upload a custom poster image, or use the auto-generated frame from your video.') ?></label>
 
         <div id="pm-thumb-upload-panel" class="pm-panel is-active">
             <label class="pm-upload-box" for="pm_thumb_file">

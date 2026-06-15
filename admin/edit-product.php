@@ -413,10 +413,7 @@ select.vb-input-ep { cursor:pointer; }
     }
 
     .ep-field-hint {
-        margin: 8px 0 0;
-        font-size: 0.8rem;
-        line-height: 1.45;
-        color: #6b7280;
+        display: none;
     }
 
     #expected-coming-date-section input[type="date"] {
@@ -960,7 +957,7 @@ select.vb-input-ep { cursor:pointer; }
         box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
         transform: translateY(-1px);
     }
-    .ep-seo-field-hint { display: block; color: #9ca3af; font-size: .76rem; margin-top: 4px; }
+    .ep-seo-field-hint { display: none; }
     /* SEO field header: label LEFT, buttons RIGHT — on the same row directly above input */
     .ep-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
     .ep-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; font-size: .9rem; color: var(--black); flex-shrink: 0; }
@@ -1084,9 +1081,8 @@ select.vb-input-ep { cursor:pointer; }
                     </select>
                 </div>
                 <div class="ep-field" id="expected-coming-date-section" style="display: <?= ((int) ($product['product_status'] ?? 0) === 2) ? 'block' : 'none' ?>;">
-                    <label for="expected_coming_date">Expected Coming Date <span class="ep-field-optional">(optional)</span></label>
+                    <label for="expected_coming_date">Expected Coming Date <span class="ep-field-optional">(optional)</span> <?= adminTooltipIcon('If set, customers will see this expected launch date on the product page.') ?></label>
                     <input type="date" id="expected_coming_date" name="expected_coming_date" value="<?= htmlspecialchars($product['expected_coming_date'] ?? '') ?>">
-                    <p class="ep-field-hint">If set, customers will see this expected launch date on the product page.</p>
                 </div>
                 <div class="ep-field">
                     <label>B2B Available</label>
@@ -1182,12 +1178,11 @@ select.vb-input-ep { cursor:pointer; }
                     <input type="number" name="prepaid_discount_amount" value="<?= htmlspecialchars((float)($product['prepaid_discount_amount'] ?? 0)) ?>" step="0.01" min="0" placeholder="0">
                 </div>
                 <div class="ep-field">
-                    <label>Product SKU</label>
+                    <label>Product SKU <?= adminTooltipIcon('Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2') ?></label>
                     <div class="ep-seo-field-wrap">
                         <input type="text" id="ep_product_sku" name="product_sku" value="<?= htmlspecialchars($product['product_sku'] ?? '') ?>" placeholder="SAM-MOB-X7K2">
                         <button type="button" class="ep-seo-auto-btn" onclick="epGenerateProductSku()" title="Auto-generate SKU from brand and category">Auto</button>
                     </div>
-                    <span class="ep-seo-field-hint">Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2</span>
                 </div>
             </div>
         </div>
@@ -1256,7 +1251,7 @@ select.vb-input-ep { cursor:pointer; }
             <div class="ep-grid">
                 <div class="ep-field full">
                     <div class="ep-seo-field-hdr">
-                        <label for="ep_seo_title">SEO Title <span id="ep_seo_title_counter" class="ep-seo-char-counter">0/60</span></label>
+                        <label for="ep_seo_title">SEO Title <?= adminTooltipIcon('Recommended: 50-60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"') ?> <span id="ep_seo_title_counter" class="ep-seo-char-counter">0/60</span></label>
                         <div class="ep-seo-btn-row">
                             <button type="button" class="ai-refine-btn" data-ai-refine="ep_seo_title" onclick="AISeo.refineField('seo_title','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
                             <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateTitle()" style="height:34px;font-size:.72rem">Manual Auto</button>
@@ -1268,12 +1263,11 @@ select.vb-input-ep { cursor:pointer; }
                             placeholder="Product Name Price in Pakistan May 2026 | Phones Dukan"
                             oninput="epSeoUpdateCharCounter('ep_seo_title',60);epSeoUpdateSnippetPreview();AISeo.runScore()">
                     </div>
-                    <span class="ep-seo-field-hint">Recommended: 50-60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
                 </div>
 
                 <div class="ep-field">
                     <div class="ep-seo-field-hdr">
-                        <label for="ep_focus_keyword">Focus Keyword</label>
+                        <label for="ep_focus_keyword">Focus Keyword <?= adminTooltipIcon('Primary keyword for ranking. Use: "brand model price in pakistan"') ?></label>
                         <div class="ep-seo-btn-row">
                             <button type="button" class="ai-refine-btn" onclick="AISeo.generateField('focus_keyword',this)"><i class="fas fa-key"></i> AI Suggest</button>
                             <button type="button" class="ep-seo-auto-btn" onclick="epSeoGenerateFocusKeyword()" style="height:34px;font-size:.72rem">Manual</button>
@@ -1285,12 +1279,11 @@ select.vb-input-ep { cursor:pointer; }
                             placeholder="product name price in pakistan"
                             oninput="AISeo.runScore()">
                     </div>
-                    <span class="ep-seo-field-hint">Primary keyword for ranking. Use: "brand model price in pakistan"</span>
                 </div>
 
                 <div class="ep-field">
                     <div class="ep-seo-field-hdr">
-                        <label for="ep_secondary_keywords">Tags</label>
+                        <label for="ep_secondary_keywords">Tags <?= adminTooltipIcon('Comma-separated tags for search visibility and discoverability.') ?></label>
                         <div class="ep-seo-btn-row">
                             <button type="button" class="ai-refine-btn" onclick="AISeo.generateTagsDirect(this)"><i class="fas fa-tags"></i> Generate Tags</button>
                         </div>
@@ -1300,12 +1293,11 @@ select.vb-input-ep { cursor:pointer; }
                             value="<?= htmlspecialchars($seoData['secondary_keywords'] ?? '') ?>"
                             placeholder="buy online, best price, official warranty, pakistan">
                     </div>
-                    <span class="ep-seo-field-hint">Comma-separated tags for search visibility and discoverability.</span>
                 </div>
 
                 <div class="ep-field full">
                     <div class="ep-seo-field-hdr">
-                        <label for="ep_seo_description">SEO Meta Description <span id="ep_seo_desc_counter" class="ep-seo-char-counter">0/160</span></label>
+                        <label for="ep_seo_description">SEO Meta Description <?= adminTooltipIcon('Recommended: 140-160 characters. Auto-generates from short description or product name.') ?> <span id="ep_seo_desc_counter" class="ep-seo-char-counter">0/160</span></label>
                         <div class="ep-seo-btn-row">
                             <button type="button" class="ai-refine-btn" data-ai-refine="ep_seo_description" onclick="AISeo.refineField('seo_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
                             <div class="ai-btn-group">
@@ -1324,7 +1316,6 @@ select.vb-input-ep { cursor:pointer; }
                             placeholder="Buy product name in Pakistan at the best price. PTA-approved with official warranty..."
                             oninput="epSeoUpdateCharCounter('ep_seo_description',160);epSeoUpdateSnippetPreview();AISeo.runScore()"><?= htmlspecialchars($seoData['seo_description'] ?? '') ?></textarea>
                     </div>
-                    <span class="ep-seo-field-hint">Recommended: 140-160 characters. Auto-generates from short description or product name.</span>
                 </div>
 
                 <div class="ep-field full">

@@ -169,12 +169,11 @@ select.vb-input { cursor:pointer; }
     box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
     transform: translateY(-1px);
 }
-.seo-field-hint { display: block; color: #9ca3af !important; font-size: 0.72rem !important; margin-top: 4px; line-height: 1.4; }
+.seo-field-hint { display: none !important; }
 /* SEO field header: label LEFT, buttons RIGHT on same row */
 .ap-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
 .ap-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; flex-shrink: 0; }
 .ap-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; }
-.form-group .seo-field-hint, .form-group span.seo-field-hint { font-size: 0.72rem !important; }
 .seo-fill-all-btn {
     background: #facc15;
     color: #111;
@@ -377,12 +376,11 @@ select.vb-input { cursor:pointer; }
                     <input id="stock_quantity" type="number" name="stock_quantity" placeholder="25" required>
                 </div>
                 <div class="form-group">
-                    <label for="product_sku">Product SKU</label>
+                    <label for="product_sku">Product SKU <?= adminTooltipIcon('Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2') ?></label>
                     <div class="seo-field-wrap">
                         <input id="product_sku" type="text" name="product_sku" placeholder="SAM-MOB-X7K2">
                         <button type="button" class="seo-auto-btn" onclick="generateProductSku()" title="Auto-generate SKU from brand and category">Auto</button>
                     </div>
-                    <span class="seo-field-hint" style="font-size:0.72rem!important;color:#9ca3af!important;line-height:1.4;">Format: BRAND-CATEGORY-RANDOM e.g. SAM-MOB-X7K2</span>
                 </div>
             </div>
         </section>
@@ -437,9 +435,8 @@ select.vb-input { cursor:pointer; }
                     </div>
                 </div>
                 <div class="form-group" id="expected-coming-date-wrap" style="display:none;">
-                    <label for="expected_coming_date">Expected Coming Date <span class="field-optional">(optional)</span></label>
+                    <label for="expected_coming_date">Expected Coming Date <span class="field-optional">(optional)</span> <?= adminTooltipIcon('If set, customers will see this expected launch date on the product page.') ?></label>
                     <input type="date" class="native-input" id="expected_coming_date" name="expected_coming_date">
-                    <p class="field-hint">If set, customers will see this expected launch date on the product page.</p>
                 </div>
             </div>
         </section>
@@ -475,7 +472,7 @@ select.vb-input { cursor:pointer; }
             <div class="form-grid cols-2">
                 <div class="form-group full-width">
                     <div class="ap-seo-field-hdr">
-                        <label for="seo_title">SEO Title <span id="seo_title_counter" class="seo-char-counter too-short">0/60</span></label>
+                        <label for="seo_title">SEO Title <?= adminTooltipIcon('Recommended: 50-60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"') ?> <span id="seo_title_counter" class="seo-char-counter too-short">0/60</span></label>
                         <div class="ap-seo-btn-row">
                             <button type="button" class="ai-refine-btn" data-ai-refine="seo_title" onclick="AISeo.refineField('seo_title','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
                             <button type="button" class="seo-auto-btn" onclick="seoGenerateSeoTitle()" style="height:34px;font-size:.72rem">Manual Auto</button>
@@ -486,12 +483,11 @@ select.vb-input { cursor:pointer; }
                             placeholder="Product Name Price in Pakistan May 2026 | Phones Dukan"
                             oninput="seoUpdateCharCounter('seo_title',60);seoUpdateSnippetPreview();AISeo.runScore()">
                     </div>
-                    <span class="seo-field-hint">Recommended: 50-60 characters. Pattern: "{Name} Price in Pakistan {Month Year} | Phones Dukan"</span>
                 </div>
 
                 <div class="form-group">
                     <div class="ap-seo-field-hdr">
-                        <label for="focus_keyword">Focus Keyword</label>
+                        <label for="focus_keyword">Focus Keyword <?= adminTooltipIcon('Primary keyword for ranking. Use: "brand model price in pakistan"') ?></label>
                         <div class="ap-seo-btn-row">
                             <button type="button" class="ai-refine-btn" onclick="AISeo.generateField('focus_keyword',this)"><i class="fas fa-key"></i> AI Suggest</button>
                             <button type="button" class="seo-auto-btn" onclick="seoGenerateFocusKeyword()" style="height:34px;font-size:.72rem">Manual</button>
@@ -502,12 +498,11 @@ select.vb-input { cursor:pointer; }
                             placeholder="product name price in pakistan"
                             oninput="AISeo.runScore()">
                     </div>
-                    <span class="seo-field-hint">Primary keyword for ranking. Use: "brand model price in pakistan"</span>
                 </div>
 
                 <div class="form-group">
                     <div class="ap-seo-field-hdr">
-                        <label for="secondary_keywords">Tags</label>
+                        <label for="secondary_keywords">Tags <?= adminTooltipIcon('Comma-separated tags for search visibility and discoverability.') ?></label>
                         <div class="ap-seo-btn-row">
                             <button type="button" class="ai-refine-btn" onclick="AISeo.generateTagsDirect(this)"><i class="fas fa-tags"></i> Generate Tags</button>
                         </div>
@@ -516,12 +511,11 @@ select.vb-input { cursor:pointer; }
                         <input id="secondary_keywords" type="text" name="secondary_keywords"
                             placeholder="buy online, best price, official warranty, pakistan">
                     </div>
-                    <span class="seo-field-hint">Comma-separated tags for search visibility and discoverability.</span>
                 </div>
 
                 <div class="form-group full-width">
                     <div class="ap-seo-field-hdr">
-                        <label for="seo_description">SEO Meta Description <span id="seo_description_counter" class="seo-char-counter too-short">0/160</span></label>
+                        <label for="seo_description">SEO Meta Description <?= adminTooltipIcon('Recommended: 140-160 characters. Auto-generates from short description or product name.') ?> <span id="seo_description_counter" class="seo-char-counter too-short">0/160</span></label>
                         <div class="ap-seo-btn-row">
                             <button type="button" class="ai-refine-btn" data-ai-refine="seo_description" onclick="AISeo.refineField('seo_description','seo')"><i class="fas fa-magic"></i> Refine with AI</button>
                             <div class="ai-btn-group">
@@ -540,7 +534,6 @@ select.vb-input { cursor:pointer; }
                             placeholder="Buy product name in Pakistan at the best price. PTA-approved with official warranty. Fast delivery..."
                             oninput="seoUpdateCharCounter('seo_description',160);seoUpdateSnippetPreview();AISeo.runScore()"></textarea>
                     </div>
-                    <span class="seo-field-hint">Recommended: 140-160 characters. Auto-generates from short description or product name.</span>
                 </div>
 
                 <div class="form-group full-width">

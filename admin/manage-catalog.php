@@ -5,6 +5,7 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     exit();
 }
 
+require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../app/Models/CatalogModel.php';
 
 $model = new CatalogModel();
@@ -142,6 +143,34 @@ function catalogDeleteHomepageImage(?string $relativePath): void
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['catalog_toggle'])) {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $entity = (string) ($_POST['entity'] ?? '');
+        $field = (string) ($_POST['field'] ?? '');
+        $id = (int) ($_POST['id'] ?? 0);
+        $enabled = !empty($_POST['enabled']);
+        $result = ['ok' => false, 'message' => 'Invalid toggle request.'];
+
+        if ($entity === 'category' && $field === 'show_in_sidebar') {
+            $result = $model->setCategoryShowInSidebar($id, $enabled);
+        } elseif ($entity === 'category' && $field === 'show_on_homepage') {
+            $result = $model->setCategoryShowOnHomepage($id, $enabled);
+        } elseif ($entity === 'brand' && $field === 'show_on_homepage') {
+            $result = $model->setBrandShowOnHomepage($id, $enabled);
+        }
+
+        if (!$result['ok'] && !empty($result['redirect'])) {
+            $_SESSION['catalog_toast'] = [
+                'type' => 'error',
+                'message' => (string) ($result['message'] ?? 'Please upload the required image.'),
+            ];
+        }
+
+        echo json_encode($result);
+        exit;
+    }
+
     if (isset($_POST['add_brand'])) {
         $name = trim($_POST['brand_name'] ?? '');
         $slug = trim($_POST['brand_slug'] ?? '') ?: catalogMakeSlug($name);
@@ -212,6 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['category_name'] ?? '');
         $slug = trim($_POST['category_slug'] ?? '') ?: catalogMakeSlug($name);
         $showOnHome = !empty($_POST['category_show_on_homepage']);
+        $showInSidebar = !empty($_POST['category_show_in_sidebar']);
         $imagePath = catalogSaveHomepageImage($_FILES['category_homepage_image'] ?? []);
 
         if ($name === '') {
@@ -225,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'A category named "' . $name . '" already exists. Use a different name.'];
         } else {
             $slug = catalogUniqueSlug(fn ($s) => $model->categorySlugExists($s, null), catalogMakeSlug($slug));
-            if ($model->addCategory($name, $slug, null, 0, 1, $showOnHome, $imagePath)) {
+            if ($model->addCategory($name, $slug, null, 0, 1, $showOnHome, $imagePath, $showInSidebar)) {
                 $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category "' . $name . '" added.'];
             } else {
                 if ($imagePath !== null) {
@@ -243,6 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['edit_category_name'] ?? '');
         $slug = trim($_POST['edit_category_slug'] ?? '') ?: catalogMakeSlug($name);
         $showOnHome = !empty($_POST['edit_category_show_on_homepage']);
+        $showInSidebar = !empty($_POST['edit_category_show_in_sidebar']);
         $existing = $id ? $model->getCategoryById($id) : null;
         $imagePath = catalogSaveHomepageImage($_FILES['edit_category_homepage_image'] ?? []);
         $updateImage = $imagePath !== null;
@@ -271,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $slug = catalogUniqueSlug(fn ($s) => $model->categorySlugExists($s, null, $id), catalogMakeSlug($slug));
-            if ($model->updateCategory($id, $name, $slug, null, 0, 1, $showOnHome, $finalImage, $updateImage)) {
+            if ($model->updateCategory($id, $name, $slug, null, 0, 1, $showOnHome, $finalImage, $updateImage, $showInSidebar)) {
                 $_SESSION['catalog_toast'] = ['type' => 'success', 'message' => 'Category updated.'];
             } else {
                 $_SESSION['catalog_toast'] = ['type' => 'error', 'message' => 'Could not update category. The name or slug may already be in use.'];
@@ -375,6 +406,7 @@ if (isset($_GET['delete_subcategory'])) {
 $editBrand = isset($_GET['edit_brand']) ? $model->getBrandById((int) $_GET['edit_brand']) : null;
 $editCategory = isset($_GET['edit_category']) ? $model->getCategoryById((int) $_GET['edit_category']) : null;
 $editSub = isset($_GET['edit_sub']) ? $model->getCategoryById((int) $_GET['edit_sub']) : null;
+$prefillHomeOnEdit = !empty($_GET['enable_home']);
 
 $brands = $model->getAllBrands();
 $categoriesWithSubs = $model->getCategoriesWithSubcounts();
@@ -383,15 +415,6 @@ $parentCategories = $model->getParentCategories();
 include __DIR__ . '/admin_header.php';
 include __DIR__ . '/admin_sidebar.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manage Catalog</title>
-<link rel="stylesheet" href="/public/assets/css/admin/manage-catalog.css">
-</head>
-<body>
 <div class="cp">
 
     <div class="ccard cp-header">
@@ -414,12 +437,11 @@ include __DIR__ . '/admin_sidebar.php';
                 <div class="cp-field cp-check-field">
                     <label class="cp-check-label">
                         <input type="checkbox" name="brand_show_on_homepage" value="1" data-home-toggle="brand-home-fields">
-                        Show on home page
+                        <?= adminTooltipLabel('Show on home page', 'Display this brand in the homepage brands marquee.') ?>
                     </label>
-                    <p class="cp-field-hint">Display this brand in the homepage brands marquee.</p>
                 </div>
                 <div class="cp-field cp-home-fields" id="brand-home-fields" hidden>
-                    <label for="brand_homepage_logo">Brand Logo <span class="req-star" aria-hidden="true">*</span></label>
+                    <label for="brand_homepage_logo">Brand Logo <span class="req-star" aria-hidden="true">*</span> <?= adminTooltipIcon('Transparent PNG or WEBP works best for brand logos.') ?></label>
                     <div class="cp-file-upload">
                         <input type="file" class="cp-file-native" id="brand_homepage_logo" name="brand_homepage_logo" accept="image/jpeg,image/png,image/webp,image/gif">
                         <label for="brand_homepage_logo" class="cp-file-btn">
@@ -428,7 +450,6 @@ include __DIR__ . '/admin_sidebar.php';
                             <span class="cp-file-name">No file selected</span>
                         </label>
                     </div>
-                    <p class="cp-field-hint">Transparent PNG or WEBP works best for brand logos.</p>
                 </div>
                 <button class="cp-btn" type="submit" name="add_brand">Add Brand</button>
             </form>
@@ -447,13 +468,18 @@ include __DIR__ . '/admin_sidebar.php';
                 </div>
                 <div class="cp-field cp-check-field">
                     <label class="cp-check-label">
-                        <input type="checkbox" name="category_show_on_homepage" value="1" data-home-toggle="category-home-fields">
-                        Show on home page
+                        <input type="checkbox" name="category_show_in_sidebar" value="1">
+                        <?= adminTooltipLabel('Show in sidebar', 'Display this category in the homepage navigation sidebar.') ?>
                     </label>
-                    <p class="cp-field-hint">Display this category in the homepage carousel.</p>
+                </div>
+                <div class="cp-field cp-check-field">
+                    <label class="cp-check-label">
+                        <input type="checkbox" name="category_show_on_homepage" value="1" data-home-toggle="category-home-fields">
+                        <?= adminTooltipLabel('Show on home page', 'Display this category in the homepage carousel.') ?>
+                    </label>
                 </div>
                 <div class="cp-field cp-home-fields" id="category-home-fields" hidden>
-                    <label for="category_homepage_image">Homepage Image <span class="req-star" aria-hidden="true">*</span></label>
+                    <label for="category_homepage_image">Homepage Image <span class="req-star" aria-hidden="true">*</span> <?= adminTooltipIcon('Square image works best (PNG, JPG, WEBP, or GIF).') ?></label>
                     <div class="cp-file-upload">
                         <input type="file" class="cp-file-native" id="category_homepage_image" name="category_homepage_image" accept="image/jpeg,image/png,image/webp,image/gif">
                         <label for="category_homepage_image" class="cp-file-btn">
@@ -462,7 +488,6 @@ include __DIR__ . '/admin_sidebar.php';
                             <span class="cp-file-name">No file selected</span>
                         </label>
                     </div>
-                    <p class="cp-field-hint">Square image works best (PNG, JPG, WEBP, or GIF).</p>
                 </div>
                 <button class="cp-btn" type="submit" name="add_category">Add Category</button>
             </form>
@@ -515,11 +540,16 @@ include __DIR__ . '/admin_sidebar.php';
                         <td><?= htmlspecialchars($brand['brand_name']) ?></td>
                         <td><code><?= htmlspecialchars($brand['slug']) ?></code></td>
                         <td>
-                            <?php if ($model->brandShowsOnHomepage($brand)): ?>
-                                <span class="home-badge" title="Shown on homepage brands"><i class="fas fa-house" aria-hidden="true"></i> Yes</span>
-                            <?php else: ?>
-                                <span class="cp-empty-mark">—</span>
-                            <?php endif; ?>
+                            <?= adminToggleSwitch(
+                                (int) ($brand['show_on_homepage'] ?? 0) === 1,
+                                [
+                                    'catalog-toggle' => '1',
+                                    'entity' => 'brand',
+                                    'field' => 'show_on_homepage',
+                                    'id' => (string) (int) $brand['brand_id'],
+                                ],
+                                'Toggle home page display for ' . (string) $brand['brand_name']
+                            ) ?>
                         </td>
                         <td>
                             <div class="row-actions">
@@ -539,21 +569,38 @@ include __DIR__ . '/admin_sidebar.php';
         <div class="ctable-wrap">
             <table class="ctable">
                 <thead>
-                    <tr><th>Category</th><th>Slug</th><th>Home</th><th>Subcategories</th><th>Actions</th></tr>
+                    <tr><th>Category</th><th>Slug</th><th>Home</th><th>Sidebar</th><th>Subcategories</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                 <?php if (empty($categoriesWithSubs)): ?>
-                    <tr><td colspan="5"><div class="empty-state">No categories yet.</div></td></tr>
+                    <tr><td colspan="6"><div class="empty-state">No categories yet.</div></td></tr>
                 <?php else: foreach ($categoriesWithSubs as $cat): ?>
                     <tr>
                         <td><strong><?= htmlspecialchars($cat['category_name']) ?></strong></td>
                         <td><code><?= htmlspecialchars($cat['slug']) ?></code></td>
                         <td>
-                            <?php if ($model->categoryShowsOnHomepage($cat)): ?>
-                                <span class="home-badge" title="Shown on homepage carousel"><i class="fas fa-house" aria-hidden="true"></i> Yes</span>
-                            <?php else: ?>
-                                <span class="cp-empty-mark">—</span>
-                            <?php endif; ?>
+                            <?= adminToggleSwitch(
+                                (int) ($cat['show_on_homepage'] ?? 0) === 1,
+                                [
+                                    'catalog-toggle' => '1',
+                                    'entity' => 'category',
+                                    'field' => 'show_on_homepage',
+                                    'id' => (string) (int) $cat['category_id'],
+                                ],
+                                'Toggle home page display for ' . (string) $cat['category_name']
+                            ) ?>
+                        </td>
+                        <td>
+                            <?= adminToggleSwitch(
+                                (int) ($cat['show_in_sidebar'] ?? 0) === 1,
+                                [
+                                    'catalog-toggle' => '1',
+                                    'entity' => 'category',
+                                    'field' => 'show_in_sidebar',
+                                    'id' => (string) (int) $cat['category_id'],
+                                ],
+                                'Toggle sidebar display for ' . (string) $cat['category_name']
+                            ) ?>
                         </td>
                         <td>
                             <?php if (empty($cat['subcategories'])): ?>
@@ -594,12 +641,12 @@ include __DIR__ . '/admin_sidebar.php';
             <div class="cp-field"><label>Slug</label><input type="text" name="edit_brand_slug" value="<?= htmlspecialchars($editBrand['slug']) ?>"></div>
             <div class="cp-field cp-check-field">
                 <label class="cp-check-label">
-                    <input type="checkbox" name="edit_brand_show_on_homepage" value="1" data-home-toggle="edit-brand-home-fields" <?= !empty($editBrand['show_on_homepage']) ? 'checked' : '' ?>>
-                    Show on home page
+                    <input type="checkbox" name="edit_brand_show_on_homepage" value="1" data-home-toggle="edit-brand-home-fields" <?= !empty($editBrand['show_on_homepage']) || $prefillHomeOnEdit ? 'checked' : '' ?>>
+                    <?= adminTooltipLabel('Show on home page', 'Display this brand in the homepage brands marquee.') ?>
                 </label>
             </div>
-            <div class="cp-field cp-home-fields" id="edit-brand-home-fields" <?= empty($editBrand['show_on_homepage']) ? 'hidden' : '' ?>>
-                <label>Brand Logo<?= empty($editBrand['homepage_logo']) ? ' <span class="req-star" aria-hidden="true">*</span>' : '' ?></label>
+            <div class="cp-field cp-home-fields" id="edit-brand-home-fields" <?= empty($editBrand['show_on_homepage']) && !$prefillHomeOnEdit ? 'hidden' : '' ?>>
+                <label>Brand Logo<?= empty($editBrand['homepage_logo']) ? ' <span class="req-star" aria-hidden="true">*</span>' : '' ?> <?= adminTooltipIcon('Upload a new logo to replace the current one.') ?></label>
                 <?php if (!empty($editBrand['homepage_logo'])): ?>
                     <div class="cp-image-preview">
                         <img src="<?= htmlspecialchars(url($editBrand['homepage_logo']), ENT_QUOTES, 'UTF-8') ?>" alt="Current brand logo">
@@ -613,7 +660,6 @@ include __DIR__ . '/admin_sidebar.php';
                         <span class="cp-file-name">No file selected</span>
                     </label>
                 </div>
-                <p class="cp-field-hint">Upload a new logo to replace the current one.</p>
             </div>
             <div class="modal-actions">
                 <a class="cp-btn cp-btn-outline" href="manage-catalog.php">Cancel</a>
@@ -634,12 +680,18 @@ include __DIR__ . '/admin_sidebar.php';
             <div class="cp-field"><label>Slug</label><input type="text" name="edit_category_slug" value="<?= htmlspecialchars($editCategory['slug']) ?>"></div>
             <div class="cp-field cp-check-field">
                 <label class="cp-check-label">
-                    <input type="checkbox" name="edit_category_show_on_homepage" value="1" data-home-toggle="edit-category-home-fields" <?= !empty($editCategory['show_on_homepage']) ? 'checked' : '' ?>>
-                    Show on home page
+                    <input type="checkbox" name="edit_category_show_in_sidebar" value="1" <?= !empty($editCategory['show_in_sidebar']) ? 'checked' : '' ?>>
+                    <?= adminTooltipLabel('Show in sidebar', 'Display this category in the homepage navigation sidebar.') ?>
                 </label>
             </div>
-            <div class="cp-field cp-home-fields" id="edit-category-home-fields" <?= empty($editCategory['show_on_homepage']) ? 'hidden' : '' ?>>
-                <label>Homepage Image<?= empty($editCategory['homepage_image']) ? ' <span class="req-star" aria-hidden="true">*</span>' : '' ?></label>
+            <div class="cp-field cp-check-field">
+                <label class="cp-check-label">
+                    <input type="checkbox" name="edit_category_show_on_homepage" value="1" data-home-toggle="edit-category-home-fields" <?= !empty($editCategory['show_on_homepage']) || $prefillHomeOnEdit ? 'checked' : '' ?>>
+                    <?= adminTooltipLabel('Show on home page', 'Display this category in the homepage carousel.') ?>
+                </label>
+            </div>
+            <div class="cp-field cp-home-fields" id="edit-category-home-fields" <?= empty($editCategory['show_on_homepage']) && !$prefillHomeOnEdit ? 'hidden' : '' ?>>
+                <label>Homepage Image<?= empty($editCategory['homepage_image']) ? ' <span class="req-star" aria-hidden="true">*</span>' : '' ?> <?= adminTooltipIcon('Upload a new image to replace the current one.') ?></label>
                 <?php if (!empty($editCategory['homepage_image'])): ?>
                     <div class="cp-image-preview">
                         <img src="<?= htmlspecialchars(url($editCategory['homepage_image']), ENT_QUOTES, 'UTF-8') ?>" alt="Current homepage image">
@@ -653,7 +705,6 @@ include __DIR__ . '/admin_sidebar.php';
                         <span class="cp-file-name">No file selected</span>
                     </label>
                 </div>
-                <p class="cp-field-hint">Upload a new image to replace the current one.</p>
             </div>
             <div class="modal-actions">
                 <a class="cp-btn cp-btn-outline" href="manage-catalog.php">Cancel</a>
@@ -722,6 +773,87 @@ document.querySelectorAll('.cp-file-native').forEach(function (input) {
 
     input.addEventListener('change', function () {
         nameEl.textContent = input.files && input.files[0] ? input.files[0].name : 'No file selected';
+    });
+});
+
+function showCatalogToast(message, type) {
+    var toast = document.getElementById('catalogToast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.remove('is-error');
+    if (type === 'error') {
+        toast.classList.add('is-error');
+    }
+    toast.classList.add('show');
+    clearTimeout(window.__catalogToastTimer);
+    window.__catalogToastTimer = setTimeout(function () {
+        toast.classList.remove('show');
+    }, 4000);
+}
+
+function syncToggleLabel(input) {
+    var label = input.closest('.ad-toggle');
+    var text = label ? label.querySelector('.ad-toggle-text') : null;
+    if (text) {
+        text.textContent = input.checked ? 'Enabled' : 'Disabled';
+    }
+}
+
+document.querySelectorAll('[data-catalog-toggle]').forEach(function (input) {
+    input.addEventListener('change', function () {
+        var toggle = input.closest('.ad-toggle');
+        var previousChecked = !input.checked;
+        var formData = new FormData();
+        formData.append('catalog_toggle', '1');
+        formData.append('entity', input.dataset.entity || '');
+        formData.append('field', input.dataset.field || '');
+        formData.append('id', input.dataset.id || '0');
+        formData.append('enabled', input.checked ? '1' : '0');
+
+        if (toggle) {
+            toggle.classList.add('is-busy');
+            toggle.classList.remove('is-error');
+        }
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+                if (!data.ok) {
+                    input.checked = previousChecked;
+                    syncToggleLabel(input);
+                    if (toggle) {
+                        toggle.classList.add('is-error');
+                    }
+                    showCatalogToast(data.message || 'Could not update setting.', 'error');
+                    return;
+                }
+                syncToggleLabel(input);
+                showCatalogToast(data.message || 'Setting updated.', 'success');
+            })
+            .catch(function () {
+                input.checked = previousChecked;
+                syncToggleLabel(input);
+                if (toggle) {
+                    toggle.classList.add('is-error');
+                }
+                showCatalogToast('Could not update setting. Please try again.', 'error');
+            })
+            .finally(function () {
+                if (toggle) {
+                    toggle.classList.remove('is-busy');
+                }
+            });
     });
 });
 

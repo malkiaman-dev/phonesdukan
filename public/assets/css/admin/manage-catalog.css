@@ -12,8 +12,17 @@
 .cp {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 24px;
-    background: var(--bg);
+    padding: 24px 24px 32px;
+    background: transparent;
+}
+
+body:has(.cp) {
+    min-height: auto !important;
+    height: auto !important;
+}
+
+.cp > .ccard:last-child {
+    margin-bottom: 0;
 }
 
 .ccard {
@@ -33,7 +42,7 @@
 }
 
 /* Undo legacy admin.css global red span pills inside catalog tables */
-.cp .ctable span:not(.home-badge):not(.sub-chip):not(.sub-chip-name) {
+.cp .ctable span:not(.home-badge):not(.sub-chip):not(.sub-chip-name):not(.ad-toggle-track):not(.ad-toggle-text) {
     background: transparent !important;
     color: var(--muted) !important;
     padding: 0 !important;
@@ -41,6 +50,25 @@
     border-radius: 0 !important;
     font-size: inherit !important;
     font-weight: inherit !important;
+}
+
+.cp .ctable .ad-toggle-track {
+    background: #ff6347 !important;
+    box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.35) !important;
+}
+
+.cp .ctable .ad-toggle-input:checked + .ad-toggle-track {
+    background: #22c55e !important;
+    box-shadow: inset 0 0 0 1px rgba(21, 128, 61, 0.45) !important;
+}
+
+.cp .ctable .ad-toggle-text {
+    color: #dc2626 !important;
+    background: transparent !important;
+}
+
+.cp .ctable .ad-toggle-input:checked ~ .ad-toggle-text {
+    color: #15803d !important;
 }
 
 .cp-header {
@@ -125,6 +153,7 @@
 
 .cp-check-field {
     margin-bottom: 10px;
+    overflow: visible;
 }
 
 .cp-check-label {

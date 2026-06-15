@@ -29,6 +29,7 @@ class CatalogModel
                 'parent_id' => 'INT NULL DEFAULT NULL',
                 'sort_order' => 'INT NOT NULL DEFAULT 0',
                 'show_on_homepage' => 'TINYINT(1) NOT NULL DEFAULT 0',
+                'show_in_sidebar' => 'TINYINT(1) NOT NULL DEFAULT 0',
                 'homepage_image' => 'VARCHAR(512) NULL DEFAULT NULL',
             ],
             'products' => [
@@ -67,6 +68,92 @@ class CatalogModel
             $db->exec('ALTER TABLE products ADD INDEX idx_products_subcategory (subcategory_id)');
         } catch (Throwable $e) {
             // index may already exist
+        }
+
+        self::seedDefaultSidebarCategories($db);
+        self::seedDefaultHomepageBrands($db);
+    }
+
+    private static function seedDefaultHomepageBrands(PDO $db): void
+    {
+        static $seedChecked = false;
+        if ($seedChecked) {
+            return;
+        }
+        $seedChecked = true;
+
+        try {
+            $staticSlugs = array_values(array_filter(array_map(
+                static fn(array $brand): string => (string) ($brand['slug'] ?? ''),
+                self::staticHomepageBrands()
+            )));
+            if ($staticSlugs === []) {
+                return;
+            }
+
+            $quotedSlugs = implode(', ', array_map(
+                static fn(string $slug): string => $db->quote($slug),
+                $staticSlugs
+            ));
+
+            $enabledStatic = (int) $db
+                ->query('SELECT COUNT(*) FROM brands WHERE slug IN (' . $quotedSlugs . ') AND show_on_homepage = 1')
+                ->fetchColumn();
+            $existingStatic = (int) $db
+                ->query('SELECT COUNT(*) FROM brands WHERE slug IN (' . $quotedSlugs . ')')
+                ->fetchColumn();
+
+            if ($existingStatic === 0 || $enabledStatic > 0) {
+                return;
+            }
+
+            foreach (self::staticHomepageBrands() as $staticBrand) {
+                $slug = (string) ($staticBrand['slug'] ?? '');
+                $logo = (string) ($staticBrand['homepage_logo'] ?? '');
+                if ($slug === '') {
+                    continue;
+                }
+
+                $update = $db->prepare(
+                    'UPDATE brands
+                     SET show_on_homepage = 1,
+                         homepage_logo = CASE
+                             WHEN homepage_logo IS NULL OR homepage_logo = \'\' THEN ?
+                             ELSE homepage_logo
+                         END
+                     WHERE slug = ?'
+                );
+                $update->execute([$logo !== '' ? $logo : null, $slug]);
+            }
+        } catch (Throwable $e) {
+            error_log('CatalogModel homepage brand seed: ' . $e->getMessage());
+        }
+    }
+
+    private static function seedDefaultSidebarCategories(PDO $db): void
+    {
+        static $seedChecked = false;
+        if ($seedChecked) {
+            return;
+        }
+        $seedChecked = true;
+
+        try {
+            $stmt = $db->query('SELECT COUNT(*) FROM categories WHERE show_in_sidebar = 1');
+            if ((int) $stmt->fetchColumn() > 0) {
+                return;
+            }
+
+            $quotedSlugs = implode(', ', array_map(
+                static fn(string $slug): string => $db->quote($slug),
+                self::defaultSidebarCategorySlugs()
+            ));
+            $db->exec(
+                'UPDATE categories SET show_in_sidebar = 1
+                 WHERE parent_id IS NULL AND slug IN (' . $quotedSlugs . ')'
+            );
+        } catch (Throwable $e) {
+            error_log('CatalogModel sidebar seed: ' . $e->getMessage());
         }
     }
 
@@ -222,7 +309,7 @@ class CatalogModel
 
     public function getParentCategories(bool $activeOnly = false): array
     {
-        $sql = 'SELECT category_id, category_name, slug, status, sort_order, show_on_homepage, homepage_image
+        $sql = 'SELECT category_id, category_name, slug, status, sort_order, show_on_homepage, show_in_sidebar, homepage_image
                 FROM categories
                 WHERE parent_id IS NULL';
         if ($activeOnly) {
@@ -250,7 +337,7 @@ class CatalogModel
     public function getCategoryById(int $id): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT category_id, category_name, slug, status, sort_order, parent_id, show_on_homepage, homepage_image
+            'SELECT category_id, category_name, slug, status, sort_order, parent_id, show_on_homepage, show_in_sidebar, homepage_image
              FROM categories WHERE category_id = ? LIMIT 1'
         );
         $stmt->execute([$id]);
@@ -296,12 +383,13 @@ class CatalogModel
         int $sortOrder = 0,
         int $status = 1,
         bool $showOnHomepage = false,
-        ?string $homepageImage = null
+        ?string $homepageImage = null,
+        bool $showInSidebar = false
     ): bool {
         try {
             $stmt = $this->db->prepare(
-                'INSERT INTO categories (category_name, slug, parent_id, sort_order, status, show_on_homepage, homepage_image)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)'
+                'INSERT INTO categories (category_name, slug, parent_id, sort_order, status, show_on_homepage, show_in_sidebar, homepage_image)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
             );
             return $stmt->execute([
                 $name,
@@ -310,6 +398,7 @@ class CatalogModel
                 $sortOrder,
                 $status,
                 $showOnHomepage ? 1 : 0,
+                $showInSidebar ? 1 : 0,
                 $homepageImage,
             ]);
         } catch (PDOException $e) {
@@ -329,14 +418,15 @@ class CatalogModel
         int $status,
         bool $showOnHomepage = false,
         ?string $homepageImage = null,
-        bool $updateHomepageImage = false
+        bool $updateHomepageImage = false,
+        bool $showInSidebar = false
     ): bool {
         try {
             if ($updateHomepageImage) {
                 $stmt = $this->db->prepare(
                     'UPDATE categories
                      SET category_name = ?, slug = ?, parent_id = ?, sort_order = ?, status = ?,
-                         show_on_homepage = ?, homepage_image = ?
+                         show_on_homepage = ?, show_in_sidebar = ?, homepage_image = ?
                      WHERE category_id = ?'
                 );
                 return $stmt->execute([
@@ -346,6 +436,7 @@ class CatalogModel
                     $sortOrder,
                     $status,
                     $showOnHomepage ? 1 : 0,
+                    $showInSidebar ? 1 : 0,
                     $homepageImage,
                     $id,
                 ]);
@@ -354,7 +445,7 @@ class CatalogModel
             $stmt = $this->db->prepare(
                 'UPDATE categories
                  SET category_name = ?, slug = ?, parent_id = ?, sort_order = ?, status = ?,
-                     show_on_homepage = ?
+                     show_on_homepage = ?, show_in_sidebar = ?
                  WHERE category_id = ?'
             );
             return $stmt->execute([
@@ -364,6 +455,7 @@ class CatalogModel
                 $sortOrder,
                 $status,
                 $showOnHomepage ? 1 : 0,
+                $showInSidebar ? 1 : 0,
                 $id,
             ]);
         } catch (PDOException $e) {
@@ -407,11 +499,168 @@ class CatalogModel
 
     public function getParentCategoriesForAdmin(): array
     {
-        $sql = 'SELECT category_id, category_name, slug, status, sort_order, show_on_homepage, homepage_image
+        $sql = 'SELECT category_id, category_name, slug, status, sort_order, show_on_homepage, show_in_sidebar, homepage_image
                 FROM categories
                 WHERE parent_id IS NULL
                 ORDER BY category_name ASC';
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /** @return array<int, string> */
+    public static function defaultSidebarCategorySlugs(): array
+    {
+        return [
+            'mobiles',
+            'smart-watches',
+            'power-banks',
+            'bluetooth-speakers',
+            'wireless-earbuds',
+            'mobile-accessories',
+        ];
+    }
+
+    public static function sidebarCategoryIcon(string $slug): string
+    {
+        $icons = [
+            'mobiles' => 'public/assets/images/mobiles_icon.svg',
+            'smart-watches' => 'public/assets/images/smartwatches_icon.svg',
+            'power-banks' => 'public/assets/images/power_banks_icon.svg',
+            'bluetooth-speakers' => 'public/assets/images/speakers_icon.svg',
+            'wireless-earbuds' => 'public/assets/images/wireless-earbuds.svg',
+            'mobile-accessories' => 'public/assets/images/accessories_icon.svg',
+            'tablets' => 'public/assets/images/tablets_icon.svg',
+        ];
+
+        return $icons[self::makeSlug($slug)] ?? 'public/assets/images/accessories_icon.svg';
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function getSidebarCategories(): array
+    {
+        $sql = 'SELECT category_id, category_name, slug
+                FROM categories
+                WHERE parent_id IS NULL
+                  AND status = 1
+                  AND show_in_sidebar = 1
+                ORDER BY category_name ASC';
+
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /** @return array<int, array{name: string, href: string}> */
+    public function getSidebarCategoryChildren(int $categoryId, string $categorySlug): array
+    {
+        $categorySlug = self::makeSlug($categorySlug);
+        $children = [];
+
+        if ($categorySlug === 'mobiles') {
+            foreach ($this->getBrandsWithProductsInCategory($categoryId) as $brand) {
+                $brandSlug = (string) ($brand['slug'] ?? '');
+                if ($brandSlug === '') {
+                    continue;
+                }
+                $children[] = [
+                    'name' => (string) ($brand['brand_name'] ?? $brandSlug),
+                    'href' => $categorySlug . '/' . $brandSlug,
+                ];
+            }
+            return $children;
+        }
+
+        foreach ($this->getSubcategories($categoryId, true) as $sub) {
+            $subSlug = (string) ($sub['slug'] ?? '');
+            if ($subSlug === '') {
+                continue;
+            }
+            $children[] = [
+                'name' => (string) ($sub['category_name'] ?? $subSlug),
+                'href' => $categorySlug . '/' . $subSlug,
+            ];
+        }
+
+        return $children;
+    }
+
+    public function categoryShowsInSidebar(array $category): bool
+    {
+        return (int) ($category['show_in_sidebar'] ?? 0) === 1;
+    }
+
+    /** @return array{ok: bool, message: string} */
+    public function setCategoryShowInSidebar(int $categoryId, bool $enabled): array
+    {
+        $category = $this->getCategoryById($categoryId);
+        if (!$category || !empty($category['parent_id'])) {
+            return ['ok' => false, 'message' => 'Invalid category.'];
+        }
+
+        $stmt = $this->db->prepare(
+            'UPDATE categories SET show_in_sidebar = ? WHERE category_id = ? AND parent_id IS NULL'
+        );
+        $ok = $stmt->execute([$enabled ? 1 : 0, $categoryId]);
+
+        return [
+            'ok' => $ok,
+            'message' => $ok
+                ? ($enabled ? 'Sidebar display enabled.' : 'Sidebar display disabled.')
+                : 'Could not update sidebar setting.',
+        ];
+    }
+
+    /** @return array{ok: bool, message: string} */
+    public function setCategoryShowOnHomepage(int $categoryId, bool $enabled): array
+    {
+        $category = $this->getCategoryById($categoryId);
+        if (!$category || !empty($category['parent_id'])) {
+            return ['ok' => false, 'message' => 'Invalid category.'];
+        }
+
+        if ($enabled && empty($category['homepage_image'])) {
+            return [
+                'ok' => false,
+                'message' => 'Upload a homepage image to show this category on the home page.',
+                'redirect' => 'manage-catalog.php?edit_category=' . $categoryId . '&enable_home=1',
+            ];
+        }
+
+        $stmt = $this->db->prepare(
+            'UPDATE categories SET show_on_homepage = ? WHERE category_id = ? AND parent_id IS NULL'
+        );
+        $ok = $stmt->execute([$enabled ? 1 : 0, $categoryId]);
+
+        return [
+            'ok' => $ok,
+            'message' => $ok
+                ? ($enabled ? 'Home page display enabled.' : 'Home page display disabled.')
+                : 'Could not update home page setting.',
+        ];
+    }
+
+    /** @return array{ok: bool, message: string} */
+    public function setBrandShowOnHomepage(int $brandId, bool $enabled): array
+    {
+        $brand = $this->getBrandById($brandId);
+        if (!$brand) {
+            return ['ok' => false, 'message' => 'Invalid brand.'];
+        }
+
+        if ($enabled && empty($brand['homepage_logo'])) {
+            return [
+                'ok' => false,
+                'message' => 'Upload a brand logo to show this brand on the home page.',
+                'redirect' => 'manage-catalog.php?edit_brand=' . $brandId . '&enable_home=1',
+            ];
+        }
+
+        $stmt = $this->db->prepare('UPDATE brands SET show_on_homepage = ? WHERE brand_id = ?');
+        $ok = $stmt->execute([$enabled ? 1 : 0, $brandId]);
+
+        return [
+            'ok' => $ok,
+            'message' => $ok
+                ? ($enabled ? 'Home page display enabled.' : 'Home page display disabled.')
+                : 'Could not update home page setting.',
+        ];
     }
 
     /** @return array<int, array<string, mixed>> */

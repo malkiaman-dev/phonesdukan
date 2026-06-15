@@ -102,27 +102,32 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// dropdwon of mobile
+// Expandable sidebar categories
 document.addEventListener("DOMContentLoaded", function () {
-    const categoryHeading = document.getElementById("mobiles-category");
-    const categoryContent = document.getElementById("mobiles-content");
-    const toggleIcon = document.getElementById("mobiles-toggle-icon");
+    document.querySelectorAll(".sb-category-item--expandable").forEach(function (item) {
+        const categoryHeading = item.querySelector(".category-heading");
+        const categoryContent = item.querySelector(".category-content");
+        const toggleIcon = item.querySelector(".dropdown-icon");
 
-    if (!categoryHeading || !categoryContent || !toggleIcon) {
-        return;
-    }
-
-    // Hide the subcategory list by default
-    categoryContent.style.display = "none";
-
-    categoryHeading.addEventListener("click", function () {
-        if (categoryContent.style.display === "none") {
-            categoryContent.style.display = "block";
-            toggleIcon.innerHTML = "&#x25B2;"; // Change to up arrow
-        } else {
-            categoryContent.style.display = "none";
-            toggleIcon.innerHTML = "&#x25BC;"; // Change to down arrow
+        if (!categoryHeading || !categoryContent || !toggleIcon) {
+            return;
         }
+
+        categoryContent.style.display = "none";
+
+        categoryHeading.addEventListener("click", function (event) {
+            if (event.target.closest(".category-link")) {
+                return;
+            }
+
+            if (categoryContent.style.display === "none") {
+                categoryContent.style.display = "block";
+                toggleIcon.innerHTML = "&#x25B2;";
+            } else {
+                categoryContent.style.display = "none";
+                toggleIcon.innerHTML = "&#x25BC;";
+            }
+        });
     });
 });
 

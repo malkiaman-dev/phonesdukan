@@ -1,3 +1,8 @@
+<?php
+require_once dirname(__DIR__) . '/app/Models/CatalogModel.php';
+$sidebarCatalogModel = new CatalogModel();
+$sidebarCategories = $sidebarCatalogModel->getSidebarCategories();
+?>
 <div id="sidebar-container" class="sidebar-container">
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <aside id="sidebar" class="sidebar">
@@ -56,71 +61,44 @@
             <p class="sb-section-label">Shop by Category</p>
 
             <div class="sb-categories">
-                <div class="sb-category-item sb-category-item--expandable">
-                    <div class="category-heading" id="mobiles-category" tabindex="0">
-                        <span class="category-icon">
-                            <img src="<?= url('public/assets/images/mobiles_icon.svg'); ?>" alt="" class="category-icon-img">
-                        </span>
-                        <a href="<?= url('mobiles'); ?>" class="category-link">Mobiles</a>
-                        <span class="dropdown-icon" id="mobiles-toggle-icon" aria-hidden="true">&#x25BC;</span>
+                <?php foreach ($sidebarCategories as $sidebarCategory): ?>
+                    <?php
+                    $categoryId = (int) ($sidebarCategory['category_id'] ?? 0);
+                    $categorySlug = (string) ($sidebarCategory['slug'] ?? '');
+                    $categoryName = (string) ($sidebarCategory['category_name'] ?? '');
+                    $categoryIcon = CatalogModel::sidebarCategoryIcon($categorySlug);
+                    $categoryChildren = $sidebarCatalogModel->getSidebarCategoryChildren($categoryId, $categorySlug);
+                    $isExpandable = $categoryChildren !== [];
+                    $itemClass = 'sb-category-item' . ($isExpandable ? ' sb-category-item--expandable' : '');
+                    $headingId = htmlspecialchars($categorySlug . '-category', ENT_QUOTES, 'UTF-8');
+                    $contentId = htmlspecialchars($categorySlug . '-content', ENT_QUOTES, 'UTF-8');
+                    $toggleId = htmlspecialchars($categorySlug . '-toggle-icon', ENT_QUOTES, 'UTF-8');
+                    ?>
+                    <div class="<?= $itemClass ?>">
+                        <div class="category-heading" id="<?= $headingId ?>" tabindex="0">
+                            <span class="category-icon">
+                                <img src="<?= url($categoryIcon); ?>" alt="" class="category-icon-img">
+                            </span>
+                            <a href="<?= url($categorySlug); ?>" class="category-link"><?= htmlspecialchars($categoryName, ENT_QUOTES, 'UTF-8') ?></a>
+                            <?php if ($isExpandable): ?>
+                                <span class="dropdown-icon" id="<?= $toggleId ?>" aria-hidden="true">&#x25BC;</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($isExpandable): ?>
+                            <div class="category-content" id="<?= $contentId ?>">
+                                <ul>
+                                    <?php foreach ($categoryChildren as $child): ?>
+                                        <li>
+                                            <a href="<?= url($child['href']); ?>" class="subcategory-link">
+                                                <?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?>
+                                            </a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                    <div class="category-content" id="mobiles-content">
-                        <ul>
-                            <li><a href="<?= url('mobiles/infinix'); ?>" class="subcategory-link">Infinix</a></li>
-                            <li><a href="<?= url('mobiles/oppo'); ?>" class="subcategory-link">Oppo</a></li>
-                            <li><a href="<?= url('mobiles/realme'); ?>" class="subcategory-link">Realme</a></li>
-                            <li><a href="<?= url('mobiles/samsung'); ?>" class="subcategory-link">Samsung</a></li>
-                            <li><a href="<?= url('mobiles/tecno'); ?>" class="subcategory-link">Tecno</a></li>
-                            <li><a href="<?= url('mobiles/vivo'); ?>" class="subcategory-link">Vivo</a></li>
-                            <li><a href="<?= url('mobiles/xiaomi'); ?>" class="subcategory-link">Xiaomi</a></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="sb-category-item">
-                    <div class="category-heading" id="smart-watches-category" tabindex="0">
-                        <span class="category-icon">
-                            <img src="<?= url('public/assets/images/smartwatches_icon.svg'); ?>" alt="">
-                        </span>
-                        <a href="<?= url('smart-watches'); ?>" class="category-link">Smart Watches</a>
-                    </div>
-                </div>
-
-                <div class="sb-category-item">
-                    <div class="category-heading" id="power-banks-category" tabindex="0">
-                        <span class="category-icon">
-                            <img src="<?= url('public/assets/images/power_banks_icon.svg'); ?>" alt="">
-                        </span>
-                        <a href="<?= url('power-banks'); ?>" class="category-link">Power Banks</a>
-                    </div>
-                </div>
-
-                <div class="sb-category-item">
-                    <div class="category-heading" id="bluetooth-speakers-category" tabindex="0">
-                        <span class="category-icon">
-                            <img src="<?= url('public/assets/images/speakers_icon.svg'); ?>" alt="">
-                        </span>
-                        <a href="<?= url('bluetooth-speakers'); ?>" class="category-link">Bluetooth Speakers</a>
-                    </div>
-                </div>
-
-                <div class="sb-category-item">
-                    <div class="category-heading" id="wireless-earbuds-category" tabindex="0">
-                        <span class="category-icon">
-                            <img src="<?= url('public/assets/images/wireless-earbuds.svg'); ?>" alt="">
-                        </span>
-                        <a href="<?= url('wireless-earbuds'); ?>" class="category-link">Wireless Earbuds</a>
-                    </div>
-                </div>
-
-                <div class="sb-category-item">
-                    <div class="category-heading" id="mobile-accessories-category" tabindex="0">
-                        <span class="category-icon">
-                            <img src="<?= url('public/assets/images/accessories_icon.svg'); ?>" alt="">
-                        </span>
-                        <a href="<?= url('mobile-accessories'); ?>" class="category-link">Mobile Accessories</a>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="sb-price-list">

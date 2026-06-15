@@ -748,3 +748,47 @@ if (!function_exists('renderBestMobilesSidebar')) {
         <?php
     }
 }
+
+if (!function_exists('adminTooltipIcon')) {
+    function adminTooltipIcon(string $message, string $id = ''): string
+    {
+        $escaped = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $idAttr = $id !== '' ? ' id="' . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . '"' : '';
+
+        return '<span class="ad-tooltip ad-tooltip--icon"' . $idAttr . ' tabindex="0" data-tooltip="'
+            . $escaped . '" aria-label="More information" role="button">'
+            . '<i class="fas fa-circle-info" aria-hidden="true"></i></span>';
+    }
+}
+
+if (!function_exists('adminTooltipLabel')) {
+    function adminTooltipLabel(string $label, string $message): string
+    {
+        $labelEsc = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+        $messageEsc = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+        return '<span class="ad-tooltip ad-tooltip--label cp-check-tooltip" tabindex="0" data-tooltip="'
+            . $messageEsc . '" aria-label="' . $messageEsc . '">' . $labelEsc . '</span>';
+    }
+}
+
+if (!function_exists('adminToggleSwitch')) {
+    function adminToggleSwitch(bool $enabled, array $dataAttributes = [], string $ariaLabel = 'Toggle setting'): string
+    {
+        $attrs = '';
+        foreach ($dataAttributes as $key => $value) {
+            $attrs .= ' data-' . htmlspecialchars((string) $key, ENT_QUOTES, 'UTF-8')
+                . '="' . htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . '"';
+        }
+
+        $checked = $enabled ? ' checked' : '';
+        $state = $enabled ? 'Enabled' : 'Disabled';
+        $aria = htmlspecialchars($ariaLabel, ENT_QUOTES, 'UTF-8');
+
+        return '<label class="ad-toggle" aria-label="' . $aria . '">'
+            . '<input type="checkbox" class="ad-toggle-input"' . $attrs . $checked . '>'
+            . '<span class="ad-toggle-track" aria-hidden="true"></span>'
+            . '<span class="ad-toggle-text">' . $state . '</span>'
+            . '</label>';
+    }
+}
