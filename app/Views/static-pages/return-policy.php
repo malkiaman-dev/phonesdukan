@@ -1,4 +1,9 @@
-<?php require_once dirname(__DIR__, 3) . '/includes/header.php';?>
+<?php
+$pageTitle = "Return & Refund Policy - Phones Dukan";
+$metaDescription = "Return and refund policy for Phones Dukan orders. Learn about cancellation rights, return conditions, and how to request a refund in Pakistan.";
+$metaRobots = "index, follow";
+require_once dirname(__DIR__, 3) . '/includes/header.php';
+?>
 
 <section id="return-policy" class="pd-policy-page">
   <div class="pd-policy-hero">

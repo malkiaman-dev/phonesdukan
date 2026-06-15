@@ -108,9 +108,16 @@
 </footer>
 
 <div class="footer-info">
-    <div>
-        <p>&copy; <?php echo date('Y'); ?> Phones Dukan • All rights reserved</p>
-    </div>
+    <p class="footer-info-copy">&copy; <?php echo date('Y'); ?> Phones Dukan • All rights reserved</p>
+    <nav class="footer-policy-links" aria-label="Legal policies">
+        <a href="<?= url('privacy-policy/'); ?>">Privacy Policy</a>
+        <span class="footer-policy-sep" aria-hidden="true">•</span>
+        <a href="<?= url('return-policy/'); ?>">Return/Refund Policy</a>
+        <span class="footer-policy-sep" aria-hidden="true">•</span>
+        <a href="<?= url('shipping-policy/'); ?>">Shipping/Service Policy</a>
+        <span class="footer-policy-sep" aria-hidden="true">•</span>
+        <a href="<?= url('terms-and-conditions/'); ?>">Terms &amp; Conditions</a>
+    </nav>
     <div class="payment-image">
         <img src="<?= url('public/assets/images/payment.webp'); ?>" alt="Secure Payment">
     </div>

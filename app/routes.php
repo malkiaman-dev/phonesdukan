@@ -194,6 +194,18 @@ switch (true) {
         include __DIR__ . '/Views/static-pages/return-policy.php';
         break;
 
+    case ($request_uri === 'privacy-policy'):
+        include __DIR__ . '/Views/static-pages/privacy-policy.php';
+        break;
+
+    case ($request_uri === 'shipping-policy'):
+        include __DIR__ . '/Views/static-pages/shipping-policy.php';
+        break;
+
+    case ($request_uri === 'terms-and-conditions'):
+        include __DIR__ . '/Views/static-pages/terms-and-conditions.php';
+        break;
+
         case ($request_uri === 'write-for-us'):
             include __DIR__ . '/Views/static-pages/write-for-us.php';
             break;
