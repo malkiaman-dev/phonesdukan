@@ -581,15 +581,38 @@ table tr:nth-child(even)    { background: #fafafa; }
 }
 .pv-related-title span { color: #f7cf04; }
 
-.pv-related-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.pv-related-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
-/* Post cards reuse blog.css classes — extra overrides if needed */
+/* Same card width as blog listing: 3 equal slots, left-aligned when fewer posts */
+.pv-related-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+}
+
+/* Keep cards to the right of the fixed share sidebar on desktop */
+@media (min-width: 1061px) {
+  .pv-related-grid {
+    margin-left: max(
+      0px,
+      calc(
+        max(16px, 50vw - 440px) + 68px -
+        ((100vw - min(1240px, 100vw)) / 2 + 24px)
+      )
+    );
+  }
+}
+
 .pv-related-section .post-card {
-  background: #fff;
+  flex: 0 0 calc((100% - 48px) / 3);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* ================================================================
@@ -602,9 +625,9 @@ img.gallery-image     { max-width: 100%; height: auto; border-radius: 12px; box-
    RESPONSIVE
    ================================================================ */
 @media (max-width: 900px) {
-  .pv-related-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+  .pv-related-inner { padding: 0 16px; }
+  .pv-related-section .post-card {
+    flex: 0 0 calc((100% - 24px) / 2);
   }
 }
 
@@ -642,7 +665,8 @@ img.gallery-image     { max-width: 100%; height: auto; border-radius: 12px; box-
   .pv-cta-btn    { width: 100%; justify-content: center; }
 
   .pv-related-section { padding: 36px 0 40px; }
-  .pv-related-grid    { grid-template-columns: 1fr; gap: 14px; }
+  .pv-related-grid    { gap: 16px; }
+  .pv-related-section .post-card { flex: 0 0 100%; }
 }
 
 @media (max-width: 480px) {

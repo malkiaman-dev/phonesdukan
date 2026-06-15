@@ -183,6 +183,7 @@ function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
 }
 ?>
 <link rel="stylesheet" href="<?= url('public/assets/css/frontend/post_view.css') ?>">
+<link rel="stylesheet" href="<?= url('public/assets/css/frontend/blog.css') ?>">
 
 <!-- ══ STICKY SHARE SIDEBAR (desktop) ══════════════════ -->
 <div class="pv-sticky-share" id="pv-sticky-share" aria-label="Share this article">
@@ -284,7 +285,7 @@ function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
 <!-- ══ RELATED BLOGS ════════════════════════════════════ -->
 <?php if (!empty($related_posts)): ?>
 <section class="pv-related-section">
-    <div class="pv-shell">
+    <div class="pv-related-inner">
         <h2 class="pv-related-title">Related <span>Blogs</span></h2>
         <div class="pv-related-grid">
             <?php foreach ($related_posts as $rp):
@@ -293,28 +294,38 @@ function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
                     : '/blog/' . htmlspecialchars($rp['category_slug']) . '/' . htmlspecialchars($rp['slug']);
                 $rp_img  = !empty($rp['image_url']) ? $rp['image_url'] : '/public/assets/images/Phones_dukan_favicon.png';
                 $rp_date = date('M j, Y', strtotime($rp['published_at']));
+                $rp_excerpt_raw = !empty($rp['excerpt'])
+                    ? $rp['excerpt']
+                    : ($rp['content'] ?? '');
+                $rp_excerpt_text = trim(preg_replace('/\s+/', ' ', strip_tags($rp_excerpt_raw)));
+                if (mb_strlen($rp_excerpt_text) > 140) {
+                    $rp_excerpt_text = mb_substr($rp_excerpt_text, 0, 137) . '...';
+                }
             ?>
                 <article class="post-card">
                     <a href="<?= $rp_slug ?>" class="post-thumb" tabindex="-1" aria-hidden="true">
                         <div class="post-img-wrapper">
                             <img src="<?= htmlspecialchars($rp_img) ?>"
                                  alt="<?= htmlspecialchars($rp['alt_text'] ?? $rp['title']) ?>"
-                                 loading="lazy">
+                                 loading="lazy" decoding="async">
                         </div>
-                        <span class="post-badge"><?= htmlspecialchars($rp['category_name'] ?? '') ?></span>
                     </a>
                     <div class="post-content">
-                        <p class="post-meta">
-                            <span class="post-meta-icon" aria-hidden="true">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <div class="post-meta">
+                            <span class="post-meta-item">
+                                <svg class="post-meta-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="8" r="4" stroke="#f7d117" stroke-width="2.2"/><path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7" stroke="#f7d117" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                <?= htmlspecialchars($rp['category_name'] ?? 'Blog') ?>
                             </span>
-                            <time class="post-date"><?= $rp_date ?></time>
-                        </p>
+                            <span class="post-meta-item">
+                                <svg class="post-meta-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#f7d117" stroke-width="2.2"/><path d="M3 10h18M8 2v4M16 2v4" stroke="#f7d117" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                <time class="post-date" datetime="<?= htmlspecialchars($rp['published_at']) ?>"><?= $rp_date ?></time>
+                            </span>
+                        </div>
                         <h3 class="post-title">
                             <a href="<?= $rp_slug ?>"><?= htmlspecialchars($rp['title']) ?></a>
                         </h3>
-                        <p class="post-excerpt"><?= htmlspecialchars($rp['excerpt'] ?? '') ?></p>
-                        <a class="post-readmore" href="<?= $rp_slug ?>">READ MORE →</a>
+                        <p class="post-excerpt"><?= htmlspecialchars($rp_excerpt_text !== '' ? $rp_excerpt_text : 'Read this post to learn more insights and updates from Phones Dukan.') ?></p>
+                        <a class="post-readmore" href="<?= $rp_slug ?>">READ MORE <span class="post-readmore-arrow">&rarr;</span></a>
                     </div>
                 </article>
             <?php endforeach; ?>
