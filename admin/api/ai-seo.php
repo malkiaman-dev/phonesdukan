@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ── Config ─────────────────────────────────────────────────────────────────
-const GROQ_API_KEY        = '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';
+const GROQ_API_KEY        = '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';
 const GROQ_ENDPOINT       = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL          = 'llama-3.3-70b-versatile'; // Primary: 70B, best quality
 const GROQ_FALLBACK       = 'llama-3.1-8b-instant';    // Fallback: smaller but confirmed active
