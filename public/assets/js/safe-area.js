@@ -2,7 +2,7 @@
     "use strict";
 
     var MOBILE_QUERY = "(max-width: 992px)";
-    var MOBILE_MIN_INSET = 36;
+    var MOBILE_MIN_INSET = 28;
 
     function isMobileViewport() {
         return window.matchMedia && window.matchMedia(MOBILE_QUERY).matches;
@@ -99,42 +99,51 @@
         return MOBILE_MIN_INSET;
     }
 
+    function resolveSafeAreaTop() {
+        if (isPhonesDukanApp()) {
+            var nativeInset = readNativeInset();
+            if (nativeInset > 0) {
+                return nativeInset;
+            }
+            return estimateMobileSafeArea();
+        }
+
+        if (!isTouchMobile()) {
+            return measureEnvSafeArea();
+        }
+
+        var measured = measureEnvSafeArea();
+        var estimated = estimateMobileSafeArea();
+        return Math.max(measured, estimated);
+    }
+
     function applyChromePadding(inset) {
         var root = document.documentElement;
         var chrome = document.getElementById("pd-site-chrome");
         var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
+        var insetPx = Math.max(0, Math.round(inset));
 
         if (isPhonesDukanApp()) {
             root.dataset.pdApp = "1";
             root.setAttribute("data-pd-app", "1");
             try { localStorage.setItem("pd_app", "1"); } catch (e) {}
-            root.style.setProperty("--pd-chrome-pad-top", "0px");
-            root.style.setProperty("--safe-area-top", "0px");
-            root.style.setProperty("--pd-status-inset", "0px");
-            root.dataset.pdSafeArea = "0";
-            if (chrome) {
-                chrome.style.paddingTop = "0px";
-            }
-            if (slot) {
-                slot.style.display = "none";
-                slot.style.height = "0px";
-            }
             var viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta && /viewport-fit=cover/i.test(viewportMeta.content || "")) {
-                viewportMeta.content = "width=device-width, initial-scale=1.0";
+                viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
+            } else if (viewportMeta && !/viewport-fit=cover/i.test(viewportMeta.content || "")) {
+                viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
             }
-            return;
+        } else {
+            root.removeAttribute("data-pd-app");
         }
 
-        root.removeAttribute("data-pd-app");
-
-        root.style.setProperty("--pd-chrome-pad-top", inset + "px");
-        root.style.setProperty("--safe-area-top", inset + "px");
-        root.style.setProperty("--pd-status-inset", inset + "px");
-        root.dataset.pdSafeArea = String(inset);
+        root.style.setProperty("--pd-chrome-pad-top", insetPx + "px");
+        root.style.setProperty("--safe-area-top", insetPx + "px");
+        root.style.setProperty("--pd-status-inset", insetPx + "px");
+        root.dataset.pdSafeArea = String(insetPx);
 
         if (chrome) {
-            chrome.style.paddingTop = inset + "px";
+            chrome.style.paddingTop = insetPx + "px";
         }
         if (slot) {
             slot.style.display = "none";
@@ -142,21 +151,8 @@
         }
     }
 
-    function resolveSafeAreaTop() {
-        if (isPhonesDukanApp()) {
-            return 0;
-        }
-
-        if (!isTouchMobile()) {
-            return measureEnvSafeArea();
-        }
-
-        return 0;
-    }
-
     function applySafeAreaTop() {
-        var inset = resolveSafeAreaTop();
-        applyChromePadding(inset);
+        applyChromePadding(resolveSafeAreaTop());
     }
 
     window.PDSafeArea = {

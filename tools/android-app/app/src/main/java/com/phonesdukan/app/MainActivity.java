@@ -23,10 +23,6 @@ public class MainActivity extends AppCompatActivity {
       "(function(){try{"
           + "document.documentElement.setAttribute('data-pd-app','1');"
           + "localStorage.setItem('pd_app','1');"
-          + "var m=document.querySelector('meta[name=viewport]');"
-          + "if(m&&/viewport-fit=cover/i.test(m.content||'')){"
-          + "m.content='width=device-width, initial-scale=1.0';"
-          + "}"
           + "if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}"
           + "}catch(e){}})();";
 
@@ -37,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+    WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     getWindow().setStatusBarColor(Color.TRANSPARENT);
     getWindow().setNavigationBarColor(Color.parseColor("#111111"));
     WindowInsetsControllerCompat insetsController =
@@ -120,10 +116,23 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  private static class AppBridge {
+  private class AppBridge {
     @JavascriptInterface
     public boolean isApp() {
       return true;
+    }
+
+    @JavascriptInterface
+    public float getStatusBarHeight() {
+      float density = getResources().getDisplayMetrics().density;
+      if (density <= 0f) {
+        return 24f;
+      }
+      int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+      if (resourceId > 0) {
+        return getResources().getDimensionPixelSize(resourceId) / density;
+      }
+      return 24f;
     }
   }
 }

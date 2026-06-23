@@ -48,20 +48,61 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        function syncMarqueeSpeed() {
-            var halfWidth = announcementTrack.scrollWidth / 2;
-            if (!halfWidth) return;
-            var pxPerSecond = 42;
-            var duration = Math.max(14, halfWidth / pxPerSecond);
-            announcementTrack.style.setProperty("--pd-ticker-duration", duration + "s");
+        function readGap() {
+            var styles = window.getComputedStyle(announcementTrack);
+            var gap = parseFloat(styles.columnGap || styles.gap);
+            return isNaN(gap) ? 0 : gap;
         }
 
-        syncMarqueeSpeed();
-        window.addEventListener("resize", syncMarqueeSpeed, { passive: true });
+        function syncMarqueeSpeed() {
+            var spans = announcementTrack.querySelectorAll(":scope > span");
+            var half = Math.floor(spans.length / 2);
+            if (!half) return;
+
+            var gap = readGap();
+            var halfWidth = 0;
+            var index;
+
+            for (index = 0; index < half; index++) {
+                halfWidth += spans[index].getBoundingClientRect().width;
+                if (index < half - 1) {
+                    halfWidth += gap;
+                }
+            }
+
+            if (!halfWidth) return;
+
+            var pxPerSecond = 40;
+            var duration = Math.max(16, halfWidth / pxPerSecond);
+            announcementTrack.style.setProperty("--pd-ticker-shift", "-" + halfWidth + "px");
+            announcementTrack.style.setProperty("--pd-ticker-duration", duration + "s");
+            announcementTrack.style.animation = "none";
+            void announcementTrack.offsetWidth;
+            announcementTrack.style.animation = "";
+        }
+
+        function scheduleSync() {
+            window.requestAnimationFrame(function () {
+                syncMarqueeSpeed();
+            });
+        }
+
+        scheduleSync();
+        window.addEventListener("resize", scheduleSync, { passive: true });
+        window.addEventListener("orientationchange", function () {
+            window.setTimeout(scheduleSync, 120);
+        }, { passive: true });
+
         if (typeof ResizeObserver !== "undefined") {
-            var marqueeObserver = new ResizeObserver(syncMarqueeSpeed);
+            var marqueeObserver = new ResizeObserver(scheduleSync);
             marqueeObserver.observe(announcementTrack);
         }
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(scheduleSync).catch(function () {});
+        }
+
+        window.addEventListener("load", scheduleSync, { passive: true });
     }
 
     function readSafeAreaTop() {

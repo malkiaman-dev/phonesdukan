@@ -4,7 +4,7 @@
             "outputFile": "com.phonesdukan.app-mergeDebugResources-21:/values-de/values-de.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a62a1307e9e5abd23090a2cadcc4865b\\gradle\\caches\\transforms-4\\c8161dfd09f2d118715a473e02aaa84c\\transformed\\core-1.13.0\\res\\values-de\\values-de.xml",
+                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\aad16ed7f939465403eb8c190812139d\\gradle\\caches\\transforms-4\\c8161dfd09f2d118715a473e02aaa84c\\transformed\\core-1.13.0\\res\\values-de\\values-de.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a62a1307e9e5abd23090a2cadcc4865b\\gradle\\caches\\transforms-4\\42a5c36a282de63de8dd0d1b551ed132\\transformed\\appcompat-1.7.0\\res\\values-de\\values-de.xml",
+                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\aad16ed7f939465403eb8c190812139d\\gradle\\caches\\transforms-4\\42a5c36a282de63de8dd0d1b551ed132\\transformed\\appcompat-1.7.0\\res\\values-de\\values-de.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
