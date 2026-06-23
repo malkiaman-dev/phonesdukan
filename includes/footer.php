@@ -618,23 +618,30 @@
         var root = document.documentElement;
         var ua = navigator.userAgent || "";
         var qs = typeof location !== "undefined" ? location.search : "";
-        if (root.getAttribute("data-pd-app") === "1") return true;
         if (/PhonesDukanApp/i.test(ua)) return true;
         if (/[?&]pd_app=1(?:&|$)/.test(qs)) return true;
         try {
-            if (localStorage.getItem("pd_app") === "1") return true;
+            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "")) return true;
         } catch (e) {}
         try {
             if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
                 return true;
             }
         } catch (e) {}
+        if (root.getAttribute("data-pd-app") === "1") return true;
         return false;
+    }
+
+    function markPdAppClient() {
+        if (!isPdAppClient()) return;
+        document.documentElement.setAttribute("data-pd-app", "1");
+        try { document.cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
+        try { localStorage.setItem("pd_app", "1"); } catch (e) {}
     }
 
     function removeInstallWidget() {
         if (!isPdAppClient()) return;
-        document.documentElement.setAttribute("data-pd-app", "1");
+        markPdAppClient();
         ["pd-install-app-btn", "pd-install-app-panel"].forEach(function (id) {
             var el = document.getElementById(id);
             if (el && el.parentNode) {

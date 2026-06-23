@@ -71,7 +71,8 @@ $productAvailability = (isset($product['product_status']) && (int)$product['prod
 $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
 $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false)
-    || (isset($_GET['pd_app']) && (string) $_GET['pd_app'] === '1');
+    || (isset($_GET['pd_app']) && (string) $_GET['pd_app'] === '1')
+    || (isset($_COOKIE['pd_app']) && (string) $_COOKIE['pd_app'] === '1');
 ?>
 <!DOCTYPE html>
 <html lang="en"<?= $isPdApp ? ' data-pd-app="1"' : '' ?>>
@@ -82,15 +83,20 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
 (function () {
     var ua = navigator.userAgent || "";
     var qs = typeof location !== "undefined" ? location.search : "";
-    var stored = false;
-    try { stored = localStorage.getItem("pd_app") === "1"; } catch (e) {}
     var nativeApp = false;
     try {
         nativeApp = !!(window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp());
     } catch (e) {}
-    if (/PhonesDukanApp/i.test(ua) || /[?&]pd_app=1(?:&|$)/.test(qs) || stored || nativeApp) {
+    if (/PhonesDukanApp/i.test(ua) || /[?&]pd_app=1(?:&|$)/.test(qs) || nativeApp) {
         document.documentElement.setAttribute("data-pd-app", "1");
         try { localStorage.setItem("pd_app", "1"); } catch (e) {}
+        try { document.cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
+    } else {
+        try {
+            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "")) {
+                document.documentElement.setAttribute("data-pd-app", "1");
+            }
+        } catch (e) {}
     }
 })();
 </script>
@@ -233,7 +239,7 @@ html[data-pd-app="1"] #pd-install-app-panel {
         if (/PhonesDukanApp/i.test(ua)) return true;
         if (/[?&]pd_app=1(?:&|$)/.test(location.search || "")) return true;
         try {
-            if (localStorage.getItem("pd_app") === "1") return true;
+            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "")) return true;
         } catch (e) {}
         try {
             if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) return true;

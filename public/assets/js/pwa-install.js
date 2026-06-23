@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return true;
         }
         try {
-            if (localStorage.getItem('pd_app') === '1') {
+            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || '')) {
                 return true;
             }
         } catch (e) {}

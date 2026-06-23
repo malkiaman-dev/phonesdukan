@@ -23,7 +23,18 @@ public class MainActivity extends AppCompatActivity {
       "(function(){try{"
           + "document.documentElement.setAttribute('data-pd-app','1');"
           + "localStorage.setItem('pd_app','1');"
+          + "document.cookie='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
+          + "['pd-install-app-btn','pd-install-app-panel'].forEach(function(id){"
+          + "var el=document.getElementById(id);"
+          + "if(el&&el.parentNode){el.parentNode.removeChild(el);}"
+          + "});"
           + "if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}"
+          + "}catch(e){}})();";
+
+  private static final String APP_EARLY_JS =
+      "(function(){try{"
+          + "document.documentElement.setAttribute('data-pd-app','1');"
+          + "document.cookie='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
           + "}catch(e){}})();";
 
   private WebView webView;
@@ -67,6 +78,11 @@ public class MainActivity extends AppCompatActivity {
       public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         view.loadUrl(ensureAppParam(request.getUrl().toString()));
         return true;
+      }
+
+      @Override
+      public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+        view.evaluateJavascript(APP_EARLY_JS, null);
       }
 
       @Override

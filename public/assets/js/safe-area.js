@@ -4,6 +4,13 @@
     var MOBILE_QUERY = "(max-width: 992px)";
     var MOBILE_MIN_INSET = 32;
 
+    function hasPdAppCookie() {
+        try {
+            return /(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "");
+        } catch (e) {}
+        return false;
+    }
+
     function isMobileViewport() {
         return window.matchMedia && window.matchMedia(MOBILE_QUERY).matches;
     }
@@ -15,11 +22,9 @@
         if (/[?&]pd_app=1(?:&|$)/.test(window.location.search || "")) {
             return true;
         }
-        try {
-            if (localStorage.getItem("pd_app") === "1") {
-                return true;
-            }
-        } catch (e) {}
+        if (hasPdAppCookie()) {
+            return true;
+        }
         try {
             if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
                 return true;
@@ -33,6 +38,15 @@
             return true;
         }
         return (navigator.maxTouchPoints || 0) > 0 && window.innerWidth <= 992;
+    }
+
+    function markPdAppClient() {
+        if (!isPhonesDukanApp()) {
+            return;
+        }
+        document.documentElement.setAttribute("data-pd-app", "1");
+        try { document.cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
+        try { localStorage.setItem("pd_app", "1"); } catch (e) {}
     }
 
     function readNativeInset() {
@@ -123,9 +137,7 @@
         var insetPx = Math.max(0, Math.round(inset));
 
         if (isPhonesDukanApp()) {
-            root.dataset.pdApp = "1";
-            root.setAttribute("data-pd-app", "1");
-            try { localStorage.setItem("pd_app", "1"); } catch (e) {}
+            markPdAppClient();
             var viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta && !/viewport-fit=cover/i.test(viewportMeta.content || "")) {
                 viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
