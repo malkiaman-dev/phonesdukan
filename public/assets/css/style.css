@@ -131,11 +131,13 @@ body {
   font-weight: var(--pd-font-weight-regular);
   line-height: 1.6;
   letter-spacing: 0;
-  background-color: #f8f8f8;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  padding-top: 32px;
+}
+
+body {
+  background-color: #f8f8f8;
 }
 
 body,
@@ -523,9 +525,6 @@ h6 {
     padding-left: 1em; /* Slightly less padding for lists on smaller screens */
   }
 
-  html, body {
-    padding-top: 20px;
-}
 .ad-container {
   padding: 10px;
 }
@@ -623,11 +622,13 @@ html {
 }
 
 @media (max-width: 768px) {
-  ::-webkit-scrollbar {
-    width: 6px;
+  html {
+    scrollbar-width: none;
   }
 
-  ::-webkit-scrollbar-thumb {
-    border-width: 1px;
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }

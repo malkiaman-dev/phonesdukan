@@ -76,7 +76,172 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 <head>
     <!-- Required Meta -->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<style id="pd-safe-top-fix">
+:root {
+    --pd-chrome-pad-top: 0px;
+    --announcement-height: 36px;
+    --header-height: 72px;
+    --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
+}
+@media (max-width: 992px) {
+    :root {
+        --header-height: 58px;
+        --announcement-height: 0px;
+        --pd-chrome-pad-top: 36px;
+        --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--header-height));
+    }
+    html[data-pd-app="1"] {
+        --pd-chrome-pad-top: 0px;
+        --pd-chrome-offset: var(--header-height);
+    }
+    #pd-site-chrome {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 10001 !important;
+        padding-top: 36px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome {
+        padding-top: 0 !important;
+    }
+    #pd-site-chrome .pd-status-bar-slot {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 36px;
+        background: #111111;
+        pointer-events: none;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-status-bar-slot {
+        display: none;
+        height: 0;
+    }
+    #pd-site-chrome .pd-top-bars,
+    #pd-site-chrome .pd-safe-area-top {
+        display: none !important;
+    }
+    #pd-site-chrome .pd-header-stack {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        width: 100% !important;
+    }
+}
+@media (max-width: 575px) {
+    :root {
+        --announcement-height: 34px;
+    }
+}
+@media (min-width: 993px) {
+    #pd-site-chrome {
+        display: contents;
+    }
+    .pd-status-bar-slot {
+        display: none;
+    }
+}
+.pd-announcement-track {
+    background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%);
+}
+</style>
+<script>
+(function () {
+    var MOBILE_MIN = 36;
+    var MOBILE_QUERY = "(max-width: 992px)";
+    function isMobile() {
+        return window.matchMedia && window.matchMedia(MOBILE_QUERY).matches;
+    }
+    function isTouchMobile() {
+        return isMobile() || ((navigator.maxTouchPoints || 0) > 0 && innerWidth <= 992);
+    }
+    function isApp() {
+        return /PhonesDukanApp/i.test(navigator.userAgent || "");
+    }
+    function readNativeInset() {
+        try {
+            if (window.PhonesDukanNative && typeof window.PhonesDukanNative.getStatusBarHeight === "function") {
+                var nativePx = parseFloat(window.PhonesDukanNative.getStatusBarHeight());
+                if (nativePx > 0) return nativePx;
+            }
+        } catch (e) {}
+        return 0;
+    }
+    function measureEnvInset() {
+        var root = document.documentElement;
+        var probe = document.createElement("div");
+        probe.style.cssText = "position:fixed;padding-top:env(safe-area-inset-top);visibility:hidden;pointer-events:none;";
+        root.appendChild(probe);
+        var inset = probe.offsetHeight || parseFloat(getComputedStyle(probe).paddingTop) || 0;
+        probe.remove();
+        return inset;
+    }
+    function estimateInset() {
+        var nativeInset = readNativeInset();
+        if (nativeInset > 0) return nativeInset;
+        var ua = navigator.userAgent || "";
+        var dpr = devicePixelRatio || 1;
+        if (/Android/i.test(ua)) {
+            if (dpr >= 3) return 36;
+            if (dpr >= 2.5) return 34;
+            return MOBILE_MIN;
+        }
+        if (/iPhone|iPod|iPad/i.test(ua)) {
+            var longSide = Math.max(screen.width, screen.height);
+            var portrait = innerHeight >= innerWidth;
+            if (longSide >= 812) return portrait ? 47 : 21;
+            return portrait ? 20 : MOBILE_MIN;
+        }
+        return MOBILE_MIN;
+    }
+    function applyChromeInset() {
+        if (window.PDSafeArea && window.PDSafeArea.apply !== applyChromeInset) {
+            window.PDSafeArea.apply();
+            return;
+        }
+        var root = document.documentElement;
+        var chrome = document.getElementById("pd-site-chrome");
+        var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
+        if (isApp()) {
+            root.dataset.pdApp = "1";
+            root.style.setProperty("--pd-chrome-pad-top", "0px");
+            if (chrome) chrome.style.paddingTop = "0px";
+            if (slot) slot.style.height = "0px";
+            root.dataset.pdSafeArea = "0";
+            return;
+        }
+        root.removeAttribute("data-pd-app");
+        var inset = 0;
+        if (isTouchMobile()) {
+            inset = Math.max(measureEnvInset(), estimateInset(), MOBILE_MIN);
+        }
+        root.style.setProperty("--pd-chrome-pad-top", inset + "px");
+        root.style.setProperty("--safe-area-top", inset + "px");
+        if (chrome) chrome.style.paddingTop = inset + "px";
+        if (slot) slot.style.height = inset + "px";
+        root.dataset.pdSafeArea = String(inset);
+    }
+    applyChromeInset();
+    window.PDSafeArea = window.PDSafeArea || { apply: applyChromeInset, measure: applyChromeInset };
+    window.addEventListener("resize", applyChromeInset, { passive: true });
+    window.addEventListener("orientationchange", function () { setTimeout(applyChromeInset, 120); }, { passive: true });
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", applyChromeInset, { passive: true });
+    }
+})();
+</script>
+<?php
+$pdSafeAreaJs = __DIR__ . '/../public/assets/js/safe-area.js';
+?>
+<script src="<?= url('public/assets/js/safe-area.js') ?>?v=<?= file_exists($pdSafeAreaJs) ? filemtime($pdSafeAreaJs) : time() ?>"></script>
 <title><?= $pageTitle ?></title>
 <meta name="description" content="<?= $metaDescription ?>">
 <?php if ($metaKeywords): ?>
@@ -111,11 +276,11 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 
 <!-- Favicon -->
 <link rel="icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png" type="image/x-icon">
-<link rel="apple-touch-icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png">
+<link rel="apple-touch-icon" href="<?= getBaseURL(); ?>public/assets/images/phonesdukan_logo.png">
 
 <!-- Author & Theme -->
 <meta name="author" content="Phones Dukan">
-<meta name="theme-color" content="#F7D117">
+<meta name="theme-color" content="#111111">
 <meta name="format-detection" content="telephone=no">
 
 <!-- Pakistan geo targeting -->
@@ -287,9 +452,14 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 <div class="site-wrapper">
 
-    <!-- Scrollable bars — NOT sticky, scroll away naturally -->
+    <div id="pd-site-chrome" class="pd-site-chrome">
+    <div class="pd-status-bar-slot" aria-hidden="true"></div>
+
+    <!-- Announcement bar (fixed below safe area via CSS) -->
     <div class="pd-top-bars">
+        <div class="pd-safe-area-top" aria-hidden="true"></div>
         <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
+            <div class="pd-announcement-viewport">
             <div class="pd-announcement-track">
                 <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
                 <span>Free delivery across Pakistan on selected products</span>
@@ -297,6 +467,7 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
                 <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
                 <span>Free delivery across Pakistan on selected products</span>
                 <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+            </div>
             </div>
         </div>
 
@@ -428,5 +599,8 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
         </header>
 
     </div>
+    </div><!-- /#pd-site-chrome -->
+
+    <div class="pd-chrome-spacer" aria-hidden="true"></div>
 
     <main class="content">

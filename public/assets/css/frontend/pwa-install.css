@@ -1,0 +1,197 @@
+/* ── Install App Widget ─────────────────────────────────────────────────────── */
+#pd-install-app-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 16px;
+    z-index: 100050;
+    min-width: 56px;
+    height: 56px;
+    padding: 0 16px;
+    border-radius: 28px;
+    background: #ffd400;
+    color: #111111;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+    transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease, visibility 0.2s ease;
+}
+#pd-install-app-btn:hover {
+    background: #ffe033;
+    transform: scale(1.04);
+}
+#pd-install-app-btn .pd-install-btn-label {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+#pd-install-app-btn svg {
+    flex-shrink: 0;
+}
+#pd-install-app-btn.pd-install-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ── Install panel ──────────────────────────────────────────────────────────── */
+#pd-install-app-panel {
+    position: fixed;
+    bottom: 92px;
+    right: 16px;
+    z-index: 100050;
+    width: 360px;
+    max-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.97);
+    transform-origin: bottom right;
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+}
+#pd-install-app-panel.pd-install-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.pd-install-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #111111;
+    color: #fff;
+}
+.pd-install-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    flex-shrink: 0;
+}
+.pd-install-header-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.pd-install-header-info {
+    flex: 1;
+    min-width: 0;
+}
+.pd-install-header-info h4 {
+    margin: 0 0 2px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+}
+.pd-install-header-info span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+}
+.pd-install-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pd-install-close:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.pd-install-body {
+    padding: 16px;
+    overflow-y: auto;
+}
+.pd-install-body p {
+    margin: 0 0 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+}
+.pd-install-body ol {
+    margin: 0 0 14px;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #4b5563;
+}
+.pd-install-body li + li {
+    margin-top: 6px;
+}
+.pd-install-cta {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: #111111;
+    color: #ffd400;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.pd-install-cta:hover {
+    background: #1b1b1b;
+}
+
+.pd-install-benefits {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+.pd-install-benefit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #4b5563;
+}
+.pd-install-benefit svg {
+    flex-shrink: 0;
+    color: #111;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    #pd-install-app-btn {
+        bottom: 20px;
+        right: 12px;
+        min-width: 52px;
+        height: 52px;
+        padding: 0 14px;
+    }
+
+    #pd-install-app-btn .pd-install-btn-label {
+        font-size: 12px;
+    }
+
+    #pd-install-app-panel {
+        top: auto;
+        bottom: 82px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-height: calc(100vh - 96px);
+        border-radius: 14px;
+    }
+
+    .pd-install-header {
+        padding: 14px;
+    }
+}

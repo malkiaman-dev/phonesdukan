@@ -2475,8 +2475,8 @@ li.custom-tab-title h2 {
    ================================================================ */
 @media screen and (max-width: 768px) {
 
-  /* Keep chatbot button above sticky cart on product page mobile */
-  #pd-chatbot-toggle {
+  /* Keep install-app button above sticky cart on product page mobile */
+  #pd-install-app-btn {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
   }
 
@@ -2785,7 +2785,7 @@ li.custom-tab-title h2 {
 
 /* Small mobile — still 2 columns, tighter; matches homepage 480px */
 @media screen and (max-width: 480px) {
-  #pd-chatbot-toggle {
+  #pd-install-app-btn {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 66px);
   }
 

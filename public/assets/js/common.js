@@ -36,13 +36,104 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebarContainer = document.getElementById("sidebar-container");
     const sidebarOverlay = document.getElementById("sidebar-overlay");
     const headerStack = document.querySelector(".pd-header-stack");
+    const announcementBar = document.querySelector(".pd-announcement-bar");
+    const announcementTrack = document.querySelector(".pd-announcement-track");
+
+    function initMobileAnnouncement() {
+        if (!announcementTrack) return;
+        if (window.matchMedia && window.matchMedia("(max-width: 992px)").matches) {
+            return;
+        }
+        const mobileQuery = window.matchMedia("(max-width: 768px)");
+        const uniqueItems = Array.from(announcementTrack.querySelectorAll("span")).filter(function (_, index) {
+            return index < 3;
+        });
+        if (!uniqueItems.length) return;
+
+        let activeIndex = 0;
+        let rotateTimer = null;
+
+        function showItem(index) {
+            uniqueItems.forEach(function (item, itemIndex) {
+                item.classList.toggle("pd-announcement-active", itemIndex === index);
+            });
+        }
+
+        function startRotation() {
+            if (rotateTimer) {
+                clearInterval(rotateTimer);
+                rotateTimer = null;
+            }
+            if (!mobileQuery.matches || uniqueItems.length < 2) {
+                showItem(0);
+                return;
+            }
+            showItem(activeIndex);
+            rotateTimer = window.setInterval(function () {
+                activeIndex = (activeIndex + 1) % uniqueItems.length;
+                showItem(activeIndex);
+            }, 4500);
+        }
+
+        startRotation();
+        if (typeof mobileQuery.addEventListener === "function") {
+            mobileQuery.addEventListener("change", startRotation);
+        } else if (typeof mobileQuery.addListener === "function") {
+            mobileQuery.addListener(startRotation);
+        }
+    }
+
+    function readSafeAreaTop() {
+        if (window.PDSafeArea && typeof window.PDSafeArea.apply === "function") {
+            window.PDSafeArea.apply();
+            return;
+        }
+        const root = document.documentElement;
+        const probe = document.createElement("div");
+        probe.style.cssText = "position:fixed;padding-top:constant(safe-area-inset-top);padding-top:env(safe-area-inset-top);visibility:hidden;pointer-events:none;";
+        root.appendChild(probe);
+        const inset = parseFloat(window.getComputedStyle(probe).paddingTop) || 0;
+        probe.remove();
+        root.style.setProperty("--safe-area-top", inset + "px");
+    }
+
+    function updateFixedChromeMetrics() {
+        const root = document.documentElement;
+        const siteChrome = document.getElementById("pd-site-chrome");
+        const isMobile = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
+        if (isMobile) {
+            root.style.setProperty("--announcement-height", "0px");
+        } else if (announcementTrack) {
+            root.style.setProperty("--announcement-height", announcementTrack.offsetHeight + "px");
+        }
+        if (headerStack) {
+            root.style.setProperty("--header-height", headerStack.offsetHeight + "px");
+        }
+        if (siteChrome && isMobile) {
+            root.style.setProperty("--pd-chrome-offset", siteChrome.offsetHeight + "px");
+        } else {
+            root.style.setProperty(
+                "--pd-chrome-offset",
+                "calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height))"
+            );
+        }
+    }
 
     if (headerStack) {
-        const topBars = document.querySelector(".pd-top-bars");
+        readSafeAreaTop();
+        initMobileAnnouncement();
+        updateFixedChromeMetrics();
+        window.addEventListener("resize", updateFixedChromeMetrics, { passive: true });
+        window.addEventListener("orientationchange", updateFixedChromeMetrics, { passive: true });
+
+        if (typeof ResizeObserver !== "undefined") {
+            const chromeObserver = new ResizeObserver(updateFixedChromeMetrics);
+            if (announcementTrack) chromeObserver.observe(announcementTrack);
+            chromeObserver.observe(headerStack);
+        }
 
         const setHeaderScrolledState = () => {
-            const threshold = topBars ? topBars.offsetHeight : 74;
-            headerStack.classList.toggle("is-scrolled", window.scrollY > threshold);
+            headerStack.classList.toggle("is-scrolled", window.scrollY > 8);
         };
 
         setHeaderScrolledState();

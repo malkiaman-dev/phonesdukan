@@ -299,7 +299,7 @@ if (!function_exists('loadCSS')) {
         $uri = $uri === '' ? '/' : $uri;
 
         emitCss('public/assets/css/style.css');
-        emitCss('public/assets/css/frontend/chatbot.css');
+        emitCss('public/assets/css/frontend/pwa-install.css');
 
         if ($uri === '/' || $uri === '/index.php') {
             emitCss('public/assets/css/frontend/index.css');
@@ -414,7 +414,7 @@ if (!function_exists('loadJS')) {
         $uri = getRequestPath();
 
         emitJs('public/assets/js/common.js');
-        emitJs('public/assets/js/chatbot.js');
+        emitJs('public/assets/js/pwa-install.js');
         emitJs('public/assets/js/faqs.js');
 
         if ($uri === '/' || strpos($uri, '/index') !== false) {
