@@ -120,13 +120,8 @@
         if (!isPhonesDukanApp()) {
             return 0;
         }
-
-        var nativeInset = readNativeInset();
-        var envInset = measureEnvSafeArea();
-        var estimated = estimateMobileSafeArea();
-        var viewportInset = readVisualViewportInset();
-
-        return Math.max(nativeInset, envInset, estimated, viewportInset, MOBILE_MIN_INSET);
+        // Native app uses a black system status bar; web content starts below it.
+        return 0;
     }
 
     function applyChromePadding(inset) {
@@ -155,15 +150,9 @@
             chrome.style.paddingTop = "0px";
         }
         if (safeFill) {
-            if (isPhonesDukanApp() && insetPx > 0) {
-                safeFill.style.display = "block";
-                safeFill.style.height = insetPx + "px";
-                safeFill.style.minHeight = insetPx + "px";
-            } else {
-                safeFill.style.display = "none";
-                safeFill.style.height = "0px";
-                safeFill.style.minHeight = "0px";
-            }
+            safeFill.style.display = "none";
+            safeFill.style.height = "0px";
+            safeFill.style.minHeight = "0px";
         }
         if (slot) {
             slot.style.display = "none";

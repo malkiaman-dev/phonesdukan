@@ -215,12 +215,9 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
         min-height: 0 !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-chrome-safe-fill {
-        display: block !important;
-        width: 100% !important;
-        height: var(--pd-chrome-pad-top) !important;
-        min-height: var(--pd-chrome-pad-top) !important;
-        background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%) !important;
-        flex-shrink: 0 !important;
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }
     #pd-site-chrome .pd-status-bar-slot {
         display: none !important;
@@ -351,24 +348,14 @@ html[data-pd-app="1"] #pd-install-app-panel {
         }
 
         var inset = 0;
-        if (isApp()) {
-            inset = Math.max(readNativeInset(), estimateInset());
-        }
-
-        root.style.setProperty("--pd-chrome-pad-top", inset + "px");
-        root.style.setProperty("--safe-area-top", inset + "px");
+        root.style.setProperty("--pd-chrome-pad-top", "0px");
+        root.style.setProperty("--safe-area-top", "0px");
         var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
         if (chrome) chrome.style.paddingTop = "0px";
         if (safeFill) {
-            if (isApp() && inset > 0) {
-                safeFill.style.display = "block";
-                safeFill.style.height = inset + "px";
-                safeFill.style.minHeight = inset + "px";
-            } else {
-                safeFill.style.display = "none";
-                safeFill.style.height = "0px";
-                safeFill.style.minHeight = "0px";
-            }
+            safeFill.style.display = "none";
+            safeFill.style.height = "0px";
+            safeFill.style.minHeight = "0px";
         }
         if (slot) {
             slot.style.display = "none";

@@ -57,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-    getWindow().setStatusBarColor(Color.TRANSPARENT);
+    WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+    getWindow().setStatusBarColor(Color.parseColor("#111111"));
     getWindow().setNavigationBarColor(Color.parseColor("#111111"));
     WindowInsetsControllerCompat insetsController =
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
