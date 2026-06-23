@@ -1149,6 +1149,14 @@ body.dimmed {
     display: block;
     position: relative;
     top: auto;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  html[data-pd-app="1"] .pd-site-chrome .pd-announcement-track {
+    display: flex;
+    background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%) !important;
+    min-height: var(--announcement-height);
   }
 
   html[data-pd-app="1"] #pd-install-app-btn,

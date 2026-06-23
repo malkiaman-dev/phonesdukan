@@ -12,8 +12,23 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!installBtn || !installPanel || !downloadUrl) return;
 
     function isPhonesDukanApp() {
-        return /PhonesDukanApp/i.test(window.navigator.userAgent || '')
-            || document.documentElement.dataset.pdApp === '1';
+        if (/PhonesDukanApp/i.test(window.navigator.userAgent || '')) {
+            return true;
+        }
+        if (/[?&]pd_app=1(?:&|$)/.test(window.location.search || '')) {
+            return true;
+        }
+        try {
+            if (localStorage.getItem('pd_app') === '1') {
+                return true;
+            }
+        } catch (e) {}
+        try {
+            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
+                return true;
+            }
+        } catch (e) {}
+        return document.documentElement.getAttribute('data-pd-app') === '1';
     }
 
     if (isPhonesDukanApp()) {

@@ -70,7 +70,8 @@ $stockQty            = isset($product['stock_quantity']) && is_numeric($product[
 $productAvailability = (isset($product['product_status']) && (int)$product['product_status'] === 1 && $stockQty > 0) ? 'instock' : 'outofstock';
 $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
-$isPdApp             = !empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false;
+$isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false)
+    || (isset($_GET['pd_app']) && (string) $_GET['pd_app'] === '1');
 ?>
 <!DOCTYPE html>
 <html lang="en"<?= $isPdApp ? ' data-pd-app="1"' : '' ?>>
@@ -78,9 +79,20 @@ $isPdApp             = !empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['
     <!-- Required Meta -->
 <meta charset="UTF-8">
 <script>
-if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
-    document.documentElement.setAttribute("data-pd-app", "1");
-}
+(function () {
+    var ua = navigator.userAgent || "";
+    var qs = typeof location !== "undefined" ? location.search : "";
+    var stored = false;
+    try { stored = localStorage.getItem("pd_app") === "1"; } catch (e) {}
+    var nativeApp = false;
+    try {
+        nativeApp = !!(window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp());
+    } catch (e) {}
+    if (/PhonesDukanApp/i.test(ua) || /[?&]pd_app=1(?:&|$)/.test(qs) || stored || nativeApp) {
+        document.documentElement.setAttribute("data-pd-app", "1");
+        try { localStorage.setItem("pd_app", "1"); } catch (e) {}
+    }
+})();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0<?= $isPdApp ? '' : ', viewport-fit=cover' ?>">
 <style id="pd-safe-top-fix">
@@ -119,6 +131,13 @@ if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
         display: block !important;
         position: relative !important;
         top: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-announcement-track {
+        display: flex !important;
+        background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%) !important;
+        min-height: var(--announcement-height) !important;
     }
     html[data-pd-app="1"] #pd-install-app-btn,
     html[data-pd-app="1"] #pd-install-app-panel {
@@ -202,7 +221,16 @@ if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
         return isMobile() || ((navigator.maxTouchPoints || 0) > 0 && innerWidth <= 992);
     }
     function isApp() {
-        return /PhonesDukanApp/i.test(navigator.userAgent || "");
+        var ua = navigator.userAgent || "";
+        if (/PhonesDukanApp/i.test(ua)) return true;
+        if (/[?&]pd_app=1(?:&|$)/.test(location.search || "")) return true;
+        try {
+            if (localStorage.getItem("pd_app") === "1") return true;
+        } catch (e) {}
+        try {
+            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) return true;
+        } catch (e) {}
+        return document.documentElement.getAttribute("data-pd-app") === "1";
     }
     function readNativeInset() {
         try {
@@ -250,6 +278,8 @@ if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
         var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
         if (isApp()) {
             root.dataset.pdApp = "1";
+            root.setAttribute("data-pd-app", "1");
+            try { localStorage.setItem("pd_app", "1"); } catch (e) {}
             root.style.setProperty("--pd-chrome-pad-top", "0px");
             root.style.setProperty("--safe-area-top", "0px");
             if (chrome) {

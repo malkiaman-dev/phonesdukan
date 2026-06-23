@@ -9,7 +9,23 @@
     }
 
     function isPhonesDukanApp() {
-        return /PhonesDukanApp/i.test(navigator.userAgent || "");
+        if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
+            return true;
+        }
+        if (/[?&]pd_app=1(?:&|$)/.test(window.location.search || "")) {
+            return true;
+        }
+        try {
+            if (localStorage.getItem("pd_app") === "1") {
+                return true;
+            }
+        } catch (e) {}
+        try {
+            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
+                return true;
+            }
+        } catch (e) {}
+        return document.documentElement.getAttribute("data-pd-app") === "1";
     }
 
     function isTouchMobile() {
@@ -90,6 +106,8 @@
 
         if (isPhonesDukanApp()) {
             root.dataset.pdApp = "1";
+            root.setAttribute("data-pd-app", "1");
+            try { localStorage.setItem("pd_app", "1"); } catch (e) {}
             root.style.setProperty("--pd-chrome-pad-top", "0px");
             root.style.setProperty("--safe-area-top", "0px");
             root.style.setProperty("--pd-status-inset", "0px");

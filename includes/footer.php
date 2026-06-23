@@ -557,6 +557,7 @@
 </div> <!-- Close site-wrapper -->
 
 <!-- ── Download App Widget ──────────────────────────────────────────────────── -->
+<?php if (empty($isPdApp)): ?>
 <button id="pd-install-app-btn" type="button"
         aria-label="Download our Android app"
         title="Download App"
@@ -610,6 +611,7 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 <!-- ── /Download App Widget ─────────────────────────────────────────────────── -->
 
 </body>
