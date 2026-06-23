@@ -37,9 +37,17 @@
 html[data-pd-app="1"] #pd-install-app-btn,
 html[data-pd-app="1"] #pd-install-app-panel {
     display: none !important;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
 }
 
 /* ── Install panel ──────────────────────────────────────────────────────────── */

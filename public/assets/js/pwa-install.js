@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', function () {
         installPanel.classList.add('pd-install-hidden');
         installBtn.setAttribute('aria-hidden', 'true');
         installPanel.setAttribute('aria-hidden', 'true');
+        if (installBtn.parentNode) {
+            installBtn.parentNode.removeChild(installBtn);
+        }
+        if (installPanel.parentNode) {
+            installPanel.parentNode.removeChild(installPanel);
+        }
         return;
     }
 

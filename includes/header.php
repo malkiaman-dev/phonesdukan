@@ -205,6 +205,18 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
 .pd-announcement-track {
     background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%);
 }
+html[data-pd-app="1"] #pd-install-app-btn,
+html[data-pd-app="1"] #pd-install-app-panel {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
 </style>
 <script>
 (function () {

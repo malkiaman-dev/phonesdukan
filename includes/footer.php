@@ -612,6 +612,43 @@
     </div>
 </div>
 <?php endif; ?>
+<script>
+(function () {
+    function isPdAppClient() {
+        var root = document.documentElement;
+        var ua = navigator.userAgent || "";
+        var qs = typeof location !== "undefined" ? location.search : "";
+        if (root.getAttribute("data-pd-app") === "1") return true;
+        if (/PhonesDukanApp/i.test(ua)) return true;
+        if (/[?&]pd_app=1(?:&|$)/.test(qs)) return true;
+        try {
+            if (localStorage.getItem("pd_app") === "1") return true;
+        } catch (e) {}
+        try {
+            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
+                return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    function removeInstallWidget() {
+        if (!isPdAppClient()) return;
+        document.documentElement.setAttribute("data-pd-app", "1");
+        ["pd-install-app-btn", "pd-install-app-panel"].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+
+    removeInstallWidget();
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", removeInstallWidget);
+    }
+})();
+</script>
 <!-- ── /Download App Widget ─────────────────────────────────────────────────── -->
 
 </body>
