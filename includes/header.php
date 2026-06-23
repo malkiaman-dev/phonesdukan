@@ -110,7 +110,6 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
         --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
     }
     html[data-pd-app="1"] #pd-site-chrome {
-        padding-top: var(--pd-chrome-pad-top) !important;
         top: 0 !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-top-bars {
@@ -130,8 +129,10 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
         flex-wrap: nowrap !important;
         background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%) !important;
         min-height: var(--announcement-height) !important;
-        animation: pdTicker var(--pd-ticker-duration, 24s) linear infinite !important;
         will-change: transform !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-announcement-track.pd-marquee-active {
+        animation: pdTicker var(--pd-ticker-duration, 24s) linear infinite !important;
     }
     html[data-pd-app="1"] #pd-install-app-btn,
     html[data-pd-app="1"] #pd-install-app-panel {
@@ -145,9 +146,23 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
         right: 0 !important;
         width: 100% !important;
         z-index: 10001 !important;
-        padding-top: var(--pd-chrome-pad-top) !important;
+        padding-top: 0 !important;
         box-sizing: border-box !important;
         overflow: hidden !important;
+        background: var(--mi-soft-black);
+    }
+    #pd-site-chrome .pd-chrome-safe-fill {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-chrome-safe-fill {
+        display: block !important;
+        width: 100% !important;
+        height: var(--pd-chrome-pad-top) !important;
+        min-height: var(--pd-chrome-pad-top) !important;
+        background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%) !important;
+        flex-shrink: 0 !important;
     }
     #pd-site-chrome .pd-status-bar-slot {
         display: none !important;
@@ -268,15 +283,23 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
         var inset = 0;
         if (isApp()) {
             inset = Math.max(readNativeInset(), estimateInset());
-        } else if (isTouchMobile()) {
-            inset = Math.max(measureEnvInset(), estimateInset());
-        } else {
-            inset = measureEnvInset();
         }
 
         root.style.setProperty("--pd-chrome-pad-top", inset + "px");
         root.style.setProperty("--safe-area-top", inset + "px");
-        if (chrome) chrome.style.paddingTop = inset + "px";
+        var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
+        if (chrome) chrome.style.paddingTop = "0px";
+        if (safeFill) {
+            if (isApp() && inset > 0) {
+                safeFill.style.display = "block";
+                safeFill.style.height = inset + "px";
+                safeFill.style.minHeight = inset + "px";
+            } else {
+                safeFill.style.display = "none";
+                safeFill.style.height = "0px";
+                safeFill.style.minHeight = "0px";
+            }
+        }
         if (slot) {
             slot.style.display = "none";
             slot.style.height = "0px";
@@ -507,6 +530,7 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 <div class="site-wrapper">
 
     <div id="pd-site-chrome" class="pd-site-chrome">
+    <div class="pd-chrome-safe-fill" aria-hidden="true"></div>
     <div class="pd-status-bar-slot" aria-hidden="true"></div>
 
     <!-- Announcement bar (fixed below safe area via CSS) -->

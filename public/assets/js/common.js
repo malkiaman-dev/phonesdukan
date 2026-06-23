@@ -44,65 +44,70 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         if (reducedMotion) {
+            announcementTrack.classList.remove("pd-marquee-active");
             announcementTrack.style.animation = "none";
             return;
         }
 
-        function readGap() {
-            var styles = window.getComputedStyle(announcementTrack);
-            var gap = parseFloat(styles.columnGap || styles.gap);
-            return isNaN(gap) ? 0 : gap;
-        }
+        var resizeTimer = null;
+        var lastHalfWidth = 0;
 
         function syncMarqueeSpeed() {
-            var spans = announcementTrack.querySelectorAll(":scope > span");
-            var half = Math.floor(spans.length / 2);
-            if (!half) return;
-
-            var gap = readGap();
-            var halfWidth = 0;
-            var index;
-
-            for (index = 0; index < half; index++) {
-                halfWidth += spans[index].getBoundingClientRect().width;
-                if (index < half - 1) {
-                    halfWidth += gap;
+            var totalWidth = announcementTrack.scrollWidth;
+            var halfWidth = totalWidth / 2;
+            if (!halfWidth || Math.abs(halfWidth - lastHalfWidth) < 1) {
+                if (!announcementTrack.classList.contains("pd-marquee-active") && halfWidth) {
+                    announcementTrack.classList.add("pd-marquee-active");
                 }
+                return;
             }
 
-            if (!halfWidth) return;
-
-            var pxPerSecond = 40;
-            var duration = Math.max(16, halfWidth / pxPerSecond);
+            lastHalfWidth = halfWidth;
+            var pxPerSecond = 38;
+            var duration = Math.max(18, halfWidth / pxPerSecond);
             announcementTrack.style.setProperty("--pd-ticker-shift", "-" + halfWidth + "px");
             announcementTrack.style.setProperty("--pd-ticker-duration", duration + "s");
-            announcementTrack.style.animation = "none";
+            announcementTrack.classList.remove("pd-marquee-active");
             void announcementTrack.offsetWidth;
-            announcementTrack.style.animation = "";
+            announcementTrack.classList.add("pd-marquee-active");
         }
 
         function scheduleSync() {
-            window.requestAnimationFrame(function () {
-                syncMarqueeSpeed();
-            });
+            window.requestAnimationFrame(syncMarqueeSpeed);
+        }
+
+        function debouncedSync() {
+            if (resizeTimer) {
+                clearTimeout(resizeTimer);
+            }
+            resizeTimer = window.setTimeout(scheduleSync, 200);
         }
 
         scheduleSync();
-        window.addEventListener("resize", scheduleSync, { passive: true });
+        window.addEventListener("resize", debouncedSync, { passive: true });
         window.addEventListener("orientationchange", function () {
-            window.setTimeout(scheduleSync, 120);
+            lastHalfWidth = 0;
+            window.setTimeout(scheduleSync, 200);
         }, { passive: true });
 
-        if (typeof ResizeObserver !== "undefined") {
-            var marqueeObserver = new ResizeObserver(scheduleSync);
-            marqueeObserver.observe(announcementTrack);
-        }
-
         if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(scheduleSync).catch(function () {});
+            document.fonts.ready.then(function () {
+                lastHalfWidth = 0;
+                scheduleSync();
+            }).catch(function () {});
         }
 
-        window.addEventListener("load", scheduleSync, { passive: true });
+        window.addEventListener("load", function () {
+            lastHalfWidth = 0;
+            scheduleSync();
+        }, { passive: true });
+
+        if (window.PDSafeArea) {
+            window.setTimeout(function () {
+                lastHalfWidth = 0;
+                scheduleSync();
+            }, 250);
+        }
     }
 
     function readSafeAreaTop() {
@@ -148,8 +153,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (typeof ResizeObserver !== "undefined") {
             const chromeObserver = new ResizeObserver(updateFixedChromeMetrics);
-            if (announcementTrack) chromeObserver.observe(announcementTrack);
-            chromeObserver.observe(headerStack);
+            if (headerStack) chromeObserver.observe(headerStack);
+            var siteChrome = document.getElementById("pd-site-chrome");
+            if (siteChrome) chromeObserver.observe(siteChrome);
         }
 
         const setHeaderScrolledState = () => {

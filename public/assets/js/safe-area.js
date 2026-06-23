@@ -2,7 +2,7 @@
     "use strict";
 
     var MOBILE_QUERY = "(max-width: 992px)";
-    var MOBILE_MIN_INSET = 28;
+    var MOBILE_MIN_INSET = 32;
 
     function isMobileViewport() {
         return window.matchMedia && window.matchMedia(MOBILE_QUERY).matches;
@@ -47,6 +47,13 @@
         return 0;
     }
 
+    function readVisualViewportInset() {
+        if (!window.visualViewport) {
+            return 0;
+        }
+        return Math.max(0, Math.round(window.visualViewport.offsetTop || 0));
+    }
+
     function measureEnvSafeArea() {
         var root = document.documentElement;
         var probe = document.createElement("div");
@@ -85,10 +92,6 @@
     }
 
     function estimateMobileSafeArea() {
-        var nativeInset = readNativeInset();
-        if (nativeInset > 0) {
-            return nativeInset;
-        }
         var ua = navigator.userAgent || "";
         if (/Android/i.test(ua)) {
             return estimateAndroidSafeArea();
@@ -100,27 +103,23 @@
     }
 
     function resolveSafeAreaTop() {
-        if (isPhonesDukanApp()) {
-            var nativeInset = readNativeInset();
-            if (nativeInset > 0) {
-                return nativeInset;
-            }
-            return estimateMobileSafeArea();
+        if (!isPhonesDukanApp()) {
+            return 0;
         }
 
-        if (!isTouchMobile()) {
-            return measureEnvSafeArea();
-        }
-
-        var measured = measureEnvSafeArea();
+        var nativeInset = readNativeInset();
+        var envInset = measureEnvSafeArea();
         var estimated = estimateMobileSafeArea();
-        return Math.max(measured, estimated);
+        var viewportInset = readVisualViewportInset();
+
+        return Math.max(nativeInset, envInset, estimated, viewportInset, MOBILE_MIN_INSET);
     }
 
     function applyChromePadding(inset) {
         var root = document.documentElement;
         var chrome = document.getElementById("pd-site-chrome");
         var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
+        var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
         var insetPx = Math.max(0, Math.round(inset));
 
         if (isPhonesDukanApp()) {
@@ -128,9 +127,7 @@
             root.setAttribute("data-pd-app", "1");
             try { localStorage.setItem("pd_app", "1"); } catch (e) {}
             var viewportMeta = document.querySelector('meta[name="viewport"]');
-            if (viewportMeta && /viewport-fit=cover/i.test(viewportMeta.content || "")) {
-                viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
-            } else if (viewportMeta && !/viewport-fit=cover/i.test(viewportMeta.content || "")) {
+            if (viewportMeta && !/viewport-fit=cover/i.test(viewportMeta.content || "")) {
                 viewportMeta.content = "width=device-width, initial-scale=1.0, viewport-fit=cover";
             }
         } else {
@@ -143,7 +140,18 @@
         root.dataset.pdSafeArea = String(insetPx);
 
         if (chrome) {
-            chrome.style.paddingTop = insetPx + "px";
+            chrome.style.paddingTop = "0px";
+        }
+        if (safeFill) {
+            if (isPhonesDukanApp() && insetPx > 0) {
+                safeFill.style.display = "block";
+                safeFill.style.height = insetPx + "px";
+                safeFill.style.minHeight = insetPx + "px";
+            } else {
+                safeFill.style.display = "none";
+                safeFill.style.height = "0px";
+                safeFill.style.minHeight = "0px";
+            }
         }
         if (slot) {
             slot.style.display = "none";
@@ -169,5 +177,6 @@
 
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", applySafeAreaTop, { passive: true });
+        window.visualViewport.addEventListener("scroll", applySafeAreaTop, { passive: true });
     }
 })(window, document);
