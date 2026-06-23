@@ -106,21 +106,12 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
     :root {
         --header-height: 58px;
         --announcement-height: 36px;
-        --pd-chrome-pad-top: 36px;
-        --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
-    }
-    html[data-pd-app="1"] {
         --pd-chrome-pad-top: 0px;
         --pd-chrome-offset: calc(var(--announcement-height) + var(--header-height));
     }
     html[data-pd-app="1"] #pd-site-chrome {
         padding-top: 0 !important;
         top: 0 !important;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-status-bar-slot {
-        display: none !important;
-        height: 0 !important;
-        visibility: hidden !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-top-bars {
         display: block !important;
@@ -151,27 +142,14 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
         right: 0 !important;
         width: 100% !important;
         z-index: 10001 !important;
-        padding-top: 36px !important;
+        padding-top: 0 !important;
         box-sizing: border-box !important;
         overflow: hidden !important;
     }
-    html[data-pd-app="1"] #pd-site-chrome {
-        padding-top: 0 !important;
-    }
     #pd-site-chrome .pd-status-bar-slot {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 36px;
-        background: #111111;
-        pointer-events: none;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-status-bar-slot {
-        display: none;
-        height: 0;
+        display: none !important;
+        height: 0 !important;
+        visibility: hidden !important;
     }
     #pd-site-chrome .pd-safe-area-top {
         display: none !important;
@@ -299,12 +277,17 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
         root.removeAttribute("data-pd-app");
         var inset = 0;
         if (isTouchMobile()) {
-            inset = Math.max(measureEnvInset(), estimateInset(), MOBILE_MIN);
+            inset = 0;
+        } else {
+            inset = measureEnvInset();
         }
         root.style.setProperty("--pd-chrome-pad-top", inset + "px");
         root.style.setProperty("--safe-area-top", inset + "px");
         if (chrome) chrome.style.paddingTop = inset + "px";
-        if (slot) slot.style.height = inset + "px";
+        if (slot) {
+            slot.style.display = "none";
+            slot.style.height = "0px";
+        }
         root.dataset.pdSafeArea = String(inset);
     }
     applyChromeInset();

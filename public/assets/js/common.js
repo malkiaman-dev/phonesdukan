@@ -39,44 +39,28 @@ document.addEventListener("DOMContentLoaded", function () {
     const announcementBar = document.querySelector(".pd-announcement-bar");
     const announcementTrack = document.querySelector(".pd-announcement-track");
 
-    function initMobileAnnouncement() {
+    function initAnnouncementMarquee() {
         if (!announcementTrack) return;
-        const mobileQuery = window.matchMedia("(max-width: 768px)");
-        const uniqueItems = Array.from(announcementTrack.querySelectorAll("span")).filter(function (_, index) {
-            return index < 3;
-        });
-        if (!uniqueItems.length) return;
 
-        let activeIndex = 0;
-        let rotateTimer = null;
-
-        function showItem(index) {
-            uniqueItems.forEach(function (item, itemIndex) {
-                item.classList.toggle("pd-announcement-active", itemIndex === index);
-            });
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reducedMotion) {
+            announcementTrack.style.animation = "none";
+            return;
         }
 
-        function startRotation() {
-            if (rotateTimer) {
-                clearInterval(rotateTimer);
-                rotateTimer = null;
-            }
-            if (!mobileQuery.matches || uniqueItems.length < 2) {
-                showItem(0);
-                return;
-            }
-            showItem(activeIndex);
-            rotateTimer = window.setInterval(function () {
-                activeIndex = (activeIndex + 1) % uniqueItems.length;
-                showItem(activeIndex);
-            }, 4500);
+        function syncMarqueeSpeed() {
+            var halfWidth = announcementTrack.scrollWidth / 2;
+            if (!halfWidth) return;
+            var pxPerSecond = 42;
+            var duration = Math.max(14, halfWidth / pxPerSecond);
+            announcementTrack.style.setProperty("--pd-ticker-duration", duration + "s");
         }
 
-        startRotation();
-        if (typeof mobileQuery.addEventListener === "function") {
-            mobileQuery.addEventListener("change", startRotation);
-        } else if (typeof mobileQuery.addListener === "function") {
-            mobileQuery.addListener(startRotation);
+        syncMarqueeSpeed();
+        window.addEventListener("resize", syncMarqueeSpeed, { passive: true });
+        if (typeof ResizeObserver !== "undefined") {
+            var marqueeObserver = new ResizeObserver(syncMarqueeSpeed);
+            marqueeObserver.observe(announcementTrack);
         }
     }
 
@@ -116,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (headerStack) {
         readSafeAreaTop();
-        initMobileAnnouncement();
+        initAnnouncementMarquee();
         updateFixedChromeMetrics();
         window.addEventListener("resize", updateFixedChromeMetrics, { passive: true });
         window.addEventListener("orientationchange", updateFixedChromeMetrics, { passive: true });

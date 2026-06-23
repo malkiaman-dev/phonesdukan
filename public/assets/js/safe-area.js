@@ -137,8 +137,8 @@
             chrome.style.paddingTop = inset + "px";
         }
         if (slot) {
-            slot.style.display = "";
-            slot.style.height = inset + "px";
+            slot.style.display = "none";
+            slot.style.height = "0px";
         }
     }
 
@@ -151,9 +151,7 @@
             return measureEnvSafeArea();
         }
 
-        var measured = measureEnvSafeArea();
-        var estimated = estimateMobileSafeArea();
-        return Math.max(measured, estimated, MOBILE_MIN_INSET);
+        return 0;
     }
 
     function applySafeAreaTop() {
