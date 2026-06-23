@@ -152,7 +152,7 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
     }
 })();
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0<?= empty($isPdApp) ? ', viewport-fit=cover' : '' ?>">
 <style id="pd-safe-top-fix">
 :root {
     --pd-chrome-pad-top: 0px;
@@ -215,9 +215,12 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
         min-height: 0 !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-chrome-safe-fill {
-        display: none !important;
-        height: 0 !important;
-        min-height: 0 !important;
+        display: block !important;
+        width: 100% !important;
+        height: var(--pd-chrome-pad-top) !important;
+        min-height: var(--pd-chrome-pad-top) !important;
+        background: #111111 !important;
+        flex-shrink: 0 !important;
     }
     #pd-site-chrome .pd-status-bar-slot {
         display: none !important;
@@ -348,14 +351,25 @@ html[data-pd-app="1"] #pd-install-app-panel {
         }
 
         var inset = 0;
-        root.style.setProperty("--pd-chrome-pad-top", "0px");
-        root.style.setProperty("--safe-area-top", "0px");
+        if (isApp()) {
+            inset = Math.max(readNativeInset(), estimateInset());
+        }
+
+        root.style.setProperty("--pd-chrome-pad-top", inset + "px");
+        root.style.setProperty("--safe-area-top", inset + "px");
         var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
         if (chrome) chrome.style.paddingTop = "0px";
         if (safeFill) {
-            safeFill.style.display = "none";
-            safeFill.style.height = "0px";
-            safeFill.style.minHeight = "0px";
+            if (isApp() && inset > 0) {
+                safeFill.style.display = "block";
+                safeFill.style.height = inset + "px";
+                safeFill.style.minHeight = inset + "px";
+                safeFill.style.background = "#111111";
+            } else {
+                safeFill.style.display = "none";
+                safeFill.style.height = "0px";
+                safeFill.style.minHeight = "0px";
+            }
         }
         if (slot) {
             slot.style.display = "none";

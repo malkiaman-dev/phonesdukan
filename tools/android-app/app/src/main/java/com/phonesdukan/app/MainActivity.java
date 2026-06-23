@@ -12,7 +12,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import java.util.HashMap;
@@ -57,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-    getWindow().setStatusBarColor(Color.parseColor("#111111"));
+    WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+    getWindow().setStatusBarColor(Color.TRANSPARENT);
     getWindow().setNavigationBarColor(Color.parseColor("#111111"));
     WindowInsetsControllerCompat insetsController =
         WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
@@ -69,6 +72,12 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     webView = findViewById(R.id.webView);
+    ViewCompat.setOnApplyWindowInsetsListener(webView, (view, windowInsets) -> {
+      Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+      view.setPadding(bars.left, 0, bars.right, bars.bottom);
+      return windowInsets;
+    });
+    ViewCompat.requestApplyInsets(webView);
     webView.setBackgroundColor(Color.WHITE);
     webView.setVerticalScrollBarEnabled(false);
     webView.setHorizontalScrollBarEnabled(false);

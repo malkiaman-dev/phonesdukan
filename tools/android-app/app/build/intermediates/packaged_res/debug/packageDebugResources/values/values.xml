@@ -4,7 +4,7 @@
     <string name="app_name">Phones Dukan</string>
     <style name="Theme.PhonesDukan" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">#FFFFFF</item>
-        <item name="android:statusBarColor">#111111</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#111111</item>
         <item name="android:windowLightStatusBar" ns1:targetApi="m">false</item>
     </style>

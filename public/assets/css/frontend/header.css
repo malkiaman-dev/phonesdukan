@@ -1195,9 +1195,12 @@ html[data-pd-app="1"] #pd-install-app-panel {
   }
 
   html[data-pd-app="1"] .pd-site-chrome .pd-chrome-safe-fill {
-    display: none !important;
-    height: 0 !important;
-    min-height: 0 !important;
+    display: block;
+    width: 100%;
+    height: var(--pd-chrome-pad-top);
+    min-height: var(--pd-chrome-pad-top);
+    background: #111111;
+    flex-shrink: 0;
   }
 
   .pd-status-bar-slot {
