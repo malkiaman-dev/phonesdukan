@@ -15,6 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
   private static final String HOME_URL = "https://www.phonesdukan.com/?pd_app=1";
@@ -23,7 +26,9 @@ public class MainActivity extends AppCompatActivity {
       "(function(){try{"
           + "document.documentElement.setAttribute('data-pd-app','1');"
           + "localStorage.setItem('pd_app','1');"
-          + "document.cookie='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
+          + "var c='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
+          + "if(/phonesdukan\\.com$/i.test(location.hostname)){c+=';domain=.phonesdukan.com';}"
+          + "document.cookie=c;"
           + "['pd-install-app-btn','pd-install-app-panel'].forEach(function(id){"
           + "var el=document.getElementById(id);"
           + "if(el&&el.parentNode){el.parentNode.removeChild(el);}"
@@ -34,10 +39,18 @@ public class MainActivity extends AppCompatActivity {
   private static final String APP_EARLY_JS =
       "(function(){try{"
           + "document.documentElement.setAttribute('data-pd-app','1');"
-          + "document.cookie='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
+          + "var c='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
+          + "if(/phonesdukan\\.com$/i.test(location.hostname)){c+=';domain=.phonesdukan.com';}"
+          + "document.cookie=c;"
           + "}catch(e){}})();";
 
   private WebView webView;
+
+  private Map<String, String> appHeaders() {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("X-PhonesDukan-App", "1");
+    return headers;
+  }
 
   @SuppressLint("SetJavaScriptEnabled")
   @Override
@@ -76,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     webView.setWebViewClient(new WebViewClient() {
       @Override
       public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        view.loadUrl(ensureAppParam(request.getUrl().toString()));
+        view.loadUrl(ensureAppParam(request.getUrl().toString()), appHeaders());
         return true;
       }
 
@@ -94,9 +107,10 @@ public class MainActivity extends AppCompatActivity {
     webView.setWebChromeClient(new WebChromeClient());
 
     if (savedInstanceState == null) {
-      webView.loadUrl(HOME_URL);
+      webView.loadUrl(HOME_URL, appHeaders());
     } else {
       webView.restoreState(savedInstanceState);
+      webView.evaluateJavascript(APP_BOOT_JS, null);
     }
   }
 

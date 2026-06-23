@@ -218,6 +218,25 @@ if (!function_exists('getRequestPath')) {
     }
 }
 
+if (!function_exists('pd_is_app_request')) {
+  function pd_is_app_request(): bool
+  {
+    if (!empty($_SERVER['HTTP_X_PHONESDUKAN_APP']) && (string) $_SERVER['HTTP_X_PHONESDUKAN_APP'] === '1') {
+      return true;
+    }
+    if (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false) {
+      return true;
+    }
+    if (isset($_GET['pd_app']) && (string) $_GET['pd_app'] === '1') {
+      return true;
+    }
+    if (isset($_COOKIE['pd_app']) && (string) $_COOKIE['pd_app'] === '1') {
+      return true;
+    }
+    return false;
+  }
+}
+
 if (!function_exists('isProductDetailPath')) {
     /**
      * True for storefront product permalinks (3- or 4-segment paths).
@@ -299,7 +318,9 @@ if (!function_exists('loadCSS')) {
         $uri = $uri === '' ? '/' : $uri;
 
         emitCss('public/assets/css/style.css');
-        emitCss('public/assets/css/frontend/pwa-install.css');
+        if (empty($GLOBALS['pd_is_app'])) {
+            emitCss('public/assets/css/frontend/pwa-install.css');
+        }
 
         if ($uri === '/' || $uri === '/index.php') {
             emitCss('public/assets/css/frontend/index.css');
@@ -414,7 +435,9 @@ if (!function_exists('loadJS')) {
         $uri = getRequestPath();
 
         emitJs('public/assets/js/common.js');
-        emitJs('public/assets/js/pwa-install.js');
+        if (empty($GLOBALS['pd_is_app'])) {
+            emitJs('public/assets/js/pwa-install.js');
+        }
         emitJs('public/assets/js/faqs.js');
 
         if ($uri === '/' || strpos($uri, '/index') !== false) {

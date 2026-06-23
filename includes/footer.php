@@ -614,31 +614,43 @@
 <?php endif; ?>
 <script>
 (function () {
+    function pdAppCookieValue() {
+        try {
+            return /(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "");
+        } catch (e) {}
+        return false;
+    }
+    function setPdAppCookie() {
+        try {
+            var cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax";
+            if (/phonesdukan\.com$/i.test(location.hostname)) {
+                cookie += ";domain=.phonesdukan.com";
+            }
+            document.cookie = cookie;
+        } catch (e) {}
+    }
     function isPdAppClient() {
         var root = document.documentElement;
         var ua = navigator.userAgent || "";
         var qs = typeof location !== "undefined" ? location.search : "";
         if (/PhonesDukanApp/i.test(ua)) return true;
         if (/[?&]pd_app=1(?:&|$)/.test(qs)) return true;
+        if (pdAppCookieValue()) return true;
         try {
-            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "")) return true;
+            if (localStorage.getItem("pd_app") === "1") return true;
         } catch (e) {}
         try {
             if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
                 return true;
             }
         } catch (e) {}
-        if (root.getAttribute("data-pd-app") === "1") return true;
-        return false;
+        return root.getAttribute("data-pd-app") === "1";
     }
-
     function markPdAppClient() {
-        if (!isPdAppClient()) return;
         document.documentElement.setAttribute("data-pd-app", "1");
-        try { document.cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
         try { localStorage.setItem("pd_app", "1"); } catch (e) {}
+        setPdAppCookie();
     }
-
     function removeInstallWidget() {
         if (!isPdAppClient()) return;
         markPdAppClient();
@@ -649,8 +661,13 @@
             }
         });
     }
-
     removeInstallWidget();
+    if (isPdAppClient() && typeof MutationObserver !== "undefined") {
+        new MutationObserver(removeInstallWidget).observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    }
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", removeInstallWidget);
     }

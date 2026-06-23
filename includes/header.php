@@ -70,9 +70,22 @@ $stockQty            = isset($product['stock_quantity']) && is_numeric($product[
 $productAvailability = (isset($product['product_status']) && (int)$product['product_status'] === 1 && $stockQty > 0) ? 'instock' : 'outofstock';
 $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
-$isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false)
-    || (isset($_GET['pd_app']) && (string) $_GET['pd_app'] === '1')
-    || (isset($_COOKIE['pd_app']) && (string) $_COOKIE['pd_app'] === '1');
+$isPdApp             = pd_is_app_request();
+$GLOBALS['pd_is_app'] = $isPdApp;
+if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '1')) {
+    $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    $cookieOpts = [
+        'expires'  => time() + 31536000,
+        'path'     => '/',
+        'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+        'httponly' => false,
+        'samesite' => 'Lax',
+    ];
+    if (preg_match('/(?:^|\.)phonesdukan\.com$/', $host)) {
+        $cookieOpts['domain'] = '.phonesdukan.com';
+    }
+    setcookie('pd_app', '1', $cookieOpts);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en"<?= $isPdApp ? ' data-pd-app="1"' : '' ?>>
@@ -81,22 +94,61 @@ $isPdApp             = (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER[
 <meta charset="UTF-8">
 <script>
 (function () {
-    var ua = navigator.userAgent || "";
-    var qs = typeof location !== "undefined" ? location.search : "";
-    var nativeApp = false;
-    try {
-        nativeApp = !!(window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp());
-    } catch (e) {}
-    if (/PhonesDukanApp/i.test(ua) || /[?&]pd_app=1(?:&|$)/.test(qs) || nativeApp) {
-        document.documentElement.setAttribute("data-pd-app", "1");
-        try { localStorage.setItem("pd_app", "1"); } catch (e) {}
-        try { document.cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
-    } else {
+    function pdAppCookieValue() {
         try {
-            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "")) {
-                document.documentElement.setAttribute("data-pd-app", "1");
+            return /(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "");
+        } catch (e) {}
+        return false;
+    }
+    function setPdAppCookie() {
+        try {
+            var cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax";
+            if (/phonesdukan\.com$/i.test(location.hostname)) {
+                cookie += ";domain=.phonesdukan.com";
+            }
+            document.cookie = cookie;
+        } catch (e) {}
+    }
+    function isPdAppClient() {
+        var ua = navigator.userAgent || "";
+        var qs = typeof location !== "undefined" ? location.search : "";
+        if (/PhonesDukanApp/i.test(ua)) return true;
+        if (/[?&]pd_app=1(?:&|$)/.test(qs)) return true;
+        if (pdAppCookieValue()) return true;
+        try {
+            if (localStorage.getItem("pd_app") === "1") return true;
+        } catch (e) {}
+        try {
+            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
+                return true;
             }
         } catch (e) {}
+        return document.documentElement.getAttribute("data-pd-app") === "1";
+    }
+    function markPdAppClient() {
+        document.documentElement.setAttribute("data-pd-app", "1");
+        try { localStorage.setItem("pd_app", "1"); } catch (e) {}
+        setPdAppCookie();
+    }
+    function removeInstallWidgetNodes() {
+        ["pd-install-app-btn", "pd-install-app-panel"].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+    if (isPdAppClient()) {
+        markPdAppClient();
+        removeInstallWidgetNodes();
+        if (typeof MutationObserver !== "undefined") {
+            new MutationObserver(removeInstallWidgetNodes).observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+        }
+    } else if (pdAppCookieValue()) {
+        document.documentElement.setAttribute("data-pd-app", "1");
     }
 })();
 </script>
