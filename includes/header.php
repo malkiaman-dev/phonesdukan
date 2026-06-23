@@ -352,7 +352,14 @@ html[data-pd-app="1"] #pd-install-app-panel {
 
         var inset = 0;
         if (isApp()) {
-            inset = Math.max(readNativeInset(), estimateInset());
+            var nativeInset = readNativeInset();
+            if (nativeInset === 0) {
+                inset = 0;
+            } else if (nativeInset > 0) {
+                inset = Math.max(nativeInset, estimateInset());
+            } else {
+                inset = Math.max(estimateInset(), 0);
+            }
         }
 
         root.style.setProperty("--pd-chrome-pad-top", inset + "px");

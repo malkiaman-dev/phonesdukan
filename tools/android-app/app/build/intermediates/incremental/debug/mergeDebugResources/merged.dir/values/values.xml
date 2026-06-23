@@ -1714,11 +1714,12 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="Theme.PhonesDukan" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.PhonesDukan" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">#FFFFFF</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">#F7D117</item>
         <item name="android:navigationBarColor">#111111</item>
         <item name="android:windowLightStatusBar" ns2:targetApi="m">false</item>
+        <item name="android:windowLightNavigationBar" ns2:targetApi="o_mr1">false</item>
     </style>
     <style name="ThemeOverlay.AppCompat" parent="Base.ThemeOverlay.AppCompat"/>
     <style name="ThemeOverlay.AppCompat.ActionBar" parent="Base.ThemeOverlay.AppCompat.ActionBar"/>

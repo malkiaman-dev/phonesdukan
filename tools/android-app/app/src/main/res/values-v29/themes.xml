@@ -3,7 +3,9 @@
         <item name="android:windowBackground">#FFFFFF</item>
         <item name="android:statusBarColor">#F7D117</item>
         <item name="android:navigationBarColor">#111111</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
     </style>
 </resources>

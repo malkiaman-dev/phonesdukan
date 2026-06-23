@@ -53,12 +53,12 @@
         try {
             if (window.PhonesDukanNative && typeof window.PhonesDukanNative.getStatusBarHeight === "function") {
                 var nativePx = parseFloat(window.PhonesDukanNative.getStatusBarHeight());
-                if (nativePx > 0) {
+                if (!isNaN(nativePx) && nativePx >= 0) {
                     return nativePx;
                 }
             }
         } catch (e) {}
-        return 0;
+        return -1;
     }
 
     function readVisualViewportInset() {
@@ -122,11 +122,16 @@
         }
 
         var nativeInset = readNativeInset();
+        if (nativeInset === 0) {
+            return 0;
+        }
+
         var envInset = measureEnvSafeArea();
         var estimated = estimateMobileSafeArea();
         var viewportInset = readVisualViewportInset();
+        var fallback = Math.max(envInset, estimated, viewportInset, MOBILE_MIN_INSET);
 
-        return Math.max(nativeInset, envInset, estimated, viewportInset, MOBILE_MIN_INSET);
+        return nativeInset > 0 ? Math.max(nativeInset, fallback) : fallback;
     }
 
     function applyChromePadding(inset) {

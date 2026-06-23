@@ -3,7 +3,11 @@ package com.phonesdukan.app;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -24,6 +28,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
   private static final String HOME_URL = "https://www.phonesdukan.com/?pd_app=1";
+  private static final int STATUS_BAR_COLOR = Color.parseColor("#F7D117");
 
   private static final String APP_BOOT_JS =
       "(function(){try{"
@@ -60,21 +65,24 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-    getWindow().setStatusBarColor(Color.TRANSPARENT);
-    getWindow().setNavigationBarColor(Color.parseColor("#111111"));
-    WindowInsetsControllerCompat insetsController =
-        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-    if (insetsController != null) {
-      insetsController.setAppearanceLightStatusBars(false);
+    Window window = getWindow();
+    WindowCompat.setDecorFitsSystemWindows(window, false);
+    window.setStatusBarColor(STATUS_BAR_COLOR);
+    window.setNavigationBarColor(Color.parseColor("#111111"));
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      window.setStatusBarContrastEnforced(false);
+      window.setNavigationBarContrastEnforced(false);
     }
+    applyWhiteStatusBarIcons();
 
     setContentView(R.layout.activity_main);
 
     webView = findViewById(R.id.webView);
     ViewCompat.setOnApplyWindowInsetsListener(webView, (view, windowInsets) -> {
       Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-      view.setPadding(bars.left, 0, bars.right, bars.bottom);
+      view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+      window.setStatusBarColor(STATUS_BAR_COLOR);
+      applyWhiteStatusBarIcons();
       return windowInsets;
     });
     ViewCompat.requestApplyInsets(webView);
@@ -105,11 +113,15 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
         view.evaluateJavascript(APP_EARLY_JS, null);
+        applyWhiteStatusBarIcons();
       }
 
       @Override
       public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(APP_BOOT_JS, null);
+        applyWhiteStatusBarIcons();
+        view.post(() -> applyWhiteStatusBarIcons());
+        view.postDelayed(() -> applyWhiteStatusBarIcons(), 250);
       }
     });
 
@@ -120,6 +132,59 @@ public class MainActivity extends AppCompatActivity {
     } else {
       webView.restoreState(savedInstanceState);
       webView.evaluateJavascript(APP_BOOT_JS, null);
+    }
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    applyWhiteStatusBarIcons();
+  }
+
+  @Override
+  public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    if (hasFocus) {
+      applyWhiteStatusBarIcons();
+    }
+  }
+
+  private void applyWhiteStatusBarIcons() {
+    Window window = getWindow();
+    if (window == null) {
+      return;
+    }
+
+    window.setStatusBarColor(STATUS_BAR_COLOR);
+
+    WindowInsetsControllerCompat compatController =
+        WindowCompat.getInsetsController(window, window.getDecorView());
+    if (compatController != null) {
+      compatController.setAppearanceLightStatusBars(false);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        compatController.setAppearanceLightNavigationBars(false);
+      }
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      WindowInsetsController platformController = window.getInsetsController();
+      if (platformController != null) {
+        platformController.setSystemBarsAppearance(
+            0,
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+        );
+      }
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      View decorView = window.getDecorView();
+      int flags = decorView.getSystemUiVisibility();
+      flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+      }
+      decorView.setSystemUiVisibility(flags);
     }
   }
 
@@ -163,15 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
     @JavascriptInterface
     public float getStatusBarHeight() {
-      float density = getResources().getDisplayMetrics().density;
-      if (density <= 0f) {
-        return 24f;
-      }
-      int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-      if (resourceId > 0) {
-        return getResources().getDimensionPixelSize(resourceId) / density;
-      }
-      return 24f;
+      return 0f;
     }
   }
 }
