@@ -32,7 +32,11 @@
 #pd-install-app-btn svg {
     flex-shrink: 0;
 }
-#pd-install-app-btn.pd-install-hidden {
+#pd-install-app-btn.pd-install-hidden,
+#pd-install-app-panel.pd-install-hidden,
+html[data-pd-app="1"] #pd-install-app-btn,
+html[data-pd-app="1"] #pd-install-app-panel {
+    display: none !important;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;

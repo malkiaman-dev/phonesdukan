@@ -41,9 +41,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function initMobileAnnouncement() {
         if (!announcementTrack) return;
-        if (window.matchMedia && window.matchMedia("(max-width: 992px)").matches) {
-            return;
-        }
         const mobileQuery = window.matchMedia("(max-width: 768px)");
         const uniqueItems = Array.from(announcementTrack.querySelectorAll("span")).filter(function (_, index) {
             return index < 3;
@@ -101,9 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const root = document.documentElement;
         const siteChrome = document.getElementById("pd-site-chrome");
         const isMobile = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
-        if (isMobile) {
-            root.style.setProperty("--announcement-height", "0px");
-        } else if (announcementTrack) {
+        if (announcementTrack) {
             root.style.setProperty("--announcement-height", announcementTrack.offsetHeight + "px");
         }
         if (headerStack) {

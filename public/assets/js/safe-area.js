@@ -88,6 +88,28 @@
         var chrome = document.getElementById("pd-site-chrome");
         var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
 
+        if (isPhonesDukanApp()) {
+            root.dataset.pdApp = "1";
+            root.style.setProperty("--pd-chrome-pad-top", "0px");
+            root.style.setProperty("--safe-area-top", "0px");
+            root.style.setProperty("--pd-status-inset", "0px");
+            root.dataset.pdSafeArea = "0";
+            if (chrome) {
+                chrome.style.paddingTop = "0px";
+            }
+            if (slot) {
+                slot.style.display = "none";
+                slot.style.height = "0px";
+            }
+            var viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (viewportMeta && /viewport-fit=cover/i.test(viewportMeta.content || "")) {
+                viewportMeta.content = "width=device-width, initial-scale=1.0";
+            }
+            return;
+        }
+
+        root.removeAttribute("data-pd-app");
+
         root.style.setProperty("--pd-chrome-pad-top", inset + "px");
         root.style.setProperty("--safe-area-top", inset + "px");
         root.style.setProperty("--pd-status-inset", inset + "px");
@@ -97,17 +119,15 @@
             chrome.style.paddingTop = inset + "px";
         }
         if (slot) {
+            slot.style.display = "";
             slot.style.height = inset + "px";
         }
     }
 
     function resolveSafeAreaTop() {
         if (isPhonesDukanApp()) {
-            document.documentElement.dataset.pdApp = "1";
             return 0;
         }
-
-        document.documentElement.removeAttribute("data-pd-app");
 
         if (!isTouchMobile()) {
             return measureEnvSafeArea();

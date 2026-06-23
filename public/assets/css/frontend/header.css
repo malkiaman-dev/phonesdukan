@@ -1118,14 +1118,43 @@ body.dimmed {
 @media (max-width: 992px) {
   :root {
     --header-height: 58px;
-    --announcement-height: 0px;
+    --announcement-height: 36px;
     --pd-chrome-pad-top: 36px;
-    --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--header-height));
+    --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
   }
 
   html[data-pd-app="1"] {
     --pd-chrome-pad-top: 0px;
-    --pd-chrome-offset: var(--header-height);
+    --pd-chrome-offset: calc(var(--announcement-height) + var(--header-height));
+  }
+
+  html[data-pd-app="1"] .pd-site-chrome {
+    padding-top: 0;
+    top: 0;
+  }
+
+  html[data-pd-app="1"] .pd-status-bar-slot {
+    display: none !important;
+    height: 0 !important;
+    visibility: hidden !important;
+  }
+
+  html[data-pd-app="1"] .pd-site-chrome .pd-top-bars {
+    display: block;
+    height: auto;
+    overflow: hidden;
+  }
+
+  html[data-pd-app="1"] .pd-site-chrome .pd-announcement-bar {
+    display: block;
+    position: relative;
+    top: auto;
+  }
+
+  html[data-pd-app="1"] #pd-install-app-btn,
+  html[data-pd-app="1"] #pd-install-app-panel {
+    display: none !important;
+    visibility: hidden !important;
   }
 
   .pd-site-chrome {
@@ -1158,22 +1187,33 @@ body.dimmed {
   }
 
   html[data-pd-app="1"] .pd-status-bar-slot {
-    display: none;
-    height: 0;
-  }
-
-  .pd-site-chrome .pd-top-bars,
-  .pd-site-chrome .pd-safe-area-top,
-  .pd-site-chrome .pd-announcement-bar {
     display: none !important;
+    height: 0 !important;
+    visibility: hidden !important;
   }
 
+  .pd-site-chrome .pd-safe-area-top {
+    display: none;
+  }
+
+  .pd-site-chrome .pd-top-bars {
+    height: auto;
+    overflow: hidden;
+  }
+
+  .pd-site-chrome .pd-announcement-bar,
   .pd-site-chrome .pd-header-stack {
     position: relative;
     top: auto;
     left: auto;
     right: auto;
     width: 100%;
+  }
+
+  html[data-pd-app="1"] #pd-install-app-btn,
+  html[data-pd-app="1"] #pd-install-app-panel {
+    display: none !important;
+    visibility: hidden !important;
   }
 
   #main-header {

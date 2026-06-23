@@ -11,6 +11,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!installBtn || !installPanel || !downloadUrl) return;
 
+    function isPhonesDukanApp() {
+        return /PhonesDukanApp/i.test(window.navigator.userAgent || '')
+            || document.documentElement.dataset.pdApp === '1';
+    }
+
+    if (isPhonesDukanApp()) {
+        installBtn.classList.add('pd-install-hidden');
+        installPanel.classList.add('pd-install-hidden');
+        installBtn.setAttribute('aria-hidden', 'true');
+        installPanel.setAttribute('aria-hidden', 'true');
+        return;
+    }
+
     var isOpen = false;
     var isDownloading = false;
 

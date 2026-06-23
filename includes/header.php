@@ -70,13 +70,19 @@ $stockQty            = isset($product['stock_quantity']) && is_numeric($product[
 $productAvailability = (isset($product['product_status']) && (int)$product['product_status'] === 1 && $stockQty > 0) ? 'instock' : 'outofstock';
 $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
+$isPdApp             = !empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false;
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"<?= $isPdApp ? ' data-pd-app="1"' : '' ?>>
 <head>
     <!-- Required Meta -->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
+    document.documentElement.setAttribute("data-pd-app", "1");
+}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0<?= $isPdApp ? '' : ', viewport-fit=cover' ?>">
 <style id="pd-safe-top-fix">
 :root {
     --pd-chrome-pad-top: 0px;
@@ -87,13 +93,37 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 @media (max-width: 992px) {
     :root {
         --header-height: 58px;
-        --announcement-height: 0px;
+        --announcement-height: 36px;
         --pd-chrome-pad-top: 36px;
-        --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--header-height));
+        --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
     }
     html[data-pd-app="1"] {
         --pd-chrome-pad-top: 0px;
-        --pd-chrome-offset: var(--header-height);
+        --pd-chrome-offset: calc(var(--announcement-height) + var(--header-height));
+    }
+    html[data-pd-app="1"] #pd-site-chrome {
+        padding-top: 0 !important;
+        top: 0 !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-status-bar-slot {
+        display: none !important;
+        height: 0 !important;
+        visibility: hidden !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-top-bars {
+        display: block !important;
+        height: auto !important;
+        overflow: hidden !important;
+    }
+    html[data-pd-app="1"] #pd-site-chrome .pd-announcement-bar {
+        display: block !important;
+        position: relative !important;
+        top: auto !important;
+    }
+    html[data-pd-app="1"] #pd-install-app-btn,
+    html[data-pd-app="1"] #pd-install-app-panel {
+        display: none !important;
+        visibility: hidden !important;
     }
     #pd-site-chrome {
         position: fixed !important;
@@ -124,16 +154,24 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
         display: none;
         height: 0;
     }
-    #pd-site-chrome .pd-top-bars,
     #pd-site-chrome .pd-safe-area-top {
         display: none !important;
     }
+    #pd-site-chrome .pd-top-bars {
+        height: auto !important;
+        overflow: hidden !important;
+    }
+    #pd-site-chrome .pd-announcement-bar,
     #pd-site-chrome .pd-header-stack {
         position: relative !important;
         top: auto !important;
         left: auto !important;
         right: auto !important;
         width: 100% !important;
+    }
+    html[data-pd-app="1"] #pd-install-app-btn,
+    html[data-pd-app="1"] #pd-install-app-panel {
+        display: none !important;
     }
 }
 @media (max-width: 575px) {
@@ -213,8 +251,18 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
         if (isApp()) {
             root.dataset.pdApp = "1";
             root.style.setProperty("--pd-chrome-pad-top", "0px");
-            if (chrome) chrome.style.paddingTop = "0px";
-            if (slot) slot.style.height = "0px";
+            root.style.setProperty("--safe-area-top", "0px");
+            if (chrome) {
+                chrome.style.paddingTop = "0px";
+            }
+            if (slot) {
+                slot.style.display = "none";
+                slot.style.height = "0px";
+            }
+            var viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (viewportMeta && /viewport-fit=cover/i.test(viewportMeta.content || "")) {
+                viewportMeta.content = "width=device-width, initial-scale=1.0";
+            }
             root.dataset.pdSafeArea = "0";
             return;
         }
