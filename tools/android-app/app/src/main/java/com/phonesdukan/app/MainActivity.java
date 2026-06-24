@@ -284,9 +284,17 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public void onBackPressed() {
     webView.evaluateJavascript(
-        "(function(){return !!(window.PDAppNav&&window.PDAppNav.back&&window.PDAppNav.back());})()",
+        "(function(){if(window.PDAppNav&&window.PDAppNav.back){return window.PDAppNav.back()?1:0;}return -1;})()",
         value -> {
-          if (value != null && value.contains("true")) {
+          if (value != null && value.contains("1")) {
+            return;
+          }
+          if (value != null && value.contains("0")) {
+            if (webView.canGoBack()) {
+              webView.goBack();
+            } else {
+              MainActivity.super.onBackPressed();
+            }
             return;
           }
           if (webView.canGoBack()) {

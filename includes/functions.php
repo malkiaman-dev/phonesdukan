@@ -587,11 +587,12 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/frontend/product.js');
         }
 
-        if (!empty($GLOBALS['pd_is_app']) && !isProductDetailPath($uri)) {
+        if (!empty($GLOBALS['pd_is_app'])) {
             emitJs('public/assets/js/jquery-3.6.0.min.js');
             emitJs('public/assets/js/sweetalert2.all.min.js');
             emitJs('public/assets/js/frontend/product.js');
             emitJs('public/assets/js/frontend/buy-now.js');
+            emitJs('public/assets/js/frontend/cart.js');
         }
 
         if (strpos($uri, '/admin/') === 0) {

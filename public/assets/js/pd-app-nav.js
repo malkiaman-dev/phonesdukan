@@ -87,18 +87,47 @@
         }
     }
 
-    function syncStackToUrl(url) {
+    function alignStackToUrl(url) {
         var key = normalizeUrl(url);
-        var saved = restoreStack([key]);
-        var idx = saved.lastIndexOf(key);
+        if (!navStack.length) {
+            navStack = [key];
+            persistStack();
+            return;
+        }
+        var top = navStack[navStack.length - 1];
+        if (top === key) {
+            return;
+        }
+        var idx = navStack.lastIndexOf(key);
         if (idx >= 0) {
-            navStack = saved.slice(0, idx + 1);
-        } else if (saved[saved.length - 1] !== key) {
-            navStack = saved.concat([key]);
+            navStack = navStack.slice(0, idx + 1);
         } else {
-            navStack = saved;
+            navStack.push(key);
         }
         persistStack();
+    }
+
+    function syncStackToUrl(url) {
+        alignStackToUrl(url);
+    }
+
+    function goToStackEntry(index, options) {
+        options = options || {};
+        if (index < 0 || index >= navStack.length) {
+            return false;
+        }
+        navStack = navStack.slice(0, index + 1);
+        var key = navStack[index];
+        var snapshot = pageCache.get(key);
+        if (!snapshot) {
+            persistStack();
+            window.location.href = key;
+            return true;
+        }
+        history.replaceState({ pdAppNav: 1, url: key, stackIndex: index }, snapshot.title || "", key);
+        applySnapshot(snapshot, { restoreScroll: options.restoreScroll !== false });
+        persistStack();
+        return true;
     }
 
     function trimCache() {
@@ -353,6 +382,7 @@
 
         if (!options.fromPop) {
             storePage(currentKey, captureCurrentPage());
+            alignStackToUrl(currentKey);
         }
 
         navigating = true;
@@ -364,8 +394,15 @@
             }
             applySnapshot(snapshot, { restoreScroll: !!options.fromPop });
             if (!options.fromPop) {
-                history.pushState({ pdAppNav: 1, url: key }, snapshot.title || "", key);
-                navStack.push(key);
+                alignStackToUrl(currentKey);
+                if (navStack[navStack.length - 1] !== key) {
+                    navStack.push(key);
+                }
+                history.replaceState({
+                    pdAppNav: 1,
+                    url: key,
+                    stackIndex: navStack.length - 1
+                }, snapshot.title || "", key);
                 persistStack();
             }
         }).catch(function () {
@@ -414,10 +451,11 @@
         }
 
         var start = normalizeUrl(window.location.href);
-        syncStackToUrl(start);
+        navStack = restoreStack([start]);
+        alignStackToUrl(start);
 
         if (!history.state || !history.state.pdAppNav) {
-            history.replaceState({ pdAppNav: 1, url: start }, document.title, start);
+            history.replaceState({ pdAppNav: 1, url: start, stackIndex: navStack.length - 1 }, document.title, start);
         }
         storePage(start, captureCurrentPage());
         window.setTimeout(warmVisibleNavTargets, 250);
@@ -443,34 +481,35 @@
 
         window.addEventListener("popstate", function (event) {
             var state = event.state || {};
+            var key = normalizeUrl(state.url || window.location.href);
+
             if (!state.pdAppNav) {
-                syncStackToUrl(window.location.href);
+                alignStackToUrl(key);
                 return;
             }
-            var key = normalizeUrl(state.url || window.location.href);
+
+            if (typeof state.stackIndex === "number" && state.stackIndex >= 0 && state.stackIndex < navStack.length) {
+                navStack = navStack.slice(0, state.stackIndex + 1);
+            } else {
+                alignStackToUrl(key);
+            }
+            persistStack();
+
             var snapshot = pageCache.get(key);
             if (!snapshot) {
                 fetchSnapshot(key).then(function (fetched) {
-                    syncStackToUrl(key);
                     applySnapshot(fetched, { restoreScroll: true });
                 }).catch(function () {
                     window.location.reload();
                 });
                 return;
             }
-            while (navStack.length > 1 && navStack[navStack.length - 1] !== key) {
-                navStack.pop();
-            }
-            if (navStack[navStack.length - 1] !== key) {
-                navStack.push(key);
-            }
-            persistStack();
             applySnapshot(snapshot, { restoreScroll: true });
         });
 
         window.addEventListener("pageshow", function (event) {
             if (event.persisted) {
-                syncStackToUrl(window.location.href);
+                alignStackToUrl(window.location.href);
             }
         }, { passive: true });
 
@@ -489,11 +528,11 @@
     }
 
     function back() {
+        alignStackToUrl(normalizeUrl(window.location.href));
         if (navStack.length <= 1) {
             return false;
         }
-        history.back();
-        return true;
+        return goToStackEntry(navStack.length - 2, { restoreScroll: true });
     }
 
     function canGoBack() {
