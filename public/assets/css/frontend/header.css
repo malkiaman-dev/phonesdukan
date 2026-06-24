@@ -22,6 +22,13 @@
   --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
 }
 
+html[data-pd-app="1"] {
+  --pd-status-inset: 0px;
+  --safe-area-top: 0px;
+  --pd-chrome-pad-top: 0px;
+  --pd-app-status-inset: 0px;
+}
+
 html {
   background: var(--mi-off-white);
 }
@@ -141,6 +148,16 @@ html[data-pd-app="1"] #pd-install-app-panel {
   background: transparent;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+html[data-pd-app="1"] .pd-announcement-bar {
+  position: relative;
+  top: auto;
+}
+
+html[data-pd-app="1"] .pd-header-stack {
+  position: relative;
+  top: auto;
 }
 
 .pd-announcement-viewport {
@@ -1139,11 +1156,8 @@ html[data-pd-app="1"] #pd-install-app-panel {
     --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
   }
 
-  html[data-pd-app="1"] {
-    --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
-  }
-
   html[data-pd-app="1"] .pd-site-chrome {
+    position: fixed;
     top: 0;
   }
 
@@ -1195,12 +1209,9 @@ html[data-pd-app="1"] #pd-install-app-panel {
   }
 
   html[data-pd-app="1"] .pd-site-chrome .pd-chrome-safe-fill {
-    display: block;
-    width: 100%;
-    height: var(--pd-chrome-pad-top);
-    min-height: var(--pd-chrome-pad-top);
-    background: #111111;
-    flex-shrink: 0;
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
   }
 
   .pd-status-bar-slot {

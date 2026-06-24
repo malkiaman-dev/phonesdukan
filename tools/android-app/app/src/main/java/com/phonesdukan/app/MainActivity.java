@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -28,7 +29,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
   private static final String HOME_URL = "https://www.phonesdukan.com/?pd_app=1";
-  private static final int STATUS_BAR_COLOR = Color.parseColor("#F7D117");
+  private static final int STATUS_BAR_COLOR = Color.parseColor("#111111");
 
   private static final String APP_BOOT_JS =
       "(function(){try{"
@@ -37,16 +38,18 @@ public class MainActivity extends AppCompatActivity {
           + "var c='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
           + "if(/phonesdukan\\.com$/i.test(location.hostname)){c+=';domain=.phonesdukan.com';}"
           + "document.cookie=c;"
-          + "['pd-install-app-btn','pd-install-app-panel'].forEach(function(id){"
+          + "if(window.PDApp&&window.PDApp.removeInstallWidget){window.PDApp.removeInstallWidget();}"
+          + "else{['pd-install-app-btn','pd-install-app-panel'].forEach(function(id){"
           + "var el=document.getElementById(id);"
           + "if(el&&el.parentNode){el.parentNode.removeChild(el);}"
-          + "});"
+          + "});}"
           + "if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}"
           + "}catch(e){}})();";
 
   private static final String APP_EARLY_JS =
       "(function(){try{"
           + "document.documentElement.setAttribute('data-pd-app','1');"
+          + "if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}"
           + "var c='pd_app=1;path=/;max-age=31536000;SameSite=Lax';"
           + "if(/phonesdukan\\.com$/i.test(location.hostname)){c+=';domain=.phonesdukan.com';}"
           + "document.cookie=c;"
@@ -66,29 +69,31 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     Window window = getWindow();
+    // Android 15+ (targetSdk 35) draws edge-to-edge; handle status bar insets on the WebView.
     WindowCompat.setDecorFitsSystemWindows(window, false);
+    window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
     window.setStatusBarColor(STATUS_BAR_COLOR);
     window.setNavigationBarColor(Color.parseColor("#111111"));
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       window.setStatusBarContrastEnforced(false);
       window.setNavigationBarContrastEnforced(false);
     }
-    applyWhiteStatusBarIcons();
+    applyStatusBarStyle();
 
     setContentView(R.layout.activity_main);
 
     webView = findViewById(R.id.webView);
-    ViewCompat.setOnApplyWindowInsetsListener(webView, (view, windowInsets) -> {
-      Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-      view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
-      window.setStatusBarColor(STATUS_BAR_COLOR);
-      applyWhiteStatusBarIcons();
-      return windowInsets;
-    });
-    ViewCompat.requestApplyInsets(webView);
-    webView.setBackgroundColor(Color.WHITE);
+    webView.setBackgroundColor(STATUS_BAR_COLOR);
     webView.setVerticalScrollBarEnabled(false);
     webView.setHorizontalScrollBarEnabled(false);
+
+    ViewCompat.setOnApplyWindowInsetsListener(webView, (view, windowInsets) -> {
+      Insets statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+      view.setPadding(0, statusBars.top, 0, 0);
+      return WindowInsetsCompat.CONSUMED;
+    });
+    ViewCompat.requestApplyInsets(webView);
 
     WebSettings settings = webView.getSettings();
     settings.setJavaScriptEnabled(true);
@@ -113,15 +118,17 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
         view.evaluateJavascript(APP_EARLY_JS, null);
-        applyWhiteStatusBarIcons();
+        applyStatusBarStyle();
       }
 
       @Override
       public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(APP_BOOT_JS, null);
-        applyWhiteStatusBarIcons();
-        view.post(() -> applyWhiteStatusBarIcons());
-        view.postDelayed(() -> applyWhiteStatusBarIcons(), 250);
+        applyStatusBarStyle();
+        view.post(() -> {
+          applyStatusBarStyle();
+          view.postDelayed(MainActivity.this::applyStatusBarStyle, 300);
+        });
       }
     });
 
@@ -138,18 +145,18 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
-    applyWhiteStatusBarIcons();
+    applyStatusBarStyle();
   }
 
   @Override
   public void onWindowFocusChanged(boolean hasFocus) {
     super.onWindowFocusChanged(hasFocus);
     if (hasFocus) {
-      applyWhiteStatusBarIcons();
+      applyStatusBarStyle();
     }
   }
 
-  private void applyWhiteStatusBarIcons() {
+  private void applyStatusBarStyle() {
     Window window = getWindow();
     if (window == null) {
       return;
@@ -157,12 +164,12 @@ public class MainActivity extends AppCompatActivity {
 
     window.setStatusBarColor(STATUS_BAR_COLOR);
 
-    WindowInsetsControllerCompat compatController =
+    WindowInsetsControllerCompat controller =
         WindowCompat.getInsetsController(window, window.getDecorView());
-    if (compatController != null) {
-      compatController.setAppearanceLightStatusBars(false);
+    if (controller != null) {
+      controller.setAppearanceLightStatusBars(false);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        compatController.setAppearanceLightNavigationBars(false);
+        controller.setAppearanceLightNavigationBars(false);
       }
     }
 
@@ -226,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
       return true;
     }
 
+    /** Always 0 — WebView top padding from native status bar insets positions web content. */
     @JavascriptInterface
     public float getStatusBarHeight() {
       return 0f;

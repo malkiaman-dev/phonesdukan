@@ -2,27 +2,16 @@
     "use strict";
 
     var MOBILE_QUERY = "(max-width: 992px)";
-    var MOBILE_MIN_INSET = 32;
-
-    function hasPdAppCookie() {
-        try {
-            return /(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "");
-        } catch (e) {}
-        return false;
-    }
 
     function isMobileViewport() {
         return window.matchMedia && window.matchMedia(MOBILE_QUERY).matches;
     }
 
     function isPhonesDukanApp() {
+        if (window.PDApp && typeof window.PDApp.is === "function") {
+            return window.PDApp.is();
+        }
         if (/PhonesDukanApp/i.test(navigator.userAgent || "")) {
-            return true;
-        }
-        if (/[?&]pd_app=1(?:&|$)/.test(window.location.search || "")) {
-            return true;
-        }
-        if (hasPdAppCookie()) {
             return true;
         }
         try {
@@ -31,13 +20,6 @@
             }
         } catch (e) {}
         return document.documentElement.getAttribute("data-pd-app") === "1";
-    }
-
-    function isTouchMobile() {
-        if (isMobileViewport()) {
-            return true;
-        }
-        return (navigator.maxTouchPoints || 0) > 0 && window.innerWidth <= 992;
     }
 
     function markPdAppClient() {
@@ -53,67 +35,12 @@
         try {
             if (window.PhonesDukanNative && typeof window.PhonesDukanNative.getStatusBarHeight === "function") {
                 var nativePx = parseFloat(window.PhonesDukanNative.getStatusBarHeight());
-                if (!isNaN(nativePx) && nativePx >= 0) {
+                if (!isNaN(nativePx) && nativePx > 0) {
                     return nativePx;
                 }
             }
         } catch (e) {}
-        return -1;
-    }
-
-    function readVisualViewportInset() {
-        if (!window.visualViewport) {
-            return 0;
-        }
-        return Math.max(0, Math.round(window.visualViewport.offsetTop || 0));
-    }
-
-    function measureEnvSafeArea() {
-        var root = document.documentElement;
-        var probe = document.createElement("div");
-        probe.style.cssText =
-            "position:fixed;top:0;left:0;width:0;" +
-            "padding-top:constant(safe-area-inset-top);" +
-            "padding-top:env(safe-area-inset-top);" +
-            "visibility:hidden;pointer-events:none;";
-        root.appendChild(probe);
-        var inset = probe.offsetHeight;
-        if (!inset) {
-            inset = parseFloat(window.getComputedStyle(probe).paddingTop) || 0;
-        }
-        probe.remove();
-        return inset;
-    }
-
-    function estimateAndroidSafeArea() {
-        var dpr = window.devicePixelRatio || 1;
-        if (dpr >= 3) {
-            return 36;
-        }
-        if (dpr >= 2.5) {
-            return 34;
-        }
-        return MOBILE_MIN_INSET;
-    }
-
-    function estimateIosSafeArea() {
-        var longSide = Math.max(window.screen.width, window.screen.height);
-        var portrait = window.innerHeight >= window.innerWidth;
-        if (longSide >= 812) {
-            return portrait ? 47 : 21;
-        }
-        return portrait ? 20 : MOBILE_MIN_INSET;
-    }
-
-    function estimateMobileSafeArea() {
-        var ua = navigator.userAgent || "";
-        if (/Android/i.test(ua)) {
-            return estimateAndroidSafeArea();
-        }
-        if (/iPhone|iPod|iPad/i.test(ua)) {
-            return estimateIosSafeArea();
-        }
-        return MOBILE_MIN_INSET;
+        return 0;
     }
 
     function resolveSafeAreaTop() {
@@ -121,32 +48,26 @@
             return 0;
         }
 
-        var nativeInset = readNativeInset();
-        if (nativeInset === 0) {
-            return 0;
-        }
-
-        var envInset = measureEnvSafeArea();
-        var estimated = estimateMobileSafeArea();
-        var viewportInset = readVisualViewportInset();
-        var fallback = Math.max(envInset, estimated, viewportInset, MOBILE_MIN_INSET);
-
-        return nativeInset > 0 ? Math.max(nativeInset, fallback) : fallback;
+        // Native Android lays out WebView below the opaque status bar; no CSS offset needed.
+        return readNativeInset();
     }
 
     function applyChromePadding(inset) {
         var root = document.documentElement;
         var chrome = document.getElementById("pd-site-chrome");
-        var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
         var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
-        var insetPx = Math.max(0, Math.round(inset));
+        var safeAreaTop = chrome ? chrome.querySelector(".pd-safe-area-top") : null;
+        var statusSlot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
+        var insetPx = isPhonesDukanApp() ? 0 : Math.max(0, Math.round(inset));
 
         if (isPhonesDukanApp()) {
             markPdAppClient();
         } else {
             root.removeAttribute("data-pd-app");
+            root.style.removeProperty("--pd-app-status-inset");
         }
 
+        root.style.setProperty("--pd-app-status-inset", insetPx + "px");
         root.style.setProperty("--pd-chrome-pad-top", insetPx + "px");
         root.style.setProperty("--safe-area-top", insetPx + "px");
         root.style.setProperty("--pd-status-inset", insetPx + "px");
@@ -154,22 +75,25 @@
 
         if (chrome) {
             chrome.style.paddingTop = "0px";
+            chrome.style.top = "";
         }
+
         if (safeFill) {
-            if (isPhonesDukanApp() && insetPx > 0) {
-                safeFill.style.display = "block";
-                safeFill.style.height = insetPx + "px";
-                safeFill.style.minHeight = insetPx + "px";
-                safeFill.style.background = "#111111";
-            } else {
-                safeFill.style.display = "none";
-                safeFill.style.height = "0px";
-                safeFill.style.minHeight = "0px";
-            }
+            safeFill.style.display = "none";
+            safeFill.style.height = "0px";
+            safeFill.style.minHeight = "0px";
         }
-        if (slot) {
-            slot.style.display = "none";
-            slot.style.height = "0px";
+
+        if (safeAreaTop) {
+            safeAreaTop.style.display = "none";
+            safeAreaTop.style.height = "0px";
+            safeAreaTop.style.minHeight = "0px";
+        }
+
+        if (statusSlot) {
+            statusSlot.style.display = "none";
+            statusSlot.style.height = "0px";
+            statusSlot.style.minHeight = "0px";
         }
     }
 
@@ -191,6 +115,5 @@
 
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", applySafeAreaTop, { passive: true });
-        window.visualViewport.addEventListener("scroll", applySafeAreaTop, { passive: true });
     }
 })(window, document);

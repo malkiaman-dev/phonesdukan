@@ -92,66 +92,8 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
 <head>
     <!-- Required Meta -->
 <meta charset="UTF-8">
-<script>
-(function () {
-    function pdAppCookieValue() {
-        try {
-            return /(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "");
-        } catch (e) {}
-        return false;
-    }
-    function setPdAppCookie() {
-        try {
-            var cookie = "pd_app=1;path=/;max-age=31536000;SameSite=Lax";
-            if (/phonesdukan\.com$/i.test(location.hostname)) {
-                cookie += ";domain=.phonesdukan.com";
-            }
-            document.cookie = cookie;
-        } catch (e) {}
-    }
-    function isPdAppClient() {
-        var ua = navigator.userAgent || "";
-        var qs = typeof location !== "undefined" ? location.search : "";
-        if (/PhonesDukanApp/i.test(ua)) return true;
-        if (/[?&]pd_app=1(?:&|$)/.test(qs)) return true;
-        if (pdAppCookieValue()) return true;
-        try {
-            if (localStorage.getItem("pd_app") === "1") return true;
-        } catch (e) {}
-        try {
-            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) {
-                return true;
-            }
-        } catch (e) {}
-        return document.documentElement.getAttribute("data-pd-app") === "1";
-    }
-    function markPdAppClient() {
-        document.documentElement.setAttribute("data-pd-app", "1");
-        try { localStorage.setItem("pd_app", "1"); } catch (e) {}
-        setPdAppCookie();
-    }
-    function removeInstallWidgetNodes() {
-        ["pd-install-app-btn", "pd-install-app-panel"].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el && el.parentNode) {
-                el.parentNode.removeChild(el);
-            }
-        });
-    }
-    if (isPdAppClient()) {
-        markPdAppClient();
-        removeInstallWidgetNodes();
-        if (typeof MutationObserver !== "undefined") {
-            new MutationObserver(removeInstallWidgetNodes).observe(document.documentElement, {
-                childList: true,
-                subtree: true
-            });
-        }
-    } else if (pdAppCookieValue()) {
-        document.documentElement.setAttribute("data-pd-app", "1");
-    }
-})();
-</script>
+<?php $pdAppJs = __DIR__ . '/../public/assets/js/pd-app.js'; ?>
+<script src="<?= url('public/assets/js/pd-app.js') ?>?v=<?= file_exists($pdAppJs) ? filemtime($pdAppJs) : time() ?>"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0<?= empty($isPdApp) ? ', viewport-fit=cover' : '' ?>">
 <style id="pd-safe-top-fix">
 :root {
@@ -159,6 +101,12 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
     --announcement-height: 36px;
     --header-height: 72px;
     --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
+}
+html[data-pd-app="1"] {
+    --pd-status-inset: 0px;
+    --safe-area-top: 0px;
+    --pd-chrome-pad-top: 0px;
+    --pd-app-status-inset: 0px;
 }
 @media (max-width: 992px) {
     :root {
@@ -168,6 +116,7 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
         --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
     }
     html[data-pd-app="1"] #pd-site-chrome {
+        position: fixed !important;
         top: 0 !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-top-bars {
@@ -215,12 +164,9 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
         min-height: 0 !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-chrome-safe-fill {
-        display: block !important;
-        width: 100% !important;
-        height: var(--pd-chrome-pad-top) !important;
-        min-height: var(--pd-chrome-pad-top) !important;
-        background: #111111 !important;
-        flex-shrink: 0 !important;
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
     }
     #pd-site-chrome .pd-status-bar-slot {
         display: none !important;
@@ -276,123 +222,6 @@ html[data-pd-app="1"] #pd-install-app-panel {
     overflow: hidden !important;
 }
 </style>
-<script>
-(function () {
-    var MOBILE_MIN = 36;
-    var MOBILE_QUERY = "(max-width: 992px)";
-    function isMobile() {
-        return window.matchMedia && window.matchMedia(MOBILE_QUERY).matches;
-    }
-    function isTouchMobile() {
-        return isMobile() || ((navigator.maxTouchPoints || 0) > 0 && innerWidth <= 992);
-    }
-    function isApp() {
-        var ua = navigator.userAgent || "";
-        if (/PhonesDukanApp/i.test(ua)) return true;
-        if (/[?&]pd_app=1(?:&|$)/.test(location.search || "")) return true;
-        try {
-            if (/(?:^|;\s*)pd_app=1(?:;|$)/.test(document.cookie || "")) return true;
-        } catch (e) {}
-        try {
-            if (window.PhonesDukanNative && window.PhonesDukanNative.isApp && window.PhonesDukanNative.isApp()) return true;
-        } catch (e) {}
-        return document.documentElement.getAttribute("data-pd-app") === "1";
-    }
-    function readNativeInset() {
-        try {
-            if (window.PhonesDukanNative && typeof window.PhonesDukanNative.getStatusBarHeight === "function") {
-                var nativePx = parseFloat(window.PhonesDukanNative.getStatusBarHeight());
-                if (nativePx > 0) return nativePx;
-            }
-        } catch (e) {}
-        return 0;
-    }
-    function measureEnvInset() {
-        var root = document.documentElement;
-        var probe = document.createElement("div");
-        probe.style.cssText = "position:fixed;padding-top:env(safe-area-inset-top);visibility:hidden;pointer-events:none;";
-        root.appendChild(probe);
-        var inset = probe.offsetHeight || parseFloat(getComputedStyle(probe).paddingTop) || 0;
-        probe.remove();
-        return inset;
-    }
-    function estimateInset() {
-        var nativeInset = readNativeInset();
-        if (nativeInset > 0) return nativeInset;
-        var ua = navigator.userAgent || "";
-        var dpr = devicePixelRatio || 1;
-        if (/Android/i.test(ua)) {
-            if (dpr >= 3) return 36;
-            if (dpr >= 2.5) return 34;
-            return MOBILE_MIN;
-        }
-        if (/iPhone|iPod|iPad/i.test(ua)) {
-            var longSide = Math.max(screen.width, screen.height);
-            var portrait = innerHeight >= innerWidth;
-            if (longSide >= 812) return portrait ? 47 : 21;
-            return portrait ? 20 : MOBILE_MIN;
-        }
-        return MOBILE_MIN;
-    }
-    function applyChromeInset() {
-        if (window.PDSafeArea && window.PDSafeArea.apply !== applyChromeInset) {
-            window.PDSafeArea.apply();
-            return;
-        }
-        var root = document.documentElement;
-        var chrome = document.getElementById("pd-site-chrome");
-        var slot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
-        if (isApp()) {
-            root.dataset.pdApp = "1";
-            root.setAttribute("data-pd-app", "1");
-            try { localStorage.setItem("pd_app", "1"); } catch (e) {}
-        } else {
-            root.removeAttribute("data-pd-app");
-        }
-
-        var inset = 0;
-        if (isApp()) {
-            var nativeInset = readNativeInset();
-            if (nativeInset === 0) {
-                inset = 0;
-            } else if (nativeInset > 0) {
-                inset = Math.max(nativeInset, estimateInset());
-            } else {
-                inset = Math.max(estimateInset(), 0);
-            }
-        }
-
-        root.style.setProperty("--pd-chrome-pad-top", inset + "px");
-        root.style.setProperty("--safe-area-top", inset + "px");
-        var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
-        if (chrome) chrome.style.paddingTop = "0px";
-        if (safeFill) {
-            if (isApp() && inset > 0) {
-                safeFill.style.display = "block";
-                safeFill.style.height = inset + "px";
-                safeFill.style.minHeight = inset + "px";
-                safeFill.style.background = "#111111";
-            } else {
-                safeFill.style.display = "none";
-                safeFill.style.height = "0px";
-                safeFill.style.minHeight = "0px";
-            }
-        }
-        if (slot) {
-            slot.style.display = "none";
-            slot.style.height = "0px";
-        }
-        root.dataset.pdSafeArea = String(inset);
-    }
-    applyChromeInset();
-    window.PDSafeArea = window.PDSafeArea || { apply: applyChromeInset, measure: applyChromeInset };
-    window.addEventListener("resize", applyChromeInset, { passive: true });
-    window.addEventListener("orientationchange", function () { setTimeout(applyChromeInset, 120); }, { passive: true });
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", applyChromeInset, { passive: true });
-    }
-})();
-</script>
 <?php
 $pdSafeAreaJs = __DIR__ . '/../public/assets/js/safe-area.js';
 ?>

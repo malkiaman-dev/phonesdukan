@@ -231,7 +231,13 @@ if (!function_exists('pd_is_app_request')) {
       return true;
     }
     if (isset($_COOKIE['pd_app']) && (string) $_COOKIE['pd_app'] === '1') {
-      return true;
+      $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+      if (stripos($ua, 'PhonesDukanApp') !== false) {
+        return true;
+      }
+      if (!empty($_SERVER['HTTP_X_PHONESDUKAN_APP']) && (string) $_SERVER['HTTP_X_PHONESDUKAN_APP'] === '1') {
+        return true;
+      }
     }
     return false;
   }
