@@ -1175,6 +1175,7 @@ a.view-all-btn {
   .sw-na-section .na-header--split,
   .mob-na-section .na-header,
   .acc-na-section .na-header,
+  .home-latest-blogs .na-header,
   .home-earbuds-section .category-header--split {
     gap: 10px;
     margin-bottom: 14px;
@@ -1183,6 +1184,7 @@ a.view-all-btn {
   .sw-na-section .na-header--split .na-view-all,
   .mob-na-section .na-view-all,
   .acc-na-section .na-view-all,
+  .home-latest-blogs .na-view-all,
   .home-earbuds-section .category-header--split .view-all-btn {
     font-size: 12px;
     padding: 6px 12px;
@@ -1256,6 +1258,7 @@ a.view-all-btn {
   .sw-na-section .na-header--split,
   .mob-na-section .na-header,
   .acc-na-section .na-header,
+  .home-latest-blogs .na-header,
   .home-earbuds-section .category-header--split {
     gap: 8px;
   }
@@ -1263,6 +1266,7 @@ a.view-all-btn {
   .sw-na-section .na-header--split .na-view-all,
   .mob-na-section .na-view-all,
   .acc-na-section .na-view-all,
+  .home-latest-blogs .na-view-all,
   .home-earbuds-section .category-header--split .view-all-btn {
     font-size: 11px;
     padding: 5px 10px;
@@ -2032,7 +2036,7 @@ a.brandItem {
   display: inline-flex;
 }
 
-/* Keep Latest Blogs title centered on all screen sizes — same as Shop By Brand */
+/* Desktop: Latest Blogs title centered (mobile overrides in 991px block) */
 .home-latest-blogs .na-header {
   justify-content: center;
 }
@@ -2231,16 +2235,6 @@ a.brandItem {
   .home-blog-card { flex: 0 0 calc((100% - 16px) / 2); }
 }
 
-@media (max-width: 991px) {
-  .home-latest-blogs .na-header {
-    justify-content: center;
-  }
-
-  .home-latest-blogs .na-title {
-    text-align: center;
-  }
-}
-
 @media (max-width: 640px) {
   .home-latest-blogs {
     padding: 30px 0 26px;
@@ -2280,12 +2274,12 @@ a.brandItem {
 
 @media (max-width: 430px) {
   .home-latest-blogs .na-header {
-    justify-content: center;
+    justify-content: space-between;
   }
 
   .home-latest-blogs .na-title {
-    text-align: center;
-    padding-right: 0; /* cancel global 84px reserved for Explore All pill */
+    text-align: left;
+    padding-right: 0;
   }
 }
 
@@ -2384,6 +2378,28 @@ a.brandItem {
 
   .mob-na-section .na-view-all,
   .acc-na-section .na-view-all {
+    position: static;
+    flex-shrink: 0;
+  }
+
+  .shopByUniqueBrandsSection .na-header {
+    justify-content: flex-start;
+  }
+
+  .shopByUniqueBrandsSection .na-title {
+    text-align: left;
+  }
+
+  .home-latest-blogs .na-header {
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .home-latest-blogs .na-title {
+    text-align: left;
+  }
+
+  .home-latest-blogs .na-view-all {
     position: static;
     flex-shrink: 0;
   }
@@ -2546,7 +2562,7 @@ a.brandItem {
   margin-bottom: 28px;
 }
 
-/* Keep brand title centered on all screen sizes */
+/* Desktop: brand title centered (mobile overrides in 991px block) */
 .shopByUniqueBrandsSection .na-header {
   justify-content: center;
 }
@@ -2624,15 +2640,15 @@ a.brandItem {
     margin-bottom: 20px;
   }
 
-  /* Keep Shop by Brand heading centered on mobile */
+  /* Shop by Brand heading: left on mobile */
   .shopByUniqueBrandsSection .na-header {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .shopByUniqueBrandsSection .na-title {
-    text-align: center;
+    text-align: left;
     padding-right: 0;
-    width: 100%;
+    width: auto;
   }
 
   .brand-marquee-track {
@@ -2655,11 +2671,11 @@ a.brandItem {
 
 @media (max-width: 430px) {
   .shopByUniqueBrandsSection .na-header {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .shopByUniqueBrandsSection .na-title {
-    text-align: center;
+    text-align: left;
     padding-right: 0;
   }
 
