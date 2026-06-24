@@ -72,6 +72,9 @@ $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($im
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
 $isPdApp             = pd_is_app_request();
 $GLOBALS['pd_is_app'] = $isPdApp;
+if ($isPdApp && !headers_sent()) {
+    header('Cache-Control: private, max-age=300, stale-while-revalidate=60');
+}
 if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '1')) {
     $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
     $cookieOpts = [
@@ -94,6 +97,19 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
 <meta charset="UTF-8">
 <?php $pdAppJs = __DIR__ . '/../public/assets/js/pd-app.js'; ?>
 <script src="<?= url('public/assets/js/pd-app.js') ?>?v=<?= file_exists($pdAppJs) ? filemtime($pdAppJs) : time() ?>"></script>
+<?php if ($isPdApp):
+$pdAppShellJs = __DIR__ . '/../public/assets/js/pd-app-shell.js';
+$pdAppNavJs = __DIR__ . '/../public/assets/js/pd-app-nav.js';
+?>
+<script src="<?= url('public/assets/js/pd-app-shell.js') ?>?v=<?= file_exists($pdAppShellJs) ? filemtime($pdAppShellJs) : time() ?>"></script>
+<script src="<?= url('public/assets/js/pd-app-nav.js') ?>?v=<?= file_exists($pdAppNavJs) ? filemtime($pdAppNavJs) : time() ?>"></script>
+<style>
+html[data-pd-nav-loading="1"] main.content {
+    opacity: 0.72;
+    pointer-events: none;
+}
+</style>
+<?php endif; ?>
 <meta name="viewport" content="width=device-width, initial-scale=1.0<?= empty($isPdApp) ? ', viewport-fit=cover' : '' ?>">
 <style id="pd-safe-top-fix">
 :root {

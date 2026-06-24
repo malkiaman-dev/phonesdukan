@@ -1,6 +1,7 @@
 package com.phonesdukan.app;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
           + "if(el&&el.parentNode){el.parentNode.removeChild(el);}"
           + "});}"
           + "if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}"
+          + "if(window.PDAppShell&&window.PDAppShell.onPageReady){window.PDAppShell.onPageReady();}"
           + "}catch(e){}})();";
 
   private static final String APP_EARLY_JS =
@@ -115,15 +118,31 @@ public class MainActivity extends AppCompatActivity {
     settings.setUseWideViewPort(true);
     settings.setBuiltInZoomControls(false);
     settings.setDisplayZoomControls(false);
-    settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+    settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+    settings.setLoadsImagesAutomatically(true);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      settings.setOffscreenPreRaster(true);
+    }
+
+    CookieManager cookieManager = CookieManager.getInstance();
+    cookieManager.setAcceptCookie(true);
+    cookieManager.setAcceptThirdPartyCookies(webView, true);
 
     webView.addJavascriptInterface(new AppBridge(), "PhonesDukanNative");
 
     webView.setWebViewClient(new WebViewClient() {
+      @SuppressWarnings("deprecation")
+      @Override
+      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        return handleUrlLoading(view, url);
+      }
+
       @Override
       public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-        view.loadUrl(ensureAppParam(request.getUrl().toString()), appHeaders());
-        return true;
+        if (!request.isForMainFrame()) {
+          return false;
+        }
+        return handleUrlLoading(view, request.getUrl().toString());
       }
 
       @Override
@@ -136,10 +155,6 @@ public class MainActivity extends AppCompatActivity {
       public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(APP_BOOT_JS, null);
         applyStatusBarStyle();
-        view.post(() -> {
-          applyStatusBarStyle();
-          view.postDelayed(MainActivity.this::applyStatusBarStyle, 300);
-        });
       }
     });
 
@@ -206,6 +221,43 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  private boolean handleUrlLoading(WebView view, String url) {
+    if (url == null || url.isEmpty()) {
+      return false;
+    }
+
+    Uri uri;
+    try {
+      uri = Uri.parse(url);
+    } catch (Exception ignored) {
+      return false;
+    }
+
+    String scheme = uri.getScheme();
+    if (scheme == null) {
+      return false;
+    }
+
+    String lowerScheme = scheme.toLowerCase();
+    if (!lowerScheme.equals("http") && !lowerScheme.equals("https")) {
+      try {
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+      } catch (Exception ignored) {}
+      return true;
+    }
+
+    String host = uri.getHost();
+    if (host == null || !host.toLowerCase().contains("phonesdukan.com")) {
+      try {
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+      } catch (Exception ignored) {}
+      return true;
+    }
+
+    // Let WebView handle in-site navigation (history + back/forward cache).
+    return false;
+  }
+
   private String ensureAppParam(String url) {
     if (url == null || url.isEmpty()) {
       return HOME_URL;
@@ -231,11 +283,19 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public void onBackPressed() {
-    if (webView.canGoBack()) {
-      webView.goBack();
-    } else {
-      super.onBackPressed();
-    }
+    webView.evaluateJavascript(
+        "(function(){return !!(window.PDAppNav&&window.PDAppNav.back&&window.PDAppNav.back());})()",
+        value -> {
+          if (value != null && value.contains("true")) {
+            return;
+          }
+          if (webView.canGoBack()) {
+            webView.goBack();
+          } else {
+            MainActivity.super.onBackPressed();
+          }
+        }
+    );
   }
 
   private class AppBridge {

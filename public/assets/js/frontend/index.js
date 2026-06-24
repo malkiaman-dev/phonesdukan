@@ -1,7 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
+    initIndexPage();
+});
+document.addEventListener("pd:page-view", function () {
+    initIndexPage();
+});
+
+function initIndexPage() {
     const heroSlider = document.querySelector("[data-pd-hero-slider]");
 
-    if (heroSlider) {
+    if (heroSlider && heroSlider.dataset.pdBound !== "1") {
+    heroSlider.dataset.pdBound = "1";
         const slides = Array.from(heroSlider.querySelectorAll("[data-pd-slide]"));
         const dots = Array.from(heroSlider.querySelectorAll("[data-pd-hero-dot]"));
         const prevBtn = heroSlider.querySelector("[data-pd-hero-prev]");
@@ -172,6 +180,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     document.querySelectorAll(".product-grid-wrapper").forEach((wrapper) => {
+        if (wrapper.dataset.pdBound === "1") {
+            return;
+        }
+        wrapper.dataset.pdBound = "1";
         const container = wrapper.querySelector(".product-grid-container");
         const grid = wrapper.querySelector(".product-grid");
         const prevBtn = wrapper.querySelector(".prev-btn");
@@ -200,9 +212,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         updateButtonState(container, prevBtn, nextBtn, grid); // Initial check
     });
+}
 
-    // ── New Arrivals: Add to Cart ────────────────
-    document.addEventListener("click", function (e) {
+document.addEventListener("click", function (e) {
         const btn = e.target.closest(".na-btn--cart");
         if (!btn) return;
 
@@ -245,6 +257,4 @@ document.addEventListener("DOMContentLoaded", function () {
             btn.disabled = false;
             btn.textContent = originalText;
         });
-    });
 });
-

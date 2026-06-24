@@ -90,8 +90,18 @@ function scrollThumbnails(direction) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    initProductPage();
+});
+document.addEventListener("pd:page-view", function () {
+    initProductPage();
+});
+
+function initProductPage() {
     const wrapper = document.querySelector(".image-wrapper");
     const image = document.getElementById("mainImage");
+    if (!wrapper || !image) {
+        return;
+    }
     let startX = 0;
     let isSwiping = false;
     let isZooming = false;
@@ -579,84 +589,83 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const viewersCount = document.querySelector('.viewers-count');
-    if (viewersCount) {
+    if (viewersCount && !viewersCount.dataset.pdTimerBound) {
+        viewersCount.dataset.pdTimerBound = "1";
         setInterval(() => {
             const newCount = Math.floor(Math.random() * (100 - 10 + 1)) + 10;
             viewersCount.textContent = newCount;
         }, 2000);
     }
+}
 
-    // ---- Related Products: Add to Cart ----
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('.rp-cart-btn');
-        if (!btn || btn.disabled) return;
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.rp-cart-btn');
+    if (!btn || btn.disabled) return;
 
-        const productId = btn.getAttribute('data-product-id');
-        const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
-        if (!productId || unitPrice <= 0) return;
+    const productId = btn.getAttribute('data-product-id');
+    const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
+    if (!productId || unitPrice <= 0) return;
 
-        btn.disabled = true;
-        const origText = btn.textContent.trim();
-        btn.textContent = '…';
+    btn.disabled = true;
+    const origText = btn.textContent.trim();
+    btn.textContent = '…';
 
-        $.ajax({
-            url: withBase('/app/Controllers/CartController.php'),
-            type: 'POST',
-            data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    const total = response.cart_summary ? (response.cart_summary.total_quantity || 0) : 0;
-                    document.querySelectorAll('.cart-count').forEach(el => el.textContent = total);
-                    btn.textContent = '✓ Added';
-                    btn.classList.add('na-btn--added');
-                } else {
-                    btn.disabled = false;
-                    btn.textContent = origText;
-                    Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
-                }
-            },
-            error: function() {
+    $.ajax({
+        url: withBase('/app/Controllers/CartController.php'),
+        type: 'POST',
+        data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                const total = response.cart_summary ? (response.cart_summary.total_quantity || 0) : 0;
+                document.querySelectorAll('.cart-count').forEach(el => el.textContent = total);
+                btn.textContent = '✓ Added';
+                btn.classList.add('na-btn--added');
+            } else {
                 btn.disabled = false;
                 btn.textContent = origText;
-                Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+                Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
             }
-        });
+        },
+        error: function() {
+            btn.disabled = false;
+            btn.textContent = origText;
+            Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+        }
     });
+});
 
-    // ---- Related Products: Buy Now ----
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('.rp-buy-btn');
-        if (!btn || btn.disabled) return;
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.rp-buy-btn');
+    if (!btn || btn.disabled) return;
 
-        const productId = btn.getAttribute('data-product-id');
-        const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
-        if (!productId || unitPrice <= 0) return;
+    const productId = btn.getAttribute('data-product-id');
+    const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
+    if (!productId || unitPrice <= 0) return;
 
-        btn.disabled = true;
-        btn.textContent = '…';
+    btn.disabled = true;
+    btn.textContent = '…';
 
-        $.ajax({
-            url: withBase('/app/Controllers/CartController.php'),
-            type: 'POST',
-            data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    window.location.href = withBase('/checkout');
-                } else {
-                    btn.disabled = false;
-                    btn.textContent = 'Buy Now';
-                    Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
-                }
-            },
-            error: function() {
+    $.ajax({
+        url: withBase('/app/Controllers/CartController.php'),
+        type: 'POST',
+        data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
+        contentType: 'application/json',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'success') {
+                window.location.href = withBase('/checkout');
+            } else {
                 btn.disabled = false;
                 btn.textContent = 'Buy Now';
-                Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+                Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
             }
-        });
+        },
+        error: function() {
+            btn.disabled = false;
+            btn.textContent = 'Buy Now';
+            Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+        }
     });
 });

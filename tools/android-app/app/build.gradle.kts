@@ -48,6 +48,8 @@ val publishDebugApk = tasks.register<Copy>("publishDebugApk") {
     }
 }
 
-tasks.named("assembleDebug") {
-    finalizedBy(publishDebugApk)
+afterEvaluate {
+    tasks.named("assembleDebug").configure {
+        finalizedBy(publishDebugApk)
+    }
 }

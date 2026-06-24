@@ -423,6 +423,10 @@ if (!function_exists('loadCSS')) {
             emitCss('public/assets/css/frontend/product.css');
         }
 
+        if (!empty($GLOBALS['pd_is_app']) && !isProductDetailPath($uri)) {
+            emitCss('public/assets/css/frontend/product.css');
+        }
+
         if (strpos($uri, 'mobiles-price-list/best-mobiles-under-') !== false) {
             emitCss('public/assets/css/frontend/best-mobiles-page.css');
         }
@@ -481,6 +485,13 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/jquery-3.6.0.min.js');
             emitJs('public/assets/js/sweetalert2.all.min.js');
             emitJs('public/assets/js/frontend/product.js');
+        }
+
+        if (!empty($GLOBALS['pd_is_app']) && !isProductDetailPath($uri)) {
+            emitJs('public/assets/js/jquery-3.6.0.min.js');
+            emitJs('public/assets/js/sweetalert2.all.min.js');
+            emitJs('public/assets/js/frontend/product.js');
+            emitJs('public/assets/js/frontend/buy-now.js');
         }
 
         if (strpos($uri, '/admin/') === 0) {

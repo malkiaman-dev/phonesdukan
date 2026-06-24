@@ -51,12 +51,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var resizeTimer = null;
         var lastHalfWidth = 0;
+        var syncAttempts = 0;
 
         function syncMarqueeSpeed() {
+            var viewport = announcementTrack.closest(".pd-announcement-viewport");
+            var viewWidth = viewport ? viewport.clientWidth : window.innerWidth;
             var totalWidth = announcementTrack.scrollWidth;
             var halfWidth = totalWidth / 2;
-            if (!halfWidth || Math.abs(halfWidth - lastHalfWidth) < 1) {
-                if (!announcementTrack.classList.contains("pd-marquee-active") && halfWidth) {
+
+            if (!halfWidth || halfWidth < viewWidth * 0.4) {
+                announcementTrack.classList.remove("pd-marquee-active");
+                if (syncAttempts < 12) {
+                    syncAttempts += 1;
+                    window.requestAnimationFrame(function () {
+                        window.setTimeout(syncMarqueeSpeed, 50);
+                    });
+                }
+                return;
+            }
+
+            syncAttempts = 0;
+            if (Math.abs(halfWidth - lastHalfWidth) < 1) {
+                if (!announcementTrack.classList.contains("pd-marquee-active")) {
                     announcementTrack.classList.add("pd-marquee-active");
                 }
                 return;
@@ -73,8 +89,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         function scheduleSync() {
+            syncAttempts = 0;
             window.requestAnimationFrame(syncMarqueeSpeed);
         }
+
+        window.PDAnnouncement = {
+            sync: scheduleSync
+        };
 
         function debouncedSync() {
             if (resizeTimer) {
@@ -88,6 +109,10 @@ document.addEventListener("DOMContentLoaded", function () {
         window.addEventListener("orientationchange", function () {
             lastHalfWidth = 0;
             window.setTimeout(scheduleSync, 200);
+        }, { passive: true });
+        window.addEventListener("pageshow", function () {
+            lastHalfWidth = 0;
+            window.setTimeout(scheduleSync, 80);
         }, { passive: true });
 
         if (document.fonts && document.fonts.ready) {
