@@ -2225,7 +2225,7 @@ li.custom-tab-title h2 {
 }
 
 /* ---- NA-CARD core (mirrors index.css) ---- */
-.na-card {
+.product-grid-wrapper .na-card {
   position: relative;
   background: #ffffff;
   border: 1px solid #ebebeb;
@@ -2239,7 +2239,7 @@ li.custom-tab-title h2 {
   max-width: calc((100% - 48px) / 4);
 }
 
-.na-card:hover {
+.product-grid-wrapper .na-card:hover {
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.10);
   transform: translateY(-4px);
 }
@@ -2281,7 +2281,7 @@ li.custom-tab-title h2 {
   transition: background 0.25s ease;
 }
 
-.na-card:hover .na-img-box {
+.product-grid-wrapper .na-card:hover .na-img-box {
   background: #f0f1f2;
 }
 
@@ -2292,7 +2292,7 @@ li.custom-tab-title h2 {
   transition: transform 0.35s ease;
 }
 
-.na-card:hover .na-img-box img {
+.product-grid-wrapper .na-card:hover .na-img-box img {
   transform: scale(1.05);
 }
 
@@ -2718,7 +2718,7 @@ li.custom-tab-title h2 {
   }
 
   /* 2-column layout: matches homepage 768px breakpoint */
-  .na-card {
+  .product-grid-wrapper .na-card {
     flex: 0 0 calc((100% - 12px) / 2);
     max-width: calc((100% - 12px) / 2);
   }
@@ -2818,7 +2818,7 @@ li.custom-tab-title h2 {
     gap: 10px;
   }
 
-  .na-card {
+  .product-grid-wrapper .na-card {
     flex: 0 0 calc((100% - 10px) / 2);
     max-width: calc((100% - 10px) / 2);
   }

@@ -434,6 +434,10 @@ if (!function_exists('loadCSS')) {
 
         emitCss('public/assets/css/frontend/ui-controls.css');
 
+        if (!empty($GLOBALS['pd_is_app'])) {
+            emitCss('public/assets/css/frontend/category-listing.css');
+        }
+
         if (defined('CATEGORY_LISTING_PAGE') && CATEGORY_LISTING_PAGE) {
             emitCss('public/assets/css/frontend/category-listing.css');
 
@@ -520,10 +524,6 @@ if (!function_exists('loadCSS')) {
 
         // Product detail pages: /{brand}/{category}/{product} or /{brand}/{category}/{subcategory}/{product}
         if (isProductDetailPath($uri)) {
-            emitCss('public/assets/css/frontend/product.css');
-        }
-
-        if (!empty($GLOBALS['pd_is_app']) && !isProductDetailPath($uri)) {
             emitCss('public/assets/css/frontend/product.css');
         }
 
