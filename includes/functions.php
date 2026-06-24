@@ -463,6 +463,10 @@ if (!function_exists('loadJS')) {
         $listingSlug = trim(getRequestPath(), '/');
         if ($listingSlug !== '' && strpos($listingSlug, '/') === false && is_file(assetFilePath('public/assets/css/frontend/' . $listingSlug . '.css'))) {
             emitJs('public/assets/js/frontend/buy-now.js');
+            $listingJs = 'public/assets/js/frontend/' . $listingSlug . '.js';
+            if (is_file(assetFilePath($listingJs))) {
+                emitJs($listingJs);
+            }
         }
 
         if (defined('BRAND_LISTING_PAGE') && BRAND_LISTING_PAGE) {
@@ -504,7 +508,8 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/sweetalert2.all.min.js');
         }
 
-        $jsUri = getRequestPath();
+        $jsUri = rtrim(getRequestPath(), '/');
+        $jsUri = $jsUri === '' ? '/' : $jsUri;
         if (!isProductDetailPath($jsUri) && strpos($jsUri, '/') === strrpos($jsUri, '/')) {
             emitJs('public/assets/js/frontend/' . getCurrentPage() . '.js');
         }
