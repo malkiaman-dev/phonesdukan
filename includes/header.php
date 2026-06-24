@@ -140,6 +140,10 @@ html[data-pd-app="1"] {
     html[data-pd-app="1"] #pd-site-chrome .pd-announcement-track.pd-marquee-active {
         animation: pdTicker var(--pd-ticker-duration, 24s) linear infinite !important;
     }
+    html[data-pd-app="1"] .pd-chrome-spacer {
+        height: calc(var(--pd-app-status-inset, 0px) + var(--announcement-height) + var(--header-height)) !important;
+        min-height: calc(var(--pd-app-status-inset, 0px) + var(--announcement-height) + var(--header-height)) !important;
+    }
     html[data-pd-app="1"] #pd-install-app-btn,
     html[data-pd-app="1"] #pd-install-app-panel {
         display: none !important;

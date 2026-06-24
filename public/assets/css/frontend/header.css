@@ -1188,6 +1188,11 @@ html[data-pd-app="1"] .pd-header-stack {
     animation: pdTicker var(--pd-ticker-duration, 24s) linear infinite;
   }
 
+  html[data-pd-app="1"] .pd-chrome-spacer {
+    height: calc(var(--pd-app-status-inset, 0px) + var(--announcement-height) + var(--header-height));
+    min-height: calc(var(--pd-app-status-inset, 0px) + var(--announcement-height) + var(--header-height));
+  }
+
   .pd-site-chrome {
     display: block;
     position: fixed;

@@ -124,18 +124,30 @@ document.addEventListener("DOMContentLoaded", function () {
         root.style.setProperty("--safe-area-top", inset + "px");
     }
 
+    function readCssPx(value) {
+        return parseFloat(value) || 0;
+    }
+
     function updateFixedChromeMetrics() {
         const root = document.documentElement;
-        const siteChrome = document.getElementById("pd-site-chrome");
         const isMobile = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
-        if (announcementTrack) {
-            root.style.setProperty("--announcement-height", announcementTrack.offsetHeight + "px");
+        let annH = announcementTrack ? announcementTrack.offsetHeight : 0;
+        let headerH = headerStack ? headerStack.offsetHeight : 0;
+
+        if (announcementTrack && announcementTrack.offsetHeight) {
+            annH = announcementTrack.offsetHeight;
+            root.style.setProperty("--announcement-height", annH + "px");
         }
-        if (headerStack) {
-            root.style.setProperty("--header-height", headerStack.offsetHeight + "px");
+        if (headerStack && headerStack.offsetHeight) {
+            headerH = headerStack.offsetHeight;
+            root.style.setProperty("--header-height", headerH + "px");
         }
-        if (siteChrome && isMobile) {
-            root.style.setProperty("--pd-chrome-offset", siteChrome.offsetHeight + "px");
+
+        const padTop = readCssPx(getComputedStyle(root).getPropertyValue("--pd-chrome-pad-top"));
+        const totalOffset = Math.round(padTop + annH + headerH);
+
+        if (isMobile) {
+            root.style.setProperty("--pd-chrome-offset", totalOffset + "px");
         } else {
             root.style.setProperty(
                 "--pd-chrome-offset",
@@ -143,6 +155,10 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         }
     }
+
+    window.PDChromeMetrics = {
+        update: updateFixedChromeMetrics
+    };
 
     if (headerStack) {
         readSafeAreaTop();

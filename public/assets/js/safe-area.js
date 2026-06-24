@@ -101,6 +101,38 @@
             statusSlot.style.height = "0px";
             statusSlot.style.minHeight = "0px";
         }
+
+        refreshChromeOffset(insetPx);
+    }
+
+    function refreshChromeOffset(insetPx) {
+        var root = document.documentElement;
+        var announcementTrack = document.querySelector(".pd-announcement-track");
+        var headerStack = document.querySelector(".pd-header-stack");
+        var annH = announcementTrack
+            ? announcementTrack.offsetHeight
+            : readCssPx(getComputedStyle(root).getPropertyValue("--announcement-height"));
+        var headerH = headerStack
+            ? headerStack.offsetHeight
+            : readCssPx(getComputedStyle(root).getPropertyValue("--header-height"));
+
+        if (announcementTrack && announcementTrack.offsetHeight) {
+            root.style.setProperty("--announcement-height", annH + "px");
+        }
+        if (headerStack && headerStack.offsetHeight) {
+            root.style.setProperty("--header-height", headerH + "px");
+        }
+
+        var padTop = isPhonesDukanApp() ? insetPx : readCssPx(getComputedStyle(root).getPropertyValue("--pd-chrome-pad-top"));
+        root.style.setProperty("--pd-chrome-offset", Math.round(padTop + annH + headerH) + "px");
+
+        if (window.PDChromeMetrics && typeof window.PDChromeMetrics.update === "function") {
+            window.PDChromeMetrics.update();
+        }
+    }
+
+    function readCssPx(value) {
+        return parseFloat(value) || 0;
     }
 
     function applySafeAreaTop() {
@@ -114,6 +146,9 @@
 
     applySafeAreaTop();
 
+    window.addEventListener("load", function () {
+        window.setTimeout(applySafeAreaTop, 50);
+    }, { passive: true });
     window.addEventListener("resize", applySafeAreaTop, { passive: true });
     window.addEventListener("orientationchange", function () {
         window.setTimeout(applySafeAreaTop, 120);

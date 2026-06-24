@@ -8,6 +8,7 @@ function collectLayoutMetrics() {
   const announcement = document.querySelector(".pd-announcement-bar");
   const track = document.querySelector(".pd-announcement-track");
   const header = document.querySelector(".pd-header-stack");
+  const spacer = document.querySelector(".pd-chrome-spacer");
   const install = document.getElementById("pd-install-app-btn");
   const root = document.documentElement;
   const chromeRect = chrome ? chrome.getBoundingClientRect() : null;
@@ -26,6 +27,8 @@ function collectLayoutMetrics() {
     annH: annRect ? Math.round(annRect.height) : 0,
     trackH: track ? track.offsetHeight : 0,
     headerH: header ? header.offsetHeight : 0,
+    spacerH: spacer ? spacer.offsetHeight : 0,
+    chromeOffset: getComputedStyle(root).getPropertyValue("--pd-chrome-offset").trim(),
     trackBg: trackStyle
       ? trackStyle.backgroundImage || trackStyle.backgroundColor
       : null,
@@ -92,6 +95,7 @@ for (const scenario of scenarios) {
   let ok;
   if (scenario.expectApp) {
     const statusInset = scenario.mockNative ? 24 : 0;
+    const minSpacer = statusInset + metrics.trackH + metrics.headerH - 4;
     ok =
       metrics.pdApp === "1" &&
       metrics.padTop === statusInset + "px" &&
@@ -99,6 +103,7 @@ for (const scenario of scenarios) {
       metrics.safeFillH === 0 &&
       metrics.safeFillDisplay === "none" &&
       metrics.annTop >= statusInset &&
+      metrics.spacerH >= minSpacer &&
       metrics.trackH > 0 &&
       metrics.headerH > 0 &&
       installHidden;
