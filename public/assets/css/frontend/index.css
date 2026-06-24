@@ -1173,12 +1173,16 @@ a.view-all-btn {
   .na-inner   { padding: 0 14px; }
 
   .sw-na-section .na-header--split,
+  .mob-na-section .na-header,
+  .acc-na-section .na-header,
   .home-earbuds-section .category-header--split {
     gap: 10px;
     margin-bottom: 14px;
   }
 
   .sw-na-section .na-header--split .na-view-all,
+  .mob-na-section .na-view-all,
+  .acc-na-section .na-view-all,
   .home-earbuds-section .category-header--split .view-all-btn {
     font-size: 12px;
     padding: 6px 12px;
@@ -1250,11 +1254,15 @@ a.view-all-btn {
   .na-card { flex: 0 0 calc((100% - 10px) / 2); }
 
   .sw-na-section .na-header--split,
+  .mob-na-section .na-header,
+  .acc-na-section .na-header,
   .home-earbuds-section .category-header--split {
     gap: 8px;
   }
 
   .sw-na-section .na-header--split .na-view-all,
+  .mob-na-section .na-view-all,
+  .acc-na-section .na-view-all,
   .home-earbuds-section .category-header--split .view-all-btn {
     font-size: 11px;
     padding: 5px 10px;
@@ -2362,6 +2370,24 @@ a.brandItem {
     text-align: left;
   }
 
+  /* Mobiles & Accessories: title left, Explore All right on mobile */
+  .mob-na-section .na-header,
+  .acc-na-section .na-header {
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .mob-na-section .na-title,
+  .acc-na-section .na-title {
+    text-align: left;
+  }
+
+  .mob-na-section .na-view-all,
+  .acc-na-section .na-view-all {
+    position: static;
+    flex-shrink: 0;
+  }
+
   /* Shop by Categories title */
   .cat-header {
     text-align: left;
@@ -2420,6 +2446,11 @@ a.brandItem {
     font-size: 17px;
     letter-spacing: -0.02em;
     padding-right: 84px; /* reserves space for the Explore All pill */
+  }
+
+  .mob-na-section .na-title,
+  .acc-na-section .na-title {
+    padding-right: 0;
   }
 
   /* Explore All: minimal footprint */
