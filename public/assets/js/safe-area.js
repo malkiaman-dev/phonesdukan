@@ -58,7 +58,9 @@
         var safeFill = chrome ? chrome.querySelector(".pd-chrome-safe-fill") : null;
         var safeAreaTop = chrome ? chrome.querySelector(".pd-safe-area-top") : null;
         var statusSlot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
-        var insetPx = isPhonesDukanApp() ? 0 : Math.max(0, Math.round(inset));
+        var insetPx = isPhonesDukanApp()
+            ? Math.max(0, Math.round(readNativeInset()))
+            : Math.max(0, Math.round(inset));
 
         if (isPhonesDukanApp()) {
             markPdAppClient();
@@ -75,7 +77,11 @@
 
         if (chrome) {
             chrome.style.paddingTop = "0px";
-            chrome.style.top = "";
+            if (isPhonesDukanApp() && insetPx > 0) {
+                chrome.style.top = insetPx + "px";
+            } else {
+                chrome.style.top = "";
+            }
         }
 
         if (safeFill) {

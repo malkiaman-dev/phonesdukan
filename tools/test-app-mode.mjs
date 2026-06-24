@@ -72,7 +72,7 @@ for (const scenario of scenarios) {
     await context.addInitScript(() => {
       window.PhonesDukanNative = {
         isApp: () => true,
-        getStatusBarHeight: () => 0,
+        getStatusBarHeight: () => 24,
       };
     });
   }
@@ -91,13 +91,14 @@ for (const scenario of scenarios) {
 
   let ok;
   if (scenario.expectApp) {
+    const statusInset = scenario.mockNative ? 24 : 0;
     ok =
       metrics.pdApp === "1" &&
-      metrics.padTop === "0px" &&
-      metrics.safeTop === "0px" &&
+      metrics.padTop === statusInset + "px" &&
+      metrics.safeTop === statusInset + "px" &&
       metrics.safeFillH === 0 &&
       metrics.safeFillDisplay === "none" &&
-      metrics.annTop === 0 &&
+      metrics.annTop >= statusInset &&
       metrics.trackH > 0 &&
       metrics.headerH > 0 &&
       installHidden;

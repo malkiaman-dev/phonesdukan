@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
           + "}catch(e){}})();";
 
   private WebView webView;
+  private View statusBarScrim;
+  private float statusBarHeightCssPx = 0f;
 
   private Map<String, String> appHeaders() {
     Map<String, String> headers = new HashMap<>();
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     WindowCompat.setDecorFitsSystemWindows(window, false);
     window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-    window.setStatusBarColor(STATUS_BAR_COLOR);
+    window.setStatusBarColor(0xFF111111);
     window.setNavigationBarColor(Color.parseColor("#111111"));
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       window.setStatusBarContrastEnforced(false);
@@ -84,13 +86,22 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     webView = findViewById(R.id.webView);
+    statusBarScrim = findViewById(R.id.statusBarScrim);
     webView.setBackgroundColor(STATUS_BAR_COLOR);
     webView.setVerticalScrollBarEnabled(false);
     webView.setHorizontalScrollBarEnabled(false);
 
     ViewCompat.setOnApplyWindowInsetsListener(webView, (view, windowInsets) -> {
       Insets statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+      float density = getResources().getDisplayMetrics().density;
+      statusBarHeightCssPx = density > 0f ? statusBars.top / density : 24f;
       view.setPadding(0, statusBars.top, 0, 0);
+      if (statusBarScrim != null) {
+        android.view.ViewGroup.LayoutParams scrimParams = statusBarScrim.getLayoutParams();
+        scrimParams.height = statusBars.top;
+        statusBarScrim.setLayoutParams(scrimParams);
+        statusBarScrim.setVisibility(statusBars.top > 0 ? View.VISIBLE : View.GONE);
+      }
       return WindowInsetsCompat.CONSUMED;
     });
     ViewCompat.requestApplyInsets(webView);
@@ -162,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
       return;
     }
 
-    window.setStatusBarColor(STATUS_BAR_COLOR);
+    window.setStatusBarColor(0xFF111111);
 
     WindowInsetsControllerCompat controller =
         WindowCompat.getInsetsController(window, window.getDecorView());
@@ -233,10 +244,10 @@ public class MainActivity extends AppCompatActivity {
       return true;
     }
 
-    /** Always 0 — WebView top padding from native status bar insets positions web content. */
+    /** Status bar height in CSS px — offsets fixed web chrome below the system bar. */
     @JavascriptInterface
     public float getStatusBarHeight() {
-      return 0f;
+      return statusBarHeightCssPx;
     }
   }
 }

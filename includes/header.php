@@ -103,10 +103,9 @@ if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '
     --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
 }
 html[data-pd-app="1"] {
-    --pd-status-inset: 0px;
-    --safe-area-top: 0px;
-    --pd-chrome-pad-top: 0px;
-    --pd-app-status-inset: 0px;
+    --pd-status-inset: var(--pd-app-status-inset, 0px);
+    --safe-area-top: var(--pd-app-status-inset, 0px);
+    --pd-chrome-pad-top: var(--pd-app-status-inset, 0px);
 }
 @media (max-width: 992px) {
     :root {
@@ -117,7 +116,7 @@ html[data-pd-app="1"] {
     }
     html[data-pd-app="1"] #pd-site-chrome {
         position: fixed !important;
-        top: 0 !important;
+        top: var(--pd-app-status-inset, 0px) !important;
     }
     html[data-pd-app="1"] #pd-site-chrome .pd-top-bars {
         display: block !important;

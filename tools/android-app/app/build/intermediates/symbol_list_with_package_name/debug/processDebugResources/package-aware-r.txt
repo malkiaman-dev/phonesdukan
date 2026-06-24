@@ -785,6 +785,7 @@ id split_action_bar
 id src_atop
 id src_in
 id src_over
+id statusBarScrim
 id submenuarrow
 id submit_area
 id tabMode
