@@ -7,6 +7,23 @@ var withBase = window.pdWithBase || function (path) {
     return localBasePath + "/" + path;
 };
 
+function pdAppNavigate(path) {
+    var href = withBase(path);
+    if (window.PDAppNav && typeof window.PDAppNav.navigate === "function") {
+        window.PDAppNav.navigate(href);
+        return;
+    }
+    window.location.href = href;
+}
+
+function pdAppLeave(path) {
+    var href = withBase(path);
+    if (window.PDAppNav && typeof window.PDAppNav.beforeFullPageLeave === "function") {
+        window.PDAppNav.beforeFullPageLeave();
+    }
+    window.location.href = href;
+}
+
 function resolveGalleryMediaUrl(path) {
     if (!path) return "";
     if (/^https?:\/\//i.test(path) || path.startsWith("//")) return path;
@@ -507,8 +524,11 @@ function initProductPage() {
                     cartCountElements.forEach(element => {
                         element.textContent = totalQuantity;
                     });
+                    if (window.PDAppNav && typeof window.PDAppNav.invalidate === "function") {
+                        window.PDAppNav.invalidate("/cart");
+                    }
                     if (redirectToCheckout) {
-                        window.location.href = withBase("/checkout");
+                        pdAppLeave("/checkout");
                     } else {
                         Swal.fire({
                             title: "Added to Cart!",
@@ -530,7 +550,7 @@ function initProductPage() {
                             buttonsStyling: false
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                window.location.href = withBase("/cart");
+                                pdAppNavigate("/cart");
                             }
                         });
                     }
@@ -655,7 +675,7 @@ document.addEventListener('click', function(e) {
         dataType: 'json',
         success: function(response) {
             if (response.status === 'success') {
-                window.location.href = withBase('/checkout');
+                pdAppLeave('/checkout');
             } else {
                 btn.disabled = false;
                 btn.textContent = 'Buy Now';

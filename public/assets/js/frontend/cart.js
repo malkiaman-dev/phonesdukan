@@ -1,18 +1,18 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const withBase = window.pdWithBase || function (path) {
-        const basePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
-        if (!path) return basePath + '/';
-        if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
-        if (path.startsWith(basePath + '/')) return path;
-        if (path.startsWith('/')) return basePath + path;
-        return basePath + '/' + path;
-    };
+var withBase = window.pdWithBase || function (path) {
+    var basePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
+    if (!path) return basePath + '/';
+    if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
+    if (path.startsWith(basePath + '/')) return path;
+    if (path.startsWith('/')) return basePath + path;
+    return basePath + '/' + path;
+};
 
-    if (window.__cartInitialized) return;
-    window.__cartInitialized = true;
-
-    const cartContainer = document.querySelector('.cart-container');
-    if (!cartContainer) return;
+function initCartPage() {
+    var cartContainer = document.querySelector('.cart-container');
+    if (!cartContainer || cartContainer.dataset.pdCartInited === '1') {
+        return;
+    }
+    cartContainer.dataset.pdCartInited = '1';
 
     // ----------------------------------------------------------------
     // Toast — lightweight non-blocking notification
@@ -268,4 +268,7 @@ document.addEventListener("DOMContentLoaded", function () {
             showToast("Something went wrong. Please try again.", 'error');
         });
     });
-});
+}
+
+document.addEventListener("DOMContentLoaded", initCartPage);
+document.addEventListener("pd:page-view", initCartPage);

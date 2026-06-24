@@ -2,10 +2,14 @@
     "use strict";
 
     var MAX_CACHE = 16;
+    var STACK_KEY = "pd-nav-stack";
     var pageCache = new Map();
     var pendingFetches = new Map();
+    var loadedScripts = new Set();
     var navStack = [];
     var booted = false;
+    var navigating = false;
+    var activeNavToken = 0;
 
     function isApp() {
         return window.PDApp && typeof window.PDApp.is === "function" && window.PDApp.is();
@@ -33,7 +37,7 @@
             if (!isSameSite(href)) {
                 return false;
             }
-            if (/^\/(checkout|cart|login|register|verify|thankyou|admin|my-account)(\/|$)/i.test(path)) {
+            if (/^\/(checkout|login|register|verify|thankyou|admin|my-account)(\/|$)/i.test(path)) {
                 return false;
             }
             if (url.protocol !== "http:" && url.protocol !== "https:") {
@@ -59,6 +63,42 @@
             return false;
         }
         return shouldUseSpa(anchor.href);
+    }
+
+    function persistStack() {
+        try {
+            sessionStorage.setItem(STACK_KEY, JSON.stringify(navStack));
+        } catch (e) {}
+    }
+
+    function restoreStack(fallback) {
+        try {
+            var raw = sessionStorage.getItem(STACK_KEY);
+            if (!raw) {
+                return fallback.slice();
+            }
+            var parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed) || !parsed.length) {
+                return fallback.slice();
+            }
+            return parsed;
+        } catch (e) {
+            return fallback.slice();
+        }
+    }
+
+    function syncStackToUrl(url) {
+        var key = normalizeUrl(url);
+        var saved = restoreStack([key]);
+        var idx = saved.lastIndexOf(key);
+        if (idx >= 0) {
+            navStack = saved.slice(0, idx + 1);
+        } else if (saved[saved.length - 1] !== key) {
+            navStack = saved.concat([key]);
+        } else {
+            navStack = saved;
+        }
+        persistStack();
     }
 
     function trimCache() {
@@ -97,6 +137,33 @@
         }
     }
 
+    function scrollToTop() {
+        window.scrollTo(0, 0);
+        if (document.documentElement) {
+            document.documentElement.scrollTop = 0;
+        }
+        if (document.body) {
+            document.body.scrollTop = 0;
+        }
+        window.requestAnimationFrame(function () {
+            window.scrollTo(0, 0);
+            window.requestAnimationFrame(function () {
+                window.scrollTo(0, 0);
+            });
+        });
+        window.setTimeout(function () {
+            window.scrollTo(0, 0);
+        }, 0);
+    }
+
+    function restoreScroll(y) {
+        var target = typeof y === "number" ? y : 0;
+        window.scrollTo(0, target);
+        window.requestAnimationFrame(function () {
+            window.scrollTo(0, target);
+        });
+    }
+
     function loadStyles(doc) {
         var links = doc.querySelectorAll('link[rel="stylesheet"][href]');
         Array.prototype.forEach.call(links, function (link) {
@@ -121,7 +188,8 @@
                 return;
             }
             var absolute = script.src;
-            if (document.querySelector('script[src="' + absolute + '"]')) {
+            if (loadedScripts.has(absolute) || document.querySelector('script[src="' + absolute + '"]')) {
+                loadedScripts.add(absolute);
                 return;
             }
             chain = chain.then(function () {
@@ -129,7 +197,10 @@
                     var tag = document.createElement("script");
                     tag.src = absolute;
                     tag.async = false;
-                    tag.onload = tag.onerror = resolve;
+                    tag.onload = tag.onerror = function () {
+                        loadedScripts.add(absolute);
+                        resolve();
+                    };
                     document.body.appendChild(tag);
                 });
             });
@@ -137,7 +208,7 @@
         return chain;
     }
 
-    function parseSnapshot(html, url) {
+    function parseSnapshot(html) {
         var doc = new DOMParser().parseFromString(html, "text/html");
         var main = doc.querySelector("main.content");
         if (!main) {
@@ -151,8 +222,13 @@
         };
     }
 
-    function fetchSnapshot(url) {
+    function fetchSnapshot(url, options) {
+        options = options || {};
         var key = normalizeUrl(url);
+        if (options.bypassCache) {
+            pageCache.delete(key);
+            pendingFetches.delete(key);
+        }
         if (pageCache.has(key)) {
             return Promise.resolve(pageCache.get(key));
         }
@@ -166,14 +242,14 @@
                 "X-PhonesDukan-App": "1",
                 "X-PD-App-Nav": "1"
             },
-            cache: "force-cache"
+            cache: "default"
         }).then(function (response) {
             if (!response.ok) {
                 throw new Error("HTTP " + response.status);
             }
             return response.text();
         }).then(function (html) {
-            var parsed = parseSnapshot(html, key);
+            var parsed = parseSnapshot(html);
             if (!parsed) {
                 throw new Error("Missing main.content");
             }
@@ -204,7 +280,8 @@
         fetchSnapshot(href).catch(function () {});
     }
 
-    function applySnapshot(snapshot, scrollY) {
+    function applySnapshot(snapshot, options) {
+        options = options || {};
         var main = document.querySelector("main.content");
         if (!main || !snapshot) {
             return;
@@ -213,12 +290,19 @@
         if (snapshot.title) {
             document.title = snapshot.title;
         }
-        window.scrollTo(0, typeof scrollY === "number" ? scrollY : 0);
+        if (options.restoreScroll) {
+            restoreScroll(snapshot.scrollY || 0);
+        } else {
+            scrollToTop();
+        }
         document.dispatchEvent(new CustomEvent("pd:page-view", {
             detail: { url: window.location.href }
         }));
         if (window.PDAppShell && typeof window.PDAppShell.onPageReady === "function") {
             window.PDAppShell.onPageReady();
+        }
+        if (!options.restoreScroll) {
+            window.setTimeout(scrollToTop, 50);
         }
     }
 
@@ -226,8 +310,10 @@
         options = options || {};
         var key = normalizeUrl(href);
         var currentKey = normalizeUrl(window.location.href);
+        var token = ++activeNavToken;
 
         if (!options.fromPop && key === currentKey) {
+            scrollToTop();
             return Promise.resolve();
         }
 
@@ -235,18 +321,36 @@
             storePage(currentKey, captureCurrentPage());
         }
 
+        navigating = true;
         setLoading(true);
-        return fetchSnapshot(key).then(function (snapshot) {
-            applySnapshot(snapshot, options.fromPop ? snapshot.scrollY : 0);
+        var bypassCache = /\/cart(\/|$)/i.test(new URL(key).pathname);
+        return fetchSnapshot(key, { bypassCache: bypassCache && !options.fromPop }).then(function (snapshot) {
+            if (token !== activeNavToken) {
+                return;
+            }
+            applySnapshot(snapshot, { restoreScroll: !!options.fromPop });
             if (!options.fromPop) {
                 history.pushState({ pdAppNav: 1, url: key }, snapshot.title || "", key);
                 navStack.push(key);
+                persistStack();
             }
         }).catch(function () {
-            window.location.href = href;
+            if (token === activeNavToken) {
+                beforeFullPageLeave();
+                window.location.href = href;
+            }
         }).finally(function () {
-            setLoading(false);
+            if (token === activeNavToken) {
+                navigating = false;
+                setLoading(false);
+            }
         });
+    }
+
+    function beforeFullPageLeave() {
+        var currentKey = normalizeUrl(window.location.href);
+        storePage(currentKey, captureCurrentPage());
+        persistStack();
     }
 
     function boot() {
@@ -254,9 +358,17 @@
             return;
         }
         booted = true;
+
+        if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+        }
+
         var start = normalizeUrl(window.location.href);
-        navStack = [start];
-        history.replaceState({ pdAppNav: 1, url: start }, document.title, start);
+        syncStackToUrl(start);
+
+        if (!history.state || !history.state.pdAppNav) {
+            history.replaceState({ pdAppNav: 1, url: start }, document.title, start);
+        }
         storePage(start, captureCurrentPage());
 
         document.addEventListener("click", function (event) {
@@ -280,10 +392,19 @@
 
         window.addEventListener("popstate", function (event) {
             var state = event.state || {};
+            if (!state.pdAppNav) {
+                syncStackToUrl(window.location.href);
+                return;
+            }
             var key = normalizeUrl(state.url || window.location.href);
             var snapshot = pageCache.get(key);
             if (!snapshot) {
-                window.location.reload();
+                fetchSnapshot(key).then(function (fetched) {
+                    syncStackToUrl(key);
+                    applySnapshot(fetched, { restoreScroll: true });
+                }).catch(function () {
+                    window.location.reload();
+                });
                 return;
             }
             while (navStack.length > 1 && navStack[navStack.length - 1] !== key) {
@@ -292,12 +413,28 @@
             if (navStack[navStack.length - 1] !== key) {
                 navStack.push(key);
             }
-            applySnapshot(snapshot, snapshot.scrollY || 0);
+            persistStack();
+            applySnapshot(snapshot, { restoreScroll: true });
         });
 
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted) {
+                syncStackToUrl(window.location.href);
+            }
+        }, { passive: true });
+
         window.addEventListener("load", function () {
+            if (navigating) {
+                return;
+            }
             storePage(normalizeUrl(window.location.href), captureCurrentPage());
         }, { passive: true });
+
+        Array.prototype.forEach.call(document.querySelectorAll("script[src]"), function (script) {
+            if (script.src) {
+                loadedScripts.add(script.src);
+            }
+        });
     }
 
     function back() {
@@ -312,12 +449,20 @@
         return navStack.length > 1;
     }
 
+    function invalidate(url) {
+        var key = normalizeUrl(url);
+        pageCache.delete(key);
+        pendingFetches.delete(key);
+    }
+
     window.PDAppNav = {
         boot: boot,
         back: back,
         canGoBack: canGoBack,
         prefetch: prefetchUrl,
-        navigate: navigateTo
+        navigate: navigateTo,
+        beforeFullPageLeave: beforeFullPageLeave,
+        invalidate: invalidate
     };
 
     if (!isApp()) {
