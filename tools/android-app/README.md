@@ -14,10 +14,15 @@ Deploy website changes to production (`www.phonesdukan.com`) for them to appear 
 2. Choose **Open** and select `tools/android-app`.
 3. Wait for Gradle sync to finish.
 4. Go to **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
-5. Copy the generated APK to:
+   Or from the command line:
+   ```bash
+   cd tools/android-app
+   ./gradlew assembleDebug
+   ```
+5. The build copies the APK automatically to:
    `public/downloads/phonesdukan.apk`
 
-The website download button serves that file through `public/download-app.php`.
+The website **Get App** button serves that file through `public/download-app.php`.
 
 ## Notes
 

@@ -37,3 +37,17 @@ configurations.configureEach {
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk7")
     exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib-jdk8")
 }
+
+val publishDebugApk = tasks.register<Copy>("publishDebugApk") {
+    dependsOn("assembleDebug")
+    from(layout.buildDirectory.file("outputs/apk/debug/app-debug.apk"))
+    into(rootProject.file("../../public/downloads"))
+    rename { "phonesdukan.apk" }
+    doLast {
+        println("Published APK to public/downloads/phonesdukan.apk")
+    }
+}
+
+tasks.named("assembleDebug") {
+    finalizedBy(publishDebugApk)
+}
