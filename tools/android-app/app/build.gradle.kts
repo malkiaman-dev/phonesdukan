@@ -10,8 +10,8 @@ android {
         applicationId = "com.phonesdukan.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = ((System.currentTimeMillis() / 1000L).toInt())
+        versionName = "1.0.${System.currentTimeMillis() / 1000L}"
     }
 
     buildTypes {
@@ -44,7 +44,20 @@ val publishDebugApk = tasks.register<Copy>("publishDebugApk") {
     into(rootProject.file("../../public/downloads"))
     rename { "phonesdukan.apk" }
     doLast {
-        println("Published APK to public/downloads/phonesdukan.apk")
+        val versionFile = rootProject.file("../../public/downloads/app-version.properties")
+        val versionCode = android.defaultConfig.versionCode
+        val versionName = android.defaultConfig.versionName ?: "1.0.0"
+        val builtAt = System.currentTimeMillis()
+        versionFile.parentFile?.mkdirs()
+        versionFile.writeText(
+            buildString {
+                appendLine("versionCode=$versionCode")
+                appendLine("versionName=$versionName")
+                appendLine("builtAt=$builtAt")
+                appendLine("apkFile=phonesdukan.apk")
+            }
+        )
+        println("Published APK to public/downloads/phonesdukan.apk ($versionName)")
     }
 }
 

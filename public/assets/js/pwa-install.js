@@ -71,12 +71,18 @@ document.addEventListener('DOMContentLoaded', function () {
         installPanel.setAttribute('aria-hidden', 'true');
     }
 
+    function buildDownloadUrl() {
+        var base = downloadUrl || '';
+        var joiner = base.indexOf('?') >= 0 ? '&' : '?';
+        return withBase(base + joiner + 't=' + Date.now());
+    }
+
     function triggerApkDownload() {
         if (isDownloading) return;
         isDownloading = true;
 
         var link = document.createElement('a');
-        link.href = withBase(downloadUrl);
+        link.href = buildDownloadUrl();
         link.download = 'PhonesDukan.apk';
         link.rel = 'noopener';
         document.body.appendChild(link);

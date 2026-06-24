@@ -243,6 +243,106 @@ if (!function_exists('pd_is_app_request')) {
   }
 }
 
+if (!function_exists('pd_app_apk_candidates')) {
+    function pd_app_apk_candidates(): array
+    {
+        $root = defined('PROJECT_ROOT') ? PROJECT_ROOT : dirname(__DIR__, 2);
+
+        return [
+            $root . '/public/downloads/phonesdukan.apk',
+            $root . '/tools/android-app/app/build/outputs/apk/debug/app-debug.apk',
+            $root . '/tools/android-app/app/build/outputs/apk/release/app-release.apk',
+        ];
+    }
+}
+
+if (!function_exists('pd_resolve_app_apk')) {
+    /**
+     * Resolve the newest APK and publish it to public/downloads/phonesdukan.apk.
+     *
+     * @return array{path:string,mtime:int,size:int,version:string}|null
+     */
+    function pd_resolve_app_apk(bool $syncPublished = true): ?array
+    {
+        $candidates = pd_app_apk_candidates();
+        $published = $candidates[0];
+        $newestPath = null;
+        $newestMtime = 0;
+
+        foreach ($candidates as $path) {
+            if (!is_file($path)) {
+                continue;
+            }
+            $mtime = (int) filemtime($path);
+            if ($mtime > $newestMtime) {
+                $newestMtime = $mtime;
+                $newestPath = $path;
+            }
+        }
+
+        if ($newestPath === null) {
+            return null;
+        }
+
+        if ($syncPublished && $newestPath !== $published) {
+            $dir = dirname($published);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+            if (!@copy($newestPath, $published)) {
+                $published = $newestPath;
+            } else {
+                @touch($published, $newestMtime);
+            }
+        } elseif ($syncPublished && is_file($published) && $newestPath === $published) {
+            // already published
+        } elseif (!$syncPublished) {
+            $published = $newestPath;
+        }
+
+        if (!is_file($published)) {
+            return null;
+        }
+
+        return [
+            'path' => $published,
+            'mtime' => (int) filemtime($published),
+            'size' => (int) filesize($published),
+            'version' => pd_read_app_version_label((int) filemtime($published)),
+        ];
+    }
+}
+
+if (!function_exists('pd_read_app_version_label')) {
+    function pd_read_app_version_label(?int $fallbackMtime = null): string
+    {
+        $root = defined('PROJECT_ROOT') ? PROJECT_ROOT : dirname(__DIR__, 2);
+        $metaFile = $root . '/public/downloads/app-version.properties';
+        if (is_file($metaFile)) {
+            $props = parse_ini_file($metaFile, false, INI_SCANNER_RAW);
+            if (is_array($props) && !empty($props['versionName'])) {
+                return (string) $props['versionName'];
+            }
+        }
+
+        $mtime = $fallbackMtime ?? time();
+        return gmdate('Y.m.d.Hi', $mtime) . ' UTC';
+    }
+}
+
+if (!function_exists('pd_app_download_url')) {
+    function pd_app_download_url(): string
+    {
+        $apk = pd_resolve_app_apk(true);
+        $url = url('public/download-app.php');
+        if ($apk) {
+            return $url . '?v=' . $apk['mtime'];
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('isProductDetailPath')) {
     /**
      * True for storefront product permalinks (3- or 4-segment paths).

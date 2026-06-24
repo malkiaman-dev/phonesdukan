@@ -558,10 +558,14 @@
 
 <!-- ── Download App Widget ──────────────────────────────────────────────────── -->
 <?php if (empty($isPdApp)): ?>
+<?php
+$pdAppDownloadUrl = function_exists('pd_app_download_url') ? pd_app_download_url() : url('public/download-app.php');
+$pdAppBuildLabel = function_exists('pd_read_app_version_label') ? pd_read_app_version_label() : '';
+?>
 <button id="pd-install-app-btn" type="button"
         aria-label="Download our Android app"
         title="Download App"
-        data-download-url="<?= url('public/download-app.php') ?>">
+        data-download-url="<?= htmlspecialchars($pdAppDownloadUrl, ENT_QUOTES, 'UTF-8') ?>">
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
@@ -577,7 +581,7 @@
         </div>
         <div class="pd-install-header-info">
             <h4>Download Phones Dukan App</h4>
-            <span>Get our Android app on your phone</span>
+            <span><?= $pdAppBuildLabel !== '' ? 'Latest build: ' . htmlspecialchars($pdAppBuildLabel, ENT_QUOTES, 'UTF-8') : 'Get our Android app on your phone' ?></span>
         </div>
         <button id="pd-install-app-close" type="button" class="pd-install-close" aria-label="Close">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"

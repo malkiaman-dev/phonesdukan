@@ -23,6 +23,7 @@ Deploy website changes to production (`www.phonesdukan.com`) for them to appear 
    `public/downloads/phonesdukan.apk`
 
 The website **Get App** button serves that file through `public/download-app.php`.
+Each build gets a new version code, and `public/downloads/app-version.properties` records the latest build.
 
 ## Notes
 
