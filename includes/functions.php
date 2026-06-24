@@ -247,12 +247,32 @@ if (!function_exists('pd_app_apk_candidates')) {
     function pd_app_apk_candidates(): array
     {
         $root = defined('PROJECT_ROOT') ? PROJECT_ROOT : dirname(__DIR__, 2);
-
-        return [
+        $candidates = [
             $root . '/public/downloads/phonesdukan.apk',
             $root . '/tools/android-app/app/build/outputs/apk/debug/app-debug.apk',
             $root . '/tools/android-app/app/build/outputs/apk/release/app-release.apk',
+            $root . '/tools/android-app/app/build/outputs/apk/release/app-release-unsigned.apk',
         ];
+
+        $downloadsDir = $root . '/public/downloads';
+        if (is_dir($downloadsDir)) {
+            foreach (glob($downloadsDir . '/*.apk') ?: [] as $apkPath) {
+                $candidates[] = $apkPath;
+            }
+        }
+
+        return array_values(array_unique($candidates));
+    }
+}
+
+if (!function_exists('pd_apk_fingerprint')) {
+    function pd_apk_fingerprint(string $path): string
+    {
+        if (!is_file($path)) {
+            return '';
+        }
+
+        return md5($path . ':' . filesize($path) . ':' . filemtime($path));
     }
 }
 
@@ -284,19 +304,23 @@ if (!function_exists('pd_resolve_app_apk')) {
             return null;
         }
 
-        if ($syncPublished && $newestPath !== $published) {
+        if ($syncPublished) {
             $dir = dirname($published);
             if (!is_dir($dir)) {
                 @mkdir($dir, 0755, true);
             }
-            if (!@copy($newestPath, $published)) {
-                $published = $newestPath;
-            } else {
-                @touch($published, $newestMtime);
+
+            $needsSync = !is_file($published)
+                || pd_apk_fingerprint($published) !== pd_apk_fingerprint($newestPath);
+
+            if ($needsSync) {
+                if (!@copy($newestPath, $published)) {
+                    $published = $newestPath;
+                } else {
+                    @touch($published, $newestMtime);
+                }
             }
-        } elseif ($syncPublished && is_file($published) && $newestPath === $published) {
-            // already published
-        } elseif (!$syncPublished) {
+        } elseif (is_file($newestPath)) {
             $published = $newestPath;
         }
 
@@ -309,6 +333,7 @@ if (!function_exists('pd_resolve_app_apk')) {
             'mtime' => (int) filemtime($published),
             'size' => (int) filesize($published),
             'version' => pd_read_app_version_label((int) filemtime($published)),
+            'hash' => pd_apk_fingerprint($published),
         ];
     }
 }
@@ -336,7 +361,8 @@ if (!function_exists('pd_app_download_url')) {
         $apk = pd_resolve_app_apk(true);
         $url = url('public/download-app.php');
         if ($apk) {
-            return $url . '?v=' . $apk['mtime'];
+            $cacheKey = !empty($apk['hash']) ? $apk['hash'] : (string) $apk['mtime'];
+            return $url . '?v=' . rawurlencode($cacheKey);
         }
 
         return $url;

@@ -81,13 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isDownloading) return;
         isDownloading = true;
 
-        var link = document.createElement('a');
-        link.href = buildDownloadUrl();
-        link.download = 'PhonesDukan.apk';
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        window.location.assign(buildDownloadUrl());
 
         window.setTimeout(function () {
             isDownloading = false;

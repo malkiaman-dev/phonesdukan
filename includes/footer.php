@@ -559,8 +559,9 @@
 <!-- ── Download App Widget ──────────────────────────────────────────────────── -->
 <?php if (empty($isPdApp)): ?>
 <?php
+$pdResolvedApk = function_exists('pd_resolve_app_apk') ? pd_resolve_app_apk(true) : null;
 $pdAppDownloadUrl = function_exists('pd_app_download_url') ? pd_app_download_url() : url('public/download-app.php');
-$pdAppBuildLabel = function_exists('pd_read_app_version_label') ? pd_read_app_version_label() : '';
+$pdAppBuildLabel = $pdResolvedApk['version'] ?? (function_exists('pd_read_app_version_label') ? pd_read_app_version_label() : '');
 ?>
 <button id="pd-install-app-btn" type="button"
         aria-label="Download our Android app"
