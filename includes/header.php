@@ -70,181 +70,13 @@ $stockQty            = isset($product['stock_quantity']) && is_numeric($product[
 $productAvailability = (isset($product['product_status']) && (int)$product['product_status'] === 1 && $stockQty > 0) ? 'instock' : 'outofstock';
 $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($images[0]['image_url'], '/') : $ogImage;
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
-$isPdApp             = pd_is_app_request();
-$GLOBALS['pd_is_app'] = $isPdApp;
-if ($isPdApp && !headers_sent()) {
-    header('Cache-Control: private, max-age=300, stale-while-revalidate=60');
-}
-if ($isPdApp && (!isset($_COOKIE['pd_app']) || (string) $_COOKIE['pd_app'] !== '1')) {
-    $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
-    $cookieOpts = [
-        'expires'  => time() + 31536000,
-        'path'     => '/',
-        'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-        'httponly' => false,
-        'samesite' => 'Lax',
-    ];
-    if (preg_match('/(?:^|\.)phonesdukan\.com$/', $host)) {
-        $cookieOpts['domain'] = '.phonesdukan.com';
-    }
-    setcookie('pd_app', '1', $cookieOpts);
-}
 ?>
 <!DOCTYPE html>
-<html lang="en"<?= $isPdApp ? ' data-pd-app="1"' : '' ?>>
+<html lang="en">
 <head>
     <!-- Required Meta -->
 <meta charset="UTF-8">
-<?php $pdAppJs = __DIR__ . '/../public/assets/js/pd-app.js'; ?>
-<script src="<?= url('public/assets/js/pd-app.js') ?>?v=<?= file_exists($pdAppJs) ? filemtime($pdAppJs) : time() ?>"></script>
-<?php if ($isPdApp):
-$pdAppShellJs = __DIR__ . '/../public/assets/js/pd-app-shell.js';
-$pdAppNavJs = __DIR__ . '/../public/assets/js/pd-app-nav.js';
-?>
-<script src="<?= url('public/assets/js/pd-app-shell.js') ?>?v=<?= file_exists($pdAppShellJs) ? filemtime($pdAppShellJs) : time() ?>"></script>
-<script src="<?= url('public/assets/js/pd-app-nav.js') ?>?v=<?= file_exists($pdAppNavJs) ? filemtime($pdAppNavJs) : time() ?>"></script>
-<style>
-html[data-pd-nav-loading="1"] main.content {
-    opacity: 0.72;
-    pointer-events: none;
-}
-</style>
-<?php endif; ?>
-<meta name="viewport" content="width=device-width, initial-scale=1.0<?= empty($isPdApp) ? ', viewport-fit=cover' : '' ?>">
-<style id="pd-safe-top-fix">
-:root {
-    --pd-chrome-pad-top: 0px;
-    --announcement-height: 36px;
-    --header-height: 72px;
-    --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
-}
-html[data-pd-app="1"] {
-    --pd-status-inset: var(--pd-app-status-inset, 0px);
-    --safe-area-top: var(--pd-app-status-inset, 0px);
-    --pd-chrome-pad-top: var(--pd-app-status-inset, 0px);
-}
-@media (max-width: 992px) {
-    :root {
-        --header-height: 58px;
-        --announcement-height: 36px;
-        --pd-chrome-pad-top: 0px;
-        --pd-chrome-offset: calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height));
-    }
-    html[data-pd-app="1"] #pd-site-chrome {
-        position: fixed !important;
-        top: var(--pd-app-status-inset, 0px) !important;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-top-bars {
-        display: block !important;
-        height: auto !important;
-        overflow: hidden !important;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-announcement-bar {
-        display: block !important;
-        position: relative !important;
-        top: auto !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-announcement-track {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%) !important;
-        min-height: var(--announcement-height) !important;
-        will-change: transform !important;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-announcement-track.pd-marquee-active {
-        animation: pdTicker var(--pd-ticker-duration, 24s) linear infinite !important;
-    }
-    html[data-pd-app="1"] .pd-chrome-spacer {
-        height: calc(var(--pd-app-status-inset, 0px) + var(--announcement-height) + var(--header-height)) !important;
-        min-height: calc(var(--pd-app-status-inset, 0px) + var(--announcement-height) + var(--header-height)) !important;
-    }
-    html[data-pd-app="1"] #pd-install-app-btn,
-    html[data-pd-app="1"] #pd-install-app-panel {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    #pd-site-chrome {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        z-index: 10001 !important;
-        padding-top: 0 !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-        background: var(--mi-soft-black);
-    }
-    #pd-site-chrome .pd-chrome-safe-fill {
-        display: none !important;
-        height: 0 !important;
-        min-height: 0 !important;
-    }
-    html[data-pd-app="1"] #pd-site-chrome .pd-chrome-safe-fill {
-        display: none !important;
-        height: 0 !important;
-        min-height: 0 !important;
-    }
-    #pd-site-chrome .pd-status-bar-slot {
-        display: none !important;
-        height: 0 !important;
-        visibility: hidden !important;
-    }
-    #pd-site-chrome .pd-safe-area-top {
-        display: none !important;
-    }
-    #pd-site-chrome .pd-top-bars {
-        height: auto !important;
-        overflow: hidden !important;
-    }
-    #pd-site-chrome .pd-announcement-bar,
-    #pd-site-chrome .pd-header-stack {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        width: 100% !important;
-    }
-    html[data-pd-app="1"] #pd-install-app-btn,
-    html[data-pd-app="1"] #pd-install-app-panel {
-        display: none !important;
-    }
-}
-@media (max-width: 575px) {
-    :root {
-        --announcement-height: 34px;
-    }
-}
-@media (min-width: 993px) {
-    #pd-site-chrome {
-        display: contents;
-    }
-    .pd-status-bar-slot {
-        display: none;
-    }
-}
-.pd-announcement-track {
-    background: linear-gradient(90deg, #ffe65a 0%, #f7d117 40%, #d4af00 100%);
-}
-html[data-pd-app="1"] #pd-install-app-btn,
-html[data-pd-app="1"] #pd-install-app-panel {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    position: absolute !important;
-    left: -9999px !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-}
-</style>
-<?php
-$pdSafeAreaJs = __DIR__ . '/../public/assets/js/safe-area.js';
-?>
-<script src="<?= url('public/assets/js/safe-area.js') ?>?v=<?= file_exists($pdSafeAreaJs) ? filemtime($pdSafeAreaJs) : time() ?>"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= $pageTitle ?></title>
 <meta name="description" content="<?= $metaDescription ?>">
 <?php if ($metaKeywords): ?>
@@ -279,11 +111,11 @@ $pdSafeAreaJs = __DIR__ . '/../public/assets/js/safe-area.js';
 
 <!-- Favicon -->
 <link rel="icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png" type="image/x-icon">
-<link rel="apple-touch-icon" href="<?= getBaseURL(); ?>public/assets/images/phonesdukan_logo.png">
+<link rel="apple-touch-icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png">
 
 <!-- Author & Theme -->
 <meta name="author" content="Phones Dukan">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#F7D117">
 <meta name="format-detection" content="telephone=no">
 
 <!-- Pakistan geo targeting -->
@@ -295,10 +127,12 @@ $pdSafeAreaJs = __DIR__ . '/../public/assets/js/safe-area.js';
 <!-- Resource hints — preconnect to critical third-party origins -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<?php if (!isPhonesDukanApp()) : ?>
 <link rel="dns-prefetch" href="//www.googletagmanager.com">
 <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
 <link rel="dns-prefetch" href="//cdn.onesignal.com">
 <link rel="dns-prefetch" href="//www.clarity.ms">
+<?php endif; ?>
 
 <script>
 window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
@@ -449,21 +283,15 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
 </head>
-<body>
+<body class="<?= isPhonesDukanApp() ? 'pd-in-app' : '' ?>">
 
     <!-- Sidebar -->
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 <div class="site-wrapper">
 
-    <div id="pd-site-chrome" class="pd-site-chrome">
-    <div class="pd-chrome-safe-fill" aria-hidden="true"></div>
-    <div class="pd-status-bar-slot" aria-hidden="true"></div>
-
-    <!-- Announcement bar (fixed below safe area via CSS) -->
+    <!-- Scrollable bars — NOT sticky, scroll away naturally -->
     <div class="pd-top-bars">
-        <div class="pd-safe-area-top" aria-hidden="true"></div>
         <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
-            <div class="pd-announcement-viewport">
             <div class="pd-announcement-track">
                 <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
                 <span>Free delivery across Pakistan on selected products</span>
@@ -471,7 +299,6 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
                 <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
                 <span>Free delivery across Pakistan on selected products</span>
                 <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
-            </div>
             </div>
         </div>
 
@@ -603,8 +430,5 @@ window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
         </header>
 
     </div>
-    </div><!-- /#pd-site-chrome -->
-
-    <div class="pd-chrome-spacer" aria-hidden="true"></div>
 
     <main class="content">

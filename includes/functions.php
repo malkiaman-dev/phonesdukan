@@ -95,6 +95,62 @@ if (!function_exists('url')) {
     }
 }
 
+if (!function_exists('getAppApkFilePath')) {
+    function getAppApkFilePath()
+    {
+        if (!defined('APK_STORAGE_PATH')) {
+            require_once dirname(__DIR__) . '/app/config/app_download.php';
+        }
+
+        return getProjectRootPath() . '/' . ltrim(APK_STORAGE_PATH, '/');
+    }
+}
+
+if (!function_exists('getAppDownloadUrl')) {
+    function getAppDownloadUrl()
+    {
+        if (!defined('APP_DOWNLOAD_ROUTE')) {
+            require_once dirname(__DIR__) . '/app/config/app_download.php';
+        }
+
+        $url = url(APP_DOWNLOAD_ROUTE);
+        $version = getAppApkVersion();
+        if ($version > 0) {
+            $url .= (strpos($url, '?') === false ? '?' : '&') . 'v=' . $version;
+        }
+
+        return $url;
+    }
+}
+
+if (!function_exists('getAppApkVersion')) {
+    function getAppApkVersion()
+    {
+        $apkPath = getAppApkFilePath();
+        if (!is_file($apkPath)) {
+            return 0;
+        }
+
+        return (int) filemtime($apkPath);
+    }
+}
+
+if (!function_exists('isAppDownloadAvailable')) {
+    function isAppDownloadAvailable()
+    {
+        $apkPath = getAppApkFilePath();
+        return is_file($apkPath) && filesize($apkPath) > 0;
+    }
+}
+
+if (!function_exists('isPhonesDukanApp')) {
+    function isPhonesDukanApp()
+    {
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        return stripos($userAgent, 'PhonesDukanApp') !== false;
+    }
+}
+
 if (!function_exists('encodeUrlPath')) {
     function encodeUrlPath(string $path): string
     {
@@ -218,157 +274,6 @@ if (!function_exists('getRequestPath')) {
     }
 }
 
-if (!function_exists('pd_is_app_request')) {
-  function pd_is_app_request(): bool
-  {
-    if (!empty($_SERVER['HTTP_X_PHONESDUKAN_APP']) && (string) $_SERVER['HTTP_X_PHONESDUKAN_APP'] === '1') {
-      return true;
-    }
-    if (!empty($_SERVER['HTTP_USER_AGENT']) && stripos($_SERVER['HTTP_USER_AGENT'], 'PhonesDukanApp') !== false) {
-      return true;
-    }
-    if (isset($_GET['pd_app']) && (string) $_GET['pd_app'] === '1') {
-      return true;
-    }
-    if (isset($_COOKIE['pd_app']) && (string) $_COOKIE['pd_app'] === '1') {
-      $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
-      if (stripos($ua, 'PhonesDukanApp') !== false) {
-        return true;
-      }
-      if (!empty($_SERVER['HTTP_X_PHONESDUKAN_APP']) && (string) $_SERVER['HTTP_X_PHONESDUKAN_APP'] === '1') {
-        return true;
-      }
-    }
-    return false;
-  }
-}
-
-if (!function_exists('pd_app_apk_candidates')) {
-    function pd_app_apk_candidates(): array
-    {
-        $root = defined('PROJECT_ROOT') ? PROJECT_ROOT : dirname(__DIR__, 2);
-        $candidates = [
-            $root . '/public/downloads/phonesdukan.apk',
-            $root . '/tools/android-app/app/build/outputs/apk/debug/app-debug.apk',
-            $root . '/tools/android-app/app/build/outputs/apk/release/app-release.apk',
-            $root . '/tools/android-app/app/build/outputs/apk/release/app-release-unsigned.apk',
-        ];
-
-        $downloadsDir = $root . '/public/downloads';
-        if (is_dir($downloadsDir)) {
-            foreach (glob($downloadsDir . '/*.apk') ?: [] as $apkPath) {
-                $candidates[] = $apkPath;
-            }
-        }
-
-        return array_values(array_unique($candidates));
-    }
-}
-
-if (!function_exists('pd_apk_fingerprint')) {
-    function pd_apk_fingerprint(string $path): string
-    {
-        if (!is_file($path)) {
-            return '';
-        }
-
-        return md5($path . ':' . filesize($path) . ':' . filemtime($path));
-    }
-}
-
-if (!function_exists('pd_resolve_app_apk')) {
-    /**
-     * Resolve the newest APK and publish it to public/downloads/phonesdukan.apk.
-     *
-     * @return array{path:string,mtime:int,size:int,version:string}|null
-     */
-    function pd_resolve_app_apk(bool $syncPublished = true): ?array
-    {
-        $candidates = pd_app_apk_candidates();
-        $published = $candidates[0];
-        $newestPath = null;
-        $newestMtime = 0;
-
-        foreach ($candidates as $path) {
-            if (!is_file($path)) {
-                continue;
-            }
-            $mtime = (int) filemtime($path);
-            if ($mtime > $newestMtime) {
-                $newestMtime = $mtime;
-                $newestPath = $path;
-            }
-        }
-
-        if ($newestPath === null) {
-            return null;
-        }
-
-        if ($syncPublished) {
-            $dir = dirname($published);
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0755, true);
-            }
-
-            $needsSync = !is_file($published)
-                || pd_apk_fingerprint($published) !== pd_apk_fingerprint($newestPath);
-
-            if ($needsSync) {
-                if (!@copy($newestPath, $published)) {
-                    $published = $newestPath;
-                } else {
-                    @touch($published, $newestMtime);
-                }
-            }
-        } elseif (is_file($newestPath)) {
-            $published = $newestPath;
-        }
-
-        if (!is_file($published)) {
-            return null;
-        }
-
-        return [
-            'path' => $published,
-            'mtime' => (int) filemtime($published),
-            'size' => (int) filesize($published),
-            'version' => pd_read_app_version_label((int) filemtime($published)),
-            'hash' => pd_apk_fingerprint($published),
-        ];
-    }
-}
-
-if (!function_exists('pd_read_app_version_label')) {
-    function pd_read_app_version_label(?int $fallbackMtime = null): string
-    {
-        $root = defined('PROJECT_ROOT') ? PROJECT_ROOT : dirname(__DIR__, 2);
-        $metaFile = $root . '/public/downloads/app-version.properties';
-        if (is_file($metaFile)) {
-            $props = parse_ini_file($metaFile, false, INI_SCANNER_RAW);
-            if (is_array($props) && !empty($props['versionName'])) {
-                return (string) $props['versionName'];
-            }
-        }
-
-        $mtime = $fallbackMtime ?? time();
-        return gmdate('Y.m.d.Hi', $mtime) . ' UTC';
-    }
-}
-
-if (!function_exists('pd_app_download_url')) {
-    function pd_app_download_url(): string
-    {
-        $apk = pd_resolve_app_apk(true);
-        $url = url('public/download-app.php');
-        if ($apk) {
-            $cacheKey = !empty($apk['hash']) ? $apk['hash'] : (string) $apk['mtime'];
-            return $url . '?v=' . rawurlencode($cacheKey);
-        }
-
-        return $url;
-    }
-}
-
 if (!function_exists('isProductDetailPath')) {
     /**
      * True for storefront product permalinks (3- or 4-segment paths).
@@ -450,8 +355,9 @@ if (!function_exists('loadCSS')) {
         $uri = $uri === '' ? '/' : $uri;
 
         emitCss('public/assets/css/style.css');
-        if (empty($GLOBALS['pd_is_app'])) {
-            emitCss('public/assets/css/frontend/pwa-install.css');
+        emitCss('public/assets/css/frontend/download-app.css');
+        if (isPhonesDukanApp()) {
+            emitCss('public/assets/css/frontend/chatbot.css');
         }
 
         if ($uri === '/' || $uri === '/index.php') {
@@ -459,10 +365,6 @@ if (!function_exists('loadCSS')) {
         }
 
         emitCss('public/assets/css/frontend/ui-controls.css');
-
-        if (!empty($GLOBALS['pd_is_app'])) {
-            emitCss('public/assets/css/frontend/category-listing.css');
-        }
 
         if (defined('CATEGORY_LISTING_PAGE') && CATEGORY_LISTING_PAGE) {
             emitCss('public/assets/css/frontend/category-listing.css');
@@ -571,8 +473,8 @@ if (!function_exists('loadJS')) {
         $uri = getRequestPath();
 
         emitJs('public/assets/js/common.js');
-        if (empty($GLOBALS['pd_is_app'])) {
-            emitJs('public/assets/js/pwa-install.js');
+        if (!isPhonesDukanApp()) {
+            emitJs('public/assets/js/download-app.js');
         }
         emitJs('public/assets/js/faqs.js');
 
@@ -593,10 +495,6 @@ if (!function_exists('loadJS')) {
         $listingSlug = trim(getRequestPath(), '/');
         if ($listingSlug !== '' && strpos($listingSlug, '/') === false && is_file(assetFilePath('public/assets/css/frontend/' . $listingSlug . '.css'))) {
             emitJs('public/assets/js/frontend/buy-now.js');
-            $listingJs = 'public/assets/js/frontend/' . $listingSlug . '.js';
-            if (is_file(assetFilePath($listingJs))) {
-                emitJs($listingJs);
-            }
         }
 
         if (defined('BRAND_LISTING_PAGE') && BRAND_LISTING_PAGE) {
@@ -611,14 +509,6 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/jquery-3.6.0.min.js');
             emitJs('public/assets/js/sweetalert2.all.min.js');
             emitJs('public/assets/js/frontend/product.js');
-        }
-
-        if (!empty($GLOBALS['pd_is_app'])) {
-            emitJs('public/assets/js/jquery-3.6.0.min.js');
-            emitJs('public/assets/js/sweetalert2.all.min.js');
-            emitJs('public/assets/js/frontend/product.js');
-            emitJs('public/assets/js/frontend/buy-now.js');
-            emitJs('public/assets/js/frontend/cart.js');
         }
 
         if (strpos($uri, '/admin/') === 0) {
@@ -646,8 +536,7 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/sweetalert2.all.min.js');
         }
 
-        $jsUri = rtrim(getRequestPath(), '/');
-        $jsUri = $jsUri === '' ? '/' : $jsUri;
+        $jsUri = getRequestPath();
         if (!isProductDetailPath($jsUri) && strpos($jsUri, '/') === strrpos($jsUri, '/')) {
             emitJs('public/assets/js/frontend/' . getCurrentPage() . '.js');
         }

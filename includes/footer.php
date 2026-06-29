@@ -129,6 +129,7 @@
         <button id="accept-popup" class="popup-button">Accept</button>
     </div>
 </div>
+<?php if (!isPhonesDukanApp()) : ?>
 <div id="pdPushPrompt" class="pd-push-prompt" aria-live="polite" aria-hidden="true" style="opacity:0;visibility:hidden;pointer-events:none">
     <div class="pd-push-card">
         <div class="pd-push-icon" aria-hidden="true">
@@ -147,12 +148,14 @@
         </div>
     </div>
 </div>
+<?php endif; ?>
 <?php loadJS(); // Dynamically load JS ?>
 <?php if (isset($schema) && !empty($schema)) : ?>
 <script type="application/ld+json">
 <?= $schema ?>
 </script>
 <?php endif; ?>
+<?php if (!isPhonesDukanApp()) : ?>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4182308742558451"
      crossorigin="anonymous"></script>
      
@@ -370,6 +373,7 @@
   window.addEventListener('load', function () { setTimeout(showPrompt, 2600); });
 })();
 </script>
+<?php endif; ?>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -482,6 +486,7 @@
 </script>
 
 <!-- Google tag (gtag.js) -->
+<?php if (!isPhonesDukanApp()) : ?>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EEN4K7V3GP"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -490,6 +495,7 @@
 
   gtag('config', 'G-EEN4K7V3GP');
 </script>
+<?php endif; ?>
 
 <button id="back-to-top" aria-label="Back to top" title="Back to top">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -529,9 +535,8 @@
 }
 @media (max-width: 768px) {
     #back-to-top {
-        bottom: 20px;
-        left: 16px;
-        right: auto;
+        bottom: 16px;
+        right: 16px;
         width: 40px;
         height: 40px;
     }
@@ -554,70 +559,37 @@
 })();
 </script>
 
-</div> <!-- Close site-wrapper -->
+<?php require_once __DIR__ . '/chatbot.php'; ?>
 
-<!-- ── Download App Widget ──────────────────────────────────────────────────── -->
-<?php if (empty($isPdApp)): ?>
+<?php if (!isPhonesDukanApp() && isAppDownloadAvailable()) : ?>
 <?php
-$pdResolvedApk = function_exists('pd_resolve_app_apk') ? pd_resolve_app_apk(true) : null;
-$pdAppDownloadUrl = function_exists('pd_app_download_url') ? pd_app_download_url() : url('public/download-app.php');
-$pdAppBuildLabel = $pdResolvedApk['version'] ?? (function_exists('pd_read_app_version_label') ? pd_read_app_version_label() : '');
+require_once __DIR__ . '/../app/config/app_download.php';
+$pdShowDesktop = defined('APP_DOWNLOAD_SHOW_ON_DESKTOP') && APP_DOWNLOAD_SHOW_ON_DESKTOP;
+$pdDownloadUrl = getAppDownloadUrl();
+$pdApkFilename = defined('APK_DOWNLOAD_FILENAME') ? APK_DOWNLOAD_FILENAME : 'phonesdukan-app.apk';
 ?>
-<button id="pd-install-app-btn" type="button"
-        aria-label="Download our Android app"
-        title="Download App"
-        data-download-url="<?= htmlspecialchars($pdAppDownloadUrl, ENT_QUOTES, 'UTF-8') ?>">
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-        <line x1="12" y1="18" x2="12.01" y2="18"/>
+<!-- ── Get App Button ───────────────────────────────────────────────────────── -->
+<a href="<?= htmlspecialchars($pdDownloadUrl, ENT_QUOTES, 'UTF-8'); ?>"
+   id="pd-download-app-btn"
+   class="<?= $pdShowDesktop ? '' : 'pd-mobile-only' ?>"
+   data-apk-url="<?= htmlspecialchars($pdDownloadUrl, ENT_QUOTES, 'UTF-8'); ?>"
+   data-apk-filename="<?= htmlspecialchars($pdApkFilename, ENT_QUOTES, 'UTF-8'); ?>"
+   data-play-store-url="<?= htmlspecialchars(PLAY_STORE_URL, ENT_QUOTES, 'UTF-8'); ?>"
+   download="<?= htmlspecialchars($pdApkFilename, ENT_QUOTES, 'UTF-8'); ?>"
+   aria-label="<?= htmlspecialchars(APP_DOWNLOAD_BUTTON_TEXT, ENT_QUOTES, 'UTF-8'); ?>"
+   title="<?= htmlspecialchars(APP_DOWNLOAD_BUTTON_TEXT, ENT_QUOTES, 'UTF-8'); ?>">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
     </svg>
-    <span class="pd-install-btn-label">Get App</span>
-</button>
-
-<div id="pd-install-app-panel" role="dialog" aria-label="Download Phones Dukan App" aria-hidden="true">
-    <div class="pd-install-header">
-        <div class="pd-install-header-icon">
-            <img src="<?= url('public/assets/images/phonesdukan_logo.png'); ?>" alt="">
-        </div>
-        <div class="pd-install-header-info">
-            <h4>Download Phones Dukan App</h4>
-            <span><?= $pdAppBuildLabel !== '' ? 'Latest build: ' . htmlspecialchars($pdAppBuildLabel, ENT_QUOTES, 'UTF-8') : 'Get our Android app on your phone' ?></span>
-        </div>
-        <button id="pd-install-app-close" type="button" class="pd-install-close" aria-label="Close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-        </button>
-    </div>
-
-    <div class="pd-install-body">
-        <div id="pd-install-android" class="pd-install-section">
-            <p><strong>Android installation</strong></p>
-            <ol>
-                <li>Your <strong>PhonesDukan.apk</strong> download should start automatically.</li>
-                <li>Open the downloaded file from your notifications or Downloads folder.</li>
-                <li>If asked, allow <strong>Install from unknown sources</strong> for your browser.</li>
-                <li>Tap <strong>Install</strong>, then open the app and start shopping.</li>
-            </ol>
-            <button type="button" id="pd-install-redownload" class="pd-install-cta">Download Again</button>
-        </div>
-
-        <div id="pd-install-ios" class="pd-install-section" hidden>
-            <p><strong>iPhone / iPad</strong></p>
-            <p>The APK file is for Android phones only. On iPhone, you can still use Phones Dukan in Safari and add it to your home screen:</p>
-            <ol>
-                <li>Tap the <strong>Share</strong> button in Safari.</li>
-                <li>Tap <strong>Add to Home Screen</strong>.</li>
-                <li>Tap <strong>Add</strong> to open Phones Dukan like an app.</li>
-            </ol>
-        </div>
-    </div>
-</div>
+    <span class="pd-download-label"><?= htmlspecialchars(APP_DOWNLOAD_BUTTON_TEXT, ENT_QUOTES, 'UTF-8'); ?></span>
+</a>
+<!-- ── /Get App Button ──────────────────────────────────────────────────────── -->
 <?php endif; ?>
-<!-- ── /Download App Widget ─────────────────────────────────────────────────── -->
 
+</div> <!-- Close site-wrapper -->
 </body>
 </html>

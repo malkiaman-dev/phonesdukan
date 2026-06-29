@@ -2225,7 +2225,7 @@ li.custom-tab-title h2 {
 }
 
 /* ---- NA-CARD core (mirrors index.css) ---- */
-.product-grid-wrapper .na-card {
+.na-card {
   position: relative;
   background: #ffffff;
   border: 1px solid #ebebeb;
@@ -2239,7 +2239,7 @@ li.custom-tab-title h2 {
   max-width: calc((100% - 48px) / 4);
 }
 
-.product-grid-wrapper .na-card:hover {
+.na-card:hover {
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.10);
   transform: translateY(-4px);
 }
@@ -2281,7 +2281,7 @@ li.custom-tab-title h2 {
   transition: background 0.25s ease;
 }
 
-.product-grid-wrapper .na-card:hover .na-img-box {
+.na-card:hover .na-img-box {
   background: #f0f1f2;
 }
 
@@ -2292,7 +2292,7 @@ li.custom-tab-title h2 {
   transition: transform 0.35s ease;
 }
 
-.product-grid-wrapper .na-card:hover .na-img-box img {
+.na-card:hover .na-img-box img {
   transform: scale(1.05);
 }
 
@@ -2475,8 +2475,8 @@ li.custom-tab-title h2 {
    ================================================================ */
 @media screen and (max-width: 768px) {
 
-  /* Keep install-app button above sticky cart on product page mobile */
-  #pd-install-app-btn {
+  /* Keep download app button above sticky cart on product page mobile */
+  #pd-download-app-btn {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
   }
 
@@ -2718,7 +2718,7 @@ li.custom-tab-title h2 {
   }
 
   /* 2-column layout: matches homepage 768px breakpoint */
-  .product-grid-wrapper .na-card {
+  .na-card {
     flex: 0 0 calc((100% - 12px) / 2);
     max-width: calc((100% - 12px) / 2);
   }
@@ -2785,7 +2785,7 @@ li.custom-tab-title h2 {
 
 /* Small mobile — still 2 columns, tighter; matches homepage 480px */
 @media screen and (max-width: 480px) {
-  #pd-install-app-btn {
+  #pd-download-app-btn {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 66px);
   }
 
@@ -2818,7 +2818,7 @@ li.custom-tab-title h2 {
     gap: 10px;
   }
 
-  .product-grid-wrapper .na-card {
+  .na-card {
     flex: 0 0 calc((100% - 10px) / 2);
     max-width: calc((100% - 10px) / 2);
   }

@@ -85,6 +85,12 @@ switch (true) {
         include __DIR__ . '/Controllers/GoogleMerchantFeedController.php';
         break;
 
+    case ($request_uri === 'download-app'):
+        include __DIR__ . '/Controllers/AppDownloadController.php';
+        $controller = new AppDownloadController();
+        $controller->download();
+        break;
+
  // User Page Route (e.g., /user/username)
  case (preg_match('#^user/([^/]+)$#', $request_uri, $matches)):
     $query = "

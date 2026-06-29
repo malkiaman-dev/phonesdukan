@@ -136,23 +136,6 @@
   align-items: stretch;
 }
 
-/* SPA/app: undo homepage carousel flex sizing inside grid listings */
-.cl-product-grid > .na-card,
-.hp-product-grid > .na-card,
-.pb-product-grid > .na-card,
-.ma-product-grid > .na-card,
-.we-product-grid > .na-card,
-.bs-product-grid > .na-card,
-.sw-product-grid > .na-card,
-.bl-product-grid > .na-card,
-.mob-product-grid > .na-card,
-.cs-product-grid > .na-card,
-.sr-product-grid > .na-card {
-  flex: unset;
-  max-width: none;
-  width: 100%;
-}
-
 .cl-products-section .na-card {
   position: relative;
   background: #ffffff;

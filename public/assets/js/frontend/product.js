@@ -7,23 +7,6 @@ var withBase = window.pdWithBase || function (path) {
     return localBasePath + "/" + path;
 };
 
-function pdAppNavigate(path) {
-    var href = withBase(path);
-    if (window.PDAppNav && typeof window.PDAppNav.navigate === "function") {
-        window.PDAppNav.navigate(href);
-        return;
-    }
-    window.location.href = href;
-}
-
-function pdAppLeave(path) {
-    var href = withBase(path);
-    if (window.PDAppNav && typeof window.PDAppNav.beforeFullPageLeave === "function") {
-        window.PDAppNav.beforeFullPageLeave();
-    }
-    window.location.href = href;
-}
-
 function resolveGalleryMediaUrl(path) {
     if (!path) return "";
     if (/^https?:\/\//i.test(path) || path.startsWith("//")) return path;
@@ -107,18 +90,8 @@ function scrollThumbnails(direction) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    initProductPage();
-});
-document.addEventListener("pd:page-view", function () {
-    initProductPage();
-});
-
-function initProductPage() {
     const wrapper = document.querySelector(".image-wrapper");
     const image = document.getElementById("mainImage");
-    if (!wrapper || !image) {
-        return;
-    }
     let startX = 0;
     let isSwiping = false;
     let isZooming = false;
@@ -524,11 +497,8 @@ function initProductPage() {
                     cartCountElements.forEach(element => {
                         element.textContent = totalQuantity;
                     });
-                    if (window.PDAppNav && typeof window.PDAppNav.invalidate === "function") {
-                        window.PDAppNav.invalidate("/cart");
-                    }
                     if (redirectToCheckout) {
-                        pdAppLeave("/checkout");
+                        window.location.href = withBase("/checkout");
                     } else {
                         Swal.fire({
                             title: "Added to Cart!",
@@ -550,7 +520,7 @@ function initProductPage() {
                             buttonsStyling: false
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                pdAppNavigate("/cart");
+                                window.location.href = withBase("/cart");
                             }
                         });
                     }
@@ -609,83 +579,84 @@ function initProductPage() {
     });
 
     const viewersCount = document.querySelector('.viewers-count');
-    if (viewersCount && !viewersCount.dataset.pdTimerBound) {
-        viewersCount.dataset.pdTimerBound = "1";
+    if (viewersCount) {
         setInterval(() => {
             const newCount = Math.floor(Math.random() * (100 - 10 + 1)) + 10;
             viewersCount.textContent = newCount;
         }, 2000);
     }
-}
 
-document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.rp-cart-btn');
-    if (!btn || btn.disabled) return;
+    // ---- Related Products: Add to Cart ----
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.rp-cart-btn');
+        if (!btn || btn.disabled) return;
 
-    const productId = btn.getAttribute('data-product-id');
-    const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
-    if (!productId || unitPrice <= 0) return;
+        const productId = btn.getAttribute('data-product-id');
+        const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
+        if (!productId || unitPrice <= 0) return;
 
-    btn.disabled = true;
-    const origText = btn.textContent.trim();
-    btn.textContent = '…';
+        btn.disabled = true;
+        const origText = btn.textContent.trim();
+        btn.textContent = '…';
 
-    $.ajax({
-        url: withBase('/app/Controllers/CartController.php'),
-        type: 'POST',
-        data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 'success') {
-                const total = response.cart_summary ? (response.cart_summary.total_quantity || 0) : 0;
-                document.querySelectorAll('.cart-count').forEach(el => el.textContent = total);
-                btn.textContent = '✓ Added';
-                btn.classList.add('na-btn--added');
-            } else {
+        $.ajax({
+            url: withBase('/app/Controllers/CartController.php'),
+            type: 'POST',
+            data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    const total = response.cart_summary ? (response.cart_summary.total_quantity || 0) : 0;
+                    document.querySelectorAll('.cart-count').forEach(el => el.textContent = total);
+                    btn.textContent = '✓ Added';
+                    btn.classList.add('na-btn--added');
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = origText;
+                    Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
+                }
+            },
+            error: function() {
                 btn.disabled = false;
                 btn.textContent = origText;
-                Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
+                Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
             }
-        },
-        error: function() {
-            btn.disabled = false;
-            btn.textContent = origText;
-            Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
-        }
+        });
     });
-});
 
-document.addEventListener('click', function(e) {
-    const btn = e.target.closest('.rp-buy-btn');
-    if (!btn || btn.disabled) return;
+    // ---- Related Products: Buy Now ----
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.rp-buy-btn');
+        if (!btn || btn.disabled) return;
 
-    const productId = btn.getAttribute('data-product-id');
-    const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
-    if (!productId || unitPrice <= 0) return;
+        const productId = btn.getAttribute('data-product-id');
+        const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
+        if (!productId || unitPrice <= 0) return;
 
-    btn.disabled = true;
-    btn.textContent = '…';
+        btn.disabled = true;
+        btn.textContent = '…';
 
-    $.ajax({
-        url: withBase('/app/Controllers/CartController.php'),
-        type: 'POST',
-        data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 'success') {
-                pdAppLeave('/checkout');
-            } else {
+        $.ajax({
+            url: withBase('/app/Controllers/CartController.php'),
+            type: 'POST',
+            data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    window.location.href = withBase('/checkout');
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Buy Now';
+                    Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
+                }
+            },
+            error: function() {
                 btn.disabled = false;
                 btn.textContent = 'Buy Now';
-                Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
+                Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
             }
-        },
-        error: function() {
-            btn.disabled = false;
-            btn.textContent = 'Buy Now';
-            Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
-        }
+        });
     });
 });
