@@ -26,7 +26,28 @@
         }
     }
 
+    function closeSidebarIfOpen() {
+        if (window.PDSidebar && typeof window.PDSidebar.close === 'function') {
+            window.PDSidebar.close();
+            return;
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const sidebarContainer = document.getElementById('sidebar-container');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const pageContent = document.querySelector('.page-content');
+        if (!sidebar || !sidebarContainer || !sidebarOverlay) return;
+
+        sidebar.classList.remove('open');
+        sidebarContainer.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+        if (pageContent) pageContent.classList.remove('dimmed');
+        document.body.classList.remove('dimmed');
+    }
+
     function openModal() {
+        closeSidebarIfOpen();
+
         const modal = document.getElementById('ws-access-modal');
         const input = document.getElementById('ws-access-code');
         const errorEl = document.getElementById('ws-access-error');

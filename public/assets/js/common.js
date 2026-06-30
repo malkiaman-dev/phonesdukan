@@ -231,6 +231,10 @@ document.addEventListener("DOMContentLoaded", function () {
         body.classList.remove("dimmed"); // Optional: Remove dimming effect from body
     }
 
+    window.PDSidebar = {
+        close: closeSidebarFunction,
+    };
+
     // Mobile hamburger icon click event (for opening sidebar)
     if (mobileMenuToggle) {
         mobileMenuToggle.addEventListener("click", function () {
