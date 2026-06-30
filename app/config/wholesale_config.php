@@ -11,4 +11,52 @@ if (!defined('WHOLESALE_SHOPKEEPER_CODE')) {
     define('WHOLESALE_SHOPKEEPER_CODE', getenv('WHOLESALE_SHOPKEEPER_CODE') ?: 'PDK-SHOP-786');
 }
 
-require_once dirname(__DIR__) . '/helpers/WholesaleAccess.php';
+// Load the access helper if present; otherwise fall back to inline definitions
+// so a missing helper file never causes a fatal error on the live site.
+$wholesaleAccessHelper = dirname(__DIR__) . '/helpers/WholesaleAccess.php';
+if (is_readable($wholesaleAccessHelper)) {
+    require_once $wholesaleAccessHelper;
+}
+
+if (!function_exists('wholesaleHasAccess')) {
+    function wholesaleHasAccess(): bool
+    {
+        return !empty($_SESSION['wholesale_access_granted']);
+    }
+}
+
+if (!function_exists('wholesaleGrantAccess')) {
+    function wholesaleGrantAccess(): void
+    {
+        $_SESSION['wholesale_access_granted'] = true;
+    }
+}
+
+if (!function_exists('wholesaleRevokeAccess')) {
+    function wholesaleRevokeAccess(): void
+    {
+        unset($_SESSION['wholesale_access_granted']);
+    }
+}
+
+if (!function_exists('wholesaleVerifyCode')) {
+    function wholesaleVerifyCode(string $code): bool
+    {
+        $expected = defined('WHOLESALE_SHOPKEEPER_CODE') ? (string) WHOLESALE_SHOPKEEPER_CODE : '';
+        if ($expected === '') {
+            return false;
+        }
+
+        return hash_equals($expected, trim($code));
+    }
+}
+
+if (!function_exists('wholesaleRequireAccess')) {
+    function wholesaleRequireAccess(): void
+    {
+        if (!wholesaleHasAccess()) {
+            http_response_code(403);
+            throw new Exception('Wholesale access denied. Valid shopkeeper code required.');
+        }
+    }
+}
