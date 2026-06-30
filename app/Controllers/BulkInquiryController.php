@@ -1,8 +1,19 @@
 <?php
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/BulkInquiryModel.php';
+require_once dirname(__DIR__, 2) . '/app/config/session.php';
+require_once dirname(__DIR__, 2) . '/app/config/wholesale_config.php';
 
 header('Content-Type: application/json');
+
+if (!wholesaleHasAccess()) {
+    http_response_code(403);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Wholesale access denied. Valid shopkeeper code required.',
+    ]);
+    exit;
+}
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -67,8 +78,8 @@ try {
                 $errors[] = 'Invalid product ID in items.';
                 break;
             }
-            if (!isset($item['quantity']) || !is_numeric($item['quantity']) || $item['quantity'] < 5) {
-                $errors[] = 'Product quantity must be at least 5 in items.';
+            if (!isset($item['quantity']) || !is_numeric($item['quantity']) || $item['quantity'] < 1) {
+                $errors[] = 'Product quantity must be at least 1 in items.';
                 break;
             }
 

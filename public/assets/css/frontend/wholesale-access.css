@@ -1,0 +1,244 @@
+/* Shopkeeper access modal (global) */
+.ws-access-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ws-access-modal[hidden] {
+  display: none !important;
+}
+
+.ws-access-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 15, 15, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.ws-access-modal__dialog {
+  position: relative;
+  width: min(100%, 420px);
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  text-align: center;
+}
+
+.ws-access-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  color: #666;
+  cursor: pointer;
+}
+
+.ws-access-modal__icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #fff8d6;
+  color: #0f0f0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ws-access-modal__dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+  color: #111;
+}
+
+.ws-access-modal__dialog p {
+  margin: 0 0 18px;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+#ws-access-form {
+  text-align: left;
+}
+
+#ws-access-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #222;
+}
+
+#ws-access-code,
+.ws-password-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 44px 12px 14px;
+  font-size: 1rem;
+}
+
+.ws-password-field {
+  position: relative;
+}
+
+.ws-password-input::-ms-reveal,
+.ws-password-input::-ms-clear {
+  display: none;
+}
+
+.ws-password-input::-webkit-credentials-auto-fill-button,
+.ws-password-input::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ws-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+}
+
+.ws-password-toggle:hover {
+  color: #111;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.ws-password-toggle svg {
+  display: block;
+}
+
+.ws-password-toggle svg[hidden] {
+  display: none !important;
+}
+
+.ws-password-input:focus {
+  outline: none;
+  border-color: #f7cf04;
+  box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.22);
+}
+
+#ws-access-code:focus {
+  outline: none;
+  border-color: #f7cf04;
+  box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.22);
+}
+
+.ws-access-error {
+  margin: 10px 0 0;
+  color: #b42318;
+  font-size: 0.88rem;
+}
+
+.ws-access-submit {
+  width: 100%;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 10px;
+  padding: 13px 16px;
+  background: #f7cf04;
+  color: #111;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ws-access-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Gate page card */
+.ws-gate-card {
+  max-width: 480px;
+  margin: 40px auto 60px;
+  padding: 34px 28px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.ws-gate-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #fff8d6;
+  color: #0f0f0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ws-gate-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.ws-gate-card p {
+  margin: 0 0 22px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.ws-gate-form {
+  text-align: left;
+}
+
+.ws-gate-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.ws-gate-form input.ws-password-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 44px 12px 14px;
+  font-size: 1rem;
+}
+
+.ws-gate-form .ws-password-input:focus {
+  outline: none;
+  border-color: #f7cf04;
+  box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.22);
+}
+
+.ws-gate-error {
+  margin: 10px 0 0;
+  color: #b42318;
+  font-size: 0.9rem;
+}
+
+.ws-gate-form .ws-submit-btn {
+  width: 100%;
+  margin-top: 18px;
+  justify-content: center;
+}

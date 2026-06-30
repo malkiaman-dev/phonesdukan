@@ -42,7 +42,7 @@ $sidebarCategories = $sidebarCatalogModel->getSidebarCategories();
                     <span class="sb-nav-text">Track my Order</span>
                 </a>
 
-                <a href="<?= url('wholesale'); ?>" class="sb-nav-link">
+                <a href="<?= url('wholesale'); ?>" class="sb-nav-link js-wholesale-link">
                     <span class="sb-nav-icon">
                         <img src="<?= url('public/assets/images/wholesale.svg'); ?>" alt="" class="sb-icon">
                     </span>

@@ -35,7 +35,7 @@
    ============================================================ */
 .ws-hero {
   background: #111111;
-  padding: 34px 0 30px;
+  padding: calc(var(--pd-chrome-offset, 108px) + 34px) 0 30px;
 }
 
 .ws-hero-inner {
@@ -677,7 +677,7 @@
 
 /* Tablet / Mobile: 2 columns, stack form */
 @media (max-width: 768px) {
-  .ws-hero            { padding: 30px 0 26px; }
+  .ws-hero            { padding: calc(var(--pd-chrome-offset, 94px) + 30px) 0 26px; }
   .ws-hero-title      { font-size: 28px; }
   .ws-hero-sub        { font-size: 14px; }
 

@@ -1,5 +1,6 @@
 # Local secrets — never commit these
 app/config/chatbot_config.local.php
+app/config/wholesale_config.local.php
 admin/config/ai-seo.local.php
 
 # Flutter build artifacts

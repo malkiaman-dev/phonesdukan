@@ -186,7 +186,11 @@ document.addEventListener("DOMContentLoaded", function () {
         element.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            window.location.href = withBase('/wholesale');
+            if (typeof window.pdOpenWholesaleAccess === 'function') {
+                window.pdOpenWholesaleAccess();
+            } else {
+                window.location.href = withBase('/wholesale');
+            }
         });
     });
 

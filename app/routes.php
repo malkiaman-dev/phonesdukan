@@ -49,6 +49,10 @@ switch (true) {
             $controller->index();
             break;
 
+        case ($request_uri === 'wholesale-verify' && $_SERVER['REQUEST_METHOD'] === 'POST'):
+            include __DIR__ . '/Controllers/WholesaleAccessController.php';
+            break;
+
             case ($request_uri === 'bulk-inquiry' && $_SERVER['REQUEST_METHOD'] === 'POST'):
                 include __DIR__ . '/Controllers/BulkInquiryController.php';
                 break;

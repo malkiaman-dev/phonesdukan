@@ -76,7 +76,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                             </label>
                             <div class="quantity-container">
                                 <button type="button" class="quantity-btn minus" aria-label="Decrease quantity">−</button>
-                                <input type="number" class="product-quantity" name="quantity" value="5" min="5"
+                                <input type="number" class="product-quantity" name="quantity" value="5" min="1"
                                        max="<?php echo htmlspecialchars($product['stock_quantity'] ?? 999); ?>" readonly>
                                 <button type="button" class="quantity-btn plus" aria-label="Increase quantity">+</button>
                             </div>
@@ -231,6 +231,13 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTotal();
     });
 
+    const DEFAULT_QTY    = 5;
+
+    function defaultQtyFor(input) {
+        const maxQty = parseInt(input.getAttribute('max')) || 999;
+        return Math.min(DEFAULT_QTY, Math.max(1, maxQty));
+    }
+
     // ── Checkbox selection ────────────────────
     selects.forEach(select => {
         select.addEventListener('change', function () {
@@ -244,10 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (this.checked) {
                 qtyInput.disabled = false;
-                qtyInput.value    = 5;
+                qtyInput.value    = defaultQtyFor(qtyInput);
             } else {
                 qtyInput.disabled = true;
-                qtyInput.value    = 5;
+                qtyInput.value    = DEFAULT_QTY;
             }
 
             updateTotal();
@@ -263,18 +270,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function minusHandler(e) {
             e.preventDefault();
-            const qty = parseInt(input.value) || 5;
-            if (qty > 5) {
+            const qty = parseInt(input.value) || defaultQtyFor(input);
+            if (qty > 1) {
                 input.value = qty - 1;
                 updateTotal();
             } else {
-                Swal.fire({ title: "Minimum Quantity!", text: "You cannot select less than 5 items for bulk orders.", icon: "warning", confirmButtonText: "OK" });
+                Swal.fire({ title: "Minimum Quantity!", text: "Quantity must be at least 1.", icon: "warning", confirmButtonText: "OK" });
             }
         }
 
         function plusHandler(e) {
             e.preventDefault();
-            const qty = parseInt(input.value) || 5;
+            const qty = parseInt(input.value) || defaultQtyFor(input);
             if (qty < maxQty) {
                 input.value = qty + 1;
                 updateTotal();
@@ -304,7 +311,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (select.checked) {
                 const item = select.closest('.product-item');
                 if (item.style.display !== 'none') {
-                    total    += (parseFloat(item.dataset.price) || 0) * (parseInt(item.querySelector('.product-quantity').value) || 5);
+                    total    += (parseFloat(item.dataset.price) || 0) * (parseInt(item.querySelector('.product-quantity').value) || defaultQtyFor(item.querySelector('.product-quantity')));
                     selected++;
                 } else {
                     // Deselect items hidden by search
@@ -312,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     item.classList.remove('is-selected');
                     const qi = item.querySelector('.product-quantity');
                     qi.disabled = true;
-                    qi.value    = 5;
+                    qi.value    = DEFAULT_QTY;
                 }
             }
         });
@@ -347,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const item = select.closest('.product-item');
                 data.items.push({
                     product_id: parseInt(item.dataset.productId),
-                    quantity:   parseInt(item.querySelector('.product-quantity').value) || 5
+                    quantity:   parseInt(item.querySelector('.product-quantity').value) || defaultQtyFor(item.querySelector('.product-quantity'))
                 });
             }
         });
@@ -385,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             const mb  = qc.querySelector('.quantity-btn.minus');
                             const pb  = qc.querySelector('.quantity-btn.plus');
                             qi.disabled = true;
-                            qi.value    = 5;
+                            qi.value    = DEFAULT_QTY;
                             setupQuantityButtons(qc, qi, mb, pb);
                         });
                         totalPriceEl.textContent = 'Total Price: Rs. 0.00';

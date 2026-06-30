@@ -2,7 +2,9 @@
 ob_start(); // Start output buffering
 require_once dirname(__DIR__, 1) . '/app/Models/CartModel.php';
 require_once dirname(__DIR__, 1) . '/app/config/session.php';
+require_once dirname(__DIR__, 1) . '/app/config/wholesale_config.php';
 require_once dirname(__DIR__, 1) . '/includes/functions.php';
+$wholesaleAccessGranted = wholesaleHasAccess();
 if (!isset($pageTitle)) {
     $pageTitle = null;
 }
@@ -136,6 +138,7 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 
 <script>
 window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
+window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' ?>;
 </script>
 
 <!-- ── Global Schema.org JSON-LD ─────────────────────────────────────── -->

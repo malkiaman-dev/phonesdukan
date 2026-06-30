@@ -149,6 +149,7 @@
     </div>
 </div>
 <?php endif; ?>
+<?php require_once __DIR__ . '/wholesale-access-modal.php'; ?>
 <?php loadJS(); // Dynamically load JS ?>
 <?php if (isset($schema) && !empty($schema)) : ?>
 <script type="application/ld+json">

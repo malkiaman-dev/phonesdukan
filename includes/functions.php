@@ -355,6 +355,7 @@ if (!function_exists('loadCSS')) {
         $uri = $uri === '' ? '/' : $uri;
 
         emitCss('public/assets/css/style.css');
+        emitCss('public/assets/css/frontend/wholesale-access.css');
         emitCss('public/assets/css/frontend/download-app.css');
         if (isPhonesDukanApp()) {
             emitCss('public/assets/css/frontend/chatbot.css');
@@ -476,6 +477,7 @@ if (!function_exists('loadJS')) {
         if (!isPhonesDukanApp()) {
             emitJs('public/assets/js/download-app.js');
         }
+        emitJs('public/assets/js/frontend/wholesale-access.js');
         emitJs('public/assets/js/faqs.js');
 
         if ($uri === '/' || strpos($uri, '/index') !== false) {
