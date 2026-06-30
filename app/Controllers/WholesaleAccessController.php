@@ -27,7 +27,7 @@ try {
         http_response_code(403);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Invalid shopkeeper code. This section is for registered shopkeepers only.',
+            'message' => 'Your entered password is incorrect',
         ]);
         exit;
     }

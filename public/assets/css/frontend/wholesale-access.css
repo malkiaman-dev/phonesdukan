@@ -150,8 +150,9 @@
 
 .ws-access-error {
   margin: 10px 0 0;
-  color: #b42318;
+  color: #dc2626;
   font-size: 0.88rem;
+  font-weight: 500;
 }
 
 .ws-access-submit {
@@ -233,8 +234,15 @@
 
 .ws-gate-error {
   margin: 10px 0 0;
-  color: #b42318;
+  color: #dc2626;
   font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.ws-password-field.is-error .ws-password-input,
+.ws-password-input.is-error {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18) !important;
 }
 
 .ws-gate-form .ws-submit-btn {

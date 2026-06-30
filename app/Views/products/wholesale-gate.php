@@ -67,12 +67,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return basePath + '/' + path;
     };
 
+    input.addEventListener('input', function () {
+        if (window.pdWsCodeForm) window.pdWsCodeForm.clearError(input, errorEl);
+    });
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         const code = input.value.trim();
         if (!code) return;
 
-        errorEl.hidden = true;
+        if (window.pdWsCodeForm) window.pdWsCodeForm.clearError(input, errorEl);
         submitBtn.disabled = true;
 
         fetch(withBase('/wholesale-verify'), {
@@ -83,18 +87,41 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({ code }),
         })
-            .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data }; }); })
+            .then(function (res) {
+                return res.text().then(function (text) {
+                    let data = {};
+                    try {
+                        data = text ? JSON.parse(text) : {};
+                    } catch (err) {
+                        data = {};
+                    }
+                    return { ok: res.ok, status: res.status, data: data };
+                });
+            })
             .then(function (result) {
                 if (result.ok && result.data.status === 'success') {
                     window.location.reload();
                     return;
                 }
-                errorEl.textContent = result.data.message || 'Invalid shopkeeper code.';
-                errorEl.hidden = false;
+                const wrongCode = result.status === 403 && result.data && result.data.status === 'error';
+                const msg = wrongCode
+                    ? ((window.pdWsCodeForm && window.pdWsCodeForm.invalidMessage) || 'Your entered password is incorrect')
+                    : 'Something went wrong. Please try again.';
+                if (window.pdWsCodeForm) {
+                    window.pdWsCodeForm.showError(input, errorEl, msg);
+                } else {
+                    errorEl.textContent = msg;
+                    errorEl.hidden = false;
+                }
             })
             .catch(function () {
-                errorEl.textContent = 'Something went wrong. Please try again.';
-                errorEl.hidden = false;
+                const msg = 'Something went wrong. Please try again.';
+                if (window.pdWsCodeForm) {
+                    window.pdWsCodeForm.showError(input, errorEl, msg);
+                } else {
+                    errorEl.textContent = msg;
+                    errorEl.hidden = false;
+                }
             })
             .finally(function () {
                 submitBtn.disabled = false;

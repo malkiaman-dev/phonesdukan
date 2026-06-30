@@ -1,6 +1,8 @@
 (function () {
     'use strict';
 
+    const WS_INVALID_CODE_MSG = 'Your entered password is incorrect';
+
     const withBase = window.pdWithBase || function (path) {
         const basePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
         if (!path) return basePath + '/';
@@ -23,6 +25,30 @@
             return path === wholesalePath || path.endsWith('/wholesale');
         } catch (e) {
             return /\/wholesale\/?$/.test(href);
+        }
+    }
+
+    function clearWsCodeError(input, errorEl) {
+        if (errorEl) {
+            errorEl.hidden = true;
+            errorEl.textContent = '';
+        }
+        const field = input ? input.closest('.ws-password-field') : null;
+        if (field) field.classList.remove('is-error');
+        if (input) input.classList.remove('is-error');
+    }
+
+    function showWsCodeError(input, errorEl, message) {
+        const msg = message || WS_INVALID_CODE_MSG;
+        if (errorEl) {
+            errorEl.textContent = msg;
+            errorEl.hidden = false;
+        }
+        const field = input ? input.closest('.ws-password-field') : null;
+        if (field) field.classList.add('is-error');
+        if (input) {
+            input.classList.add('is-error');
+            input.focus();
         }
     }
 
@@ -53,8 +79,7 @@
         const errorEl = document.getElementById('ws-access-error');
         if (!modal) return;
 
-        errorEl.hidden = true;
-        errorEl.textContent = '';
+        clearWsCodeError(input, errorEl);
         if (input) input.value = '';
         modal.hidden = false;
         modal.setAttribute('aria-hidden', 'false');
@@ -79,8 +104,14 @@
             },
             body: JSON.stringify({ code }),
         }).then(function (res) {
-            return res.json().then(function (data) {
-                return { ok: res.ok, data: data };
+            return res.text().then(function (text) {
+                let data = {};
+                try {
+                    data = text ? JSON.parse(text) : {};
+                } catch (e) {
+                    data = {};
+                }
+                return { ok: res.ok, status: res.status, data: data };
             });
         });
     }
@@ -113,6 +144,10 @@
 
         if (!modal || !form) return;
 
+        input.addEventListener('input', function () {
+            clearWsCodeError(input, errorEl);
+        });
+
         modal.querySelectorAll('[data-ws-access-close]').forEach(function (el) {
             el.addEventListener('click', closeModal);
         });
@@ -126,7 +161,7 @@
             const code = (input.value || '').trim();
             if (!code) return;
 
-            errorEl.hidden = true;
+            clearWsCodeError(input, errorEl);
             submitBtn.disabled = true;
 
             verifyCode(code)
@@ -137,12 +172,16 @@
                         window.location.href = withBase('/wholesale');
                         return;
                     }
-                    errorEl.textContent = result.data.message || 'Invalid shopkeeper code.';
-                    errorEl.hidden = false;
+                    // Genuine wrong code: server responds 403 with a JSON error payload.
+                    if (result.status === 403 && result.data && result.data.status === 'error') {
+                        showWsCodeError(input, errorEl, WS_INVALID_CODE_MSG);
+                        return;
+                    }
+                    // Anything else (missing endpoint, HTML response, 404/500) is a server problem.
+                    showWsCodeError(input, errorEl, 'Something went wrong. Please try again.');
                 })
                 .catch(function () {
-                    errorEl.textContent = 'Something went wrong. Please try again.';
-                    errorEl.hidden = false;
+                    showWsCodeError(input, errorEl, 'Something went wrong. Please try again.');
                 })
                 .finally(function () {
                     submitBtn.disabled = false;
@@ -170,6 +209,12 @@
             return;
         }
         openModal();
+    };
+
+    window.pdWsCodeForm = {
+        invalidMessage: WS_INVALID_CODE_MSG,
+        showError: showWsCodeError,
+        clearError: clearWsCodeError,
     };
 
     document.addEventListener('DOMContentLoaded', function () {
