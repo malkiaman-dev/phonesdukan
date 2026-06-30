@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.pdWsCodeForm) window.pdWsCodeForm.clearError(input, errorEl);
         submitBtn.disabled = true;
 
-        fetch(withBase('/wholesale-verify'), {
+        fetch(withBase('/app/Controllers/WholesaleAccessController.php'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

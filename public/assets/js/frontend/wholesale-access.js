@@ -96,7 +96,7 @@
     }
 
     function verifyCode(code) {
-        return fetch(withBase('/wholesale-verify'), {
+        return fetch(withBase('/app/Controllers/WholesaleAccessController.php'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
