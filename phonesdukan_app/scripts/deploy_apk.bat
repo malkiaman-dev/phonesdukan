@@ -39,6 +39,14 @@ echo [4/4] Copying APK to website downloads folder...
 if not exist "..\public\downloads" mkdir "..\public\downloads"
 copy /Y "build\app\outputs\flutter-apk\app-release.apk" "..\public\downloads\phonesdukan-app.apk"
 
+for /f %%i in ('powershell -NoProfile -Command "[int][double]::Parse((Get-Item '..\public\downloads\phonesdukan-app.apk').LastWriteTimeUtc.Subtract([datetime]'1970-01-01').TotalSeconds)"') do set BUILT_AT=%%i
+for /f "tokens=1 delims=+" %%v in ('flutter --version 2^>nul ^| findstr /i "Flutter"') do set FLUTTER_VER=%%v
+(
+echo apkFile=phonesdukan-app.apk
+echo builtAt=%BUILT_AT%
+echo versionName=flutter-release-%BUILT_AT%
+) > "..\public\downloads\app-version.properties"
+
 echo.
 echo SUCCESS!
 echo   APK: public\downloads\phonesdukan-app.apk

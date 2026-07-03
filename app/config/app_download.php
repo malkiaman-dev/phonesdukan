@@ -17,6 +17,8 @@
 // Relative path to the built APK inside the project root.
 define('APK_STORAGE_PATH', 'public/downloads/phonesdukan-app.apk');
 define('APK_DOWNLOAD_FILENAME', 'phonesdukan-app.apk');
+define('APK_DOWNLOADS_DIR', 'public/downloads');
+define('APK_VERSION_FILE', 'public/downloads/app-version.properties');
 
 // Clean URL served by AppDownloadController (forces browser download).
 define('APP_DOWNLOAD_ROUTE', 'download-app');

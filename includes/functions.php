@@ -98,11 +98,152 @@ if (!function_exists('url')) {
 if (!function_exists('getAppApkFilePath')) {
     function getAppApkFilePath()
     {
+        $apk = pd_resolve_app_apk();
+        if ($apk !== null) {
+            return $apk['path'];
+        }
+
         if (!defined('APK_STORAGE_PATH')) {
             require_once dirname(__DIR__) . '/app/config/app_download.php';
         }
 
         return getProjectRootPath() . '/' . ltrim(APK_STORAGE_PATH, '/');
+    }
+}
+
+if (!function_exists('pd_get_apk_downloads_dir')) {
+    function pd_get_apk_downloads_dir(): string
+    {
+        if (!defined('APK_DOWNLOADS_DIR')) {
+            require_once dirname(__DIR__) . '/app/config/app_download.php';
+        }
+
+        return getProjectRootPath() . '/' . ltrim(APK_DOWNLOADS_DIR, '/');
+    }
+}
+
+if (!function_exists('pd_read_apk_version_manifest')) {
+    function pd_read_apk_version_manifest(): ?array
+    {
+        if (!defined('APK_VERSION_FILE')) {
+            require_once dirname(__DIR__) . '/app/config/app_download.php';
+        }
+
+        $manifestPath = getProjectRootPath() . '/' . ltrim(APK_VERSION_FILE, '/');
+        if (!is_readable($manifestPath)) {
+            return null;
+        }
+
+        $props = parse_ini_file($manifestPath, false, INI_SCANNER_RAW);
+        return is_array($props) ? $props : null;
+    }
+}
+
+if (!function_exists('pd_build_apk_meta')) {
+    function pd_build_apk_meta(string $path): ?array
+    {
+        if (!is_file($path) || !is_readable($path)) {
+            return null;
+        }
+
+        $size = filesize($path);
+        if ($size === false || $size < 500000) {
+            return null;
+        }
+
+        $mtime = filemtime($path) ?: 0;
+
+        return [
+            'path' => $path,
+            'size' => $size,
+            'mtime' => $mtime,
+            'version' => (string) $mtime,
+            'hash' => md5_file($path) ?: '',
+            'basename' => basename($path),
+        ];
+    }
+}
+
+if (!function_exists('pd_resolve_app_apk')) {
+    /**
+     * Resolve the latest deployable APK for website download.
+     * Priority: app-version.properties → configured storage path → newest file in downloads/.
+     */
+    function pd_resolve_app_apk(bool $allowDirectoryScan = true): ?array
+    {
+        if (!defined('APK_STORAGE_PATH')) {
+            require_once dirname(__DIR__) . '/app/config/app_download.php';
+        }
+
+        $downloadsDir = pd_get_apk_downloads_dir();
+        $manifest = pd_read_apk_version_manifest();
+
+        if ($manifest && !empty($manifest['apkFile'])) {
+            $manifestPath = $downloadsDir . '/' . basename((string) $manifest['apkFile']);
+            $apk = pd_build_apk_meta($manifestPath);
+            if ($apk !== null) {
+                if (!empty($manifest['versionName'])) {
+                    $apk['version'] = (string) $manifest['versionName'];
+                }
+                if (!empty($manifest['builtAt']) && is_numeric($manifest['builtAt'])) {
+                    $apk['builtAt'] = (int) $manifest['builtAt'];
+                }
+                return $apk;
+            }
+        }
+
+        $configuredPath = getProjectRootPath() . '/' . ltrim(APK_STORAGE_PATH, '/');
+        $apk = pd_build_apk_meta($configuredPath);
+        if ($apk !== null) {
+            return $apk;
+        }
+
+        if (!$allowDirectoryScan || !is_dir($downloadsDir)) {
+            return null;
+        }
+
+        $newest = null;
+        foreach (glob($downloadsDir . '/*.apk') ?: [] as $candidatePath) {
+            $candidate = pd_build_apk_meta($candidatePath);
+            if ($candidate === null) {
+                continue;
+            }
+            if ($newest === null || $candidate['mtime'] > $newest['mtime']) {
+                $newest = $candidate;
+            }
+        }
+
+        return $newest;
+    }
+}
+
+if (!function_exists('pd_write_apk_version_manifest')) {
+    function pd_write_apk_version_manifest(string $apkBasename, ?string $versionName = null): bool
+    {
+        if (!defined('APK_VERSION_FILE')) {
+            require_once dirname(__DIR__) . '/app/config/app_download.php';
+        }
+
+        $downloadsDir = pd_get_apk_downloads_dir();
+        $apkPath = $downloadsDir . '/' . basename($apkBasename);
+        if (!is_file($apkPath)) {
+            return false;
+        }
+
+        $mtime = filemtime($apkPath) ?: time();
+        $manifestPath = getProjectRootPath() . '/' . ltrim(APK_VERSION_FILE, '/');
+        $dir = dirname($manifestPath);
+        if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+            return false;
+        }
+
+        $lines = [
+            'apkFile=' . basename($apkBasename),
+            'builtAt=' . $mtime,
+            'versionName=' . ($versionName ?: date('Y.m.d.Hi', $mtime)),
+        ];
+
+        return file_put_contents($manifestPath, implode(PHP_EOL, $lines) . PHP_EOL) !== false;
     }
 }
 
@@ -126,20 +267,23 @@ if (!function_exists('getAppDownloadUrl')) {
 if (!function_exists('getAppApkVersion')) {
     function getAppApkVersion()
     {
-        $apkPath = getAppApkFilePath();
-        if (!is_file($apkPath)) {
+        $apk = pd_resolve_app_apk();
+        if ($apk === null) {
             return 0;
         }
 
-        return (int) filemtime($apkPath);
+        if (!empty($apk['builtAt'])) {
+            return (int) $apk['builtAt'];
+        }
+
+        return (int) ($apk['mtime'] ?? 0);
     }
 }
 
 if (!function_exists('isAppDownloadAvailable')) {
     function isAppDownloadAvailable()
     {
-        $apkPath = getAppApkFilePath();
-        return is_file($apkPath) && filesize($apkPath) > 0;
+        return pd_resolve_app_apk() !== null;
     }
 }
 
