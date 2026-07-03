@@ -48,8 +48,8 @@
             return 0;
         }
 
-        // Native Android lays out WebView below the opaque status bar; no CSS offset needed.
-        return readNativeInset();
+        // Android WebView already applies status bar padding to the viewport.
+        return 0;
     }
 
     function applyChromePadding(inset) {
@@ -77,11 +77,7 @@
 
         if (chrome) {
             chrome.style.paddingTop = "0px";
-            if (isPhonesDukanApp() && insetPx > 0) {
-                chrome.style.top = insetPx + "px";
-            } else {
-                chrome.style.top = "";
-            }
+            chrome.style.top = "";
         }
 
         if (safeFill) {

@@ -292,6 +292,10 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 <div class="site-wrapper">
 
+    <div id="pd-site-chrome" class="pd-site-chrome">
+        <div class="pd-chrome-safe-fill" aria-hidden="true"></div>
+        <div class="pd-status-bar-slot" aria-hidden="true"></div>
+
     <!-- Scrollable bars — NOT sticky, scroll away naturally -->
     <div class="pd-top-bars">
         <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
@@ -433,5 +437,8 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
         </header>
 
     </div>
+    </div><!-- /#pd-site-chrome -->
+
+    <div class="pd-chrome-spacer" aria-hidden="true"></div>
 
     <main class="content">
