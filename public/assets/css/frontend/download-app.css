@@ -38,6 +38,17 @@
     transform: translateY(-1px) scale(1.02);
 }
 
+#pd-download-app-btn svg {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    transition: transform 0.25s ease;
+}
+
+#pd-download-app-btn:hover svg {
+    transform: translateY(-2px);
+}
+
 #pd-download-app-btn .pd-download-label {
     white-space: nowrap;
 }
@@ -75,6 +86,12 @@
         right: 16px;
         padding: 12px 18px;
         font-size: 14px;
+        gap: 8px;
+    }
+
+    #pd-download-app-btn svg {
+        width: 20px;
+        height: 20px;
     }
 }
 
