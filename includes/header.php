@@ -20,7 +20,7 @@ if (!isset($metaRobots)) {
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
 $pageUrl = $protocol . "://" . $_SERVER['HTTP_HOST'] . url(ltrim(getRequestPath(), '/'));
-$ogImage = getBaseURL() . "public/assets/images/Phones_dukan_favicon.png";
+$ogImage = getBaseURL() . ltrim(getAppIconPath(), '/');
 
 // Initialize CartModel and fetch cart items
 $cartModel = new CartModel();
@@ -112,8 +112,8 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 <meta name="twitter:site" content="@phonesdukan">
 
 <!-- Favicon -->
-<link rel="icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png" type="image/x-icon">
-<link rel="apple-touch-icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png">
+<link rel="icon" href="<?= getAppIconUrl(); ?>" type="image/png">
+<link rel="apple-touch-icon" href="<?= getAppIconUrl(); ?>">
 
 <!-- Author & Theme -->
 <meta name="author" content="Phones Dukan">

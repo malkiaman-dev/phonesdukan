@@ -68,6 +68,21 @@ if (!function_exists('getBaseURL')) {
     }
 }
 
+if (!function_exists('getAppIconPath')) {
+    /** Relative web path to the Phones Dukan app / site icon (PNG). */
+    function getAppIconPath(): string
+    {
+        return 'public/assets/images/app-icon.png';
+    }
+}
+
+if (!function_exists('getAppIconUrl')) {
+    function getAppIconUrl(): string
+    {
+        return url(getAppIconPath());
+    }
+}
+
 if (!function_exists('url')) {
     function url($path = '')
     {

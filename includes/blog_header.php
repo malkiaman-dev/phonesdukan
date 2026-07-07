@@ -14,7 +14,7 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https"
 $pageUrl = $protocol . "://" . $_SERVER['HTTP_HOST'] . url(ltrim(getRequestPath(), '/'));
 
 // Open Graph and Twitter image URL
-$ogImage = getBaseURL() . "public/assets/images/Phones_dukan_favicon.png"; // Default image for blog posts
+$ogImage = getBaseURL() . ltrim(getAppIconPath(), '/');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,7 +62,8 @@ $ogImage = getBaseURL() . "public/assets/images/Phones_dukan_favicon.png"; // De
     <meta name="twitter:site" content="@phonesdukan">
 
     <!-- Favicon -->
-    <link rel="icon" href="<?= getBaseURL(); ?>public/assets/images/Phones_dukan_favicon.png" type="image/x-icon">
+    <link rel="icon" href="<?= getAppIconUrl(); ?>" type="image/png">
+    <link rel="apple-touch-icon" href="<?= getAppIconUrl(); ?>">
 
     <!-- Author & Theme -->
     <meta name="author" content="Phones Dukan">
