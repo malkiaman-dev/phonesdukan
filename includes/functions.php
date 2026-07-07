@@ -221,10 +221,10 @@ if (!function_exists('pd_build_apk_meta')) {
 
 if (!function_exists('pd_resolve_app_apk')) {
     /**
-     * Resolve the latest deployable APK for website download.
-     * Priority: app-version.properties → configured storage path → newest file in downloads/.
+     * Resolve the Flutter release APK for website download.
+     * Priority: app-version.properties → configured storage path (phonesdukan-app.apk).
      */
-    function pd_resolve_app_apk(bool $allowDirectoryScan = true): ?array
+    function pd_resolve_app_apk(bool $allowDirectoryScan = false): ?array
     {
         if (!defined('APK_STORAGE_PATH')) {
             require_once dirname(__DIR__) . '/app/config/app_download.php';
@@ -248,27 +248,7 @@ if (!function_exists('pd_resolve_app_apk')) {
         }
 
         $configuredPath = getProjectRootPath() . '/' . ltrim(APK_STORAGE_PATH, '/');
-        $apk = pd_build_apk_meta($configuredPath);
-        if ($apk !== null) {
-            return $apk;
-        }
-
-        if (!$allowDirectoryScan || !is_dir($downloadsDir)) {
-            return null;
-        }
-
-        $newest = null;
-        foreach (glob($downloadsDir . '/*.apk') ?: [] as $candidatePath) {
-            $candidate = pd_build_apk_meta($candidatePath);
-            if ($candidate === null) {
-                continue;
-            }
-            if ($newest === null || $candidate['mtime'] > $newest['mtime']) {
-                $newest = $candidate;
-            }
-        }
-
-        return $newest;
+        return pd_build_apk_meta($configuredPath);
     }
 }
 

@@ -1,36 +1,23 @@
 <?php
 /**
- * PhonesDukan Android App — Download Configuration
+ * PhonesDukan Android App — Download Configuration (Flutter)
  *
- * HOW IT WORKS
- * ────────────
- * • The app is a WebView shell around your live website (phonesdukan.com).
- *   Website changes (products, prices, pages, design) appear in the app
- *   automatically — no APK rebuild needed.
+ * The mobile app is built with Flutter in phonesdukan_app/.
+ * After building, run phonesdukan_app/scripts/deploy_apk.bat (Windows)
+ * or phonesdukan_app/scripts/build_all.sh (macOS/Linux).
  *
- * • Rebuild the APK only when you change native app code (Flutter/Android).
- *   After building, copy the release APK to public/downloads/phonesdukan-app.apk
- *   (or run phonesdukan_app/scripts/deploy_apk.bat). The Get App button always
- *   serves whatever file is there, with cache-busting so users get the latest build.
+ * That copies the release APK to public/downloads/phonesdukan-app.apk
+ * and updates app-version.properties. The Get App button serves that file.
  */
 
-// Relative path to the built APK inside the project root.
 define('APK_STORAGE_PATH', 'public/downloads/phonesdukan-app.apk');
 define('APK_DOWNLOAD_FILENAME', 'phonesdukan-app.apk');
 define('APK_DOWNLOADS_DIR', 'public/downloads');
 define('APK_VERSION_FILE', 'public/downloads/app-version.properties');
 
-// Clean URL served by AppDownloadController (forces browser download).
 define('APP_DOWNLOAD_ROUTE', 'download-app');
-
-// Legacy alias — kept for backwards compatibility.
 define('APK_DOWNLOAD_URL', APP_DOWNLOAD_ROUTE);
 
-// Play Store URL (leave empty — app is distributed via website download only)
 define('PLAY_STORE_URL', '');
-
-// Button label
 define('APP_DOWNLOAD_BUTTON_TEXT', 'Get App');
-
-// Show button on desktop too (true) or mobile only (false)
 define('APP_DOWNLOAD_SHOW_ON_DESKTOP', true);

@@ -46,19 +46,18 @@
     RewriteRule ^favicon\.ico$ public/assets/images/Phones_dukan_favicon.png [L,NC]
 
     # Allow existing files and directories (except APK — always resolve latest via PHP)
-    RewriteCond %{REQUEST_URI} !/public/downloads/phonesdukan\.apk$ [NC]
     RewriteCond %{REQUEST_URI} !/public/downloads/phonesdukan-app\.apk$ [NC]
-    RewriteCond %{REQUEST_URI} !^/downloads/phonesdukan\.apk$ [NC]
     RewriteCond %{REQUEST_URI} !^/downloads/phonesdukan-app\.apk$ [NC]
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Serve the newest APK through the PHP resolver (never a stale static copy)
-    RewriteRule ^public/downloads/phonesdukan\.apk$ public/download-app.php [L,QSA]
+    # Serve the Flutter APK through the PHP resolver (never a stale static copy)
     RewriteRule ^public/downloads/phonesdukan-app\.apk$ public/download-app.php [L,QSA]
-    RewriteRule ^downloads/phonesdukan\.apk$ public/download-app.php [L,QSA]
     RewriteRule ^downloads/phonesdukan-app\.apk$ public/download-app.php [L,QSA]
+    # Legacy Java APK filename → Flutter download
+    RewriteRule ^public/downloads/phonesdukan\.apk$ public/download-app.php [L,QSA]
+    RewriteRule ^downloads/phonesdukan\.apk$ public/download-app.php [L,QSA]
 
     # Route all other requests through index.php
     RewriteRule ^ index.php [L,QSA]

@@ -1,8 +1,9 @@
 <?php
 require_once dirname(__DIR__) . '/app/config/bootstrap.php';
+require_once dirname(__DIR__) . '/app/config/app_download.php';
 
-$apk = pd_resolve_app_apk(true);
-$downloadName = 'PhonesDukan.apk';
+$apk = pd_resolve_app_apk();
+$downloadName = defined('APK_DOWNLOAD_FILENAME') ? APK_DOWNLOAD_FILENAME : 'phonesdukan-app.apk';
 
 if ($apk === null) {
     http_response_code(404);
