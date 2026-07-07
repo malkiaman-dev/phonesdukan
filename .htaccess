@@ -31,8 +31,19 @@
     # Fix accidental admin-relative asset URLs like /admin/public/assets/...
     RewriteRule ^admin/public/(.*)$ public/$1 [L,NC]
 
-    # Legacy / root app-icon.png → canonical assets path
+    # Legacy / root app-icon.png → canonical assets path (with fallback)
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/app-icon.png -f
     RewriteRule ^app-icon\.png$ public/assets/images/app-icon.png [L,NC]
+    RewriteCond %{DOCUMENT_ROOT}/app-icon.png -f
+    RewriteRule ^app-icon\.png$ app-icon.png [L,NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/Phones_dukan_favicon.png -f
+    RewriteRule ^app-icon\.png$ public/assets/images/Phones_dukan_favicon.png [L,NC]
+
+    # Browsers often request /favicon.ico directly
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/app-icon.png -f
+    RewriteRule ^favicon\.ico$ public/assets/images/app-icon.png [L,NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/Phones_dukan_favicon.png -f
+    RewriteRule ^favicon\.ico$ public/assets/images/Phones_dukan_favicon.png [L,NC]
 
     # Allow existing files and directories (except APK — always resolve latest via PHP)
     RewriteCond %{REQUEST_URI} !/public/downloads/phonesdukan\.apk$ [NC]

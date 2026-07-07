@@ -72,14 +72,54 @@ if (!function_exists('getAppIconPath')) {
     /** Relative web path to the Phones Dukan app / site icon (PNG). */
     function getAppIconPath(): string
     {
-        return 'public/assets/images/app-icon.png';
+        static $resolved = null;
+        if ($resolved !== null) {
+            return $resolved;
+        }
+
+        $candidates = [
+            'public/assets/images/app-icon.png',
+            'app-icon.png',
+            'public/assets/images/Phones_dukan_favicon.png',
+        ];
+
+        $root = getProjectRootPath();
+        foreach ($candidates as $relative) {
+            $full = $root . '/' . ltrim($relative, '/');
+            if (is_file($full) && is_readable($full)) {
+                $resolved = $relative;
+                return $resolved;
+            }
+        }
+
+        $resolved = 'public/assets/images/app-icon.png';
+        return $resolved;
     }
 }
 
 if (!function_exists('getAppIconUrl')) {
-    function getAppIconUrl(): string
+    function getAppIconUrl(bool $absolute = true): string
     {
-        return url(getAppIconPath());
+        $path = getAppIconPath();
+        $url = url($path);
+
+        $fullPath = getProjectRootPath() . '/' . ltrim($path, '/');
+        if (is_file($fullPath)) {
+            $url .= (strpos($url, '?') === false ? '?' : '&') . 'v=' . filemtime($fullPath);
+        }
+
+        if (!$absolute) {
+            return $url;
+        }
+
+        if (preg_match('#^https?://#i', $url)) {
+            return $url;
+        }
+
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+        return $protocol . '://' . $host . $url;
     }
 }
 
