@@ -20,7 +20,7 @@ Deploy website changes to production (`www.phonesdukan.com`) for them to appear 
    ./gradlew assembleDebug
    ```
 5. The build copies the APK automatically to:
-   `public/downloads/phonesdukan.apk`
+   `public/downloads/phonesdukan-app.apk`
 
 The website **Get App** button serves that file through `public/download-app.php`.
 Each build gets a new version code, and `public/downloads/app-version.properties` records the latest build.

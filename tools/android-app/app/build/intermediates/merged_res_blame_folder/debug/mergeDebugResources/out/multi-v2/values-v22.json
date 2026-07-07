@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.phonesdukan.app-mergeDebugResources-21:/values-v22/values-v22.xml",
+            "outputFile": "com.phonesdukan.app-mergeDebugResources-22:/values-v22/values-v22.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\89ce3bb5ec9f1ff4795546f564476bf2\\gradle\\caches\\transforms-4\\42a5c36a282de63de8dd0d1b551ed132\\transformed\\appcompat-1.7.0\\res\\values-v22\\values-v22.xml",
+                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\439e54c51c520753fc38f858a5291dfd\\gradle\\caches\\transforms-4\\42a5c36a282de63de8dd0d1b551ed132\\transformed\\appcompat-1.7.0\\res\\values-v22\\values-v22.xml",
                     "from": {
                         "startLines": "2,3,4,9",
                         "startColumns": "4,4,4,4",

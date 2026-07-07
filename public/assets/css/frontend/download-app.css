@@ -38,15 +38,17 @@
     transform: translateY(-1px) scale(1.02);
 }
 
-#pd-download-app-btn svg {
+#pd-download-app-btn .pd-download-app-icon {
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
     transition: transform 0.25s ease;
 }
 
-#pd-download-app-btn:hover svg {
-    transform: translateY(-2px);
+#pd-download-app-btn:hover .pd-download-app-icon {
+    transform: translateY(-2px) scale(1.05);
 }
 
 #pd-download-app-btn .pd-download-label {
@@ -89,9 +91,9 @@
         gap: 8px;
     }
 
-    #pd-download-app-btn svg {
-        width: 20px;
-        height: 20px;
+    #pd-download-app-btn .pd-download-app-icon {
+        width: 24px;
+        height: 24px;
     }
 }
 

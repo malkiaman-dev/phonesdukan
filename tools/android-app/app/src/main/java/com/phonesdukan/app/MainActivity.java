@@ -20,6 +20,7 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
   private WebView webView;
   private View statusBarScrim;
+  private View splashOverlay;
+  private boolean pageReady = false;
   private float statusBarHeightCssPx = 0f;
 
   private Map<String, String> appHeaders() {
@@ -71,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
   @SuppressLint("SetJavaScriptEnabled")
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+    splashScreen.setKeepOnScreenCondition(() -> !pageReady);
+
     super.onCreate(savedInstanceState);
 
     Window window = getWindow();
@@ -90,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
     webView = findViewById(R.id.webView);
     statusBarScrim = findViewById(R.id.statusBarScrim);
+    splashOverlay = findViewById(R.id.splashOverlay);
     webView.setBackgroundColor(STATUS_BAR_COLOR);
     webView.setVerticalScrollBarEnabled(false);
     webView.setHorizontalScrollBarEnabled(false);
@@ -155,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
       public void onPageFinished(WebView view, String url) {
         view.evaluateJavascript(APP_BOOT_JS, null);
         applyStatusBarStyle();
+        hideSplashOverlay();
       }
     });
 
@@ -165,6 +173,14 @@ public class MainActivity extends AppCompatActivity {
     } else {
       webView.restoreState(savedInstanceState);
       webView.evaluateJavascript(APP_BOOT_JS, null);
+      hideSplashOverlay();
+    }
+  }
+
+  private void hideSplashOverlay() {
+    pageReady = true;
+    if (splashOverlay != null) {
+      splashOverlay.setVisibility(View.GONE);
     }
   }
 

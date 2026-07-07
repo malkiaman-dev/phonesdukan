@@ -9,6 +9,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <FrameLayout
+        android:id="@+id/splashOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/ic_launcher_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:importantForAccessibility="noHideDescendants">
+
+        <ImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/app_name"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            android:src="@drawable/phonesdukan_favicon" />
+    </FrameLayout>
+
     <View
         android:id="@+id/statusBarScrim"
         android:layout_width="match_parent"

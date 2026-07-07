@@ -1,5 +1,8 @@
 <?php
 return [
+    '/bluetooth-headphones' => '/headphones',
+    '/bluetooth-headphones/' => '/headphones/',
+
     '/yolo/generic-brand/yolo-fortuner-calling-watch/' => '/smart-watches/yolo/yolo-fortuner-calling-watch',
 
     '/yolo/generic-brand/yolo-epic-bluetooth-calling-smart-watch/' => '/smart-watches/yolo/yolo-epic-bluetooth-calling-smart-watch',

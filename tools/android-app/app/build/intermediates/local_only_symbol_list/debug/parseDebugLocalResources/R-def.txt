@@ -3,6 +3,8 @@ local
 color ic_launcher_background
 drawable ic_launcher_foreground
 drawable phonesdukan_favicon
+drawable splash_screen_icon
+id splashOverlay
 id statusBarScrim
 id webView
 layout activity_main
@@ -10,3 +12,4 @@ mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
 style Theme.PhonesDukan
+style Theme.PhonesDukan.App

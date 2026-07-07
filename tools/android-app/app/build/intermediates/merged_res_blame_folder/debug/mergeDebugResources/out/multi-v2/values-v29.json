@@ -1,25 +1,44 @@
 {
     "logs": [
         {
-            "outputFile": "com.phonesdukan.app-mergeDebugResources-21:/values-v29/values-v29.xml",
+            "outputFile": "com.phonesdukan.app-mergeDebugResources-22:/values-v29/values-v29.xml",
             "map": [
                 {
                     "source": "C:\\xampp\\htdocs\\phonesdukan\\tools\\android-app\\app\\src\\main\\res\\values-v29\\themes.xml",
                     "from": {
-                        "startLines": "1",
-                        "startColumns": "4",
-                        "startOffsets": "63",
-                        "endLines": "9",
-                        "endColumns": "12",
-                        "endOffsets": "620"
+                        "startLines": "11,1",
+                        "startColumns": "4,4",
+                        "startOffsets": "630,63",
+                        "endLines": "11,9",
+                        "endColumns": "69,12",
+                        "endOffsets": "695,624"
                     },
                     "to": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "100",
-                        "endLines": "10",
-                        "endColumns": "12",
-                        "endOffsets": "655"
+                        "startLines": "9,10",
+                        "startColumns": "4,4",
+                        "startOffsets": "514,583",
+                        "endLines": "9,18",
+                        "endColumns": "68,12",
+                        "endOffsets": "578,1142"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Admin\\AppData\\Local\\Temp\\cursor-sandbox-cache\\439e54c51c520753fc38f858a5291dfd\\gradle\\caches\\transforms-4\\d512b4e1ef0556fce0af9b354401a516\\transformed\\core-splashscreen-1.0.1\\res\\values-v29\\values-v29.xml",
+                    "from": {
+                        "startLines": "2,7",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,374",
+                        "endLines": "6,8",
+                        "endColumns": "12,12",
+                        "endOffsets": "369,464"
+                    },
+                    "to": {
+                        "startLines": "2,7",
+                        "startColumns": "4,4",
+                        "startOffsets": "100,419",
+                        "endLines": "6,8",
+                        "endColumns": "12,12",
+                        "endOffsets": "414,509"
                     }
                 }
             ]

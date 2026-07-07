@@ -464,7 +464,7 @@ foreach ($latest_posts_raw as $post) {
 <section class="eb-category-strip">
     <div class="na-inner">
         <div class="eb-cat-grid">
-            <a href="/bluetooth-headphones" class="eb-cat-item">
+            <a href="<?= url('headphones'); ?>" class="eb-cat-item">
                 <img src="/public/assets/images/Headphones.png" alt="Headphones">
                 <span class="eb-cat-label">Headphones</span>
             </a>
@@ -562,13 +562,13 @@ foreach ($latest_posts_raw as $post) {
 <div class="mob-promo-strip">
     <div class="na-inner">
         <div class="mob-promo-grid">
-            <a href="/bluetooth-headphones" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
+            <a href="<?= url('headphones'); ?>" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
                 <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
             </a>
-            <a href="/bluetooth-headphones" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
+            <a href="<?= url('headphones'); ?>" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
                 <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
             </a>
-            <a href="/bluetooth-headphones" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
+            <a href="<?= url('headphones'); ?>" class="mob-promo-item mob-promo-item--no-action" onclick="event.preventDefault(); return false;" aria-label="Headphone promo preview">
                 <img src="/public/assets/images/Headphone_L29.png" alt="L-292 Velora Pro Headphones" loading="lazy">
             </a>
         </div>

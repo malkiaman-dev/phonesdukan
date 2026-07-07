@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.phonesdukan.app-mergeDebugResources-21:/values-v35/values-v35.xml",
+            "outputFile": "com.phonesdukan.app-mergeDebugResources-22:/values-v35/values-v35.xml",
             "map": [
                 {
                     "source": "C:\\xampp\\htdocs\\phonesdukan\\tools\\android-app\\app\\src\\main\\res\\values-v35\\themes.xml",
@@ -9,17 +9,17 @@
                         "startLines": "1",
                         "startColumns": "4",
                         "startOffsets": "63",
-                        "endLines": "9",
+                        "endLines": "12",
                         "endColumns": "12",
-                        "endOffsets": "620"
+                        "endOffsets": "900"
                     },
                     "to": {
                         "startLines": "2",
                         "startColumns": "4",
                         "startOffsets": "100",
-                        "endLines": "10",
+                        "endLines": "13",
                         "endColumns": "12",
-                        "endOffsets": "655"
+                        "endOffsets": "935"
                     }
                 }
             ]

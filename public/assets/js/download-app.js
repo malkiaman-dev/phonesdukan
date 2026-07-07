@@ -17,16 +17,15 @@
     }
 
     btn.addEventListener('click', function (e) {
-        var isAndroid = /Android/i.test(navigator.userAgent);
-
-        if (isAndroid && playStoreUrl) {
+        if (!apkUrl) {
             e.preventDefault();
-            window.open(playStoreUrl, '_blank', 'noopener');
             return;
         }
 
-        if (!apkUrl) {
+        var isAndroid = /Android/i.test(navigator.userAgent);
+        if (isAndroid && playStoreUrl) {
             e.preventDefault();
+            window.open(playStoreUrl, '_blank', 'noopener');
             return;
         }
 
