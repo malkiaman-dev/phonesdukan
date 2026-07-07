@@ -35,3 +35,13 @@
 .pd-product-page #pd-whatsapp-toggle.pd-whatsapp-fab {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
+
+/* Legacy chatbot UI must never appear in the native app shell */
+html[data-pd-app="1"] #pd-chatbot-toggle,
+html[data-pd-app="1"] #pd-chatbot-win,
+html[data-pd-app="1"] .pd-chatbot-desktop,
+html[data-pd-app="1"] .pd-chatbot-fab {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}

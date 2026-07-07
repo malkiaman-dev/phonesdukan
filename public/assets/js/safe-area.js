@@ -43,13 +43,26 @@
         return 0;
     }
 
+    function measureEnvSafeAreaTop() {
+        var probe = document.createElement("div");
+        probe.style.cssText = "position:fixed;top:0;left:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);";
+        document.documentElement.appendChild(probe);
+        var inset = parseFloat(window.getComputedStyle(probe).paddingTop) || 0;
+        document.documentElement.removeChild(probe);
+        return Math.max(0, inset);
+    }
+
     function resolveSafeAreaTop() {
         if (!isPhonesDukanApp()) {
             return 0;
         }
 
-        // Android WebView already applies status bar padding to the viewport.
-        return 0;
+        var nativeInset = readNativeInset();
+        if (nativeInset > 0) {
+            return nativeInset;
+        }
+
+        return measureEnvSafeAreaTop();
     }
 
     function applyChromePadding(inset) {
@@ -59,7 +72,7 @@
         var safeAreaTop = chrome ? chrome.querySelector(".pd-safe-area-top") : null;
         var statusSlot = chrome ? chrome.querySelector(".pd-status-bar-slot") : null;
         var insetPx = isPhonesDukanApp()
-            ? Math.max(0, Math.round(readNativeInset()))
+            ? Math.max(0, Math.round(resolveSafeAreaTop()))
             : Math.max(0, Math.round(inset));
 
         if (isPhonesDukanApp()) {

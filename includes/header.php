@@ -78,7 +78,7 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 <head>
     <!-- Required Meta -->
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0<?= isPhonesDukanApp() ? ', viewport-fit=cover' : '' ?>">
 <title><?= $pageTitle ?></title>
 <meta name="description" content="<?= $metaDescription ?>">
 <?php if ($metaKeywords): ?>

@@ -44,8 +44,13 @@
             return;
         }
         markApp();
-        ["pd-install-app-btn", "pd-install-app-panel"].forEach(function (id) {
+        ["pd-install-app-btn", "pd-install-app-panel", "pd-download-app-btn", "pd-chatbot-toggle", "pd-chatbot-win"].forEach(function (id) {
             var el = document.getElementById(id);
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+        document.querySelectorAll(".pd-chatbot-desktop, .pd-chatbot-fab, #pd-chatbot-form").forEach(function (el) {
             if (el && el.parentNode) {
                 el.parentNode.removeChild(el);
             }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import '../../core/theme/app_theme.dart';
 import '../../services/connectivity/connectivity_service.dart';
 import '../../services/external_link/external_link_handler.dart';
 import '../offline/offline_screen.dart';
-import '../widgets/whatsapp_fab.dart';
 
 class WebViewScreen extends StatefulWidget {
   const WebViewScreen({super.key, this.initialUrl});
@@ -27,8 +27,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   InAppWebViewController? _controller;
   bool _isOffline = false;
-  bool _showSplash = true;
-  double _progress = 0;
 
   static const String _bootJs = r'''
 (function(){try{
@@ -37,9 +35,13 @@ localStorage.setItem('pd_app','1');
 var c='pd_app=1;path=/;max-age=31536000;SameSite=Lax';
 if(/phonesdukan\.com$/i.test(location.hostname)){c+=';domain=.phonesdukan.com';}
 document.cookie=c;
-['pd-install-app-btn','pd-install-app-panel','pd-download-app-btn','pd-chatbot-toggle'].forEach(function(id){
+['pd-install-app-btn','pd-install-app-panel','pd-download-app-btn','pd-chatbot-toggle','pd-chatbot-win'].forEach(function(id){
 var el=document.getElementById(id);if(el&&el.parentNode){el.parentNode.removeChild(el);}
 });
+document.querySelectorAll('.pd-chatbot-desktop,.pd-chatbot-fab,#pd-chatbot-form').forEach(function(el){
+if(el&&el.parentNode){el.parentNode.removeChild(el);}
+});
+if(window.PDApp&&window.PDApp.removeInstallWidget){window.PDApp.removeInstallWidget();}
 if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}
 }catch(e){}})();
 ''';
@@ -94,11 +96,7 @@ if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}
       return;
     }
 
-    setState(() {
-      _isOffline = false;
-      _showSplash = true;
-      _progress = 0;
-    });
+    setState(() => _isOffline = false);
 
     await _controller?.loadUrl(
       urlRequest: URLRequest(
@@ -114,6 +112,10 @@ if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}
       return false;
     }
     return true;
+  }
+
+  Future<void> _injectBootJs(InAppWebViewController controller) async {
+    await controller.evaluateJavascript(source: _bootJs);
   }
 
   @override
@@ -134,84 +136,50 @@ if(window.PDSafeArea&&window.PDSafeArea.apply){window.PDSafeArea.apply();}
       child: Scaffold(
         backgroundColor: AppTheme.brandBlack,
         body: SafeArea(
-          top: false,
-          child: Stack(
-            children: [
-              InAppWebView(
-                initialUrlRequest: URLRequest(
-                  url: WebUri(widget.initialUrl ?? AppConfig.homeUrl),
-                  headers: const {'X-PhonesDukan-App': '1'},
-                ),
-                initialSettings: InAppWebViewSettings(
-                  javaScriptEnabled: true,
-                  domStorageEnabled: true,
-                  databaseEnabled: true,
-                  useWideViewPort: true,
-                  supportZoom: false,
-                  builtInZoomControls: false,
-                  displayZoomControls: false,
-                  mediaPlaybackRequiresUserGesture: false,
-                  allowsInlineMediaPlayback: true,
-                  transparentBackground: true,
-                  userAgent: Platform.isAndroid
-                      ? 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36${AppConfig.userAgentSuffix}'
-                      : null,
-                ),
-                onWebViewCreated: (controller) {
-                  _controller = controller;
-                },
-                onLoadStart: (controller, url) {
-                  if (!mounted) return;
-                  setState(() {
-                    _showSplash = true;
-                    _progress = 0;
-                  });
-                },
-                onProgressChanged: (controller, progress) {
-                  if (!mounted) return;
-                  setState(() => _progress = progress / 100);
-                },
-                onLoadStop: (controller, url) async {
-                  await controller.evaluateJavascript(source: _bootJs);
-                  if (!mounted) return;
-                  setState(() => _showSplash = false);
-                },
-                shouldOverrideUrlLoading: (controller, action) async {
-                  return _onNavigation(action);
-                },
-                onReceivedError: (controller, request, error) async {
-                  if (request.isForMainFrame == true && mounted) {
-                    setState(() => _isOffline = true);
-                  }
-                },
+          top: true,
+          bottom: false,
+          child: InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri(widget.initialUrl ?? AppConfig.homeUrl),
+              headers: const {'X-PhonesDukan-App': '1'},
+            ),
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              domStorageEnabled: true,
+              databaseEnabled: true,
+              useWideViewPort: true,
+              supportZoom: false,
+              builtInZoomControls: false,
+              displayZoomControls: false,
+              mediaPlaybackRequiresUserGesture: false,
+              allowsInlineMediaPlayback: true,
+              transparentBackground: true,
+              cacheEnabled: true,
+              underPageBackgroundColor: AppTheme.brandBlack,
+              userAgent: Platform.isAndroid
+                  ? 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36${AppConfig.userAgentSuffix}'
+                  : null,
+            ),
+            initialUserScripts: UnmodifiableListView<UserScript>([
+              UserScript(
+                source: _bootJs,
+                injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
               ),
-              if (_showSplash)
-                Container(
-                  color: AppTheme.brandBlack,
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/app-icon.png',
-                        width: 120,
-                        height: 120,
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: 180,
-                        child: LinearProgressIndicator(
-                          value: _progress > 0 ? _progress : null,
-                          backgroundColor: Colors.white12,
-                          color: AppTheme.brandYellow,
-                          minHeight: 4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              WhatsAppFab(),
-            ],
+            ]),
+            onWebViewCreated: (controller) {
+              _controller = controller;
+            },
+            onLoadStop: (controller, url) async {
+              await _injectBootJs(controller);
+            },
+            shouldOverrideUrlLoading: (controller, action) async {
+              return _onNavigation(action);
+            },
+            onReceivedError: (controller, request, error) async {
+              if (request.isForMainFrame == true && mounted) {
+                setState(() => _isOffline = true);
+              }
+            },
           ),
         ),
       ),

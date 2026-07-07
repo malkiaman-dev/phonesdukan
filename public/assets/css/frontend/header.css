@@ -23,10 +23,10 @@
 }
 
 html[data-pd-app="1"] {
-  --pd-status-inset: 0px;
-  --safe-area-top: 0px;
-  --pd-chrome-pad-top: 0px;
-  --pd-chrome-offset: calc(var(--announcement-height) + var(--header-height));
+  --pd-status-inset: env(safe-area-inset-top, 0px);
+  --safe-area-top: var(--pd-status-inset);
+  --pd-chrome-pad-top: var(--pd-status-inset);
+  --pd-chrome-offset: calc(var(--pd-status-inset) + var(--announcement-height) + var(--header-height));
 }
 
 html {
@@ -1194,8 +1194,8 @@ html[data-pd-app="1"] .pd-header-stack {
 
   html[data-pd-app="1"] .pd-chrome-spacer {
     display: block;
-    height: calc(var(--announcement-height) + var(--header-height));
-    min-height: calc(var(--announcement-height) + var(--header-height));
+    height: calc(var(--pd-status-inset) + var(--announcement-height) + var(--header-height));
+    min-height: calc(var(--pd-status-inset) + var(--announcement-height) + var(--header-height));
   }
 
   .pd-chrome-spacer {
