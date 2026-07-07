@@ -579,13 +579,6 @@ $pdApkFilename = defined('APK_DOWNLOAD_FILENAME') ? APK_DOWNLOAD_FILENAME : 'pho
    download="<?= htmlspecialchars($pdApkFilename, ENT_QUOTES, 'UTF-8'); ?>"
    aria-label="<?= htmlspecialchars(APP_DOWNLOAD_BUTTON_TEXT, ENT_QUOTES, 'UTF-8'); ?>"
    title="<?= htmlspecialchars(APP_DOWNLOAD_BUTTON_TEXT, ENT_QUOTES, 'UTF-8'); ?>">
-    <img src="<?= htmlspecialchars(getAppIconUrl(), ENT_QUOTES, 'UTF-8'); ?>"
-         alt=""
-         class="pd-download-app-icon"
-         width="28"
-         height="28"
-         aria-hidden="true"
-         decoding="async">
     <span class="pd-download-label"><?= htmlspecialchars(APP_DOWNLOAD_BUTTON_TEXT, ENT_QUOTES, 'UTF-8'); ?></span>
 </a>
 <!-- ── /Get App Button ──────────────────────────────────────────────────────── -->
