@@ -8,34 +8,37 @@
         return base + (path.startsWith('/') ? path : '/' + path);
     };
 
-    /* ── Brand filter tabs ─────────────────────────────────── */
+    /* ── Brand filter tabs (client-side only when button filters are present) ── */
     document.addEventListener('DOMContentLoaded', function () {
-        var tabs  = document.querySelectorAll('.mob-brand-tab');
-        var cards = document.querySelectorAll('.mob-na-card');
+        var bar = document.getElementById('mobBrandBar');
+        if (bar) {
+            var tabs = bar.querySelectorAll('button.mob-brand-tab[data-brand]');
+            var cards = document.querySelectorAll('.mob-na-card[data-brand]');
 
-        if (!tabs.length) return;
+            if (tabs.length && cards.length) {
+                function filterByBrand(brand) {
+                    tabs.forEach(function (t) {
+                        var active = t.getAttribute('data-brand') === brand;
+                        t.classList.toggle('is-active', active);
+                        t.setAttribute('aria-pressed', active ? 'true' : 'false');
+                    });
+                    cards.forEach(function (card) {
+                        var show = brand === 'all' || card.getAttribute('data-brand') === brand;
+                        card.style.display = show ? '' : 'none';
+                    });
+                }
 
-        function filterByBrand(brand) {
-            tabs.forEach(function (t) {
-                var active = t.getAttribute('data-brand') === brand;
-                t.classList.toggle('is-active', active);
-                t.setAttribute('aria-pressed', active ? 'true' : 'false');
-            });
-            cards.forEach(function (card) {
-                var show = brand === 'all' || card.getAttribute('data-brand') === brand;
-                card.style.display = show ? '' : 'none';
-            });
+                tabs.forEach(function (tab) {
+                    tab.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        filterByBrand(tab.getAttribute('data-brand') || 'all');
+                    });
+                });
+
+                filterByBrand('all');
+            }
         }
 
-        tabs.forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                filterByBrand(tab.getAttribute('data-brand') || 'all');
-            });
-        });
-
-        filterByBrand('all');
-
-        /* ── Brand carousel (transform, auto-scroll, dots) ─── */
         initBrandsCarousel();
     });
 

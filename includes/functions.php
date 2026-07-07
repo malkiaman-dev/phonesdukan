@@ -617,6 +617,8 @@ if (!function_exists('loadJS')) {
     {
         $uri = getRequestPath();
 
+        emitJs('public/assets/js/pd-app.js');
+        emitJs('public/assets/js/safe-area.js');
         emitJs('public/assets/js/common.js');
         if (!isPhonesDukanApp()) {
             emitJs('public/assets/js/download-app.js');

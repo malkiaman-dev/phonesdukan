@@ -63,23 +63,23 @@ $sidebarCategories = $sidebarCatalogModel->getSidebarCategories();
             <div class="sb-categories">
                 <?php foreach ($sidebarCategories as $sidebarCategory): ?>
                     <?php
-                    $categoryId = (int) ($sidebarCategory['category_id'] ?? 0);
-                    $categorySlug = (string) ($sidebarCategory['slug'] ?? '');
-                    $categoryName = (string) ($sidebarCategory['category_name'] ?? '');
-                    $categoryIcon = CatalogModel::sidebarCategoryIcon($categorySlug);
-                    $categoryChildren = $sidebarCatalogModel->getSidebarCategoryChildren($categoryId, $categorySlug);
-                    $isExpandable = $categoryChildren !== [];
+                    $sbCategoryId = (int) ($sidebarCategory['category_id'] ?? 0);
+                    $sbCategorySlug = (string) ($sidebarCategory['slug'] ?? '');
+                    $sbCategoryName = (string) ($sidebarCategory['category_name'] ?? '');
+                    $sbCategoryIcon = CatalogModel::sidebarCategoryIcon($sbCategorySlug);
+                    $sbCategoryChildren = $sidebarCatalogModel->getSidebarCategoryChildren($sbCategoryId, $sbCategorySlug);
+                    $isExpandable = $sbCategoryChildren !== [];
                     $itemClass = 'sb-category-item' . ($isExpandable ? ' sb-category-item--expandable' : '');
-                    $headingId = htmlspecialchars($categorySlug . '-category', ENT_QUOTES, 'UTF-8');
-                    $contentId = htmlspecialchars($categorySlug . '-content', ENT_QUOTES, 'UTF-8');
-                    $toggleId = htmlspecialchars($categorySlug . '-toggle-icon', ENT_QUOTES, 'UTF-8');
+                    $headingId = htmlspecialchars($sbCategorySlug . '-category', ENT_QUOTES, 'UTF-8');
+                    $contentId = htmlspecialchars($sbCategorySlug . '-content', ENT_QUOTES, 'UTF-8');
+                    $toggleId = htmlspecialchars($sbCategorySlug . '-toggle-icon', ENT_QUOTES, 'UTF-8');
                     ?>
                     <div class="<?= $itemClass ?>">
                         <div class="category-heading" id="<?= $headingId ?>" tabindex="0">
                             <span class="category-icon">
-                                <img src="<?= url($categoryIcon); ?>" alt="" class="category-icon-img">
+                                <img src="<?= url($sbCategoryIcon); ?>" alt="" class="category-icon-img">
                             </span>
-                            <a href="<?= url($categorySlug); ?>" class="category-link"><?= htmlspecialchars($categoryName, ENT_QUOTES, 'UTF-8') ?></a>
+                            <a href="<?= url($sbCategorySlug); ?>" class="category-link"><?= htmlspecialchars($sbCategoryName, ENT_QUOTES, 'UTF-8') ?></a>
                             <?php if ($isExpandable): ?>
                                 <span class="dropdown-icon" id="<?= $toggleId ?>" aria-hidden="true">&#x25BC;</span>
                             <?php endif; ?>
@@ -87,7 +87,7 @@ $sidebarCategories = $sidebarCatalogModel->getSidebarCategories();
                         <?php if ($isExpandable): ?>
                             <div class="category-content" id="<?= $contentId ?>">
                                 <ul>
-                                    <?php foreach ($categoryChildren as $child): ?>
+                                    <?php foreach ($sbCategoryChildren as $child): ?>
                                         <li>
                                             <a href="<?= url($child['href']); ?>" class="subcategory-link">
                                                 <?= htmlspecialchars($child['name'], ENT_QUOTES, 'UTF-8') ?>

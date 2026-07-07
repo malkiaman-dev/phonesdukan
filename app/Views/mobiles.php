@@ -1,5 +1,7 @@
 <?php
 require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+require_once dirname(__DIR__, 1) . '/Models/CatalogModel.php';
+require_once dirname(__DIR__, 1) . '/Models/ProductModel.php';
 
 $pageTitle       = "Mobile Prices in Pakistan " . date('F Y') . " – Updated Rates & Top Brands";
 $metaDescription = "Explore mobile prices in Pakistan " . date('F Y') . ". Compare latest models from Samsung, Infinix, Oppo, Vivo, Xiaomi & more. Updated daily!";
@@ -8,49 +10,49 @@ $metaKeywords    = "mobile prices Pakistan, buy mobile online Pakistan, smartpho
 
 $breadcrumbs = SeoHelper::categoryBreadcrumbs('mobiles', 'Mobiles');
 
-require_once __DIR__ . '/../../database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 
-$database = new Database();
-$conn     = $database->getConnection();
-if (!$conn) { die("Database connection error."); }
+$catalogModel = new CatalogModel();
+$productModel = new ProductModel();
+$category = $catalogModel->getActiveParentCategoryBySlug('mobiles');
 
-$brandList = [
-    'samsung' => 'Samsung',
-    'infinix' => 'Infinix',
-    'oppo'    => 'Oppo',
-    'vivo'    => 'Vivo',
-    'xiaomi'  => 'Xiaomi',
-    'tecno'   => 'Tecno',
-    'realme'  => 'Realme',
-];
+if (!$category) {
+    echo '<p class="mob-empty">Category not found.</p>';
+    require_once dirname(__DIR__, 2) . '/includes/footer.php';
+    return;
+}
+
+$categoryId = (int) $category['category_id'];
+$categorySlug = (string) $category['slug'];
+$categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
+
+$limit = 48;
+$paged = isset($_GET['paged']) ? (int) $_GET['paged'] : 1;
+$paged = $paged > 0 ? $paged : 1;
+$offset = ($paged - 1) * $limit;
+
+$totalRows = $productModel->countListingProductsForCategory($categoryId);
+$rawProducts = $productModel->getListingProductsForCategory($categoryId, $limit, $offset);
 
 $allProducts = [];
-foreach ($brandList as $brandSlug => $brandName) {
-    $query = "SELECT p.product_id, p.product_slug, p.product_name,
-                     p.regular_price, p.sale_price, p.stock_quantity,
-                     p.product_status, p.product_tag,
-                     pi.image_url, b.slug AS brand_slug, c.slug AS category_slug
-              FROM products p
-              JOIN brands b ON p.brand_id = b.brand_id
-              JOIN categories c ON p.category_id = c.category_id
-              LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
-              WHERE p.category_id = 2 AND b.slug = :brand AND p.product_status != '0'
-              ORDER BY p.created_at DESC
-              LIMIT 6";
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(':brand', $brandSlug);
-    $stmt->execute();
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($rows as $p) {
-        $card = prepareProductCardFromRow($p);
-        $card['brand_slug'] = $brandSlug;
-        $allProducts[] = $card;
-    }
+foreach ($rawProducts as $row) {
+    $allProducts[] = prepareProductCardFromRow($row);
 }
+
+$brandList = [];
+foreach ($categoryBrands as $brandRow) {
+    $slug = (string) ($brandRow['slug'] ?? '');
+    if ($slug === '') {
+        continue;
+    }
+    $brandList[$slug] = (string) ($brandRow['brand_name'] ?? $slug);
+}
+
 $totalProducts = count($allProducts);
 $totalBrands   = count($brandList);
+$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+$activeBrandSlug = null;
+$allLabel = 'All Mobiles';
 ?>
 
 <!-- HERO -->
@@ -63,16 +65,7 @@ $totalBrands   = count($brandList);
 </section>
 
 <!-- BRAND FILTER TABS -->
-<div class="mob-brand-bar" id="mobBrandBar">
-    <div class="mob-brand-bar-inner">
-        <button class="mob-brand-tab is-active" data-brand="all" aria-pressed="true">All</button>
-        <?php foreach ($brandList as $slug => $name): ?>
-            <button class="mob-brand-tab" data-brand="<?= htmlspecialchars($slug, ENT_QUOTES, 'UTF-8') ?>" aria-pressed="false">
-                <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>
-            </button>
-        <?php endforeach; ?>
-    </div>
-</div>
+<?php include __DIR__ . '/partials/category-brand-tabs.php'; ?>
 
 <?php include_once __DIR__ . '/ad/feed1.php'; ?>
 
@@ -82,7 +75,7 @@ $totalBrands   = count($brandList);
         <?php if (!empty($allProducts)): ?>
             <div class="mob-product-grid" id="mobProductGrid">
                 <?php foreach ($allProducts as $product): ?>
-                    <article class="na-card mob-na-card" data-brand="<?= htmlspecialchars($product['brand_slug'], ENT_QUOTES, 'UTF-8') ?>">
+                    <article class="na-card mob-na-card">
 
                         <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
@@ -118,6 +111,20 @@ $totalBrands   = count($brandList);
                     </article>
                 <?php endforeach; ?>
             </div>
+
+            <?php if ($totalPages > 1): ?>
+                <div class="mob-pagination-wrap">
+                    <div class="pagination mob-pagination">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="<?= htmlspecialchars(url('mobiles') . '?paged=' . $i, ENT_QUOTES, 'UTF-8') ?>"
+                               class="<?= ($i === $paged) ? 'active' : '' ?>"
+                               <?= ($i === $paged) ? "aria-current='page'" : '' ?>>
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
         <?php else: ?>
             <p class="mob-empty">No products found. Please check back soon.</p>

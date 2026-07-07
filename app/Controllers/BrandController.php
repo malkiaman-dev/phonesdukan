@@ -42,13 +42,19 @@ class BrandController
         $totalRows = $productModel->countListingProductsForBrandAndCategory($brandId, $categoryId);
         $rawProducts = $productModel->getListingProductsForBrandAndCategory($brandId, $categoryId, $limit, $offset);
 
+        $categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
+
+        if ($totalRows === 0) {
+            header('Location: ' . url($category['slug']), true, 302);
+            exit();
+        }
+
         $products = [];
         foreach ($rawProducts as $row) {
             $products[] = prepareProductCardFromRow($row);
         }
 
         $totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
-        $categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
 
         $listingPath = rawurlencode((string) $category['slug']) . '/' . rawurlencode((string) $brand['slug']);
 

@@ -1,5 +1,7 @@
 <?php
 require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+require_once dirname(__DIR__, 1) . '/Models/CatalogModel.php';
+require_once dirname(__DIR__, 1) . '/Models/ProductModel.php';
 
 $pageTitle = "Best Wireless Earbuds Prices in Pakistan | Phones Dukan";
 $metaDescription = "Shop premium wireless earbuds at Phones Dukan with updated prices in Pakistan. Compare budget to premium earbuds with ANC, calling, and long battery life.";
@@ -8,51 +10,38 @@ $metaKeywords = "Wireless Earbuds, best wireless earbuds, wireless earbuds price
 
 $breadcrumbs = SeoHelper::categoryBreadcrumbs('wireless-earbuds', 'Wireless Earbuds');
 
-require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/header.php';
 
-$database = new Database();
-$conn = $database->getConnection();
+$catalogModel = new CatalogModel();
+$productModel = new ProductModel();
+$category = $catalogModel->getActiveParentCategoryBySlug('wireless-earbuds');
 
-if (!$conn) {
-    die('Database connection error.');
+if (!$category) {
+    echo '<p class="we-empty">Category not found.</p>';
+    require_once dirname(__DIR__, 2) . '/includes/footer.php';
+    return;
 }
 
+$categoryId = (int) $category['category_id'];
+$categorySlug = (string) $category['slug'];
+$categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
+
 $limit = 16;
-$paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
+$paged = isset($_GET['paged']) ? (int) $_GET['paged'] : 1;
 $paged = $paged > 0 ? $paged : 1;
 $offset = ($paged - 1) * $limit;
 
-$query = "SELECT
-            p.product_id,
-            p.product_slug,
-            p.product_name,
-            p.regular_price,
-            p.sale_price,
-            p.stock_quantity,
-            p.product_status,
-            p.product_tag,
-            pi.image_url,
-            b.slug AS brand_slug,
-            c.slug AS category_slug
-          FROM products p
-          JOIN brands b ON p.brand_id = b.brand_id
-          JOIN categories c ON p.category_id = c.category_id
-          LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
-          WHERE c.slug = 'wireless-earbuds' AND p.product_status != '0'
-          ORDER BY p.created_at DESC
-          LIMIT :limit OFFSET :offset";
-
-$stmt = $conn->prepare($query);
-$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$rawProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$totalRows = $productModel->countListingProductsForCategory($categoryId);
+$rawProducts = $productModel->getListingProductsForCategory($categoryId, $limit, $offset);
 
 $products = [];
 foreach ($rawProducts as $product) {
     $products[] = prepareProductCardFromRow($product);
 }
+
+$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+$activeBrandSlug = null;
+$allLabel = 'All';
 ?>
 
 <section class="we-hero">
@@ -62,6 +51,8 @@ foreach ($rawProducts as $product) {
         <p class="we-hero-sub">Explore the latest wireless earbuds in Pakistan with deep bass, ANC noise cancellation, low latency gaming mode, and long battery life from trusted audio brands.</p>
     </div>
 </section>
+
+<?php include __DIR__ . '/partials/category-brand-tabs.php'; ?>
 
 <?php include_once __DIR__ . '/ad/feed1.php'; ?>
 
@@ -113,19 +104,8 @@ foreach ($rawProducts as $product) {
 
         <div class="we-pagination-wrap">
             <div class="pagination we-pagination">
-                <?php
-                $countSql = "SELECT COUNT(*) as total
-                             FROM products p
-                             JOIN categories c ON p.category_id = c.category_id
-                             WHERE c.slug = 'wireless-earbuds' AND p.product_status != '0'";
-                $stmtCount = $conn->prepare($countSql);
-                $stmtCount->execute();
-                $totalRows = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
-                $totalPages = (int)ceil($totalRows / $limit);
-
-                for ($i = 1; $i <= $totalPages; $i++):
-                ?>
-                    <a href="?paged=<?= $i ?>"
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="<?= htmlspecialchars(url('wireless-earbuds') . '?paged=' . $i, ENT_QUOTES, 'UTF-8') ?>"
                        class="<?= ($i === $paged) ? 'active' : '' ?>"
                        <?= ($i === $paged) ? "aria-current='page'" : '' ?>>
                         <?= $i ?>
@@ -135,10 +115,6 @@ foreach ($rawProducts as $product) {
         </div>
     </div>
 </section>
-
-<?php
-$conn = null;
-?>
 
 <section class="we-content-section">
     <div class="we-container">

@@ -7,18 +7,21 @@ if (!defined('BRAND_LISTING_PAGE')) {
 
 $brandName = (string) ($brand['brand_name'] ?? 'Brand');
 $brandSlug = (string) ($brand['slug'] ?? '');
-$categoryName = (string) ($category['category_name'] ?? 'Category');
-$categorySlug = (string) ($category['slug'] ?? '');
-$listingPath = (string) ($listingPath ?? ($categorySlug . '/' . $brandSlug));
+$listingCategoryName = (string) ($category['category_name'] ?? 'Category');
+$listingCategorySlug = (string) ($category['slug'] ?? '');
+$listingPath = (string) ($listingPath ?? ($listingCategorySlug . '/' . $brandSlug));
 
-$pageTitle = $brandName . ' ' . $categoryName . ' Price in Pakistan | Phones Dukan';
-$metaDescription = 'Shop ' . $brandName . ' ' . $categoryName . ' at Phones Dukan with updated prices in Pakistan. Browse the latest models and deals.';
+$pageTitle = $brandName . ' ' . $listingCategoryName . ' Price in Pakistan | Phones Dukan';
+$metaDescription = 'Shop ' . $brandName . ' ' . $listingCategoryName . ' at Phones Dukan with updated prices in Pakistan. Browse the latest models and deals.';
 $metaRobots = 'index, follow';
-$metaKeywords = $brandName . ' ' . $categoryName . ', ' . $brandName . ' price in pakistan, Phones Dukan';
+$metaKeywords = $brandName . ' ' . $listingCategoryName . ', ' . $brandName . ' price in pakistan, Phones Dukan';
 
-$breadcrumbs = SeoHelper::categoryBrandBreadcrumbs($categorySlug, $categoryName, $brandSlug, $brandName);
+$breadcrumbs = SeoHelper::categoryBrandBreadcrumbs($listingCategorySlug, $listingCategoryName, $brandSlug, $brandName);
 
 require_once dirname(__DIR__, 2) . '/includes/header.php';
+
+$categoryName = $listingCategoryName;
+$categorySlug = $listingCategorySlug;
 ?>
 
 <div class="bl-page">
@@ -30,24 +33,10 @@ require_once dirname(__DIR__, 2) . '/includes/header.php';
         </div>
     </section>
 
-    <?php if (!empty($categoryBrands)): ?>
-    <div class="mob-brand-bar" id="mobBrandBar">
-        <div class="mob-brand-bar-inner">
-            <a href="<?= htmlspecialchars(url($categorySlug), ENT_QUOTES, 'UTF-8') ?>" class="mob-brand-tab">All</a>
-            <?php foreach ($categoryBrands as $categoryBrand): ?>
-                <?php
-                $tabSlug = (string) ($categoryBrand['slug'] ?? '');
-                $tabName = (string) ($categoryBrand['brand_name'] ?? '');
-                $tabHref = url($categorySlug . '/' . rawurlencode($tabSlug));
-                $isActive = $tabSlug === $brandSlug;
-                ?>
-                <a href="<?= htmlspecialchars($tabHref, ENT_QUOTES, 'UTF-8') ?>" class="mob-brand-tab<?= $isActive ? ' is-active' : '' ?>">
-                    <?= htmlspecialchars($tabName, ENT_QUOTES, 'UTF-8') ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
+    <?php
+    $activeBrandSlug = $brandSlug;
+    include __DIR__ . '/partials/category-brand-tabs.php';
+    ?>
 
     <section class="bl-products-section">
         <div class="bl-container">

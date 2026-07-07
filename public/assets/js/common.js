@@ -155,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateFixedChromeMetrics() {
         const root = document.documentElement;
-        const isMobile = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
         let annH = announcementTrack ? announcementTrack.offsetHeight : 0;
         let headerH = headerStack ? headerStack.offsetHeight : 0;
 
@@ -169,15 +168,30 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const padTop = readCssPx(getComputedStyle(root).getPropertyValue("--pd-chrome-pad-top"));
-        const totalOffset = Math.round(padTop + annH + headerH);
+        let totalOffset = Math.round(padTop + annH + headerH);
 
-        if (isMobile) {
-            root.style.setProperty("--pd-chrome-offset", totalOffset + "px");
-        } else {
-            root.style.setProperty(
-                "--pd-chrome-offset",
-                "calc(var(--pd-chrome-pad-top) + var(--announcement-height) + var(--header-height))"
-            );
+        const siteChrome = document.getElementById("pd-site-chrome");
+        const isMobileLayout = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
+        if (window.scrollY < 2) {
+            if (isMobileLayout && siteChrome) {
+                const chromeBottom = siteChrome.getBoundingClientRect().bottom;
+                if (chromeBottom > 0) {
+                    totalOffset = Math.round(chromeBottom);
+                }
+            } else if (headerStack) {
+                const headerBottom = headerStack.getBoundingClientRect().bottom;
+                if (headerBottom > 0) {
+                    totalOffset = Math.round(headerBottom);
+                }
+            }
+        }
+
+        root.style.setProperty("--pd-chrome-offset", totalOffset + "px");
+
+        const spacer = document.querySelector(".pd-chrome-spacer");
+        if (spacer) {
+            spacer.style.height = totalOffset + "px";
+            spacer.style.minHeight = totalOffset + "px";
         }
     }
 
@@ -195,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (typeof ResizeObserver !== "undefined") {
             const chromeObserver = new ResizeObserver(updateFixedChromeMetrics);
             if (headerStack) chromeObserver.observe(headerStack);
+            if (announcementTrack) chromeObserver.observe(announcementTrack);
             var siteChrome = document.getElementById("pd-site-chrome");
             if (siteChrome) chromeObserver.observe(siteChrome);
         }

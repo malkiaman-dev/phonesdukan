@@ -166,10 +166,13 @@ html[data-pd-app="1"] .pd-header-stack {
 }
 
 .pd-chrome-spacer {
-  display: none;
+  display: block;
   width: 100%;
   height: var(--pd-chrome-offset);
+  min-height: var(--pd-chrome-offset);
+  margin-bottom: -1px;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .pd-announcement-track {
@@ -231,7 +234,8 @@ html[data-pd-app="1"] .pd-header-stack {
 .pd-main-header {
   background: rgba(17, 17, 17, 0.94);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(247, 209, 23, 0.2);
+  border-bottom: none;
+  box-shadow: inset 0 -1px 0 rgba(247, 209, 23, 0.2);
   transition: box-shadow 0.25s ease;
 }
 
@@ -1272,7 +1276,8 @@ html[data-pd-app="1"] .pd-header-stack {
 
   .pd-mobile-header {
     background: rgba(17, 17, 17, 0.95);
-    border-bottom: 1px solid rgba(247, 209, 23, 0.2);
+    border-bottom: none;
+    box-shadow: inset 0 -1px 0 rgba(247, 209, 23, 0.2);
     backdrop-filter: blur(8px);
     position: relative;
   }

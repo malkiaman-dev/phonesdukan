@@ -74,7 +74,7 @@ $productImage        = isset($images[0]['image_url']) ? getBaseURL() . ltrim($im
 $productImageAlt     = isset($product['product_name']) ? $product['product_name'] : 'Phones Dukan';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"<?= isPhonesDukanApp() ? ' data-pd-app="1"' : '' ?>>
 <head>
     <!-- Required Meta -->
 <meta charset="UTF-8">

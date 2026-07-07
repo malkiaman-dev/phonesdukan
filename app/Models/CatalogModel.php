@@ -553,17 +553,18 @@ class CatalogModel
         $categorySlug = self::makeSlug($categorySlug);
         $children = [];
 
-        if ($categorySlug === 'mobiles') {
-            foreach ($this->getBrandsWithProductsInCategory($categoryId) as $brand) {
-                $brandSlug = (string) ($brand['slug'] ?? '');
-                if ($brandSlug === '') {
-                    continue;
-                }
-                $children[] = [
-                    'name' => (string) ($brand['brand_name'] ?? $brandSlug),
-                    'href' => $categorySlug . '/' . $brandSlug,
-                ];
+        foreach ($this->getBrandsWithProductsInCategory($categoryId) as $brand) {
+            $brandSlug = (string) ($brand['slug'] ?? '');
+            if ($brandSlug === '') {
+                continue;
             }
+            $children[] = [
+                'name' => (string) ($brand['brand_name'] ?? $brandSlug),
+                'href' => $categorySlug . '/' . $brandSlug,
+            ];
+        }
+
+        if ($children !== []) {
             return $children;
         }
 

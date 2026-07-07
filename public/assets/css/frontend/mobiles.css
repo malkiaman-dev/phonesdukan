@@ -293,6 +293,8 @@
   transition: color 0.18s ease, border-color 0.18s ease;
   white-space: nowrap;
   outline: none;
+  text-decoration: none !important;
+  display: inline-block;
 }
 .mob-brand-tab:hover { color: #111; }
 .mob-brand-tab.is-active {
