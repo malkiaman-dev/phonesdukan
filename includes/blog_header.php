@@ -72,8 +72,8 @@ $ogImage = getAppIconUrl();
 
     <!-- Load Styles -->
     <?php loadCSS(); ?>
-    <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/blog_header.css">
-    <link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/blog_footer.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/blog_header.css'), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/blog_footer.css'), ENT_QUOTES, 'UTF-8') ?>">
 </head>
 <body>
 <header class="rishi-header sticky">

@@ -4,6 +4,14 @@ require_once dirname(__DIR__, 1) . '/app/Models/CartModel.php';
 require_once dirname(__DIR__, 1) . '/app/config/session.php';
 require_once dirname(__DIR__, 1) . '/app/config/wholesale_config.php';
 require_once dirname(__DIR__, 1) . '/includes/functions.php';
+
+// HTML must never be cached long-term so users always get fresh asset ?v= URLs
+if (!headers_sent()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+}
+
 $wholesaleAccessGranted = wholesaleHasAccess();
 if (!isset($pageTitle)) {
     $pageTitle = null;
@@ -139,6 +147,7 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 
 <script>
 window.__PD_BASE_PATH__ = <?= json_encode(rtrim(getBaseURL(), '/')) ?>;
+window.__PD_ASSET_VERSION__ = <?= json_encode(getDeployAssetVersion()) ?>;
 window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' ?>;
 </script>
 
@@ -281,8 +290,6 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
 
 <!-- Load Styles -->
 <?php loadCSS(); ?>
-<link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/header.css">
-<link rel="stylesheet" href="<?= getBaseURL(); ?>public/assets/css/frontend/footer.css">
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
 

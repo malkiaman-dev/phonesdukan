@@ -182,8 +182,8 @@ function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
     </a>';
 }
 ?>
-<link rel="stylesheet" href="<?= url('public/assets/css/frontend/post_view.css') ?>">
-<link rel="stylesheet" href="<?= url('public/assets/css/frontend/blog.css') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/post_view.css'), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/blog.css'), ENT_QUOTES, 'UTF-8') ?>">
 
 <!-- ══ STICKY SHARE SIDEBAR (desktop) ══════════════════ -->
 <div class="pv-sticky-share" id="pv-sticky-share" aria-label="Share this article">
@@ -353,7 +353,7 @@ function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
 }
 </script>
 
-<script src="/public/assets/js/pta_calculator.js"></script>
+<script src="<?= htmlspecialchars(assetUrl('public/assets/js/pta_calculator.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 
 <!-- ══ PAGE JS ══════════════════════════════════════════ -->
 <script>

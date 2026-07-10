@@ -117,7 +117,7 @@
     SetEnvIf HTTP_X_PhonesDukan_App "1" pd_app_request=1
     <FilesMatch "\.php$">
         Header set Cache-Control "no-store, no-cache, must-revalidate" env=!pd_app_request
-        Header set Cache-Control "private, max-age=300, stale-while-revalidate=60" env=pd_app_request
+        Header set Cache-Control "private, no-cache, must-revalidate, max-age=0" env=pd_app_request
     </FilesMatch>
 
     # ── Security headers ──────────────────────────────────────────────────

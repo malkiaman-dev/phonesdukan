@@ -993,5 +993,5 @@ foreach ($latest_posts_raw as $post) {
         </div>
     </div>
 </section>
-<script src="/public/assets/js/pd-carousel.js"></script>
+<script src="<?= htmlspecialchars(assetUrl('public/assets/js/pd-carousel.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>

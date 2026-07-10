@@ -105,8 +105,8 @@ $categories = $postModel->getAllCategories();
     </div>
 </div>
 
-<script src="<?= getBaseURL(); ?>public/assets/js/faqs.js"></script>
-<script src="<?= getBaseURL(); ?>public/assets/js/frontend/blog_search.js"></script>
+<script src="<?= htmlspecialchars(assetUrl('public/assets/js/faqs.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="<?= htmlspecialchars(assetUrl('public/assets/js/frontend/blog_search.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 
 <script type="application/ld+json">
 {

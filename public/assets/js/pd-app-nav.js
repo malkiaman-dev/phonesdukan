@@ -3,6 +3,7 @@
 
     var MAX_CACHE = 16;
     var STACK_KEY = "pd-nav-stack";
+    var ASSET_VERSION_KEY = "pd-asset-version";
     var pageCache = new Map();
     var pendingFetches = new Map();
     var loadedScripts = new Set();
@@ -10,6 +11,22 @@
     var booted = false;
     var navigating = false;
     var activeNavToken = 0;
+
+    function syncAssetVersion() {
+        var current = String(window.__PD_ASSET_VERSION__ || "");
+        if (!current) {
+            return;
+        }
+        try {
+            var previous = sessionStorage.getItem(ASSET_VERSION_KEY);
+            if (previous && previous !== current) {
+                pageCache.clear();
+                pendingFetches.clear();
+                loadedScripts.clear();
+            }
+            sessionStorage.setItem(ASSET_VERSION_KEY, current);
+        } catch (e) {}
+    }
 
     function isApp() {
         return window.PDApp && typeof window.PDApp.is === "function" && window.PDApp.is();
@@ -329,7 +346,7 @@
                 "X-PhonesDukan-App": "1",
                 "X-PD-App-Nav": "1"
             },
-            cache: "default"
+            cache: "no-store"
         }).then(function (response) {
             if (!response.ok) {
                 throw new Error("HTTP " + response.status);
@@ -473,6 +490,7 @@
             return;
         }
         booted = true;
+        syncAssetVersion();
 
         if ("scrollRestoration" in history) {
             history.scrollRestoration = "manual";

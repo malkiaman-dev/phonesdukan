@@ -495,6 +495,60 @@ if (!function_exists('assetFilePath')) {
     }
 }
 
+if (!function_exists('getDeployAssetVersion')) {
+    /**
+     * Global deploy stamp. Bump public/assets/version.txt on each release
+     * so every CSS/JS URL changes even if file mtimes are preserved.
+     */
+    function getDeployAssetVersion(): string
+    {
+        static $version = null;
+        if ($version !== null) {
+            return $version;
+        }
+
+        $file = getProjectRootPath() . '/public/assets/version.txt';
+        if (is_file($file)) {
+            $raw = trim((string) file_get_contents($file));
+            if ($raw !== '') {
+                $version = preg_replace('/[^a-zA-Z0-9._-]/', '', $raw) ?: '1';
+                return $version;
+            }
+        }
+
+        $version = '1';
+        return $version;
+    }
+}
+
+if (!function_exists('assetVersion')) {
+    /**
+     * Per-file cache-buster: deploy version + file mtime.
+     */
+    function assetVersion(string $relativePath): string
+    {
+        $fullPath = assetFilePath($relativePath);
+        $parts = [getDeployAssetVersion()];
+        if (is_file($fullPath)) {
+            $parts[] = (string) filemtime($fullPath);
+        }
+        return implode('.', $parts);
+    }
+}
+
+if (!function_exists('assetUrl')) {
+    /**
+     * Public URL for a CSS/JS/image asset with automatic cache busting.
+     */
+    function assetUrl(string $relativePath): string
+    {
+        $url = url($relativePath);
+        $version = assetVersion($relativePath);
+        $separator = str_contains($url, '?') ? '&' : '?';
+        return $url . $separator . 'v=' . rawurlencode($version);
+    }
+}
+
 if (!function_exists('emitCss')) {
     function emitCss($relativePath)
     {
@@ -507,7 +561,7 @@ if (!function_exists('emitCss')) {
             return;
         }
 
-        echo '<link rel="stylesheet" href="' . url($relativePath) . '?v=' . filemtime($fullPath) . '">';
+        echo '<link rel="stylesheet" href="' . htmlspecialchars(assetUrl($relativePath), ENT_QUOTES, 'UTF-8') . '">';
     }
 }
 
@@ -523,7 +577,7 @@ if (!function_exists('emitJs')) {
             return;
         }
 
-        echo '<script src="' . url($relativePath) . '?v=' . filemtime($fullPath) . '"></script>';
+        echo '<script src="' . htmlspecialchars(assetUrl($relativePath), ENT_QUOTES, 'UTF-8') . '"></script>';
     }
 }
 
@@ -534,6 +588,8 @@ if (!function_exists('loadCSS')) {
         $uri = $uri === '' ? '/' : $uri;
 
         emitCss('public/assets/css/style.css');
+        emitCss('public/assets/css/frontend/header.css');
+        emitCss('public/assets/css/frontend/footer.css');
         emitCss('public/assets/css/frontend/wholesale-access.css');
         emitCss('public/assets/css/frontend/download-app.css');
         if (isPhonesDukanApp()) {

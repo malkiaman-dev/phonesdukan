@@ -8,23 +8,19 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 $admin_name = $_SESSION['admin_name'] ?? 'Admin'; // Default name if not set
 $currentAdminPage = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
-$adminCssPath = assetFilePath('public/assets/css/admin/admin.css');
-$adminCssVer = file_exists($adminCssPath) ? filemtime($adminCssPath) : time();
-$componentsCssPath = assetFilePath('public/assets/css/admin/admin-components.css');
-$componentsCssVer = file_exists($componentsCssPath) ? filemtime($componentsCssPath) : time();
 $adminPageCssMap = [
     'add-product.php' => [
-        '/public/assets/css/admin/add-product.css',
-        '/admin/css/ai-seo.css?v=3.0',
-        '/admin/css/product-media.css?v=1.2',
+        'public/assets/css/admin/add-product.css',
+        'admin/css/ai-seo.css',
+        'admin/css/product-media.css',
     ],
     'edit-product.php' => [
-        '/public/assets/css/admin/add-product.css',
-        '/admin/css/ai-seo.css?v=3.0',
-        '/admin/css/product-media.css?v=1.2',
+        'public/assets/css/admin/add-product.css',
+        'admin/css/ai-seo.css',
+        'admin/css/product-media.css',
     ],
     'manage-catalog.php' => [
-        '/public/assets/css/admin/manage-catalog.css',
+        'public/assets/css/admin/manage-catalog.css',
     ],
 ];
 ?>
@@ -38,10 +34,10 @@ $adminPageCssMap = [
     
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="<?= url('public/assets/css/admin/admin.css') . '?v=' . $adminCssVer; ?>">
-    <link rel="stylesheet" href="<?= url('public/assets/css/admin/admin-components.css') . '?v=' . $componentsCssVer; ?>">
-    <link rel="stylesheet" href="<?= url('public/assets/css/style.css'); ?>">
-    <link rel="stylesheet" href="<?= url('public/assets/css/frontend/ui-controls.css'); ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/admin/admin.css'), ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/admin/admin-components.css'), ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/style.css'), ENT_QUOTES, 'UTF-8'); ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/ui-controls.css'), ENT_QUOTES, 'UTF-8'); ?>">
     <?php if (isset($adminPageCssMap[$currentAdminPage])): ?>
         <?php
         $adminPageStylesheets = $adminPageCssMap[$currentAdminPage];
@@ -49,7 +45,7 @@ $adminPageCssMap = [
             $adminPageStylesheets = [$adminPageStylesheets];
         }
         foreach ($adminPageStylesheets as $adminStylesheet): ?>
-            <link rel="stylesheet" href="<?= htmlspecialchars($adminStylesheet, ENT_QUOTES, 'UTF-8'); ?>">
+            <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl(ltrim((string) $adminStylesheet, '/')), ENT_QUOTES, 'UTF-8'); ?>">
         <?php endforeach; ?>
     <?php endif; ?>
     <style>
@@ -166,9 +162,9 @@ $adminPageCssMap = [
             #sidebar.is-open { left: 0; }
         }
     </style>
-    <script src="<?= url('public/assets/js/common.js'); ?>" defer></script>
-    <script src="<?= url('public/assets/js/faqs.js'); ?>" defer></script>
-    <script src="<?= url('public/assets/js/admin/required-fields.js'); ?>" defer></script>
+    <script src="<?= htmlspecialchars(assetUrl('public/assets/js/common.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <script src="<?= htmlspecialchars(assetUrl('public/assets/js/faqs.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <script src="<?= htmlspecialchars(assetUrl('public/assets/js/admin/required-fields.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 </head>
 <body>
 <!-- Navbar -->

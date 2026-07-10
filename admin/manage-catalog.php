@@ -748,7 +748,7 @@ include __DIR__ . '/admin_sidebar.php';
 <?php endif; ?>
 
 <div class="cp-toast <?= $toastType === 'error' ? 'is-error' : '' ?> <?= $toast ? 'show' : '' ?>" id="catalogToast"><?= htmlspecialchars($toast) ?></div>
-<script src="<?= htmlspecialchars(url('public/assets/js/admin/custom-select.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="<?= htmlspecialchars(assetUrl('public/assets/js/admin/custom-select.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
 <script>
 if (document.getElementById('catalogToast')?.classList.contains('show')) {
     setTimeout(function() { document.getElementById('catalogToast').classList.remove('show'); }, 4000);

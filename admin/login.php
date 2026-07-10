@@ -462,7 +462,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         })();
     </script>
-    <script src="<?= htmlspecialchars(url('public/assets/js/admin/required-fields.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <script src="<?= htmlspecialchars(assetUrl('public/assets/js/admin/required-fields.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 
 </body>
 
