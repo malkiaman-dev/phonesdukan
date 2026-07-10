@@ -102,7 +102,7 @@ body.dimmed .pd-page-scroll {
   width: 100%;
   z-index: 10000;
   background: var(--mi-soft-black);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .pd-status-bar-slot {
@@ -138,6 +138,7 @@ html[data-pd-app="1"] #pd-install-app-panel {
   right: auto;
   width: 100%;
   z-index: 10000;
+  overflow: visible;
 }
 
 .pd-top-bars {
@@ -402,6 +403,7 @@ html[data-pd-app="1"] .pd-header-stack {
   position: relative;
   display: flex;
   align-items: center;
+  z-index: 10050;
 }
 
 #search-input {
@@ -490,7 +492,7 @@ html[data-pd-app="1"] .pd-header-stack {
   background: var(--mi-white);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(0, 0, 0, 0.07);
-  z-index: 40;
+  z-index: 10050;
 }
 
 #search-results:empty {
@@ -1242,7 +1244,7 @@ html[data-pd-app="1"] .pd-header-stack {
     z-index: 10001;
     padding-top: 0;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
     background: var(--mi-soft-black);
     flex: 0 0 auto;
   }
