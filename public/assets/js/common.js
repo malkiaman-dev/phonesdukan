@@ -376,9 +376,9 @@ if (mobileCloseButton && mobileSearchContainer && mobileSearchInput && mobileSea
     });
 }
 
-// Function to sanitize input by removing unwanted characters
+// Allow normal product-name characters (hyphen, underscore, brackets, etc.)
 function sanitizeInput(input) {
-    return input.replace(/[^a-zA-Z0-9\s]/g, ''); // Removes anything except letters, numbers, and spaces
+    return String(input).replace(/[<>\\`]/g, '');
 }
 
 function uniqueValues(values) {
