@@ -222,6 +222,167 @@ class ProductModel
      * @param int $limit
      * @return array<int,array<string,mixed>>
      */
+    /**
+     * Synonym / intent groups so casual queries map to the right products.
+     *
+     * @return array<int, array{
+     *   phrases: array<int, string>,
+     *   terms: array<int, string>,
+     *   keywords: array<int, string>,
+     *   category_slugs: array<int, string>
+     * }>
+     */
+    private function searchIntentGroups(): array
+    {
+        return [
+            [
+                'phrases' => ['smart phone', 'smart phones', 'cell phone', 'cell phones', 'mobile phone', 'mobile phones'],
+                'terms' => ['phone', 'phones', 'mobile', 'mobiles', 'smartphone', 'smartphones', 'cellphone', 'cellphones', 'handset', 'handsets'],
+                // Category-only: most phone names are "Samsung Galaxy..." without the word "phone"
+                'keywords' => [],
+                'category_slugs' => ['mobiles'],
+            ],
+            [
+                'phrases' => ['wireless earbuds', 'bluetooth earbuds', 'ear buds', 'air pods', 'neckband'],
+                'terms' => ['earbud', 'earbuds', 'earphone', 'earphones', 'airpod', 'airpods', 'buds', 'tws', 'headset', 'headsets'],
+                'keywords' => ['earbud', 'earphone', 'airpod', 'airpods', 'buds', 'tws', 'headset'],
+                'category_slugs' => ['wireless-earbuds', 'headphones', 'handsfree'],
+            ],
+            [
+                'phrases' => ['bluetooth speaker', 'bluetooth speakers', 'bt speaker'],
+                'terms' => ['speaker', 'speakers'],
+                'keywords' => ['speaker', 'bluetooth'],
+                'category_slugs' => ['bluetooth-speakers'],
+            ],
+            [
+                'phrases' => ['head phone', 'head phones'],
+                'terms' => ['headphone', 'headphones', 'earcup'],
+                'keywords' => ['headphone', 'headset'],
+                'category_slugs' => ['headphones'],
+            ],
+            [
+                'phrases' => ['smart watch', 'smart watches', 'smartwatch'],
+                'terms' => ['smartwatch', 'smartwatches', 'watch', 'watches'],
+                'keywords' => ['watch', 'smartwatch'],
+                'category_slugs' => ['smart-watches'],
+            ],
+            [
+                'phrases' => ['power bank', 'power banks', 'powerbank'],
+                'terms' => ['powerbank', 'powerbanks'],
+                'keywords' => ['powerbank', 'power bank'],
+                'category_slugs' => ['power-banks'],
+            ],
+            [
+                'phrases' => ['mobile charger', 'phone charger', 'wall charger', 'fast charger'],
+                'terms' => ['charger', 'chargers', 'adapter', 'adapters'],
+                'keywords' => ['charger', 'adapter'],
+                'category_slugs' => ['mobile-chargers', 'car-charger'],
+            ],
+            [
+                'phrases' => ['car charger', 'car chargers'],
+                'terms' => [],
+                'keywords' => ['car charger'],
+                'category_slugs' => ['car-charger'],
+            ],
+            [
+                'phrases' => ['mobile cable', 'phone cable', 'charging cable', 'data cable', 'type c', 'type-c', 'usb c', 'usb-c'],
+                'terms' => ['cable', 'cables', 'cord', 'cords'],
+                'keywords' => ['cable', 'type c', 'usb'],
+                'category_slugs' => ['mobile-cables'],
+            ],
+            [
+                'phrases' => ['phone cover', 'mobile cover', 'back cover', 'phone case', 'mobile case'],
+                'terms' => ['cover', 'covers', 'case', 'cases'],
+                'keywords' => ['cover', 'case'],
+                'category_slugs' => ['mobile-cover', 'cases-protection'],
+            ],
+            [
+                'phrases' => ['tempered glass', 'screen protector', 'screen guard'],
+                'terms' => ['protector', 'protectors', 'glass'],
+                'keywords' => ['tempered', 'protector', 'glass'],
+                'category_slugs' => ['tempered-glass', 'cases-protection'],
+            ],
+            [
+                'phrases' => ['cooling fan', 'phone cooler'],
+                'terms' => ['cooler', 'coolers', 'fan', 'fans'],
+                'keywords' => ['cooling', 'cooler', 'fan'],
+                'category_slugs' => ['cooling-fan'],
+            ],
+            [
+                'phrases' => ['mobile accessory', 'mobile accessories', 'phone accessory', 'phone accessories'],
+                'terms' => ['accessory', 'accessories'],
+                'keywords' => ['accessory'],
+                'category_slugs' => ['mobile-accessories', 'accessories'],
+            ],
+            [
+                'phrases' => ['bluetooth'],
+                'terms' => ['bluetooth', 'bt'],
+                'keywords' => ['bluetooth', 'wireless', 'bt'],
+                'category_slugs' => ['wireless-earbuds', 'bluetooth-speakers', 'headphones', 'handsfree'],
+            ],
+        ];
+    }
+
+    /**
+     * Detect intent groups and leftover literal tokens from a normalized query.
+     *
+     * @return array{intents: array<int, array<string, mixed>>, tokens: array<int, string>, consumed: array<int, string>}
+     */
+    private function resolveSearchIntents(string $normalizedQuery): array
+    {
+        $haystack = ' ' . trim(preg_replace('/\s+/', ' ', $normalizedQuery) ?? '') . ' ';
+        $groups = $this->searchIntentGroups();
+        $matchedIndexes = [];
+        $consumed = [];
+
+        // Pass 1: longest phrases first so "car charger" beats bare "charger"
+        $phraseHits = [];
+        foreach ($groups as $index => $group) {
+            foreach ($group['phrases'] as $phrase) {
+                $phraseHits[] = ['index' => $index, 'phrase' => $phrase, 'len' => strlen($phrase)];
+            }
+        }
+        usort($phraseHits, static fn(array $a, array $b): int => $b['len'] <=> $a['len']);
+
+        foreach ($phraseHits as $hit) {
+            $needle = ' ' . $hit['phrase'] . ' ';
+            if (str_contains($haystack, $needle)) {
+                $matchedIndexes[$hit['index']] = true;
+                $consumed[] = $hit['phrase'];
+                $haystack = str_replace($needle, ' ', $haystack);
+            }
+        }
+
+        // Pass 2: single-term intents on whatever is left
+        foreach ($groups as $index => $group) {
+            foreach ($group['terms'] as $term) {
+                if (preg_match('/\b' . preg_quote($term, '/') . '\b/', $haystack)) {
+                    $matchedIndexes[$index] = true;
+                    $consumed[] = $term;
+                    $haystack = preg_replace('/\b' . preg_quote($term, '/') . '\b/', ' ', $haystack) ?? $haystack;
+                }
+            }
+        }
+
+        $matchedIntents = [];
+        foreach (array_keys($matchedIndexes) as $index) {
+            $matchedIntents[] = $groups[$index];
+        }
+
+        $remaining = preg_split('/\s+/', trim(preg_replace('/\s+/', ' ', $haystack) ?? ''), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $stopWords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'on', 'with', 'buy', 'best', 'price', 'pakistan'];
+        $remaining = array_values(array_filter(
+            $remaining,
+            static fn(string $token): bool => strlen($token) >= 2 && !in_array($token, $stopWords, true)
+        ));
+
+        return [
+            'intents' => $matchedIntents,
+            'tokens' => $remaining,
+            'consumed' => array_values(array_unique($consumed)),
+        ];
+    }
+
     public function searchProducts(string $query, int $limit = 10): array
     {
         $query = trim(html_entity_decode($query, ENT_QUOTES, 'UTF-8'));
@@ -231,26 +392,32 @@ class ProductModel
 
         $limit = max(1, min($limit, 100));
 
-        // Split into searchable tokens (ignore tiny words like "a", "of")
         $normalized = strtolower(preg_replace('/[^a-zA-Z0-9\s]+/', ' ', $query) ?? '');
-        $tokens = preg_split('/\s+/', trim($normalized), -1, PREG_SPLIT_NO_EMPTY) ?: [];
-        $stopWords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'on', 'with'];
-        $tokens = array_values(array_filter(
-            $tokens,
-            static fn(string $token): bool => strlen($token) >= 2 && !in_array($token, $stopWords, true)
-        ));
-
-        if ($tokens === []) {
-            $compact = strtolower(preg_replace('/\s+/', '', $normalized) ?: $query);
-            if ($compact === '') {
-                return [];
-            }
-            $tokens = [$compact];
+        $normalized = trim(preg_replace('/\s+/', ' ', $normalized) ?? '');
+        if ($normalized === '') {
+            return [];
         }
 
-        // Match against a punctuation-stripped product name so
-        // "AirPods Pro 2nd" finds "AirPods Pro (2nd generation)"
+        $resolved = $this->resolveSearchIntents($normalized);
+        $intents = $resolved['intents'];
+        $literalTokens = $resolved['tokens'];
+
+        // Fallback: if no intents and no leftover tokens, tokenize the whole query
+        if ($intents === [] && $literalTokens === []) {
+            $literalTokens = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $stopWords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'on', 'with'];
+            $literalTokens = array_values(array_filter(
+                $literalTokens,
+                static fn(string $token): bool => strlen($token) >= 2 && !in_array($token, $stopWords, true)
+            ));
+        }
+
+        // Match against punctuation-stripped product names
         $nameExpr = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(p.product_name, '(', ' '), ')', ' '), '-', ' '), '/', ' '), '.', ' '), ',', ' '))";
+        $categoryExpr = 'LOWER(COALESCE(c.slug, \'\'))';
+        $subcategoryExpr = 'LOWER(COALESCE(sc.slug, \'\'))';
+        $categoryNameExpr = "LOWER(REPLACE(REPLACE(COALESCE(c.category_name, ''), '-', ' '), '_', ' '))";
+        $brandExpr = "LOWER(REPLACE(COALESCE(b.brand_name, ''), '-', ' '))";
 
         $whereParts = [
             'p.product_status != 0',
@@ -258,31 +425,90 @@ class ProductModel
         ];
         $params = [];
         $relevanceParts = [];
+        $paramIndex = 0;
 
-        foreach ($tokens as $i => $token) {
-            $whereKey = ':wtok' . $i;
-            $scoreKey = ':stok' . $i;
-            $whereParts[] = $nameExpr . ' LIKE ' . $whereKey;
-            $params[$whereKey] = '%' . $token . '%';
-            $params[$scoreKey] = '%' . $token . '%';
-            $relevanceParts[] = 'CASE WHEN ' . $nameExpr . ' LIKE ' . $scoreKey . ' THEN 1 ELSE 0 END';
+        $nextParam = static function (string $prefix) use (&$paramIndex): string {
+            $paramIndex++;
+            return ':' . $prefix . $paramIndex;
+        };
+
+        // Intent groups: match related category OR synonym keywords (OR within group)
+        foreach ($intents as $intent) {
+            $intentClauses = [];
+
+            foreach ($intent['category_slugs'] as $slug) {
+                $catKey = $nextParam('cat');
+                $subKey = $nextParam('sub');
+                $params[$catKey] = $slug;
+                $params[$subKey] = $slug;
+                $intentClauses[] = $categoryExpr . ' = ' . $catKey;
+                $intentClauses[] = $subcategoryExpr . ' = ' . $subKey;
+
+                $boostCat = $nextParam('bcat');
+                $boostSub = $nextParam('bsub');
+                $params[$boostCat] = $slug;
+                $params[$boostSub] = $slug;
+                $relevanceParts[] = 'CASE WHEN ' . $categoryExpr . ' = ' . $boostCat . ' OR ' . $subcategoryExpr . ' = ' . $boostSub . ' THEN 100 ELSE 0 END';
+            }
+
+            foreach ($intent['keywords'] as $keyword) {
+                $nameKey = $nextParam('ikw');
+                $catNameKey = $nextParam('ick');
+                $params[$nameKey] = '%' . $keyword . '%';
+                $params[$catNameKey] = '%' . $keyword . '%';
+                $intentClauses[] = $nameExpr . ' LIKE ' . $nameKey;
+                $intentClauses[] = $categoryNameExpr . ' LIKE ' . $catNameKey;
+
+                $boostKey = $nextParam('bkw');
+                $params[$boostKey] = '%' . $keyword . '%';
+                $relevanceParts[] = 'CASE WHEN ' . $nameExpr . ' LIKE ' . $boostKey . ' THEN 8 ELSE 0 END';
+            }
+
+            if ($intentClauses !== []) {
+                $whereParts[] = '(' . implode(' OR ', $intentClauses) . ')';
+            }
         }
 
-        $phraseKey = ':phrase';
-        $phraseNameKey = ':phraseName';
-        $phraseValue = '%' . implode('%', $tokens) . '%';
-        $params[$phraseKey] = $phraseValue;
-        $params[$phraseNameKey] = $phraseValue;
+        // Literal leftover tokens (brands, model names) must still match
+        foreach ($literalTokens as $token) {
+            $nameKey = $nextParam('ltn');
+            $brandKey = $nextParam('ltb');
+            $params[$nameKey] = '%' . $token . '%';
+            $params[$brandKey] = '%' . $token . '%';
+            $whereParts[] = '(' . $nameExpr . ' LIKE ' . $nameKey . ' OR ' . $brandExpr . ' LIKE ' . $brandKey . ')';
 
-        $startsKey = ':starts';
-        $params[$startsKey] = $tokens[0] . '%';
+            $scoreName = $nextParam('lsn');
+            $scoreBrand = $nextParam('lsb');
+            $params[$scoreName] = '%' . $token . '%';
+            $params[$scoreBrand] = '%' . $token . '%';
+            $relevanceParts[] = 'CASE WHEN ' . $nameExpr . ' LIKE ' . $scoreName . ' THEN 18 ELSE 0 END';
+            $relevanceParts[] = 'CASE WHEN ' . $brandExpr . ' LIKE ' . $scoreBrand . ' THEN 22 ELSE 0 END';
+        }
 
-        $tokenScore = $relevanceParts === [] ? '0' : '(' . implode(' + ', $relevanceParts) . ')';
-        $relevanceSql = $tokenScore
-            . ' * 10'
-            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $phraseKey . ' THEN 50 ELSE 0 END'
-            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $startsKey . ' THEN 20 ELSE 0 END'
-            . ' + CASE WHEN LOWER(p.product_name) LIKE ' . $phraseNameKey . ' THEN 15 ELSE 0 END';
+        // If somehow nothing was added, fall back to simple name contains
+        if (count($whereParts) <= 2) {
+            $fallbackKey = $nextParam('fb');
+            $params[$fallbackKey] = '%' . $normalized . '%';
+            $whereParts[] = $nameExpr . ' LIKE ' . $fallbackKey;
+            $relevanceParts[] = '1';
+        }
+
+        $allTokensForPhrase = array_values(array_unique(array_merge(
+            $literalTokens,
+            $resolved['consumed'] ?? []
+        )));
+        if ($allTokensForPhrase === []) {
+            $allTokensForPhrase = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [$normalized];
+        }
+
+        $phraseKey = $nextParam('ph');
+        $startsKey = $nextParam('st');
+        $params[$phraseKey] = '%' . implode('%', $allTokensForPhrase) . '%';
+        $params[$startsKey] = $allTokensForPhrase[0] . '%';
+
+        $relevanceSql = ($relevanceParts === [] ? '0' : '(' . implode(' + ', $relevanceParts) . ')')
+            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $phraseKey . ' THEN 35 ELSE 0 END'
+            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $startsKey . ' THEN 15 ELSE 0 END';
 
         $sql = '
             SELECT p.product_id, p.product_name, p.product_slug,
