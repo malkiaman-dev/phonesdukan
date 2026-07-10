@@ -46,6 +46,30 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         </div>
     </div>
 
+    <?php
+    $categories = is_array($categories ?? null) ? $categories : [];
+    if (!empty($categories)):
+    ?>
+    <!-- SECTION 2b · CATEGORY FILTER TABS -->
+    <div class="ws-category-bar" id="wsCategoryBar">
+        <div class="ws-category-bar-inner">
+            <button type="button" class="ws-category-tab is-active" data-category="all">All Products</button>
+            <?php foreach ($categories as $category): ?>
+                <?php
+                $tabSlug = (string) ($category['slug'] ?? '');
+                $tabName = (string) ($category['category_name'] ?? $tabSlug);
+                if ($tabSlug === '') {
+                    continue;
+                }
+                ?>
+                <button type="button" class="ws-category-tab" data-category="<?php echo htmlspecialchars($tabSlug, ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php echo htmlspecialchars($tabName, ENT_QUOTES, 'UTF-8'); ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- SECTION 3 · PRODUCT GRID -->
     <div class="ws-product-wrap">
         <div class="wholesale-products-grid ws-grid">
@@ -54,7 +78,8 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                     <div class="product-item ws-card"
                          data-product-id="<?php echo htmlspecialchars($product['product_id']); ?>"
                          data-price="<?php echo htmlspecialchars($product['b2b_regular_price'] ?? 0); ?>"
-                         data-name="<?php echo htmlspecialchars(strtolower($product['product_name'])); ?>">
+                         data-name="<?php echo htmlspecialchars(strtolower($product['product_name'])); ?>"
+                         data-category="<?php echo htmlspecialchars((string) ($product['category_slug'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
 
                         <div class="ws-card__img-wrap">
                             <img src="<?php echo url(ltrim($product['image_url'] ?? 'public/assets/images/Phones_dukan_favicon.png', '/')); ?>"
@@ -196,6 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput  = document.getElementById('b2b-search-input');
     const clearBtn     = document.getElementById('b2b-clear-search');
     const productItems = document.querySelectorAll('.product-item');
+    const categoryTabs = document.querySelectorAll('.ws-category-tab');
+    let activeCategory = 'all';
 
     // Floating panel & order summary refs
     const floatPanel   = document.getElementById('ws-float-panel');
@@ -214,21 +241,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Search ────────────────────────────────
-    searchInput.addEventListener('input', function () {
-        const term = this.value.trim().toLowerCase();
+    // ── Category + search filter ───────────────
+    function applyProductFilters() {
+        const term = searchInput.value.trim().toLowerCase();
         clearBtn.style.display = term ? 'flex' : 'none';
         productItems.forEach(item => {
-            item.style.display = (!term || item.dataset.name.includes(term)) ? '' : 'none';
+            const matchCategory = activeCategory === 'all' || item.dataset.category === activeCategory;
+            const matchSearch = !term || item.dataset.name.includes(term);
+            item.style.display = matchCategory && matchSearch ? '' : 'none';
         });
         updateTotal();
+    }
+
+    categoryTabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            activeCategory = this.dataset.category || 'all';
+            categoryTabs.forEach(t => t.classList.toggle('is-active', t === this));
+            applyProductFilters();
+        });
     });
+
+    searchInput.addEventListener('input', applyProductFilters);
 
     clearBtn.addEventListener('click', function () {
         searchInput.value = '';
-        clearBtn.style.display = 'none';
-        productItems.forEach(item => { item.style.display = ''; });
-        updateTotal();
+        applyProductFilters();
     });
 
     const DEFAULT_QTY    = 5;
@@ -380,9 +417,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.status === "success") {
                     Swal.fire({ title: "Success!", text: response.message || "Your inquiry has been submitted successfully.", icon: "success", confirmButtonText: "OK" }).then(() => {
                         form.reset();
-                        searchInput.value      = '';
-                        clearBtn.style.display = 'none';
-                        productItems.forEach(item => { item.style.display = ''; });
+                        searchInput.value = '';
+                        activeCategory = 'all';
+                        categoryTabs.forEach(t => t.classList.toggle('is-active', t.dataset.category === 'all'));
+                        applyProductFilters();
                         selects.forEach(select => {
                             select.checked = false;
                             const item     = select.closest('.product-item');

@@ -264,7 +264,7 @@
   background: #fff;
   border-bottom: 1px solid #ebebeb;
   position: sticky;
-  top: 62px;
+  top: 0;
   z-index: 90;
 }
 .mob-brand-bar-inner {
@@ -575,7 +575,7 @@
   .mob-why-grid          { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .mob-why-title         { font-size: 24px; }
   .mob-seo               { padding: 40px 16px; }
-  .mob-brand-bar         { top: 56px; }
+  .mob-brand-bar         { top: 0; }
   .mob-brands-section    { padding: 24px 16px; }
   .mob-brands-title      { font-size: 21px; }
   .mob-brand-card        { width: 120px; height: 80px; padding: 9px 12px 8px; gap: 6px; }

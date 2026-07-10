@@ -14,13 +14,32 @@ class BulkInquiryModel
     public function getB2BProducts()
     {
         $query = "
-            SELECT p.product_id, p.product_name, p.b2b_regular_price, p.stock_quantity, pi.image_url
+            SELECT p.product_id, p.product_name, p.b2b_regular_price, p.stock_quantity, pi.image_url,
+                   c.category_id, c.slug AS category_slug, c.category_name
             FROM products p
             LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+            LEFT JOIN categories c ON c.category_id = p.category_id
             WHERE p.is_b2b_available = 1
             AND p.product_status = 1
             AND p.stock_quantity >= 5
             ORDER BY p.product_name
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getB2BCategories(): array
+    {
+        $query = "
+            SELECT c.category_id, c.category_name, c.slug
+            FROM categories c
+            INNER JOIN products p ON p.category_id = c.category_id
+            WHERE p.is_b2b_available = 1
+              AND p.product_status = 1
+              AND p.stock_quantity >= 5
+            GROUP BY c.category_id, c.category_name, c.slug
+            ORDER BY c.category_name ASC
         ";
         $stmt = $this->db->prepare($query);
         $stmt->execute();

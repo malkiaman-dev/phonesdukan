@@ -14,6 +14,7 @@ class WholesaleController
 
         $bulkInquiryModel = new BulkInquiryModel();
         $products = $bulkInquiryModel->getB2BProducts();
+        $categories = $bulkInquiryModel->getB2BCategories();
         error_log('WholesaleController: Fetched ' . count($products) . ' B2B products at ' . date('Y-m-d H:i:s'));
         include __DIR__ . '/../Views/products/wholesale.php';
     }

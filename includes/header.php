@@ -300,13 +300,15 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
     <!-- Scrollable bars — NOT sticky, scroll away naturally -->
     <div class="pd-top-bars">
         <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
-            <div class="pd-announcement-track">
-                <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
-                <span>Free delivery across Pakistan on selected products</span>
-                <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
-                <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
-                <span>Free delivery across Pakistan on selected products</span>
-                <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+            <div class="pd-announcement-viewport">
+                <div class="pd-announcement-track">
+                    <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
+                    <span>Free delivery across Pakistan on selected products</span>
+                    <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+                    <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
+                    <span>Free delivery across Pakistan on selected products</span>
+                    <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+                </div>
             </div>
         </div>
 
@@ -440,6 +442,5 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
     </div>
     </div><!-- /#pd-site-chrome -->
 
-    <div class="pd-chrome-spacer" aria-hidden="true"></div>
-
+    <div class="pd-page-scroll" id="pd-page-scroll">
     <main class="content">

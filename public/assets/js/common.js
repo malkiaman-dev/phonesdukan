@@ -8,6 +8,33 @@ window.pdWithBase = window.pdWithBase || function (path) {
     return pdBasePath + '/' + path;
 };
 
+window.pdGetScrollRoot = window.pdGetScrollRoot || function () {
+    return document.getElementById('pd-page-scroll')
+        || document.scrollingElement
+        || document.documentElement;
+};
+
+window.pdGetScrollY = window.pdGetScrollY || function () {
+    const root = window.pdGetScrollRoot();
+    if (root === document.scrollingElement || root === document.documentElement || root === document.body) {
+        return window.scrollY || window.pageYOffset || 0;
+    }
+    return root.scrollTop || 0;
+};
+
+window.pdScrollTo = window.pdScrollTo || function (x, y) {
+    const root = window.pdGetScrollRoot();
+    const top = typeof y === 'number' ? y : 0;
+    const left = typeof x === 'number' ? x : 0;
+    if (root === document.scrollingElement || root === document.documentElement || root === document.body) {
+        window.scrollTo(left, top);
+        return;
+    }
+    root.scrollTo(left, top);
+    root.scrollTop = top;
+    root.scrollLeft = left;
+};
+
 window.pdBuildProductPath = window.pdBuildProductPath || function (product) {
     const parts = [
         product.brand_slug || '',
@@ -172,7 +199,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const siteChrome = document.getElementById("pd-site-chrome");
         const isMobileLayout = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
-        if (window.scrollY < 2) {
+        const scrollY = window.pdGetScrollY ? window.pdGetScrollY() : (window.scrollY || 0);
+        if (scrollY < 2) {
             if (isMobileLayout && siteChrome) {
                 const chromeBottom = siteChrome.getBoundingClientRect().bottom;
                 if (chromeBottom > 0) {
@@ -215,10 +243,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const setHeaderScrolledState = () => {
-            headerStack.classList.toggle("is-scrolled", window.scrollY > 8);
+            const y = window.pdGetScrollY ? window.pdGetScrollY() : (window.scrollY || 0);
+            headerStack.classList.toggle("is-scrolled", y > 8);
         };
 
         setHeaderScrolledState();
+        const scrollRoot = window.pdGetScrollRoot ? window.pdGetScrollRoot() : window;
+        if (scrollRoot && scrollRoot !== document.documentElement && scrollRoot !== document.body && scrollRoot !== document.scrollingElement) {
+            scrollRoot.addEventListener("scroll", setHeaderScrolledState, { passive: true });
+        }
         window.addEventListener("scroll", setHeaderScrolledState, { passive: true });
     }
 

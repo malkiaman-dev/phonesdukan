@@ -146,7 +146,7 @@
         return {
             html: main.innerHTML,
             title: document.title,
-            scrollY: window.scrollY || 0
+            scrollY: (window.pdGetScrollY && window.pdGetScrollY()) || window.scrollY || 0
         };
     }
 
@@ -167,29 +167,57 @@
     }
 
     function scrollToTop() {
-        window.scrollTo(0, 0);
+        if (window.pdScrollTo) {
+            window.pdScrollTo(0, 0);
+        } else {
+            window.scrollTo(0, 0);
+        }
         if (document.documentElement) {
             document.documentElement.scrollTop = 0;
         }
         if (document.body) {
             document.body.scrollTop = 0;
         }
+        var root = window.pdGetScrollRoot ? window.pdGetScrollRoot() : null;
+        if (root && root !== document.documentElement && root !== document.body) {
+            root.scrollTop = 0;
+        }
         window.requestAnimationFrame(function () {
-            window.scrollTo(0, 0);
-            window.requestAnimationFrame(function () {
+            if (window.pdScrollTo) {
+                window.pdScrollTo(0, 0);
+            } else {
                 window.scrollTo(0, 0);
+            }
+            window.requestAnimationFrame(function () {
+                if (window.pdScrollTo) {
+                    window.pdScrollTo(0, 0);
+                } else {
+                    window.scrollTo(0, 0);
+                }
             });
         });
         window.setTimeout(function () {
-            window.scrollTo(0, 0);
+            if (window.pdScrollTo) {
+                window.pdScrollTo(0, 0);
+            } else {
+                window.scrollTo(0, 0);
+            }
         }, 0);
     }
 
     function restoreScroll(y) {
         var target = typeof y === "number" ? y : 0;
-        window.scrollTo(0, target);
-        window.requestAnimationFrame(function () {
+        if (window.pdScrollTo) {
+            window.pdScrollTo(0, target);
+        } else {
             window.scrollTo(0, target);
+        }
+        window.requestAnimationFrame(function () {
+            if (window.pdScrollTo) {
+                window.pdScrollTo(0, target);
+            } else {
+                window.scrollTo(0, target);
+            }
         });
     }
 

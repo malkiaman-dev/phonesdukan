@@ -591,6 +591,7 @@ $pdApkFilename = defined('APK_DOWNLOAD_FILENAME') ? APK_DOWNLOAD_FILENAME : 'pho
 <!-- ── /Get App Button ──────────────────────────────────────────────────────── -->
 <?php endif; ?>
 
+</div><!-- /#pd-page-scroll -->
 </div> <!-- Close site-wrapper -->
 </body>
 </html>
