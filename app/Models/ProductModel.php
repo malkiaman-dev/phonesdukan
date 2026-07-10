@@ -224,14 +224,67 @@ class ProductModel
      */
     public function searchProducts(string $query, int $limit = 10): array
     {
-        $query = trim($query);
+        $query = trim(html_entity_decode($query, ENT_QUOTES, 'UTF-8'));
         if ($query === '') {
             return [];
         }
 
         $limit = max(1, min($limit, 100));
 
-        $stmt = $this->db->prepare('
+        // Split into searchable tokens (ignore tiny words like "a", "of")
+        $normalized = strtolower(preg_replace('/[^a-zA-Z0-9\s]+/', ' ', $query) ?? '');
+        $tokens = preg_split('/\s+/', trim($normalized), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $stopWords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'on', 'with'];
+        $tokens = array_values(array_filter(
+            $tokens,
+            static fn(string $token): bool => strlen($token) >= 2 && !in_array($token, $stopWords, true)
+        ));
+
+        if ($tokens === []) {
+            $compact = strtolower(preg_replace('/\s+/', '', $normalized) ?: $query);
+            if ($compact === '') {
+                return [];
+            }
+            $tokens = [$compact];
+        }
+
+        // Match against a punctuation-stripped product name so
+        // "AirPods Pro 2nd" finds "AirPods Pro (2nd generation)"
+        $nameExpr = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(p.product_name, '(', ' '), ')', ' '), '-', ' '), '/', ' '), '.', ' '), ',', ' '))";
+
+        $whereParts = [
+            'p.product_status != 0',
+            "LOWER(CAST(p.product_status AS CHAR)) != 'out of stock'",
+        ];
+        $params = [];
+        $relevanceParts = [];
+
+        foreach ($tokens as $i => $token) {
+            $whereKey = ':wtok' . $i;
+            $scoreKey = ':stok' . $i;
+            $whereParts[] = $nameExpr . ' LIKE ' . $whereKey;
+            $params[$whereKey] = '%' . $token . '%';
+            $params[$scoreKey] = '%' . $token . '%';
+            $relevanceParts[] = 'CASE WHEN ' . $nameExpr . ' LIKE ' . $scoreKey . ' THEN 1 ELSE 0 END';
+        }
+
+        $phraseKey = ':phrase';
+        $phraseNameKey = ':phraseName';
+        $phraseValue = '%' . implode('%', $tokens) . '%';
+        $params[$phraseKey] = $phraseValue;
+        $params[$phraseNameKey] = $phraseValue;
+
+        $startsKey = ':starts';
+        $params[$startsKey] = $tokens[0] . '%';
+
+        $tokenScore = $relevanceParts === [] ? '0' : '(' . implode(' + ', $relevanceParts) . ')';
+        $relevanceSql = $tokenScore
+            . ' * 10'
+            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $phraseKey . ' THEN 50 ELSE 0 END'
+            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $startsKey . ' THEN 20 ELSE 0 END'
+            . ' + CASE WHEN LOWER(p.product_name) LIKE ' . $phraseNameKey . ' THEN 15 ELSE 0 END';
+
+        $sql = '
             SELECT p.product_id, p.product_name, p.product_slug,
                    COALESCE(p.regular_price, 0) AS regular_price,
                    NULLIF(p.sale_price, \'\') AS sale_price,
@@ -240,21 +293,23 @@ class ProductModel
                    pi.image_url,
                    c.slug AS category_slug,
                    b.slug AS brand_slug,
-                   sc.slug AS subcategory_slug
+                   sc.slug AS subcategory_slug,
+                   (' . $relevanceSql . ') AS relevance_score
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.category_id
             LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
             LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
-            WHERE p.product_status != 0
-              AND LOWER(p.product_status) != \'out of stock\'
-              AND p.product_name LIKE :query
+            WHERE ' . implode(' AND ', $whereParts) . '
             GROUP BY p.product_id
-            ORDER BY p.created_at DESC
+            ORDER BY relevance_score DESC, p.created_at DESC
             LIMIT :limit
-        ');
+        ';
 
-        $stmt->bindValue(':query', '%' . $query . '%', PDO::PARAM_STR);
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 

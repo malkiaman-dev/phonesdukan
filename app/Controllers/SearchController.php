@@ -21,10 +21,7 @@ class SearchController {
             return;
         }
 
-        // Prevent XSS while allowing valid search characters
-        $searchQuery = htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8');
-
-        // Fetch results from the model
+        // Fetch results from the model (prepared statements handle SQL safety)
         $results = $this->productModel->searchProducts($searchQuery);
 
         // Return JSON response
