@@ -16,6 +16,17 @@ $settings = getSiteSettings($conn);
 $flash = null;
 $flashType = 'success';
 
+if (!empty($_SESSION['settings_flash']) && is_array($_SESSION['settings_flash'])) {
+    $flash = (string) ($_SESSION['settings_flash']['message'] ?? '');
+    $flashType = (string) ($_SESSION['settings_flash']['type'] ?? 'success');
+    unset($_SESSION['settings_flash']);
+}
+
+if (!empty($_SESSION['settings_draft']) && is_array($_SESSION['settings_draft'])) {
+    $settings = array_merge($settings, $_SESSION['settings_draft']);
+    unset($_SESSION['settings_draft']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $siteName = trim((string) ($_POST['site_name'] ?? ''));
     $contactEmail = trim((string) ($_POST['contact_email'] ?? ''));
@@ -26,14 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $announcementText = getDefaultAnnouncementText();
     }
 
+    $draft = [
+        'announcement_enabled' => $announcementEnabled,
+        'announcement_text' => $announcementText,
+        'site_name' => $siteName,
+        'contact_email' => $contactEmail,
+        'footer_text' => $footerText,
+    ];
+
     if ($siteName === '' || $contactEmail === '' || !filter_var($contactEmail, FILTER_VALIDATE_EMAIL) || $footerText === '') {
-        $flash = 'Please fill all fields with valid values.';
-        $flashType = 'error';
-        $settings['announcement_enabled'] = $announcementEnabled;
-        $settings['announcement_text'] = $announcementText;
-        $settings['site_name'] = $siteName;
-        $settings['contact_email'] = $contactEmail;
-        $settings['footer_text'] = $footerText;
+        $_SESSION['settings_flash'] = [
+            'message' => 'Please fill all fields with valid values.',
+            'type' => 'error',
+        ];
+        $_SESSION['settings_draft'] = $draft;
     } else {
         try {
             $settingsId = isset($settings['id']) ? (int) $settings['id'] : 0;
@@ -63,26 +80,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $update->bindValue(':announcement_text', $announcementText, PDO::PARAM_STR);
             $update->execute();
 
-            if ($settingsId === 0) {
-                $settingsId = (int) $conn->lastInsertId();
-            }
-
-            $settings = [
-                'id' => $settingsId,
-                'site_name' => $siteName,
-                'contact_email' => $contactEmail,
-                'footer_text' => $footerText,
-                'announcement_enabled' => $announcementEnabled,
-                'announcement_text' => $announcementText,
+            $_SESSION['settings_flash'] = [
+                'message' => 'Settings updated successfully.',
+                'type' => 'success',
             ];
-            $flash = 'Settings updated successfully.';
-            $flashType = 'success';
         } catch (Throwable $e) {
             error_log('settings.php update: ' . $e->getMessage());
-            $flash = 'Failed to update settings.';
-            $flashType = 'error';
+            $_SESSION['settings_flash'] = [
+                'message' => 'Failed to update settings.',
+                'type' => 'error',
+            ];
+            $_SESSION['settings_draft'] = $draft;
         }
     }
+
+    header('Location: ' . url('admin/settings.php'));
+    exit();
 }
 
 $announcementOn = (int) ($settings['announcement_enabled'] ?? 1) === 1;
@@ -359,7 +372,7 @@ include __DIR__ . '/admin_sidebar.php';
 <div class="set-wrap">
     <div class="set-head">
         <h2 class="set-title">Site Settings</h2>
-        <p class="set-sub">Manage global storefront details used across your website.</p>
+        <p class="set-sub">Manage announcement bar and global storefront details. Deal popup has its own tab.</p>
     </div>
 
     <form method="POST" action="">
@@ -443,6 +456,7 @@ include __DIR__ . '/admin_sidebar.php';
 
         <div class="set-actions">
             <button type="submit" class="set-btn">Update Settings</button>
+            <a class="set-btn set-btn-outline" href="<?php echo htmlspecialchars(url('admin/deal-settings.php'), ENT_QUOTES, 'UTF-8'); ?>">Deal Popup</a>
             <a class="set-btn set-btn-outline" href="<?php echo htmlspecialchars(url('admin/dashboard.php'), ENT_QUOTES, 'UTF-8'); ?>">Back to Dashboard</a>
         </div>
     </form>

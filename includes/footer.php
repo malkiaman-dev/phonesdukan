@@ -129,6 +129,7 @@
         <button id="accept-popup" class="popup-button">Accept</button>
     </div>
 </div>
+<?= renderDealPopupHtml(); ?>
 <?php if (!isPhonesDukanApp()) : ?>
 <div id="pdPushPrompt" class="pd-push-prompt" aria-live="polite" aria-hidden="true" style="opacity:0;visibility:hidden;pointer-events:none">
     <div class="pd-push-card">

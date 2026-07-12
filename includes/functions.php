@@ -591,6 +591,7 @@ if (!function_exists('loadCSS')) {
         emitCss('public/assets/css/frontend/header.css');
         emitCss('public/assets/css/frontend/footer.css');
         emitCss('public/assets/css/frontend/wholesale-access.css');
+        emitCss('public/assets/css/frontend/deal-of-day.css');
         emitCss('public/assets/css/frontend/download-app.css');
         if (isPhonesDukanApp()) {
             emitCss('public/assets/css/frontend/chatbot.css');
@@ -715,6 +716,7 @@ if (!function_exists('loadJS')) {
             emitJs('public/assets/js/download-app.js');
         }
         emitJs('public/assets/js/frontend/wholesale-access.js');
+        emitJs('public/assets/js/frontend/deal-of-day.js');
         emitJs('public/assets/js/faqs.js');
 
         if ($uri === '/' || strpos($uri, '/index') !== false) {
@@ -1121,6 +1123,16 @@ if (!function_exists('ensureSiteSettingsSchema')) {
         $columns = [
             'announcement_enabled' => 'TINYINT(1) NOT NULL DEFAULT 1',
             'announcement_text' => 'TEXT NULL',
+            'deal_enabled' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'deal_badge' => 'VARCHAR(80) NULL DEFAULT NULL',
+            'deal_title' => 'VARCHAR(255) NULL DEFAULT NULL',
+            'deal_sale_price' => 'VARCHAR(40) NULL DEFAULT NULL',
+            'deal_regular_price' => 'VARCHAR(40) NULL DEFAULT NULL',
+            'deal_ends_at' => 'DATETIME NULL DEFAULT NULL',
+            'deal_image' => 'VARCHAR(512) NULL DEFAULT NULL',
+            'deal_cta_text' => 'VARCHAR(80) NULL DEFAULT NULL',
+            'deal_cta_url' => 'VARCHAR(512) NULL DEFAULT NULL',
+            'deal_note' => 'VARCHAR(255) NULL DEFAULT NULL',
         ];
 
         foreach ($columns as $column => $definition) {
@@ -1143,7 +1155,7 @@ if (!function_exists('ensureSiteSettingsSchema')) {
         // Persist current storefront announcement copy when the column is empty
         try {
             $seed = $db->query(
-                'SELECT id, announcement_text, footer_text, contact_email
+                'SELECT id, announcement_text, footer_text, contact_email, deal_title, deal_enabled
                  FROM site_settings
                  ORDER BY id ASC
                  LIMIT 1'
@@ -1170,6 +1182,23 @@ if (!function_exists('ensureSiteSettingsSchema')) {
                     $params[':contact_email'] = 'info@phonesdukan.com';
                 }
 
+                if (trim((string) ($row['deal_title'] ?? '')) === '') {
+                    $defaults = getDefaultDealSettings();
+                    $updates[] = 'deal_enabled = :deal_enabled';
+                    $updates[] = 'deal_badge = :deal_badge';
+                    $updates[] = 'deal_title = :deal_title';
+                    $updates[] = 'deal_sale_price = :deal_sale_price';
+                    $updates[] = 'deal_regular_price = :deal_regular_price';
+                    $updates[] = 'deal_ends_at = :deal_ends_at';
+                    $updates[] = 'deal_image = :deal_image';
+                    $updates[] = 'deal_cta_text = :deal_cta_text';
+                    $updates[] = 'deal_cta_url = :deal_cta_url';
+                    $updates[] = 'deal_note = :deal_note';
+                    foreach ($defaults as $key => $value) {
+                        $params[':' . $key] = $value;
+                    }
+                }
+
                 if ($updates !== []) {
                     $sql = 'UPDATE site_settings SET ' . implode(', ', $updates) . ' WHERE id = :id';
                     $upd = $db->prepare($sql);
@@ -1191,6 +1220,24 @@ if (!function_exists('getDefaultAnnouncementText')) {
     }
 }
 
+if (!function_exists('getDefaultDealSettings')) {
+    function getDefaultDealSettings(): array
+    {
+        return [
+            'deal_enabled' => 1,
+            'deal_badge' => 'Deal of the Day',
+            'deal_title' => 'Premium Wireless Earbuds — Flash Deal',
+            'deal_sale_price' => '4999',
+            'deal_regular_price' => '7999',
+            'deal_ends_at' => date('Y-m-d H:i:s', strtotime('+3 days')),
+            'deal_image' => 'public/uploads/l-210earbuds6.webp',
+            'deal_cta_text' => 'Shop This Deal',
+            'deal_cta_url' => 'wireless-earbuds/',
+            'deal_note' => 'Hurry up! Offer ends in:',
+        ];
+    }
+}
+
 if (!function_exists('getSiteSettings')) {
     function getSiteSettings(?PDO $db = null): array
     {
@@ -1199,14 +1246,15 @@ if (!function_exists('getSiteSettings')) {
             return $cached;
         }
 
-        $defaults = [
+        $dealDefaults = getDefaultDealSettings();
+        $defaults = array_merge([
             'id' => 0,
             'site_name' => '',
             'contact_email' => '',
             'footer_text' => '',
             'announcement_enabled' => 1,
             'announcement_text' => getDefaultAnnouncementText(),
-        ];
+        ], $dealDefaults);
 
         try {
             if (!$db instanceof PDO) {
@@ -1218,8 +1266,16 @@ if (!function_exists('getSiteSettings')) {
             $row = $stmt ? ($stmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
             $cached = array_merge($defaults, is_array($row) ? $row : []);
             $cached['announcement_enabled'] = (int) ($cached['announcement_enabled'] ?? 1) === 1 ? 1 : 0;
+            $cached['deal_enabled'] = (int) ($cached['deal_enabled'] ?? 0) === 1 ? 1 : 0;
             if (trim((string) ($cached['announcement_text'] ?? '')) === '') {
                 $cached['announcement_text'] = getDefaultAnnouncementText();
+            }
+            if (trim((string) ($cached['deal_title'] ?? '')) === '') {
+                foreach ($dealDefaults as $key => $value) {
+                    if (trim((string) ($cached[$key] ?? '')) === '') {
+                        $cached[$key] = $value;
+                    }
+                }
             }
         } catch (Throwable $e) {
             error_log('getSiteSettings: ' . $e->getMessage());
@@ -1289,5 +1345,172 @@ if (!function_exists('renderAnnouncementBarHtml')) {
         }
 
         return $html;
+    }
+}
+
+if (!function_exists('formatDealPriceDisplay')) {
+    function formatDealPriceDisplay(string $raw): string
+    {
+        $raw = trim($raw);
+        if ($raw === '') {
+            return '';
+        }
+        if (preg_match('/[a-zA-Z]/', $raw)) {
+            return $raw;
+        }
+        $numeric = preg_replace('/[^\d.]/', '', $raw);
+        if ($numeric === '' || !is_numeric($numeric)) {
+            return $raw;
+        }
+        $value = (float) $numeric;
+        if (abs($value - round($value)) < 0.001) {
+            return 'Rs. ' . number_format($value, 0);
+        }
+        return 'Rs. ' . number_format($value, 2);
+    }
+}
+
+if (!function_exists('resolveDealImageUrl')) {
+    function resolveDealImageUrl(string $image): string
+    {
+        $image = trim($image);
+        if ($image === '') {
+            $image = 'public/uploads/l-210earbuds6.webp';
+        }
+        if (preg_match('#^https?://#i', $image)) {
+            return $image;
+        }
+        return normalizeMediaUrl(url(ltrim($image, '/')));
+    }
+}
+
+if (!function_exists('resolveDealCtaUrl')) {
+    function resolveDealCtaUrl(string $ctaUrl): string
+    {
+        $ctaUrl = trim($ctaUrl);
+        if ($ctaUrl === '') {
+            return url();
+        }
+        if (preg_match('#^https?://#i', $ctaUrl)) {
+            return $ctaUrl;
+        }
+        return url(ltrim($ctaUrl, '/'));
+    }
+}
+
+if (!function_exists('isDealPopupEnabled')) {
+    function isDealPopupEnabled(?PDO $db = null): bool
+    {
+        if (function_exists('isPhonesDukanApp') && isPhonesDukanApp()) {
+            return false;
+        }
+
+        $settings = getSiteSettings($db);
+        if ((int) ($settings['deal_enabled'] ?? 0) !== 1) {
+            return false;
+        }
+        if (trim((string) ($settings['deal_title'] ?? '')) === '') {
+            return false;
+        }
+
+        $endsAt = trim((string) ($settings['deal_ends_at'] ?? ''));
+        if ($endsAt !== '') {
+            $ts = strtotime($endsAt);
+            if ($ts !== false && $ts < time()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+if (!function_exists('renderDealPopupHtml')) {
+    function renderDealPopupHtml(?PDO $db = null): string
+    {
+        if (!isDealPopupEnabled($db)) {
+            return '';
+        }
+
+        $settings = getSiteSettings($db);
+        $badge = trim((string) ($settings['deal_badge'] ?? 'Deal of the Day'));
+        $title = trim((string) ($settings['deal_title'] ?? ''));
+        $note = trim((string) ($settings['deal_note'] ?? 'Hurry up! Offer ends in:'));
+        $sale = formatDealPriceDisplay((string) ($settings['deal_sale_price'] ?? ''));
+        $regular = formatDealPriceDisplay((string) ($settings['deal_regular_price'] ?? ''));
+        $ctaText = trim((string) ($settings['deal_cta_text'] ?? 'Shop This Deal'));
+        if ($ctaText === '') {
+            $ctaText = 'Shop This Deal';
+        }
+        $ctaUrl = resolveDealCtaUrl((string) ($settings['deal_cta_url'] ?? ''));
+        $imageUrl = resolveDealImageUrl((string) ($settings['deal_image'] ?? ''));
+        $endsAt = trim((string) ($settings['deal_ends_at'] ?? ''));
+        $endsAtIso = '';
+        if ($endsAt !== '') {
+            $ts = strtotime($endsAt);
+            if ($ts !== false) {
+                $endsAtIso = date('c', $ts);
+            }
+        }
+
+        $badgeEsc = htmlspecialchars($badge, ENT_QUOTES, 'UTF-8');
+        $titleEsc = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+        $noteEsc = htmlspecialchars($note, ENT_QUOTES, 'UTF-8');
+        $saleEsc = htmlspecialchars($sale, ENT_QUOTES, 'UTF-8');
+        $regularEsc = htmlspecialchars($regular, ENT_QUOTES, 'UTF-8');
+        $ctaTextEsc = htmlspecialchars($ctaText, ENT_QUOTES, 'UTF-8');
+        $ctaUrlEsc = htmlspecialchars($ctaUrl, ENT_QUOTES, 'UTF-8');
+        $imageUrlEsc = htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8');
+        $endsAtEsc = htmlspecialchars($endsAtIso, ENT_QUOTES, 'UTF-8');
+        $dismissKey = htmlspecialchars('pd_deal_' . substr(sha1($title . '|' . $endsAt), 0, 12), ENT_QUOTES, 'UTF-8');
+
+        $regularHtml = $regular !== ''
+            ? '<span class="pd-deal-price-old">' . $regularEsc . '</span>'
+            : '';
+
+        $timerHtml = $endsAtIso !== ''
+            ? '<p class="pd-deal-urgency">' . $noteEsc . '</p>
+                <div class="pd-deal-timer" data-deal-ends="' . $endsAtEsc . '" aria-label="Offer countdown">
+                    <div class="pd-deal-timer-unit"><span data-deal-days>00</span><small>Days</small></div>
+                    <div class="pd-deal-timer-unit"><span data-deal-hours>00</span><small>Hours</small></div>
+                    <div class="pd-deal-timer-unit"><span data-deal-mins>00</span><small>Mins</small></div>
+                    <div class="pd-deal-timer-unit"><span data-deal-secs>00</span><small>Secs</small></div>
+                </div>'
+            : '';
+
+        return '<div id="pd-deal-popup" class="pd-deal-popup" hidden aria-hidden="true" data-dismiss-key="' . $dismissKey . '">
+            <div class="pd-deal-backdrop" data-deal-close tabindex="-1" aria-hidden="true"></div>
+            <div class="pd-deal-dialog" role="dialog" aria-modal="true" aria-labelledby="pd-deal-title">
+                <button type="button" class="pd-deal-close" data-deal-close aria-label="Close deal offer">&times;</button>
+                <div class="pd-deal-grid">
+                    <div class="pd-deal-copy">
+                        <span class="pd-deal-badge">' . $badgeEsc . '</span>
+                        <h2 id="pd-deal-title" class="pd-deal-title">' . $titleEsc . '</h2>
+                        <div class="pd-deal-prices">
+                            <span class="pd-deal-price-sale">' . $saleEsc . '</span>
+                            ' . $regularHtml . '
+                        </div>
+                        ' . $timerHtml . '
+                        <ul class="pd-deal-perks">
+                            <li>Official store warranty</li>
+                            <li>Fast delivery across Pakistan</li>
+                            <li>Limited-time store deal</li>
+                        </ul>
+                        <a class="pd-deal-cta" href="' . $ctaUrlEsc . '">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            ' . $ctaTextEsc . '
+                        </a>
+                    </div>
+                    <div class="pd-deal-media">
+                        <div class="pd-deal-media-stage">
+                            <span class="pd-deal-media-ring" aria-hidden="true"></span>
+                            <span class="pd-deal-media-shine" aria-hidden="true"></span>
+                            <img src="' . $imageUrlEsc . '" alt="' . $titleEsc . '" loading="eager" decoding="async">
+                            <span class="pd-deal-media-base" aria-hidden="true"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
     }
 }

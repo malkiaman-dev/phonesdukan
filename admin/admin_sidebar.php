@@ -128,6 +128,11 @@ $pending_b2b_orders_count = $bulkInquiryModel->getPendingB2BOrdersCount();
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?= ($current_page == 'deal-settings.php') ? 'active' : '' ?>" href="<?= url('admin/deal-settings.php'); ?>">
+                    <i class="fas fa-bolt"></i> Deal Popup
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="<?= url('admin/settings.php'); ?>">
                     <i class="fas fa-cog"></i> Settings
                 </a>

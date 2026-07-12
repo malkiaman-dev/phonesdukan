@@ -57,7 +57,6 @@ $adminPageCssMap = [
         body {
             background: #f8fafc !important;
             margin: 0 !important;
-            padding: 0 !important;
             height: auto !important;
             min-height: 100% !important;
             max-height: none !important;
@@ -72,9 +71,12 @@ $adminPageCssMap = [
             height: 0 !important;
             display: none !important;
         }
-        body {
-            padding-left: 248px !important;
+        /* Use longhands only — a later padding:0 shorthand must not wipe the sidebar offset */
+        html body {
             padding-top: 56px !important;
+            padding-right: 0 !important;
+            padding-bottom: 0 !important;
+            padding-left: 248px !important;
             color: #111111;
             opacity: 1;
             transition: opacity 0.15s ease;
@@ -191,7 +193,7 @@ $adminPageCssMap = [
             overflow: visible;
         }
         @media (max-width: 992px) {
-            body { padding-left: 0 !important; }
+            html body { padding-left: 0 !important; }
             #sidebar { left: -270px; }
             #sidebar.is-open { left: 0; }
         }
