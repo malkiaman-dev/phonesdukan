@@ -162,12 +162,53 @@ class ProductModel
         return $productImages;
     }
 
-    public function insertProductImage($productId, $imageUrl, $isPrimary)
+    public function insertProductImage($productId, $imageUrl, $isPrimary, $status = 1)
     {
-        $stmt = $this->db->prepare('INSERT INTO product_images (product_id, image_url, is_primary) 
-                                VALUES (?, ?, ?)');
-        $stmt->execute([$productId, $imageUrl, $isPrimary]);
+        $stmt = $this->db->prepare(
+            'INSERT INTO product_images (product_id, image_url, is_primary, status)
+             VALUES (?, ?, ?, ?)'
+        );
+        $stmt->execute([$productId, $imageUrl, $isPrimary ? 1 : 0, (int) $status]);
         return $this->db->lastInsertId();
+    }
+
+    public function syncImageStatusForProduct(int $productId, int $status): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE product_images SET status = ? WHERE product_id = ?'
+        );
+        $stmt->execute([$status === 1 ? 1 : 0, $productId]);
+    }
+
+    public function ensurePrimaryImageExists(int $productId): void
+    {
+        $countStmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM product_images WHERE product_id = ?'
+        );
+        $countStmt->execute([$productId]);
+        if ((int) $countStmt->fetchColumn() === 0) {
+            return;
+        }
+
+        $primaryStmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM product_images WHERE product_id = ? AND is_primary = 1'
+        );
+        $primaryStmt->execute([$productId]);
+        if ((int) $primaryStmt->fetchColumn() > 0) {
+            return;
+        }
+
+        $firstStmt = $this->db->prepare(
+            'SELECT image_id FROM product_images
+             WHERE product_id = ?
+             ORDER BY sort_order ASC, image_id ASC
+             LIMIT 1'
+        );
+        $firstStmt->execute([$productId]);
+        $firstImageId = $firstStmt->fetchColumn();
+        if ($firstImageId) {
+            $this->setPrimaryImage($productId, (int) $firstImageId);
+        }
     }
 
     public function insertImageMetadata($imageId, $metadata)
@@ -219,10 +260,18 @@ class ProductModel
 
     public function setPrimaryImage($productId, $imageId)
     {
+        $check = $this->db->prepare(
+            'SELECT image_id FROM product_images WHERE image_id = ? AND product_id = ? LIMIT 1'
+        );
+        $check->execute([(int) $imageId, (int) $productId]);
+        if (!$check->fetchColumn()) {
+            return false;
+        }
+
         $stmt = $this->db->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
-        $stmt->execute([$productId]);
-        $stmt = $this->db->prepare('UPDATE product_images SET is_primary = 1 WHERE image_id = ?');
-        $stmt->execute([$imageId]);
+        $stmt->execute([(int) $productId]);
+        $stmt = $this->db->prepare('UPDATE product_images SET is_primary = 1 WHERE image_id = ? AND product_id = ?');
+        return $stmt->execute([(int) $imageId, (int) $productId]);
     }
 
     public function removeImage($imageId)

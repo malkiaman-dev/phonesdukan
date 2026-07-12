@@ -85,6 +85,12 @@ class ProductController
         
             $this->model->updateProduct($id, $data);
 
+            // Keep gallery image visibility in sync with product status.
+            // Coming Soon / Inactive products store images with status=0;
+            // activating the product must promote those images too.
+            $imageStatus = ((int) ($data['product_status'] ?? 0) === 1) ? 1 : 0;
+            $this->model->syncImageStatusForProduct((int) $id, $imageStatus);
+
             // Auto-regenerate canonical URL from the current category/brand/product slugs
             try {
                 $dbSlug = (new Database())->getConnection();
@@ -121,7 +127,8 @@ class ProductController
                 $this->model->insertSeoData($id, $seoData);
             }
         
-            $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId);
+            $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId, $imageStatus);
+            $this->model->ensurePrimaryImageExists((int) $id);
 
             $mediaService = new ProductMediaService((new Database())->getConnection());
             $mediaService->saveFromRequest((int) $id, $_POST, $_FILES);
@@ -164,7 +171,7 @@ class ProductController
         $this->redirectToCurrentEditPage($id);
     }
     
-    public function updateProductImages($productId, $primaryImage, $imageMetadata, $primaryImageId = null)
+    public function updateProductImages($productId, $primaryImage, $imageMetadata, $primaryImageId = null, $imageStatus = 1)
     {
         $isPrimarySet = false;
         if ($primaryImage && !empty($primaryImage['name'])) {
@@ -176,7 +183,7 @@ class ProductController
                         $isPrimary = 1;
                         $isPrimarySet = true;
                     }
-                    $imageId = $this->model->insertProductImage($productId, $imagePath, $isPrimary);
+                    $imageId = $this->model->insertProductImage($productId, $imagePath, $isPrimary, (int) $imageStatus);
                     $metadataToInsert = [
                         'alt_text' => null,
                         'title' => null,

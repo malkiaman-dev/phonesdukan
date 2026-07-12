@@ -178,6 +178,8 @@ class ProductController
                 $seoStmt = $this->db->prepare($seoQuery);
                 $seoStmt->execute($seoData);
 
+                $productStatusInt = (int) $productData['product_status'];
+                $imageStatus = $productStatusInt === 1 ? 1 : 0;
                 $keyToImageId = [];
 
                 // Handle Primary Image Upload
@@ -211,7 +213,7 @@ class ProductController
                         $imageData = [
                             'image_url' => '/public/uploads/' . $newFileName,
                             'is_primary' => 1,  // Set primary flag to 1 for primary image
-                            'status' => mapProductStatusFromForm($_POST['product_status'] ?? 'inactive') === 1 ? 1 : 0,
+                            'status' => $imageStatus,
                             'product_id' => $productId
                         ];
 
@@ -279,7 +281,7 @@ class ProductController
                             $imageData = [
                                 'image_url' => '/public/uploads/' . $newFileName,
                                 'is_primary' => 0,  // Set primary flag to 0 for gallery images
-                                'status' => mapProductStatusFromForm($_POST['product_status'] ?? 'inactive') === 1 ? 1 : 0,
+                                'status' => $imageStatus,
                                 'product_id' => $productId
                             ];
 
@@ -313,6 +315,10 @@ class ProductController
                         }
                     }
                 }
+
+                // Keep image visibility aligned with product status and guarantee a primary thumbnail.
+                $this->productModel->syncImageStatusForProduct((int) $productId, $imageStatus);
+                $this->productModel->ensurePrimaryImageExists((int) $productId);
 
                 // Save product video and gallery order
                 $mediaService->saveFromRequest($productId, $_POST, $_FILES);

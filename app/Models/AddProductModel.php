@@ -61,8 +61,6 @@ class AddProductModel
 
                 // Insert image metadata using the correct image_id from product_images
                 $metaQuery = 'INSERT INTO image_metadata (image_id, alt_text, meta_id, title, caption, description) 
-                              VALUES (:image_id, :alt_text, :meta_id, :title, :caption, :description)';
-                $metaQuery = 'INSERT INTO image_metadata (image_id, alt_text, meta_id, title, caption, description) 
 VALUES (:image_id, :alt_text, :meta_id, :title, :caption, :description)';
                 $imageMetaData = [
                     'image_id' => $imageId,  // Use the correct image_id from the last inserted product_images
@@ -81,6 +79,56 @@ VALUES (:image_id, :alt_text, :meta_id, :title, :caption, :description)';
             }
         }
 
+        $statusInt = mapProductStatusFromForm($_POST['product_status'] ?? 'inactive');
+        $this->syncImageStatusForProduct((int) $productId, $statusInt === 1 ? 1 : 0);
+        $this->ensurePrimaryImageExists((int) $productId);
+
         return true;
+    }
+
+    public function syncImageStatusForProduct(int $productId, int $status): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE product_images SET status = ? WHERE product_id = ?'
+        );
+        $stmt->execute([$status === 1 ? 1 : 0, $productId]);
+    }
+
+    public function ensurePrimaryImageExists(int $productId): void
+    {
+        $countStmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM product_images WHERE product_id = ?'
+        );
+        $countStmt->execute([$productId]);
+        if ((int) $countStmt->fetchColumn() === 0) {
+            return;
+        }
+
+        $primaryStmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM product_images WHERE product_id = ? AND is_primary = 1'
+        );
+        $primaryStmt->execute([$productId]);
+        if ((int) $primaryStmt->fetchColumn() > 0) {
+            return;
+        }
+
+        $firstStmt = $this->db->prepare(
+            'SELECT image_id FROM product_images
+             WHERE product_id = ?
+             ORDER BY sort_order ASC, image_id ASC
+             LIMIT 1'
+        );
+        $firstStmt->execute([$productId]);
+        $firstImageId = $firstStmt->fetchColumn();
+        if (!$firstImageId) {
+            return;
+        }
+
+        $clear = $this->db->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
+        $clear->execute([$productId]);
+        $set = $this->db->prepare(
+            'UPDATE product_images SET is_primary = 1 WHERE image_id = ? AND product_id = ?'
+        );
+        $set->execute([(int) $firstImageId, $productId]);
     }
 }
