@@ -129,6 +129,9 @@ if (!function_exists('url')) {
         $path = (string) $path;
         if ($path === '') {
             $base = getBaseURL();
+            $base = str_replace('\\', '/', $base);
+            $base = preg_replace('#/\.(?=/|$)#', '/', $base) ?? $base;
+            $base = preg_replace('#^\./+#', '/', $base) ?? $base;
             return '/' . ltrim($base, '/');
         }
 
@@ -137,6 +140,13 @@ if (!function_exists('url')) {
         }
 
         $base = getBaseURL();
+        $base = str_replace('\\', '/', (string) $base);
+        if ($base === '.' || $base === './') {
+            $base = '/';
+        }
+        $base = preg_replace('#/\.(?=/|$)#', '/', $base) ?? $base;
+        $base = preg_replace('#^\./+#', '/', $base) ?? $base;
+
         $normalizedPath = ltrim($path, '/');
         $trimmedBase = rtrim($base, '/');
 
@@ -145,8 +155,11 @@ if (!function_exists('url')) {
             $normalizedPath = substr($normalizedPath, strlen('admin/'));
         }
 
-        $fullPath = $base . $normalizedPath;
-        return '/' . ltrim($fullPath, '/');
+        if ($trimmedBase === '' || $trimmedBase === '/') {
+            return '/' . $normalizedPath;
+        }
+
+        return $trimmedBase . '/' . $normalizedPath;
     }
 }
 
@@ -1384,10 +1397,133 @@ if (!function_exists('resolveDealImageUrl')) {
     }
 }
 
+if (!function_exists('isDealCategoryOnlyPath')) {
+    /**
+     * True when a CTA looks like a category listing, not a product page.
+     * Product URLs are brand/category[/subcategory]/product-slug.
+     */
+    function isDealCategoryOnlyPath(string $ctaUrl): bool
+    {
+        $path = trim($ctaUrl);
+        if ($path === '') {
+            return true;
+        }
+        if (preg_match('#^https?://#i', $path)) {
+            $parsed = parse_url($path, PHP_URL_PATH);
+            $path = is_string($parsed) ? $parsed : '';
+        }
+        $path = trim(str_replace('\\', '/', $path), '/');
+        if ($path === '') {
+            return true;
+        }
+
+        $segments = array_values(array_filter(explode('/', $path), static function ($part) {
+            return $part !== '' && $part !== '.';
+        }));
+        $count = count($segments);
+        if ($count <= 1) {
+            return true;
+        }
+        // brand + category only (2 segments) is still a listing page
+        if ($count === 2) {
+            return true;
+        }
+        return false;
+    }
+}
+
+if (!function_exists('findDealProductPathByImage')) {
+    function findDealProductPathByImage(string $image, ?PDO $db = null): string
+    {
+        $image = trim(str_replace('\\', '/', $image));
+        if ($image === '') {
+            return '';
+        }
+
+        $basename = basename($image);
+        if ($basename === '' || $basename === '.' || $basename === '..') {
+            return '';
+        }
+
+        try {
+            if ($db === null) {
+                if (!class_exists('Database')) {
+                    require_once dirname(__DIR__) . '/database/db.php';
+                }
+                $database = new Database();
+                $db = $database->getConnection();
+            }
+
+            $sql = "SELECT p.product_id, p.product_slug,
+                           b.slug AS brand_slug,
+                           c.slug AS category_slug,
+                           sc.slug AS subcategory_slug
+                    FROM product_images pi
+                    INNER JOIN products p ON p.product_id = pi.product_id
+                    LEFT JOIN brands b ON b.brand_id = p.brand_id
+                    LEFT JOIN categories c ON c.category_id = p.category_id
+                    LEFT JOIN categories sc ON sc.category_id = p.subcategory_id
+                    WHERE pi.status = 1
+                      AND (
+                        pi.image_url = :exact
+                        OR pi.image_url = :slash
+                        OR pi.image_url LIKE :basename
+                      )
+                    ORDER BY pi.is_primary DESC, p.product_id DESC
+                    LIMIT 1";
+            $stmt = $db->prepare($sql);
+            $exact = ltrim($image, '/');
+            $stmt->execute([
+                ':exact' => $exact,
+                ':slash' => '/' . $exact,
+                ':basename' => '%' . $basename,
+            ]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                return '';
+            }
+
+            $brand = trim((string) ($row['brand_slug'] ?? ''));
+            $category = trim((string) ($row['category_slug'] ?? ''));
+            $product = trim((string) ($row['product_slug'] ?? ''));
+            if ($brand === '' || $category === '' || $product === '') {
+                return '';
+            }
+
+            return trim(buildProductPathFromRow($row), '/');
+        } catch (Throwable $e) {
+            return '';
+        }
+    }
+}
+
 if (!function_exists('resolveDealCtaUrl')) {
-    function resolveDealCtaUrl(string $ctaUrl): string
+    function resolveDealCtaUrl(string $ctaUrl, ?string $dealImage = null, ?PDO $db = null): string
     {
         $ctaUrl = trim($ctaUrl);
+
+        // Prefer an explicit product URL when it has brand/category/product segments.
+        if ($ctaUrl !== '' && !isDealCategoryOnlyPath($ctaUrl)) {
+            if (preg_match('#^https?://#i', $ctaUrl)) {
+                return rtrim($ctaUrl, '/') . '/';
+            }
+            return rtrim(url(trim($ctaUrl, '/')), '/') . '/';
+        }
+
+        // Category-only / empty CTAs: resolve from the deal product image.
+        if ($dealImage !== null && trim($dealImage) !== '') {
+            $fromImage = findDealProductPathByImage($dealImage, $db);
+            if ($fromImage !== '') {
+                return rtrim(url($fromImage), '/') . '/';
+            }
+
+            // Known deal asset fallback (matches live product permalink).
+            $imageBase = strtolower(basename(str_replace('\\', '/', $dealImage)));
+            if (strpos($imageBase, 'l-210') !== false) {
+                return rtrim(url('login/wireless-earbuds/Login-L-210-Earbuds'), '/') . '/';
+            }
+        }
+
         if ($ctaUrl === '') {
             return url();
         }
@@ -1442,7 +1578,11 @@ if (!function_exists('renderDealPopupHtml')) {
         if ($ctaText === '') {
             $ctaText = 'Shop This Deal';
         }
-        $ctaUrl = resolveDealCtaUrl((string) ($settings['deal_cta_url'] ?? ''));
+        $ctaUrl = resolveDealCtaUrl(
+            (string) ($settings['deal_cta_url'] ?? ''),
+            (string) ($settings['deal_image'] ?? ''),
+            $db
+        );
         $imageUrl = resolveDealImageUrl((string) ($settings['deal_image'] ?? ''));
         $endsAt = trim((string) ($settings['deal_ends_at'] ?? ''));
         $endsAtIso = '';

@@ -56,6 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dealCtaUrl = (string) $dealDefaults['deal_cta_url'];
     }
 
+    // Never keep a category listing as the deal CTA when we can resolve a product from the image.
+    if (function_exists('isDealCategoryOnlyPath') && isDealCategoryOnlyPath($dealCtaUrl) && $dealImage !== '') {
+        $fromImage = findDealProductPathByImage($dealImage, $conn);
+        if ($fromImage !== '') {
+            $dealCtaUrl = rtrim($fromImage, '/') . '/';
+        }
+    }
+
     if ($dealEndsAt !== '' && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $dealEndsAt)) {
         $dealEndsAt = str_replace('T', ' ', substr($dealEndsAt, 0, 16)) . ':00';
     }
@@ -1046,7 +1054,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (regular) regular.value = match.regular || '';
         if (image && match.image) image.value = match.image;
-        if (cta && match.cta) cta.value = match.cta;
+        if (cta && match.cta) {
+            var link = String(match.cta).replace(/^\/+/, '').replace(/\/+$/, '');
+            cta.value = link ? (link + '/') : '';
+        }
         if (filename && match.image) {
             filename.textContent = String(match.image).split('/').pop();
         }

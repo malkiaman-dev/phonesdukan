@@ -130,6 +130,50 @@
     }, 280);
   }
 
+  function fixCategoryOnlyCta(root) {
+    var cta = root.querySelector(".pd-deal-cta");
+    if (!cta) {
+      return;
+    }
+
+    var href = String(cta.getAttribute("href") || "").trim();
+    var path = href;
+    try {
+      if (/^https?:\/\//i.test(href)) {
+        path = new URL(href, window.location.origin).pathname;
+      }
+    } catch (e) {
+      path = href;
+    }
+
+    var segments = String(path || "")
+      .split("/")
+      .filter(function (part) {
+        return part && part !== ".";
+      });
+
+    // Real product URLs have brand + category + product (3+ segments).
+    if (segments.length >= 3) {
+      return;
+    }
+
+    var img = root.querySelector(".pd-deal-media img");
+    var imgSrc = img ? String(img.getAttribute("src") || "") : "";
+    var titleEl = root.querySelector("#pd-deal-title, .pd-deal-title");
+    var title = titleEl ? String(titleEl.textContent || "") : "";
+    var looksLikeL210 =
+      /l-210/i.test(imgSrc) ||
+      /l-210/i.test(title) ||
+      /premium wireless earbuds/i.test(title);
+
+    if (!looksLikeL210) {
+      return;
+    }
+
+    var base = String(window.__PD_BASE_PATH__ || window.PD_BASE_PATH || "").replace(/\/+$/, "");
+    cta.setAttribute("href", base + "/login/wireless-earbuds/Login-L-210-Earbuds/");
+  }
+
   function boot() {
     var root = document.getElementById("pd-deal-popup");
     if (!root) {
@@ -140,6 +184,8 @@
     if (root.parentElement !== document.body) {
       document.body.appendChild(root);
     }
+
+    fixCategoryOnlyCta(root);
 
     var key = root.getAttribute("data-dismiss-key") || "pd_deal_dismissed";
     clearLegacyLocalDismiss(key);
