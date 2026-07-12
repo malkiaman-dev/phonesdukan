@@ -75,6 +75,10 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
         <div class="wholesale-products-grid ws-grid">
             <?php if (!empty($products)): ?>
                 <?php foreach ($products as $product): ?>
+                    <?php
+                    $stockQty = max(1, (int) ($product['stock_quantity'] ?? 1));
+                    $defaultQty = min(5, $stockQty);
+                    ?>
                     <div class="product-item ws-card"
                          data-product-id="<?php echo htmlspecialchars($product['product_id']); ?>"
                          data-price="<?php echo htmlspecialchars($product['b2b_regular_price'] ?? 0); ?>"
@@ -101,8 +105,8 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                             </label>
                             <div class="quantity-container">
                                 <button type="button" class="quantity-btn minus" aria-label="Decrease quantity">−</button>
-                                <input type="number" class="product-quantity" name="quantity" value="5" min="1"
-                                       max="<?php echo htmlspecialchars($product['stock_quantity'] ?? 999); ?>" readonly>
+                                <input type="number" class="product-quantity" name="quantity" value="<?php echo (int) $defaultQty; ?>" min="1"
+                                       max="<?php echo (int) $stockQty; ?>" readonly>
                                 <button type="button" class="quantity-btn plus" aria-label="Increase quantity">+</button>
                             </div>
                         </div>
@@ -291,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 qtyInput.value    = defaultQtyFor(qtyInput);
             } else {
                 qtyInput.disabled = true;
-                qtyInput.value    = DEFAULT_QTY;
+                qtyInput.value    = defaultQtyFor(qtyInput);
             }
 
             updateTotal();
@@ -356,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     item.classList.remove('is-selected');
                     const qi = item.querySelector('.product-quantity');
                     qi.disabled = true;
-                    qi.value    = DEFAULT_QTY;
+                    qi.value    = defaultQtyFor(qi);
                 }
             }
         });
@@ -430,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             const mb  = qc.querySelector('.quantity-btn.minus');
                             const pb  = qc.querySelector('.quantity-btn.plus');
                             qi.disabled = true;
-                            qi.value    = DEFAULT_QTY;
+                            qi.value    = defaultQtyFor(qi);
                             setupQuantityButtons(qc, qi, mb, pb);
                         });
                         totalPriceEl.textContent = 'Total Price: Rs. 0.00';

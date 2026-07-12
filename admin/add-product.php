@@ -382,6 +382,17 @@ select.vb-input { cursor:pointer; }
                         <button type="button" class="seo-auto-btn" onclick="generateProductSku()" title="Auto-generate SKU from brand and category">Auto</button>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label for="is_b2b_available">B2B Available</label>
+                    <label class="ep-check-row" style="display:flex;align-items:center;gap:10px;min-height:42px;">
+                        <input type="checkbox" id="is_b2b_available" name="is_b2b_available" value="1">
+                        <span>Enable B2B pricing for wholesale</span>
+                    </label>
+                </div>
+                <div class="form-group" id="b2b-price-section" style="display:none;">
+                    <label for="b2b_regular_price">B2B Regular Price</label>
+                    <input id="b2b_regular_price" type="number" name="b2b_regular_price" step="0.01" min="0" placeholder="9499">
+                </div>
             </div>
         </section>
 
@@ -1540,6 +1551,14 @@ document.addEventListener('DOMContentLoaded', function () {
         ajaxUploadUrl: 'ajax-upload-product-video.php',
         ajaxPreviewUrl: 'ajax-fetch-video-preview.php',
     });
+
+    const b2bCheckbox = document.getElementById('is_b2b_available');
+    const b2bSection = document.getElementById('b2b-price-section');
+    if (b2bCheckbox && b2bSection) {
+        b2bCheckbox.addEventListener('change', function () {
+            b2bSection.style.display = this.checked ? '' : 'none';
+        });
+    }
 });
 </script>
 

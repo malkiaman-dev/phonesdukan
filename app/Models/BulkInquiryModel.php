@@ -14,14 +14,32 @@ class BulkInquiryModel
     public function getB2BProducts()
     {
         $query = "
-            SELECT p.product_id, p.product_name, p.b2b_regular_price, p.stock_quantity, pi.image_url,
+            SELECT p.product_id, p.product_name, p.b2b_regular_price, p.stock_quantity,
+                   COALESCE(
+                       (
+                           SELECT pi.image_url
+                           FROM product_images pi
+                           WHERE pi.product_id = p.product_id
+                             AND pi.is_primary = 1
+                           ORDER BY pi.image_id ASC
+                           LIMIT 1
+                       ),
+                       (
+                           SELECT pi2.image_url
+                           FROM product_images pi2
+                           WHERE pi2.product_id = p.product_id
+                           ORDER BY pi2.sort_order ASC, pi2.image_id ASC
+                           LIMIT 1
+                       )
+                   ) AS image_url,
                    c.category_id, c.slug AS category_slug, c.category_name
             FROM products p
-            LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
             LEFT JOIN categories c ON c.category_id = p.category_id
-            WHERE p.is_b2b_available = 1
-            AND p.product_status = 1
-            AND p.stock_quantity >= 1
+            WHERE CAST(p.is_b2b_available AS UNSIGNED) = 1
+              AND CAST(p.product_status AS UNSIGNED) = 1
+              AND CAST(p.stock_quantity AS SIGNED) >= 1
+              AND p.b2b_regular_price IS NOT NULL
+              AND CAST(p.b2b_regular_price AS DECIMAL(12,2)) > 0
             ORDER BY p.product_name
         ";
         $stmt = $this->db->prepare($query);
@@ -35,9 +53,11 @@ class BulkInquiryModel
             SELECT c.category_id, c.category_name, c.slug
             FROM categories c
             INNER JOIN products p ON p.category_id = c.category_id
-            WHERE p.is_b2b_available = 1
-              AND p.product_status = 1
-              AND p.stock_quantity >= 1
+            WHERE CAST(p.is_b2b_available AS UNSIGNED) = 1
+              AND CAST(p.product_status AS UNSIGNED) = 1
+              AND CAST(p.stock_quantity AS SIGNED) >= 1
+              AND p.b2b_regular_price IS NOT NULL
+              AND CAST(p.b2b_regular_price AS DECIMAL(12,2)) > 0
             GROUP BY c.category_id, c.category_name, c.slug
             ORDER BY c.category_name ASC
         ";
@@ -52,9 +72,11 @@ class BulkInquiryModel
             SELECT product_id, b2b_regular_price, stock_quantity
             FROM products
             WHERE product_id = :product_id
-            AND is_b2b_available = 1
-            AND product_status = 1
-            AND stock_quantity >= 1
+              AND CAST(is_b2b_available AS UNSIGNED) = 1
+              AND CAST(product_status AS UNSIGNED) = 1
+              AND CAST(stock_quantity AS SIGNED) >= 1
+              AND b2b_regular_price IS NOT NULL
+              AND CAST(b2b_regular_price AS DECIMAL(12,2)) > 0
         ";
         $stmt = $this->db->prepare($query);
         $stmt->execute([':product_id' => $productId]);
