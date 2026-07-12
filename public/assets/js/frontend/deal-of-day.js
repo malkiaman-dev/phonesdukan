@@ -123,6 +123,11 @@
       return;
     }
 
+    // Keep the modal on <body> so overflow/transform parents cannot clip it.
+    if (root.parentElement !== document.body) {
+      document.body.appendChild(root);
+    }
+
     var key = root.getAttribute("data-dismiss-key") || "pd_deal_dismissed";
     if (wasDismissed(key)) {
       root.remove();
