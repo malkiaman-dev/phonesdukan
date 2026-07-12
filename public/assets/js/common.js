@@ -187,8 +187,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (announcementTrack && announcementTrack.offsetHeight) {
             annH = announcementTrack.offsetHeight;
-            root.style.setProperty("--announcement-height", annH + "px");
+        } else {
+            annH = 0;
         }
+        root.style.setProperty("--announcement-height", annH + "px");
         if (headerStack && headerStack.offsetHeight) {
             headerH = headerStack.offsetHeight;
             root.style.setProperty("--header-height", headerH + "px");

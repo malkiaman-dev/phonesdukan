@@ -36,7 +36,6 @@ $adminPageCssMap = [
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/admin/admin.css'), ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/admin/admin-components.css'), ENT_QUOTES, 'UTF-8'); ?>">
-    <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/style.css'), ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/ui-controls.css'), ENT_QUOTES, 'UTF-8'); ?>">
     <?php if (isset($adminPageCssMap[$currentAdminPage])): ?>
         <?php
@@ -53,15 +52,29 @@ $adminPageCssMap = [
         html.admin-loading body {
             opacity: 0;
         }
-        html, body {
-            background: #f8fafc;
-            margin: 0;
-            padding: 0;
+        /* style.css locks storefront scroll; admin must be able to scroll */
+        html,
+        body {
+            background: #f8fafc !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: 100% !important;
+            max-height: none !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            display: none !important;
         }
         body {
-            min-height: 100%;
-            padding-left: 248px;
-            padding-top: 56px;
+            padding-left: 248px !important;
+            padding-top: 56px !important;
             color: #111111;
             opacity: 1;
             transition: opacity 0.15s ease;
@@ -87,13 +100,34 @@ $adminPageCssMap = [
             z-index: 5000;
             background: #ffffff;
             border-right: 1px solid #e5e7eb;
-            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             isolation: isolate;
+        }
+        #sidebar .sidebar-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        #sidebar .sidebar-scroll::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+        #sidebar .sidebar-footer {
+            flex: 0 0 auto;
+            border-top: 1px solid #e5e7eb;
+            padding: 8px 10px 12px;
+            background: #ffffff;
         }
         #sidebar .nav {
             position: relative;
             z-index: 1;
-            overflow: visible;
         }
         #sidebar .nav-item.has-submenu:hover {
             z-index: 6500;
@@ -157,7 +191,7 @@ $adminPageCssMap = [
             overflow: visible;
         }
         @media (max-width: 992px) {
-            body { padding-left: 0; }
+            body { padding-left: 0 !important; }
             #sidebar { left: -270px; }
             #sidebar.is-open { left: 0; }
         }
@@ -197,20 +231,72 @@ window.addEventListener('load', function () {
     document.documentElement.classList.remove('admin-loading');
     var toggleBtn = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');
-    if (!toggleBtn || !sidebar) {
-        return;
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', function () {
+            sidebar.classList.toggle('is-open');
+        });
+
+        document.addEventListener('click', function (event) {
+            if (window.innerWidth > 992) {
+                return;
+            }
+            if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+                sidebar.classList.remove('is-open');
+            }
+        });
     }
 
-    toggleBtn.addEventListener('click', function () {
-        sidebar.classList.toggle('is-open');
-    });
-
-    document.addEventListener('click', function (event) {
-        if (window.innerWidth > 992) {
+    // Flyout submenus to the right (fixed so they aren't clipped by sidebar scroll)
+    var scrollEl = document.querySelector('#sidebar .sidebar-scroll');
+    document.querySelectorAll('#sidebar .nav-item.has-submenu').forEach(function (item) {
+        var submenu = item.querySelector(':scope > .submenu');
+        var link = item.querySelector(':scope > .nav-link');
+        if (!submenu || !link) {
             return;
         }
-        if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
-            sidebar.classList.remove('is-open');
+
+        var closeTimer = null;
+
+        function placeSubmenu() {
+            var rect = link.getBoundingClientRect();
+            var left = Math.round(rect.right + 6);
+            var top = Math.round(rect.top);
+            submenu.style.left = left + 'px';
+            submenu.style.top = top + 'px';
+
+            var subRect = submenu.getBoundingClientRect();
+            if (subRect.bottom > window.innerHeight - 8) {
+                top = Math.max(8, Math.round(window.innerHeight - subRect.height - 8));
+                submenu.style.top = top + 'px';
+            }
+        }
+
+        function openSubmenu() {
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+            item.classList.add('is-open');
+            placeSubmenu();
+        }
+
+        function scheduleClose() {
+            closeTimer = setTimeout(function () {
+                item.classList.remove('is-open');
+            }, 140);
+        }
+
+        item.addEventListener('mouseenter', openSubmenu);
+        item.addEventListener('mouseleave', scheduleClose);
+        submenu.addEventListener('mouseenter', openSubmenu);
+        submenu.addEventListener('mouseleave', scheduleClose);
+
+        if (scrollEl) {
+            scrollEl.addEventListener('scroll', function () {
+                if (item.classList.contains('is-open')) {
+                    placeSubmenu();
+                }
+            }, { passive: true });
         }
     });
 });

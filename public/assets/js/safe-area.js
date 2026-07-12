@@ -118,16 +118,14 @@
         var root = document.documentElement;
         var announcementTrack = document.querySelector(".pd-announcement-track");
         var headerStack = document.querySelector(".pd-header-stack");
-        var annH = announcementTrack
+        var annH = announcementTrack && announcementTrack.offsetHeight
             ? announcementTrack.offsetHeight
-            : readCssPx(getComputedStyle(root).getPropertyValue("--announcement-height"));
+            : 0;
         var headerH = headerStack
             ? headerStack.offsetHeight
             : readCssPx(getComputedStyle(root).getPropertyValue("--header-height"));
 
-        if (announcementTrack && announcementTrack.offsetHeight) {
-            root.style.setProperty("--announcement-height", annH + "px");
-        }
+        root.style.setProperty("--announcement-height", annH + "px");
         if (headerStack && headerStack.offsetHeight) {
             root.style.setProperty("--header-height", headerH + "px");
         }

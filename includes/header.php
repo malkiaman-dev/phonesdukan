@@ -292,6 +292,9 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
 <?php loadCSS(); ?>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
+<?php if (!isAnnouncementBarEnabled()): ?>
+<style>:root { --announcement-height: 0px; }</style>
+<?php endif; ?>
 
 </head>
 <body class="<?= isPhonesDukanApp() ? 'pd-in-app' : '' ?>">
@@ -306,37 +309,15 @@ window.__PD_WHOLESALE_ACCESS__ = <?= $wholesaleAccessGranted ? 'true' : 'false' 
 
     <!-- Scrollable bars — NOT sticky, scroll away naturally -->
     <div class="pd-top-bars">
+        <?php if (isAnnouncementBarEnabled()): ?>
         <div class="pd-announcement-bar" role="region" aria-label="Store announcements">
             <div class="pd-announcement-viewport">
                 <div class="pd-announcement-track">
-                    <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
-                    <span>Free delivery across Pakistan on selected products</span>
-                    <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
-                    <span><strong>Mobile Island</strong> Official Store • We Believe in Satisfaction</span>
-                    <span>Free delivery across Pakistan on selected products</span>
-                    <span>Call / WhatsApp: <strong>+92 311 6600031</strong></span>
+                    <?= renderAnnouncementBarHtml(); ?>
                 </div>
             </div>
         </div>
-
-        <!-- stripe Section  -->
-
-        <!-- <div class="pd-trust-strip" role="region" aria-label="Store trust highlights">
-            <div class="pd-trust-container">
-                <div class="pd-trust-item">
-                    <span class="pd-trust-dot" aria-hidden="true">●</span>
-                    <p>Fast &amp; Free Delivery Over Order <strong>Rs. 3000/-</strong> Only.</p>
-                </div>
-                <div class="pd-trust-item">
-                    <span class="pd-trust-dot" aria-hidden="true">●</span>
-                    <p><strong>30M+</strong> Happy Customers</p>
-                </div>
-                <div class="pd-trust-item">
-                    <span class="pd-trust-dot" aria-hidden="true">●</span>
-                    <p><strong>7 Days</strong> Replacement &amp; <strong>1 Year</strong> Warranty</p>
-                </div>
-            </div>
-        </div> -->
+        <?php endif; ?>
     </div>
 
     <!-- Sticky navbar only -->

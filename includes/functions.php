@@ -1092,3 +1092,202 @@ if (!function_exists('adminToggleSwitch')) {
             . '</label>';
     }
 }
+
+if (!function_exists('ensureSiteSettingsSchema')) {
+    function ensureSiteSettingsSchema(PDO $db): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+
+        try {
+            $db->exec(
+                'CREATE TABLE IF NOT EXISTS site_settings (
+                    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    site_name VARCHAR(255) NOT NULL DEFAULT \'\',
+                    contact_email VARCHAR(255) NOT NULL DEFAULT \'\',
+                    footer_text TEXT NULL,
+                    announcement_enabled TINYINT(1) NOT NULL DEFAULT 1,
+                    announcement_text TEXT NULL,
+                    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+            );
+        } catch (Throwable $e) {
+            error_log('ensureSiteSettingsSchema create: ' . $e->getMessage());
+        }
+
+        $columns = [
+            'announcement_enabled' => 'TINYINT(1) NOT NULL DEFAULT 1',
+            'announcement_text' => 'TEXT NULL',
+        ];
+
+        foreach ($columns as $column => $definition) {
+            try {
+                $stmt = $db->prepare(
+                    'SELECT COUNT(*) FROM information_schema.COLUMNS
+                     WHERE TABLE_SCHEMA = DATABASE()
+                       AND TABLE_NAME = \'site_settings\'
+                       AND COLUMN_NAME = ?'
+                );
+                $stmt->execute([$column]);
+                if ((int) $stmt->fetchColumn() === 0) {
+                    $db->exec("ALTER TABLE site_settings ADD COLUMN `$column` $definition");
+                }
+            } catch (Throwable $e) {
+                error_log("ensureSiteSettingsSchema column ($column): " . $e->getMessage());
+            }
+        }
+
+        // Persist current storefront announcement copy when the column is empty
+        try {
+            $seed = $db->query(
+                'SELECT id, announcement_text, footer_text, contact_email
+                 FROM site_settings
+                 ORDER BY id ASC
+                 LIMIT 1'
+            );
+            $row = $seed ? ($seed->fetch(PDO::FETCH_ASSOC) ?: null) : null;
+            if (is_array($row) && (int) ($row['id'] ?? 0) > 0) {
+                $updates = [];
+                $params = [':id' => (int) $row['id']];
+
+                if (trim((string) ($row['announcement_text'] ?? '')) === '') {
+                    $updates[] = 'announcement_text = :announcement_text';
+                    $params[':announcement_text'] = getDefaultAnnouncementText();
+                }
+
+                $footer = (string) ($row['footer_text'] ?? '');
+                if ($footer === '' || strpos($footer, '??') === 0 || strpos($footer, '?') === 0) {
+                    $updates[] = 'footer_text = :footer_text';
+                    $params[':footer_text'] = '© ' . date('Y') . ' Phones Dukan. All Rights Reserved.';
+                }
+
+                $email = trim((string) ($row['contact_email'] ?? ''));
+                if ($email === '' || strcasecmp($email, 'admin@phonesdukan.com') === 0) {
+                    $updates[] = 'contact_email = :contact_email';
+                    $params[':contact_email'] = 'info@phonesdukan.com';
+                }
+
+                if ($updates !== []) {
+                    $sql = 'UPDATE site_settings SET ' . implode(', ', $updates) . ' WHERE id = :id';
+                    $upd = $db->prepare($sql);
+                    $upd->execute($params);
+                }
+            }
+        } catch (Throwable $e) {
+            error_log('ensureSiteSettingsSchema seed: ' . $e->getMessage());
+        }
+    }
+}
+
+if (!function_exists('getDefaultAnnouncementText')) {
+    function getDefaultAnnouncementText(): string
+    {
+        return "<strong>Mobile Island</strong> Official Store • We Believe in Satisfaction\n"
+            . "Free delivery across Pakistan on selected products\n"
+            . "Call / WhatsApp: <strong>+92 311 6600031</strong>";
+    }
+}
+
+if (!function_exists('getSiteSettings')) {
+    function getSiteSettings(?PDO $db = null): array
+    {
+        static $cached = null;
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $defaults = [
+            'id' => 0,
+            'site_name' => '',
+            'contact_email' => '',
+            'footer_text' => '',
+            'announcement_enabled' => 1,
+            'announcement_text' => getDefaultAnnouncementText(),
+        ];
+
+        try {
+            if (!$db instanceof PDO) {
+                require_once dirname(__DIR__) . '/database/db.php';
+                $db = (new Database())->getConnection();
+            }
+            ensureSiteSettingsSchema($db);
+            $stmt = $db->query('SELECT * FROM site_settings ORDER BY id ASC LIMIT 1');
+            $row = $stmt ? ($stmt->fetch(PDO::FETCH_ASSOC) ?: []) : [];
+            $cached = array_merge($defaults, is_array($row) ? $row : []);
+            $cached['announcement_enabled'] = (int) ($cached['announcement_enabled'] ?? 1) === 1 ? 1 : 0;
+            if (trim((string) ($cached['announcement_text'] ?? '')) === '') {
+                $cached['announcement_text'] = getDefaultAnnouncementText();
+            }
+        } catch (Throwable $e) {
+            error_log('getSiteSettings: ' . $e->getMessage());
+            $cached = $defaults;
+        }
+
+        return $cached;
+    }
+}
+
+if (!function_exists('isAnnouncementBarEnabled')) {
+    function isAnnouncementBarEnabled(?PDO $db = null): bool
+    {
+        $settings = getSiteSettings($db);
+        return (int) ($settings['announcement_enabled'] ?? 1) === 1;
+    }
+}
+
+if (!function_exists('getAnnouncementMessages')) {
+    /**
+     * @return list<string> Sanitized HTML fragments for marquee spans
+     */
+    function getAnnouncementMessages(?PDO $db = null): array
+    {
+        $settings = getSiteSettings($db);
+        $raw = (string) ($settings['announcement_text'] ?? '');
+        if (trim($raw) === '') {
+            $raw = getDefaultAnnouncementText();
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw) ?: [];
+        $messages = [];
+        foreach ($lines as $line) {
+            $line = trim((string) $line);
+            if ($line === '') {
+                continue;
+            }
+            $messages[] = strip_tags($line, '<strong><b><em><i>');
+        }
+
+        if ($messages === []) {
+            foreach (preg_split('/\r\n|\r|\n/', getDefaultAnnouncementText()) ?: [] as $line) {
+                $line = trim((string) $line);
+                if ($line !== '') {
+                    $messages[] = strip_tags($line, '<strong><b><em><i>');
+                }
+            }
+        }
+
+        return $messages;
+    }
+}
+
+if (!function_exists('renderAnnouncementBarHtml')) {
+    function renderAnnouncementBarHtml(?PDO $db = null): string
+    {
+        $messages = getAnnouncementMessages($db);
+        if ($messages === []) {
+            return '';
+        }
+
+        // Duplicate once so the CSS marquee can loop seamlessly
+        $loop = array_merge($messages, $messages);
+        $html = '';
+        foreach ($loop as $message) {
+            $html .= '<span>' . $message . '</span>';
+        }
+
+        return $html;
+    }
+}
