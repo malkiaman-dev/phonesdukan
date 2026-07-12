@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  var SESSION_SEEN_PREFIX = "pd_deal_seen_";
+
   function pad(n) {
     return n < 10 ? "0" + n : String(n);
   }
@@ -30,19 +32,33 @@
     });
   }
 
-  function wasDismissed(key) {
+  function sessionKey(dismissKey) {
+    return SESSION_SEEN_PREFIX + String(dismissKey || "default");
+  }
+
+  // Once per browser tab/session: show on first landing, hide while browsing,
+  // then show again only after the visitor fully leaves and returns.
+  function wasSeenThisVisit(dismissKey) {
     try {
-      return window.localStorage.getItem(key) === "1";
+      return window.sessionStorage.getItem(sessionKey(dismissKey)) === "1";
     } catch (e) {
       return false;
     }
   }
 
-  function markDismissed(key) {
+  function markSeenThisVisit(dismissKey) {
     try {
-      window.localStorage.setItem(key, "1");
+      window.sessionStorage.setItem(sessionKey(dismissKey), "1");
     } catch (e) {
       // ignore storage failures
+    }
+  }
+
+  function clearLegacyLocalDismiss(dismissKey) {
+    try {
+      window.localStorage.removeItem(String(dismissKey || "pd_deal_dismissed"));
+    } catch (e) {
+      // ignore
     }
   }
 
@@ -77,7 +93,7 @@
       if (secsEl) secsEl.textContent = pad(secs);
 
       if (diff <= 0) {
-        closePopup(root, true);
+        closePopup(root);
         return false;
       }
       return true;
@@ -101,7 +117,7 @@
     root._dealInterval = initTimer(root);
   }
 
-  function closePopup(root, persist) {
+  function closePopup(root) {
     root.classList.remove("is-open");
     root.setAttribute("aria-hidden", "true");
     unlockScroll();
@@ -112,9 +128,6 @@
     window.setTimeout(function () {
       root.hidden = true;
     }, 280);
-    if (persist) {
-      markDismissed(root.getAttribute("data-dismiss-key") || "pd_deal_dismissed");
-    }
   }
 
   function boot() {
@@ -129,20 +142,25 @@
     }
 
     var key = root.getAttribute("data-dismiss-key") || "pd_deal_dismissed";
-    if (wasDismissed(key)) {
+    clearLegacyLocalDismiss(key);
+
+    if (wasSeenThisVisit(key)) {
       root.remove();
       return;
     }
 
+    // Mark as soon as we decide to show, so in-site navigation won't reopen it.
+    markSeenThisVisit(key);
+
     root.querySelectorAll("[data-deal-close]").forEach(function (el) {
       el.addEventListener("click", function () {
-        closePopup(root, true);
+        closePopup(root);
       });
     });
 
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && !root.hidden) {
-        closePopup(root, true);
+        closePopup(root);
       }
     });
 
