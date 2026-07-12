@@ -21,7 +21,7 @@ class BulkInquiryModel
             LEFT JOIN categories c ON c.category_id = p.category_id
             WHERE p.is_b2b_available = 1
             AND p.product_status = 1
-            AND p.stock_quantity >= 5
+            AND p.stock_quantity >= 1
             ORDER BY p.product_name
         ";
         $stmt = $this->db->prepare($query);
@@ -37,7 +37,7 @@ class BulkInquiryModel
             INNER JOIN products p ON p.category_id = c.category_id
             WHERE p.is_b2b_available = 1
               AND p.product_status = 1
-              AND p.stock_quantity >= 5
+              AND p.stock_quantity >= 1
             GROUP BY c.category_id, c.category_name, c.slug
             ORDER BY c.category_name ASC
         ";
@@ -54,7 +54,7 @@ class BulkInquiryModel
             WHERE product_id = :product_id
             AND is_b2b_available = 1
             AND product_status = 1
-            AND stock_quantity >= 5
+            AND stock_quantity >= 1
         ";
         $stmt = $this->db->prepare($query);
         $stmt->execute([':product_id' => $productId]);
