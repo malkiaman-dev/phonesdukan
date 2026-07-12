@@ -1232,7 +1232,7 @@ if (!function_exists('getDefaultDealSettings')) {
             'deal_ends_at' => date('Y-m-d H:i:s', strtotime('+3 days')),
             'deal_image' => 'public/uploads/l-210earbuds6.webp',
             'deal_cta_text' => 'Shop This Deal',
-            'deal_cta_url' => 'wireless-earbuds/',
+            'deal_cta_url' => '',
             'deal_note' => 'Hurry up! Offer ends in:',
         ];
     }

@@ -242,8 +242,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  min-height: 300px;
-  padding: 28px 24px 32px;
+  min-height: 320px;
+  padding: 32px 28px;
   box-sizing: border-box;
   background:
     linear-gradient(160deg, #1c1c1c 0%, #0d0d0d 42%, #16120a 100%);
@@ -255,7 +255,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(247, 209, 23, 0.18) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(247, 209, 23, 0.18) 0%, transparent 62%),
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.08) 0%, transparent 28%),
     radial-gradient(circle at 88% 78%, rgba(247, 209, 23, 0.1) 0%, transparent 34%),
     repeating-linear-gradient(
@@ -285,8 +285,9 @@
 .pd-deal-media-stage {
   position: relative;
   z-index: 1;
-  width: min(100%, 280px);
-  aspect-ratio: 1;
+  width: min(100%, 260px);
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
   margin: 0 auto;
@@ -295,6 +296,7 @@
 .pd-deal-media-ring {
   position: absolute;
   inset: 0;
+  margin: auto;
   border-radius: 50%;
   background:
     radial-gradient(circle at 50% 50%, rgba(247, 209, 23, 0.18) 0%, rgba(247, 209, 23, 0.06) 42%, transparent 70%);
@@ -308,7 +310,7 @@
 
 .pd-deal-media-shine {
   position: absolute;
-  inset: -20%;
+  inset: 0;
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(
@@ -326,28 +328,19 @@
 .pd-deal-media img {
   position: relative;
   z-index: 1;
-  width: 68%;
-  height: 68%;
-  max-width: 68%;
-  max-height: 68%;
+  grid-area: 1 / 1;
+  width: 62%;
+  height: 62%;
+  max-width: 62%;
+  max-height: 62%;
   object-fit: contain;
-  object-position: center;
-  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.55));
+  object-position: center center;
+  filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.55));
   animation: pd-deal-float 4.8s ease-in-out infinite;
 }
 
 .pd-deal-media-base {
-  position: absolute;
-  left: 50%;
-  bottom: 8%;
-  z-index: 0;
-  width: 58%;
-  height: 14px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55) 0%, transparent 72%);
-  filter: blur(1px);
-  pointer-events: none;
+  display: none;
 }
 
 @keyframes pd-deal-float {
@@ -428,8 +421,8 @@
 
   .pd-deal-media {
     order: 1;
-    min-height: 240px;
-    padding: 24px 18px 22px;
+    min-height: 0;
+    padding: 28px 20px;
   }
 
   .pd-deal-media::after {
@@ -438,14 +431,14 @@
   }
 
   .pd-deal-media-stage {
-    width: min(72vw, 220px);
+    width: min(58vw, 210px);
   }
 
   .pd-deal-media img {
-    width: 66%;
-    height: 66%;
-    max-width: 66%;
-    max-height: 66%;
+    width: 60%;
+    height: 60%;
+    max-width: 60%;
+    max-height: 60%;
     animation: none;
   }
 

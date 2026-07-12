@@ -171,8 +171,14 @@ $previewRegular = formatDealPriceDisplay((string) ($settings['deal_regular_price
 $productOptions = [];
 try {
     $productSql = "SELECT p.product_id, p.product_name, p.product_slug, p.sale_price, p.regular_price,
-                          pi.image_url
+                          pi.image_url,
+                          b.slug AS brand_slug,
+                          c.slug AS category_slug,
+                          sc.slug AS subcategory_slug
                    FROM products p
+                   LEFT JOIN brands b ON b.brand_id = p.brand_id
+                   LEFT JOIN categories c ON c.category_id = p.category_id
+                   LEFT JOIN categories sc ON sc.category_id = p.subcategory_id
                    LEFT JOIN product_images pi
                      ON pi.product_id = p.product_id AND pi.is_primary = 1 AND pi.status = 1
                    ORDER BY p.product_id DESC
@@ -190,8 +196,13 @@ foreach ($productOptions as $product) {
     }
     $cta = '';
     try {
-        if (function_exists('buildProductPathFromRow')) {
-            $cta = ltrim((string) buildProductPathFromRow($product), '/');
+        $brandSlug = trim((string) ($product['brand_slug'] ?? ''));
+        $categorySlug = trim((string) ($product['category_slug'] ?? ''));
+        $productSlug = trim((string) ($product['product_slug'] ?? ''));
+        if ($brandSlug !== '' && $categorySlug !== '' && $productSlug !== '' && function_exists('buildProductPathFromRow')) {
+            $cta = trim((string) buildProductPathFromRow($product), '/');
+        } elseif ($productSlug !== '') {
+            $cta = $productSlug;
         }
     } catch (Throwable $e) {
         $cta = '';
@@ -885,7 +896,8 @@ include __DIR__ . '/admin_sidebar.php';
                         <label class="deal-label" for="deal_cta_url">Button link</label>
                         <input class="deal-input" id="deal_cta_url" type="text" name="deal_cta_url"
                             value="<?php echo htmlspecialchars((string) ($settings['deal_cta_url'] ?? $dealDefaults['deal_cta_url']), ENT_QUOTES, 'UTF-8'); ?>"
-                            placeholder="product-url/ or full link">
+                            placeholder="Pick a product above, or paste full product URL">
+                        <span class="deal-hint">Use Fill from product so this links to the exact product page (not a category).</span>
                     </div>
                     <div class="deal-field deal-field-full">
                         <label class="deal-label" for="deal_note">Countdown label</label>
