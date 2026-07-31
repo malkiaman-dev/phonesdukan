@@ -217,6 +217,25 @@ if (!function_exists('schemaMigrationLockPath')) {
     }
 }
 
+if (!function_exists('ensureProductGroupsTable')) {
+    function ensureProductGroupsTable(PDO $db): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+
+        $modelFile = dirname(__DIR__) . '/app/Models/ProductGroupModel.php';
+        if (is_file($modelFile)) {
+            require_once $modelFile;
+            if (class_exists('ProductGroupModel') && method_exists('ProductGroupModel', 'ensureSchema')) {
+                ProductGroupModel::ensureSchema($db);
+            }
+        }
+    }
+}
+
 if (!function_exists('ensureDatabaseSchema')) {
     function ensureDatabaseSchema(PDO $db): void
     {
@@ -225,6 +244,9 @@ if (!function_exists('ensureDatabaseSchema')) {
             return;
         }
         $done = true;
+
+        // Always-run: group products table (safe CREATE IF NOT EXISTS)
+        ensureProductGroupsTable($db);
 
         $lockFile = schemaMigrationLockPath();
         if (is_file($lockFile)) {

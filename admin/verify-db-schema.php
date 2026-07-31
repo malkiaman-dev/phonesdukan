@@ -27,6 +27,7 @@ $tables = [
     'ai_seo_cache',
     'ai_seo_history',
     'ai_seo_error_logs',
+    'product_group_items',
 ];
 
 $ok = true;

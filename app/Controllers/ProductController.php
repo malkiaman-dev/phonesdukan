@@ -129,8 +129,10 @@ class ProductController
             $product['product_id']
         );
 
+        require_once __DIR__ . '/../Models/ProductGroupModel.php';
+        $groupProducts = (new ProductGroupModel())->getGroupProductsForDisplay((int) $product['product_id']);
+
         require_once __DIR__ . '/../Views/products/product.php';
         require_once __DIR__ . '/../Views/products/related-products.php';
     }
 }
-?>

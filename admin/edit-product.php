@@ -164,6 +164,11 @@ $vModel = new VariationModel();
 $allVarTypes = $vModel->getVariationTypesWithValues();
 $existingVariations = $vModel->getProductVariationsForFrontend($product['product_id']);
 $currentProductType = $product['product_type'] ?? 'simple';
+
+require_once dirname(__DIR__, 1) . '/app/Models/ProductGroupModel.php';
+$groupModel = new ProductGroupModel();
+$groupProducts = $groupModel->getGroupProductsForAdmin((int) $product['product_id']);
+$groupExcludeProductId = (int) $product['product_id'];
 ?>
 
 <style>
@@ -1554,6 +1559,8 @@ select.vb-input-ep { cursor:pointer; }
                 <input type="hidden" name="variations_json" id="epVariationsJson" value="<?= htmlspecialchars(json_encode($existingVariations)) ?>">
             </div>
         </div>
+
+        <?php require __DIR__ . '/partials/group-products-picker.php'; ?>
 
         <div class="ep-footer-actions">
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">

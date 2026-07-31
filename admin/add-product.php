@@ -698,6 +698,12 @@ select.vb-input { cursor:pointer; }
             </div>
         </section>
 
+        <?php
+        $groupProducts = [];
+        $groupExcludeProductId = 0;
+        require __DIR__ . '/partials/group-products-picker.php';
+        ?>
+
         <div class="form-footer-actions">
             <button type="submit" class="submit-btn">Save Product</button>
         </div>

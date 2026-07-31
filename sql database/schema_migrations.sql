@@ -6,3 +6,4 @@ SOURCE prepaid_discount_migration.sql;
 SOURCE variations_migration.sql;
 SOURCE product_seo_migration.sql;
 SOURCE users_profile_photo_migration.sql;
+SOURCE product_groups_migration.sql;

@@ -480,72 +480,114 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             return;
         }
-        $.ajax({
-            url: withBase("/app/Controllers/CartController.php"),
-            type: "POST",
-            data: JSON.stringify({
-                product_id: productId,
-                quantity: quantity,
-                attribute_value: attributeValue,
-                unit_price: unitPrice,
-                payment_method: paymentMethod,
-                variation_id: resolvedVariationId ? parseInt(resolvedVariationId) : null,
-            }),
-            contentType: "application/json",
-            dataType: "json",
-            success: function(response) {
-                if (response.status === "success") {
-                    // Update cart count in the DOM
-                    const cartCountElements = document.querySelectorAll('.cart-count');
-                    const totalQuantity = response.cart_summary.total_quantity || 0;
-                    cartCountElements.forEach(element => {
-                        element.textContent = totalQuantity;
-                    });
-                    if (redirectToCheckout) {
-                        window.location.href = withBase("/checkout");
-                    } else {
-                        Swal.fire({
-                            title: "Added to Cart!",
-                            text: "Your product has been added. What would you like to do next?",
-                            icon: "success",
-                            showCancelButton: true,
-                            confirmButtonText: "View Cart",
-                            cancelButtonText: "Continue Shopping",
-                            reverseButtons: true,
-                            customClass: {
-                                popup: "pd-cart-popup",
-                                icon: "pd-cart-popup__icon",
-                                title: "pd-cart-popup__title",
-                                htmlContainer: "pd-cart-popup__text",
-                                confirmButton: "pd-cart-popup__btn pd-cart-popup__btn--primary",
-                                cancelButton: "pd-cart-popup__btn pd-cart-popup__btn--secondary",
-                                actions: "pd-cart-popup__actions"
-                            },
-                            buttonsStyling: false
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = withBase("/cart");
-                            }
-                        });
+
+        const groupExtras = Array.from(document.querySelectorAll('.pd-group-item__check:checked')).map(function (el) {
+            return {
+                product_id: parseInt(el.getAttribute('data-product-id'), 10),
+                unit_price: parseFloat(el.getAttribute('data-unit-price') || 0),
+                variation_id: el.getAttribute('data-variation-id') || null,
+                quantity: 1,
+                payment_method: paymentMethod
+            };
+        }).filter(function (item) {
+            return item.product_id > 0 && item.unit_price > 0;
+        });
+
+        function postCartItem(payload) {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: withBase("/app/Controllers/CartController.php"),
+                    type: "POST",
+                    data: JSON.stringify(payload),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (response) {
+                        if (response && response.status === "success") {
+                            resolve(response);
+                        } else {
+                            reject(new Error((response && response.message) || "Failed to add item"));
+                        }
+                    },
+                    error: function () {
+                        reject(new Error("Something went wrong, please try again."));
                     }
+                });
+            });
+        }
+
+        const mainPayload = {
+            product_id: productId,
+            quantity: quantity,
+            attribute_value: attributeValue,
+            unit_price: unitPrice,
+            payment_method: paymentMethod,
+            variation_id: resolvedVariationId ? parseInt(resolvedVariationId) : null,
+        };
+
+        postCartItem(mainPayload)
+            .then(function (mainResponse) {
+                let chain = Promise.resolve(mainResponse);
+                groupExtras.forEach(function (extra) {
+                    chain = chain.then(function (last) {
+                        return postCartItem({
+                            product_id: extra.product_id,
+                            quantity: extra.quantity,
+                            unit_price: extra.unit_price,
+                            payment_method: extra.payment_method,
+                            variation_id: extra.variation_id ? parseInt(extra.variation_id, 10) : null,
+                        }).catch(function () {
+                            // Keep main product in cart even if an accessory fails
+                            return last;
+                        });
+                    });
+                });
+                return chain;
+            })
+            .then(function (response) {
+                const cartCountElements = document.querySelectorAll('.cart-count');
+                const totalQuantity = (response.cart_summary && response.cart_summary.total_quantity) || 0;
+                cartCountElements.forEach(function (element) {
+                    element.textContent = totalQuantity;
+                });
+                if (redirectToCheckout) {
+                    window.location.href = withBase("/checkout");
                 } else {
+                    const extrasCount = groupExtras.length;
                     Swal.fire({
-                        title: "Oops!",
-                        text: response.message,
-                        icon: "error",
-                        confirmButtonText: "Try Again"
+                        title: "Added to Cart!",
+                        text: extrasCount > 0
+                            ? ("Product and " + extrasCount + " accessory item(s) added. What would you like to do next?")
+                            : "Your product has been added. What would you like to do next?",
+                        icon: "success",
+                        showCancelButton: true,
+                        confirmButtonText: "View Cart",
+                        cancelButtonText: "Continue Shopping",
+                        reverseButtons: true,
+                        customClass: {
+                            popup: "pd-cart-popup",
+                            icon: "pd-cart-popup__icon",
+                            title: "pd-cart-popup__title",
+                            htmlContainer: "pd-cart-popup__text",
+                            confirmButton: "pd-cart-popup__btn pd-cart-popup__btn--primary",
+                            cancelButton: "pd-cart-popup__btn pd-cart-popup__btn--secondary",
+                            actions: "pd-cart-popup__actions"
+                        },
+                        buttonsStyling: false
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            window.location.href = withBase("/cart");
+                        }
                     });
                 }
-            },
-            error: function(xhr, status, error) {
+            })
+            .catch(function (err) {
                 Swal.fire({
-                    title: "Error!",
-                    text: "Something went wrong, please try again.",
+                    title: "Oops!",
+                    text: err && err.message ? err.message : "Something went wrong, please try again.",
                     icon: "error",
-                    confirmButtonText: "OK"
+                    confirmButtonText: "Try Again"
                 });
-            }
-        });
+            });
     }
 
     for (let key in addToCartButtons) {

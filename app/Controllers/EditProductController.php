@@ -158,6 +158,12 @@ class ProductController
                 )->execute([$id]);
             }
 
+            require_once __DIR__ . '/../Models/ProductGroupModel.php';
+            $groupIds = isset($_POST['group_product_ids']) && is_array($_POST['group_product_ids'])
+                ? $_POST['group_product_ids']
+                : [];
+            (new ProductGroupModel($db))->saveGroupProducts((int) $id, $groupIds);
+
             session_start();
             $_SESSION['message'] = 'Product updated successfully!';
             $_SESSION['message_type'] = 'success';

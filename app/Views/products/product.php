@@ -822,6 +822,8 @@ $prepaidBtnLabel = $prepaidDiscountAmount > 0
     : 'Prepaid';
 if ($cartFormCondition): ?>
             <!-- Payment Method Selection -->
+    <?php require __DIR__ . '/group-products.php'; ?>
+
     <div class="payment-method-selection">
         <button type="button" class="payment-btn cod active" data-method="cod">COD</button>
         <button type="button" class="payment-btn prepaid" data-method="prepaid" data-prepaid-discount="<?= $prepaidDiscountAmount ?>"><?= $prepaidBtnLabel ?></button>

@@ -342,6 +342,12 @@ class ProductController
                     }
                 }
 
+                require_once __DIR__ . '/../Models/ProductGroupModel.php';
+                $groupIds = isset($_POST['group_product_ids']) && is_array($_POST['group_product_ids'])
+                    ? $_POST['group_product_ids']
+                    : [];
+                (new ProductGroupModel($this->db))->saveGroupProducts((int) $productId, $groupIds);
+
                 // Commit the transaction
                 $this->commitIfActive();
 
