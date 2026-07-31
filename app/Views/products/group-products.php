@@ -10,7 +10,7 @@ if (empty($groupProducts) || !is_array($groupProducts)) {
 <div class="pd-group-products" id="pd-group-products">
     <div class="pd-group-products__header">
         <h3 class="pd-group-products__title">Frequently bought together</h3>
-        <p class="pd-group-products__sub">Select accessories to add with this product</p>
+        <p class="pd-group-products__sub">Select accessories to add with this product — bundle prices may be lower</p>
     </div>
     <div class="pd-group-products__list">
         <?php foreach ($groupProducts as $gp):
@@ -25,12 +25,10 @@ if (empty($groupProducts) || !is_array($groupProducts)) {
                 ? rtrim(getBaseURL(), '/') . buildProductPathFromRow($gp)
                 : '#';
             $variationId = !empty($gp['default_variation_id']) ? (int) $gp['default_variation_id'] : 0;
-            $regular = isset($gp['regular_price']) && is_numeric($gp['regular_price']) ? (float) $gp['regular_price'] : 0;
-            $sale = isset($gp['sale_price']) && is_numeric($gp['sale_price']) ? (float) $gp['sale_price'] : 0;
-            if (($gp['product_type'] ?? '') === 'variable') {
-                $sale = 0;
-                $regular = $gpPrice;
-            }
+            $original = isset($gp['original_price']) && is_numeric($gp['original_price'])
+                ? (float) $gp['original_price']
+                : $gpPrice;
+            $hasDiscount = !empty($gp['has_group_discount']) || ($original > $gpPrice);
         ?>
             <label class="pd-group-item">
                 <input
@@ -50,9 +48,10 @@ if (empty($groupProducts) || !is_array($groupProducts)) {
                         <?= htmlspecialchars($gpName, ENT_QUOTES, 'UTF-8') ?>
                     </a>
                     <span class="pd-group-item__price">
-                        <?php if ($sale > 0 && $regular > $sale): ?>
-                            <span class="pd-group-item__old">Rs. <?= number_format($regular) ?></span>
-                            <span class="pd-group-item__new">Rs. <?= number_format($sale) ?></span>
+                        <?php if ($hasDiscount): ?>
+                            <span class="pd-group-item__old">Rs. <?= number_format($original) ?></span>
+                            <span class="pd-group-item__new">Rs. <?= number_format($gpPrice) ?></span>
+                            <span class="pd-group-item__badge">Bundle deal</span>
                         <?php else: ?>
                             <span class="pd-group-item__new">Rs. <?= number_format($gpPrice) ?></span>
                         <?php endif; ?>

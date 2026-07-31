@@ -13,7 +13,8 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
     <div style="margin-bottom:16px">
         <h3 style="margin:0;font-size:1.05rem;font-weight:800;color:#111">Group Products</h3>
         <p style="margin:4px 0 0;color:#6b7280;font-size:.88rem">
-            Link accessories (cables, adapters, cases, etc.). Customers can add them with this product from the product page.
+            Link accessories and set an optional <strong>group price</strong> (bundle discount).
+            This does not change the product’s normal individual price.
         </p>
     </div>
 
@@ -39,9 +40,12 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
                 $gpImg = (string) ($gp['image_url'] ?? '');
                 $sale = isset($gp['sale_price']) && is_numeric($gp['sale_price']) ? (float) $gp['sale_price'] : 0;
                 $regular = isset($gp['regular_price']) && is_numeric($gp['regular_price']) ? (float) $gp['regular_price'] : 0;
-                $price = $sale > 0 ? $sale : $regular;
+                $standalone = $sale > 0 ? $sale : $regular;
+                $groupPrice = isset($gp['group_price']) && is_numeric($gp['group_price']) && (float) $gp['group_price'] > 0
+                    ? (float) $gp['group_price']
+                    : '';
             ?>
-                <div class="pg-item" data-id="<?= $gpId ?>">
+                <div class="pg-item" data-id="<?= $gpId ?>" data-standalone="<?= htmlspecialchars((string) $standalone, ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="group_product_ids[]" value="<?= $gpId ?>">
                     <?php if ($gpImg !== ''): ?>
                         <img class="pg-item-img" src="<?= htmlspecialchars($gpImg, ENT_QUOTES, 'UTF-8') ?>" alt="">
@@ -53,8 +57,21 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
                         <div class="pg-item-sub">
                             #<?= $gpId ?>
                             <?php if ($gpSku !== ''): ?> · <?= htmlspecialchars($gpSku, ENT_QUOTES, 'UTF-8') ?><?php endif; ?>
-                            <?php if ($price > 0): ?> · Rs. <?= number_format($price) ?><?php endif; ?>
+                            <?php if ($standalone > 0): ?> · Normal: Rs. <?= number_format($standalone) ?><?php endif; ?>
                         </div>
+                        <label class="pg-price-label">
+                            Group price (Rs.)
+                            <input
+                                type="number"
+                                class="pg-price-input"
+                                name="group_product_prices[<?= $gpId ?>]"
+                                value="<?= $groupPrice !== '' ? htmlspecialchars((string) $groupPrice, ENT_QUOTES, 'UTF-8') : '' ?>"
+                                min="0"
+                                step="0.01"
+                                placeholder="<?= $standalone > 0 ? number_format($standalone, 0, '.', '') : 'Optional' ?>"
+                                title="Leave empty to use the normal product price"
+                            >
+                        </label>
                     </div>
                     <button type="button" class="pg-remove" title="Remove">&times;</button>
                 </div>
@@ -88,18 +105,27 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
 .pg-item-img--placeholder { background:#f3f4f6; }
 .pg-result-name { font-size:.88rem; font-weight:700; color:#111; }
 .pg-result-sub { font-size:.75rem; color:#6b7280; margin-top:2px; }
-.pg-selected { margin-top:16px; display:flex; flex-direction:column; gap:8px; max-width:640px; }
+.pg-selected { margin-top:16px; display:flex; flex-direction:column; gap:8px; max-width:720px; }
 .pg-empty { margin:0; color:#9ca3af; font-size:.88rem; }
 .pg-item {
-    display:flex; align-items:center; gap:12px; padding:10px 12px;
+    display:flex; align-items:flex-start; gap:12px; padding:12px;
     border:1px solid #e5e7eb; border-radius:12px; background:#fff;
 }
 .pg-item-meta { flex:1; min-width:0; }
 .pg-item-name { font-size:.9rem; font-weight:700; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pg-item-sub { font-size:.75rem; color:#6b7280; margin-top:2px; }
+.pg-price-label {
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    margin-top:8px; font-size:.78rem; font-weight:700; color:#374151;
+}
+.pg-price-input {
+    width:130px; height:34px; padding:0 10px; border:1px solid #e5e7eb; border-radius:8px;
+    font-size:.85rem; font-weight:600; color:#111; background:#fff; outline:none;
+}
+.pg-price-input:focus { border-color:#facc15; box-shadow:0 0 0 3px rgba(250,204,21,.25); }
 .pg-remove {
     width:32px; height:32px; border:1px solid #fecaca; border-radius:8px;
-    background:#fff; color:#ef4444; font-size:1.2rem; line-height:1; cursor:pointer;
+    background:#fff; color:#ef4444; font-size:1.2rem; line-height:1; cursor:pointer; flex-shrink:0;
 }
 .pg-remove:hover { background:#fef2f2; }
 </style>
@@ -135,10 +161,14 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
         emptyMsg.hidden = hasItems;
     }
 
-    function formatPrice(sale, regular) {
+    function standalonePrice(sale, regular) {
         const s = parseFloat(sale) || 0;
         const r = parseFloat(regular) || 0;
-        const p = s > 0 ? s : r;
+        return s > 0 ? s : r;
+    }
+
+    function formatPrice(amount) {
+        const p = parseFloat(amount) || 0;
         return p > 0 ? ('Rs. ' + Math.round(p).toLocaleString()) : '';
     }
 
@@ -146,11 +176,12 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
         const id = parseInt(p.product_id, 10);
         if (!id || selectedIds().indexOf(id) !== -1) return;
 
+        const standalone = standalonePrice(p.sale_price, p.regular_price);
         const item = document.createElement('div');
         item.className = 'pg-item';
         item.dataset.id = String(id);
+        item.dataset.standalone = String(standalone || 0);
 
-        const price = formatPrice(p.sale_price, p.regular_price);
         const sku = (p.product_sku || '').trim();
         const imgHtml = p.image_url
             ? '<img class="pg-item-img" src="' + String(p.image_url).replace(/"/g, '&quot;') + '" alt="">'
@@ -162,18 +193,26 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
             '<div class="pg-item-meta">' +
                 '<div class="pg-item-name"></div>' +
                 '<div class="pg-item-sub"></div>' +
+                '<label class="pg-price-label">Group price (Rs.)' +
+                    '<input type="number" class="pg-price-input" name="group_product_prices[' + id + ']"' +
+                    ' min="0" step="0.01" value=""' +
+                    ' placeholder="' + (standalone > 0 ? String(Math.round(standalone)) : 'Optional') + '"' +
+                    ' title="Leave empty to use the normal product price">' +
+                '</label>' +
             '</div>' +
             '<button type="button" class="pg-remove" title="Remove">&times;</button>';
 
         item.querySelector('.pg-item-name').textContent = p.product_name || ('Product #' + id);
         item.querySelector('.pg-item-sub').textContent =
-            '#' + id + (sku ? ' · ' + sku : '') + (price ? ' · ' + price : '');
+            '#' + id + (sku ? ' · ' + sku : '') + (standalone > 0 ? ' · Normal: ' + formatPrice(standalone) : '');
 
         listEl.appendChild(item);
         syncEmpty();
         resultsEl.hidden = true;
         resultsEl.innerHTML = '';
         searchInput.value = '';
+        const priceInput = item.querySelector('.pg-price-input');
+        if (priceInput) priceInput.focus();
     }
 
     listEl.addEventListener('click', function (e) {
@@ -200,7 +239,7 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
         filtered.forEach(function (p) {
             const row = document.createElement('div');
             row.className = 'pg-result';
-            const price = formatPrice(p.sale_price, p.regular_price);
+            const standalone = standalonePrice(p.sale_price, p.regular_price);
             const sku = (p.product_sku || '').trim();
             row.innerHTML =
                 (p.image_url
@@ -209,7 +248,7 @@ $groupExcludeProductId = (int) ($groupExcludeProductId ?? 0);
                 '<div><div class="pg-result-name"></div><div class="pg-result-sub"></div></div>';
             row.querySelector('.pg-result-name').textContent = p.product_name || ('Product #' + p.product_id);
             row.querySelector('.pg-result-sub').textContent =
-                '#' + p.product_id + (sku ? ' · ' + sku : '') + (price ? ' · ' + price : '');
+                '#' + p.product_id + (sku ? ' · ' + sku : '') + (standalone > 0 ? ' · ' + formatPrice(standalone) : '');
             row.addEventListener('click', function () { addProduct(p); });
             resultsEl.appendChild(row);
         });

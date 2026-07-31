@@ -734,6 +734,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             <select id="b2bStatusFilter" class="native-filter-select" aria-label="Filter by status">
                 <option value="all">All statuses</option>
                 <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
                 <option value="Cancelled">Cancelled</option>
                 <option value="Completed">Completed</option>
             </select>
@@ -742,6 +743,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                 <ul class="filter-options" data-filter-options>
                     <li><button type="button" class="filter-option is-selected" data-value="all">All statuses</button></li>
                     <li><button type="button" class="filter-option" data-value="Pending">Pending</button></li>
+                    <li><button type="button" class="filter-option" data-value="Processing">Processing</button></li>
                     <li><button type="button" class="filter-option" data-value="Cancelled">Cancelled</button></li>
                     <li><button type="button" class="filter-option" data-value="Completed">Completed</button></li>
                 </ul>
@@ -817,9 +819,10 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                         <form method="post" style="margin:0;">
                             <input type="hidden" name="inquiry_id" value="<?= htmlspecialchars($order['id']) ?>">
                             <select name="inquiry_status" class="native-status-select" aria-label="Inquiry status">
-                                <option value="Pending"   <?= ($order['status'] === 'Pending')   ? 'selected' : '' ?>>Pending</option>
-                                <option value="Cancelled" <?= ($order['status'] === 'Cancelled') ? 'selected' : '' ?>>Cancelled</option>
-                                <option value="Completed" <?= ($order['status'] === 'Completed') ? 'selected' : '' ?>>Completed</option>
+                                <option value="Pending"    <?= ($order['status'] === 'Pending')    ? 'selected' : '' ?>>Pending</option>
+                                <option value="Processing" <?= ($order['status'] === 'Processing') ? 'selected' : '' ?>>Processing</option>
+                                <option value="Cancelled"  <?= ($order['status'] === 'Cancelled')  ? 'selected' : '' ?>>Cancelled</option>
+                                <option value="Completed"  <?= ($order['status'] === 'Completed')  ? 'selected' : '' ?>>Completed</option>
                             </select>
                             <div class="status-select-wrap" data-status-select>
                                 <button type="button" class="status-display" data-status-display>
@@ -827,6 +830,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                                 </button>
                                 <ul class="status-options" data-status-options>
                                     <li><button type="button" class="status-option <?= ($order['status'] === 'Pending') ? 'is-selected' : '' ?>" data-value="Pending">Pending</button></li>
+                                    <li><button type="button" class="status-option <?= ($order['status'] === 'Processing') ? 'is-selected' : '' ?>" data-value="Processing">Processing</button></li>
                                     <li><button type="button" class="status-option <?= ($order['status'] === 'Cancelled') ? 'is-selected' : '' ?>" data-value="Cancelled">Cancelled</button></li>
                                     <li><button type="button" class="status-option <?= ($order['status'] === 'Completed') ? 'is-selected' : '' ?>" data-value="Completed">Completed</button></li>
                                 </ul>

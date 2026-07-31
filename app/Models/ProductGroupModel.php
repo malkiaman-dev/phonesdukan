@@ -27,6 +27,7 @@ class ProductGroupModel
                     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
                     parent_product_id INT UNSIGNED NOT NULL,
                     child_product_id INT UNSIGNED NOT NULL,
+                    group_price DECIMAL(12,2) NULL DEFAULT NULL,
                     sort_order INT NOT NULL DEFAULT 0,
                     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (id),
@@ -37,6 +38,35 @@ class ProductGroupModel
             );
         } catch (Throwable $e) {
             error_log('product_group_items schema: ' . $e->getMessage());
+        }
+
+        // Existing installs: add group_price if missing
+        if (function_exists('dbAddColumnIfMissing')) {
+            dbAddColumnIfMissing(
+                $db,
+                'product_group_items',
+                'group_price',
+                'DECIMAL(12,2) NULL DEFAULT NULL AFTER child_product_id'
+            );
+        } else {
+            try {
+                $stmt = $db->prepare(
+                    'SELECT COUNT(*) FROM information_schema.COLUMNS
+                     WHERE TABLE_SCHEMA = DATABASE()
+                       AND TABLE_NAME = ?
+                       AND COLUMN_NAME = ?'
+                );
+                $stmt->execute(['product_group_items', 'group_price']);
+                if ((int) $stmt->fetchColumn() === 0) {
+                    $db->exec(
+                        'ALTER TABLE product_group_items
+                         ADD COLUMN group_price DECIMAL(12,2) NULL DEFAULT NULL
+                         AFTER child_product_id'
+                    );
+                }
+            } catch (Throwable $e) {
+                error_log('product_group_items.group_price: ' . $e->getMessage());
+            }
         }
     }
 
@@ -70,6 +100,7 @@ class ProductGroupModel
                     p.stock_quantity,
                     p.product_status,
                     p.product_type,
+                    g.group_price,
                     c.slug AS category_slug,
                     b.slug AS brand_slug,
                     sc.slug AS subcategory_slug,
@@ -123,12 +154,21 @@ class ProductGroupModel
         foreach ($rows as &$row) {
             $isVariable = ($row['product_type'] ?? 'simple') === 'variable';
             if ($isVariable && !empty($row['default_variation_price'])) {
-                $row['unit_price'] = (float) $row['default_variation_price'];
+                $standalone = (float) $row['default_variation_price'];
             } else {
                 $sale = isset($row['sale_price']) && is_numeric($row['sale_price']) ? (float) $row['sale_price'] : 0;
                 $regular = isset($row['regular_price']) && is_numeric($row['regular_price']) ? (float) $row['regular_price'] : 0;
-                $row['unit_price'] = $sale > 0 ? $sale : $regular;
+                $standalone = $sale > 0 ? $sale : $regular;
             }
+
+            $row['original_price'] = $standalone;
+            $groupPrice = isset($row['group_price']) && is_numeric($row['group_price'])
+                ? (float) $row['group_price']
+                : 0;
+            // Group price only applies when set and positive; does not alter catalog price
+            $row['unit_price'] = $groupPrice > 0 ? $groupPrice : $standalone;
+            $row['has_group_discount'] = $groupPrice > 0 && $standalone > $groupPrice;
+
             if (!$isVariable) {
                 $row['default_variation_id'] = null;
             }
@@ -154,6 +194,7 @@ class ProductGroupModel
                     p.sale_price,
                     p.regular_price,
                     p.product_status,
+                    g.group_price,
                     (
                         SELECT pi.image_url
                         FROM product_images pi
@@ -174,16 +215,44 @@ class ProductGroupModel
     /**
      * Replace all group links for a parent product.
      *
-     * @param list<int|string> $childIds
+     * @param list<int|string|array{id?:int|string,product_id?:int|string,group_price?:float|string|null}> $items
+     *        Accepts plain IDs or ['id' => int, 'group_price' => float|null]
+     * @param array<int|string, float|string|null>|null $priceMap Optional map product_id => group_price
      */
-    public function saveGroupProducts(int $parentProductId, array $childIds): void
+    public function saveGroupProducts(int $parentProductId, array $items, ?array $priceMap = null): void
     {
         $clean = [];
-        foreach ($childIds as $id) {
-            $id = (int) $id;
-            if ($id > 0 && $id !== $parentProductId) {
-                $clean[$id] = $id;
+        foreach ($items as $key => $item) {
+            if (is_array($item)) {
+                $id = (int) ($item['id'] ?? $item['product_id'] ?? 0);
+                $priceRaw = $item['group_price'] ?? null;
+            } else {
+                $id = (int) $item;
+                $priceRaw = null;
             }
+
+            if ($id <= 0 || $id === $parentProductId) {
+                continue;
+            }
+
+            if ($priceMap !== null && array_key_exists($id, $priceMap)) {
+                $priceRaw = $priceMap[$id];
+            } elseif ($priceMap !== null && array_key_exists((string) $id, $priceMap)) {
+                $priceRaw = $priceMap[(string) $id];
+            }
+
+            $groupPrice = null;
+            if ($priceRaw !== null && $priceRaw !== '' && is_numeric($priceRaw)) {
+                $parsed = (float) $priceRaw;
+                if ($parsed > 0) {
+                    $groupPrice = round($parsed, 2);
+                }
+            }
+
+            $clean[$id] = [
+                'id' => $id,
+                'group_price' => $groupPrice,
+            ];
         }
         $clean = array_values($clean);
 
@@ -197,11 +266,16 @@ class ProductGroupModel
 
             if (!empty($clean)) {
                 $ins = $this->db->prepare(
-                    'INSERT INTO product_group_items (parent_product_id, child_product_id, sort_order)
-                     VALUES (?, ?, ?)'
+                    'INSERT INTO product_group_items (parent_product_id, child_product_id, group_price, sort_order)
+                     VALUES (?, ?, ?, ?)'
                 );
-                foreach ($clean as $sort => $childId) {
-                    $ins->execute([$parentProductId, $childId, $sort]);
+                foreach ($clean as $sort => $row) {
+                    $ins->execute([
+                        $parentProductId,
+                        $row['id'],
+                        $row['group_price'],
+                        $sort,
+                    ]);
                 }
             }
 

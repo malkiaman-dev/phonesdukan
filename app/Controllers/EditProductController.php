@@ -162,7 +162,10 @@ class ProductController
             $groupIds = isset($_POST['group_product_ids']) && is_array($_POST['group_product_ids'])
                 ? $_POST['group_product_ids']
                 : [];
-            (new ProductGroupModel($db))->saveGroupProducts((int) $id, $groupIds);
+            $groupPrices = isset($_POST['group_product_prices']) && is_array($_POST['group_product_prices'])
+                ? $_POST['group_product_prices']
+                : [];
+            (new ProductGroupModel($db))->saveGroupProducts((int) $id, $groupIds, $groupPrices);
 
             session_start();
             $_SESSION['message'] = 'Product updated successfully!';
