@@ -9,34 +9,56 @@ class PagesSitemapController {
         echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
 
-        $directories = [
-            'https://www.phonesdukan.com/mobiles-price-list' => __DIR__ . '/../Views/mobiles-price-list/',
-            'https://www.phonesdukan.com/static-pages'       => __DIR__ . '/../Views/static-pages/',
+        // Real public routes only — never emit /static-pages/... paths (those 404).
+        $staticPages = [
+            'about-us' => __DIR__ . '/../Views/static-pages/about-us.php',
+            'contact-us' => __DIR__ . '/../Views/static-pages/contact.php',
+            'return-policy' => __DIR__ . '/../Views/static-pages/return-policy.php',
+            'privacy-policy' => __DIR__ . '/../Views/static-pages/privacy-policy.php',
+            'shipping-policy' => __DIR__ . '/../Views/static-pages/shipping-policy.php',
+            'terms-and-conditions' => __DIR__ . '/../Views/static-pages/terms-and-conditions.php',
+            'write-for-us' => __DIR__ . '/../Views/static-pages/write-for-us.php',
+            'wholesale' => __DIR__ . '/../Views/products/wholesale.php',
+            'coming-soon-products' => __DIR__ . '/../Views/coming-soon-products.php',
+            'shop' => __DIR__ . '/../Views/shop/index.php',
         ];
 
-        $model = new PagesSitemapModel();
-        $pages = $model->getAllPhpPages($directories);
-
-        // Explicitly add wholesale.php from /app/Views/products/
-        $wholesaleFile = __DIR__ . '/../Views/products/wholesale.php';
-        if (file_exists($wholesaleFile)) {
+        $pages = [];
+        foreach ($staticPages as $slug => $filePath) {
+            if (!is_file($filePath)) {
+                continue;
+            }
             $pages[] = [
-                'url' => 'https://www.phonesdukan.com/wholesale',
-                'lastmod' => date('Y-m-d', filemtime($wholesaleFile))
+                'url' => 'https://www.phonesdukan.com/' . $slug . '/',
+                'lastmod' => date('Y-m-d', filemtime($filePath)),
             ];
         }
 
-        if (empty($pages)) {
-            echo '<error>No pages found</error>' . PHP_EOL;
-        } else {
-            foreach ($pages as $page) {
-                echo '  <url>' . PHP_EOL;
-                echo '    <loc>' . htmlspecialchars($page['url']) . '</loc>' . PHP_EOL;
-                echo '    <lastmod>' . $page['lastmod'] . '</lastmod>' . PHP_EOL;
-                echo '    <changefreq>monthly</changefreq>' . PHP_EOL;
-                echo '    <priority>0.5</priority>' . PHP_EOL;
-                echo '  </url>' . PHP_EOL;
+        $priceListDir = __DIR__ . '/../Views/mobiles-price-list/';
+        if (is_dir($priceListDir)) {
+            foreach (scandir($priceListDir) ?: [] as $file) {
+                if (pathinfo($file, PATHINFO_EXTENSION) !== 'php') {
+                    continue;
+                }
+                $slug = pathinfo($file, PATHINFO_FILENAME);
+                if ($slug === '' || strtolower($slug) === 'index') {
+                    continue;
+                }
+                $filePath = $priceListDir . $file;
+                $pages[] = [
+                    'url' => 'https://www.phonesdukan.com/mobiles-price-list/' . $slug . '/',
+                    'lastmod' => date('Y-m-d', filemtime($filePath)),
+                ];
             }
+        }
+
+        foreach ($pages as $page) {
+            echo '  <url>' . PHP_EOL;
+            echo '    <loc>' . htmlspecialchars($page['url']) . '</loc>' . PHP_EOL;
+            echo '    <lastmod>' . $page['lastmod'] . '</lastmod>' . PHP_EOL;
+            echo '    <changefreq>monthly</changefreq>' . PHP_EOL;
+            echo '    <priority>0.5</priority>' . PHP_EOL;
+            echo '  </url>' . PHP_EOL;
         }
 
         echo '</urlset>' . PHP_EOL;

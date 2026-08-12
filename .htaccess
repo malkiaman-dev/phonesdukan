@@ -31,6 +31,11 @@
     # Fix accidental admin-relative asset URLs like /admin/public/assets/...
     RewriteRule ^admin/public/(.*)$ public/$1 [L,NC]
 
+    # Legacy WordPress uploads: DB may say /public/uploads/... while files still
+    # live under /wp-content/uploads/... — serve them without moving/deleting files.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^public/uploads/(.*)$ wp-content/uploads/$1 [L]
+
     # Legacy / root app-icon.png → canonical assets path (with fallback)
     RewriteCond %{DOCUMENT_ROOT}/public/assets/images/app-icon.png -f
     RewriteRule ^app-icon\.png$ public/assets/images/app-icon.png [L,NC]

@@ -215,7 +215,7 @@ class ProductController
                     if (move_uploaded_file($primaryImageTmpName, $targetFile)) {
                         // Insert primary image into product_images table
                         $imageData = [
-                            'image_url' => '/public/uploads/' . $newFileName,
+                            'image_url' => normalizeStoredUploadPath('/public/uploads/' . $newFileName),
                             'is_primary' => 1,  // Set primary flag to 1 for primary image
                             'status' => $imageStatus,
                             'product_id' => $productId
@@ -283,7 +283,7 @@ class ProductController
                         if (move_uploaded_file($galleryImageTmpName, $targetFile)) {
                             // Insert gallery image into product_images table
                             $imageData = [
-                                'image_url' => '/public/uploads/' . $newFileName,
+                                'image_url' => normalizeStoredUploadPath('/public/uploads/' . $newFileName),
                                 'is_primary' => 0,  // Set primary flag to 0 for gallery images
                                 'status' => $imageStatus,
                                 'product_id' => $productId

@@ -20,6 +20,35 @@ if (BASE_PATH !== '' && strpos($requestUri, BASE_PATH) === 0) {
 
 $requestUri = $requestUri === '' ? '/' : $requestUri;
 
+// Strip legacy WordPress / junk query params that cause Soft 404 crawl waste
+// (e.g. /?s=, /?p=, /?page_id= serving the homepage at HTTP 200).
+if (function_exists('seoRedirectAwayFromJunkQueryParams')) {
+    seoRedirectAwayFromJunkQueryParams();
+} elseif (!empty($_GET)) {
+    $junkKeys = [
+        's', 'p', 'page_id', 'attachment_id', 'cat', 'tag', 'author',
+        'year', 'monthnum', 'day', 'name', 'pagename', 'm', 'replytocom',
+        'preview', 'post_type', 'TB_iframe',
+    ];
+    $cleanQuery = $_GET;
+    $hadJunk = false;
+    foreach ($junkKeys as $key) {
+        if (array_key_exists($key, $cleanQuery)) {
+            unset($cleanQuery[$key]);
+            $hadJunk = true;
+        }
+    }
+    if ($hadJunk) {
+        $qs = http_build_query($cleanQuery);
+        $target = $requestUri . ($qs !== '' ? '?' . $qs : '');
+        if (BASE_PATH !== '' && strpos($target, BASE_PATH) !== 0) {
+            $target = rtrim(BASE_PATH, '/') . $target;
+        }
+        header('Location: ' . $target, true, 301);
+        exit;
+    }
+}
+
 // Step 3: Redirect if necessary
 $redirectTarget = $oldRoutes[$requestUri]
     ?? $oldRoutes[rtrim($requestUri, '/') . '/']

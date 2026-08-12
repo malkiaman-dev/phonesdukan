@@ -29,6 +29,14 @@ Disallow: /user/
 # entirely so Google never wastes quota on 40K+ filter permutations.
 Disallow: /shop?*
 
+# ── Thin / Soft-404 prone crawl paths ─────────────────────────────────────
+Disallow: /search
+Disallow: /*?*s=
+Disallow: /*?*p=
+Disallow: /*?*page_id=
+Disallow: /*?*paged=
+Disallow: /*?*attachment_id=
+
 # ── Development / temp files ─────────────────────────────────────────────
 Disallow: /tmp/
 Disallow: /temp/
@@ -57,7 +65,6 @@ Allow: /*.woff2$
 
 # ── Sitemaps ─────────────────────────────────────────────────────────────
 Sitemap: https://www.phonesdukan.com/sitemap_index.xml
-Sitemap: https://www.phonesdukan.com/sitemap.xml
 
 # Host directive (Yandex canonical host)
 Host: https://www.phonesdukan.com

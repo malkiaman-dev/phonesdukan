@@ -119,7 +119,7 @@
         <a href="<?= url('terms-and-conditions/'); ?>">Terms &amp; Conditions</a>
     </nav>
     <div class="payment-image">
-        <img src="<?= url('public/assets/images/payment.webp'); ?>" alt="Secure Payment">
+        <img src="<?= url('public/assets/images/payment.webp'); ?>" alt="Secure Payment" loading="lazy" decoding="async" width="320" height="40">
     </div>
 </div>
 

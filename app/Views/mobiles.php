@@ -10,15 +10,15 @@ $metaKeywords    = "mobile prices Pakistan, buy mobile online Pakistan, smartpho
 
 $breadcrumbs = SeoHelper::categoryBreadcrumbs('mobiles', 'Mobiles');
 
-require_once dirname(__DIR__, 2) . '/includes/header.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 $catalogModel = new CatalogModel();
 $productModel = new ProductModel();
 $category = $catalogModel->getActiveParentCategoryBySlug('mobiles');
 
 if (!$category) {
-    echo '<p class="mob-empty">Category not found.</p>';
-    require_once dirname(__DIR__, 2) . '/includes/footer.php';
+    http_response_code(404);
+    include __DIR__ . '/404.php';
     return;
 }
 
@@ -29,9 +29,12 @@ $categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
 $limit = 48;
 $paged = isset($_GET['paged']) ? (int) $_GET['paged'] : 1;
 $paged = $paged > 0 ? $paged : 1;
-$offset = ($paged - 1) * $limit;
 
 $totalRows = $productModel->countListingProductsForCategory($categoryId);
+$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+seoEnforceListingPagination($paged, $totalPages);
+$offset = ($paged - 1) * $limit;
+
 $rawProducts = $productModel->getListingProductsForCategory($categoryId, $limit, $offset);
 
 $allProducts = [];
@@ -50,9 +53,10 @@ foreach ($categoryBrands as $brandRow) {
 
 $totalProducts = count($allProducts);
 $totalBrands   = count($brandList);
-$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
 $activeBrandSlug = null;
 $allLabel = 'All Mobiles';
+
+require_once dirname(__DIR__, 2) . '/includes/header.php';
 ?>
 
 <!-- HERO -->

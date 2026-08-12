@@ -30,6 +30,9 @@ $offset = ($paged - 1) * $limit;
 $totalRows = $productModel->countListingProductsForCategory($categoryId);
 $rawProducts = $productModel->getListingProductsForCategory($categoryId, $limit, $offset);
 $totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+if (function_exists('seoEnforceListingPagination')) {
+    seoEnforceListingPagination($paged, $totalPages);
+}
 
 $products = [];
 foreach ($rawProducts as $row) {

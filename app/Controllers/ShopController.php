@@ -5,6 +5,7 @@ $productModel = new ProductModel(); // Assuming ShopModel is handling both produ
 
 $limit = 12; // Products per page
 $paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
+$paged = $paged > 0 ? $paged : 1;
 $offset = ($paged - 1) * $limit;
 
 // Collect filters from GET parameters
@@ -24,12 +25,17 @@ $filters = [
 
 $selectedCategoryIds = array_map('strval', $filters['category']);
 
-// Fetch filtered & paginated products based on the filters
-$products = $productModel->getPaginatedProducts($limit, $offset, $filters);
-
 // Get total product count (with filters applied)
 $total_rows = $productModel->getTotalFilteredProductCount($filters);
-$total_pages = ceil($total_rows / $limit);
+$total_pages = $total_rows > 0 ? (int) ceil($total_rows / $limit) : 0;
+
+if (function_exists('seoEnforceListingPagination')) {
+    seoEnforceListingPagination($paged, $total_pages);
+}
+$offset = ($paged - 1) * $limit;
+
+// Fetch filtered & paginated products based on the filters
+$products = $productModel->getPaginatedProducts($limit, $offset, $filters);
 
 // Fetch all active categories and brands for the filter dropdowns
 $categories = $productModel->getAllCategories();

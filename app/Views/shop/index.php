@@ -1,9 +1,15 @@
 <?php
 require_once __DIR__ . '/../../Controllers/ShopController.php';
 
-// Filter/sort combinations create thin duplicate pages — noindex them to
-// protect crawl budget and prevent 27K "crawled, not indexed" entries in GSC.
-$hasFilters = !empty($_GET['category']) || !empty($_GET['sort_by']) || !empty($_GET['brand']) || !empty($_GET['page']);
+// Filter/sort/pagination combinations create thin duplicate pages — noindex them.
+$hasFilters = !empty($_GET['category'])
+    || !empty($_GET['sort_by'])
+    || !empty($_GET['brand'])
+    || !empty($_GET['page'])
+    || !empty($_GET['paged'])
+    || !empty($_GET['min_price'])
+    || !empty($_GET['max_price'])
+    || !empty($_GET['price_range']);
 $metaRobots = $hasFilters ? 'noindex, follow' : 'index, follow';
 
 require_once dirname(__DIR__, 3) . '/includes/header.php';

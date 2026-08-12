@@ -31,14 +31,24 @@ class CategoryController
         $offset = ($paged - 1) * $limit;
 
         $totalRows = $productModel->countListingProductsForCategory((int) $category['category_id']);
+
+        // Empty category listings are Soft 404s — hard 404 + keep out of sitemaps.
+        if ($totalRows === 0) {
+            http_response_code(404);
+            include __DIR__ . '/../Views/404.php';
+            return;
+        }
+
+        $totalPages = (int) ceil($totalRows / $limit);
+        seoEnforceListingPagination($paged, $totalPages);
+        $offset = ($paged - 1) * $limit;
+
         $rawProducts = $productModel->getListingProductsForCategory((int) $category['category_id'], $limit, $offset);
 
         $products = [];
         foreach ($rawProducts as $row) {
             $products[] = prepareProductCardFromRow($row);
         }
-
-        $totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
 
         include __DIR__ . '/../Views/category-dynamic.php';
     }

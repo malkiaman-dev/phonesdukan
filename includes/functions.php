@@ -412,6 +412,147 @@ if (!function_exists('buildProductCanonicalUrl')) {
         return rtrim($domain, '/') . $path . '/';
     }
 }
+if (!function_exists('normalizeStoredUploadPath')) {
+    /**
+     * Canonicalize local upload paths for DB storage.
+     * - Keeps /wp-content/uploads/... (legacy WordPress files)
+     * - Keeps /public/uploads/... (new uploads)
+     * - Converts absolute/domain/base-path URLs to a site-relative upload path
+     * - Leaves external CDN URLs unchanged
+     */
+    function normalizeStoredUploadPath(string $mediaUrl): string
+    {
+        $mediaUrl = trim(str_replace(['\\', '�'], ['/', '-'], $mediaUrl));
+        if ($mediaUrl === '') {
+            return '';
+        }
+
+        $isAbsolute = (bool) preg_match('#^https?://#i', $mediaUrl);
+        $path = $mediaUrl;
+
+        if ($isAbsolute) {
+            $parsedPath = parse_url($mediaUrl, PHP_URL_PATH);
+            $path = is_string($parsedPath) ? $parsedPath : '';
+            // External non-upload URLs (TikTok/Facebook CDN, etc.) stay absolute.
+            if ($path === '' || !preg_match('#/(?:wp-content/|public/)?uploads/#i', $path)) {
+                return $mediaUrl;
+            }
+        }
+
+        $path = str_replace('\\', '/', $path);
+        $path = preg_replace('#/\./#', '/', $path) ?? $path;
+
+        // Strip current base path prefix (/phonesdukan, etc.) when it is a URL path (not a filesystem path).
+        $base = '';
+        if (defined('BASE_PATH')) {
+            $candidate = str_replace('\\', '/', (string) BASE_PATH);
+            // Ignore Windows filesystem paths wrongly assigned to BASE_PATH in CLI.
+            if ($candidate !== '' && $candidate !== '/' && !preg_match('#^[A-Za-z]:/#', $candidate) && strpos($candidate, '/xampp/') === false) {
+                $base = rtrim($candidate, '/');
+            }
+        }
+        if ($base !== '' && strpos($path, $base . '/') === 0) {
+            $path = substr($path, strlen($base));
+        }
+
+        $trimmed = ltrim($path, '/');
+
+        // Preserve legacy WordPress upload locations.
+        if (preg_match('#^(?:.*?)(wp-content/uploads/.+)$#i', $trimmed, $m)) {
+            return '/' . $m[1];
+        }
+
+        // Preserve / public upload locations.
+        if (preg_match('#^(?:.*?)((?:public/)?uploads/.+)$#i', $trimmed, $m)) {
+            $uploadsPart = $m[1];
+            if (stripos($uploadsPart, 'public/') !== 0) {
+                $uploadsPart = 'public/' . ltrim($uploadsPart, '/');
+            }
+            return '/' . $uploadsPart;
+        }
+
+        if ($trimmed !== '' && !$isAbsolute) {
+            return '/' . $trimmed;
+        }
+
+        return $mediaUrl;
+    }
+}
+
+if (!function_exists('resolveLocalUploadFilesystemPath')) {
+    /**
+     * Map a stored upload URL to an absolute filesystem path, or null if not local.
+     * Checks /public/uploads and falls back to legacy /wp-content/uploads.
+     */
+    function resolveLocalUploadFilesystemPath(string $mediaUrl): ?string
+    {
+        $normalized = normalizeStoredUploadPath($mediaUrl);
+        if ($normalized === '' || preg_match('#^https?://#i', $normalized)) {
+            return null;
+        }
+
+        if (!preg_match('#/(?:wp-content/|public/)?uploads/#i', $normalized)) {
+            return null;
+        }
+
+        $root = dirname(__DIR__);
+        $relative = ltrim($normalized, '/');
+        $candidates = [$root . '/' . $relative];
+
+        // If DB points at public/uploads but file only exists in wp-content/uploads (or vice versa).
+        if (preg_match('#^(?:public/)?uploads/(.+)$#i', $relative, $m)) {
+            $candidates[] = $root . '/public/uploads/' . $m[1];
+            $candidates[] = $root . '/wp-content/uploads/' . $m[1];
+        } elseif (preg_match('#^wp-content/uploads/(.+)$#i', $relative, $m)) {
+            $candidates[] = $root . '/wp-content/uploads/' . $m[1];
+            $candidates[] = $root . '/public/uploads/' . $m[1];
+        }
+
+        foreach ($candidates as $full) {
+            $full = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $full);
+            if (is_file($full)) {
+                return $full;
+            }
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('resolveExistingUploadWebPath')) {
+    /**
+     * Return the site-relative web path for an upload that actually exists on disk.
+     * Prefers the stored location; falls back between public/ and wp-content/ uploads.
+     */
+    function resolveExistingUploadWebPath(string $mediaUrl): string
+    {
+        $normalized = normalizeStoredUploadPath($mediaUrl);
+        if ($normalized === '' || preg_match('#^https?://#i', $normalized)) {
+            return $normalized !== '' ? $normalized : $mediaUrl;
+        }
+
+        $fs = resolveLocalUploadFilesystemPath($normalized);
+        if ($fs === null) {
+            return $normalized;
+        }
+
+        $root = realpath(dirname(__DIR__));
+        $real = realpath($fs);
+        if ($root === false || $real === false) {
+            return $normalized;
+        }
+
+        $relative = str_replace('\\', '/', substr($real, strlen($root)));
+        $relative = '/' . ltrim($relative, '/');
+
+        if (preg_match('#^/wp-content/uploads/#i', $relative) || preg_match('#^/public/uploads/#i', $relative)) {
+            return $relative;
+        }
+
+        return $normalized;
+    }
+}
+
 if (!function_exists('normalizeMediaUrl')) {
     function normalizeMediaUrl(string $mediaUrl): string
     {
@@ -420,10 +561,19 @@ if (!function_exists('normalizeMediaUrl')) {
             return $mediaUrl;
         }
 
-        // External URLs (e.g. signed TikTok/Facebook CDN links) must not be re-encoded.
         if (preg_match('#^https?://#i', $mediaUrl)) {
-            return $mediaUrl;
+            $canonical = normalizeStoredUploadPath($mediaUrl);
+            // External CDN/absolute non-local URLs must not be rewritten.
+            if ($canonical === $mediaUrl || preg_match('#^https?://#i', $canonical)) {
+                return $mediaUrl;
+            }
+            $mediaUrl = $canonical;
+        } else {
+            $mediaUrl = normalizeStoredUploadPath($mediaUrl);
         }
+
+        // Point at the folder where the file actually exists (public or wp-content).
+        $mediaUrl = resolveExistingUploadWebPath($mediaUrl);
 
         $query = '';
         $fragment = '';
@@ -438,7 +588,15 @@ if (!function_exists('normalizeMediaUrl')) {
             $query = substr($pathOnly, $queryPos);
             $pathOnly = substr($pathOnly, 0, $queryPos);
         }
-        return encodeUrlPath($pathOnly) . $query . $fragment;
+
+        $encoded = encodeUrlPath($pathOnly) . $query . $fragment;
+
+        // Prefix BASE_PATH on subdirectory installs (localhost/phonesdukan).
+        if ($encoded !== '' && !preg_match('#^https?://#i', $encoded) && function_exists('url')) {
+            return url($encoded);
+        }
+
+        return $encoded;
     }
 }
 
@@ -590,7 +748,7 @@ if (!function_exists('emitJs')) {
             return;
         }
 
-        echo '<script src="' . htmlspecialchars(assetUrl($relativePath), ENT_QUOTES, 'UTF-8') . '"></script>';
+        echo '<script src="' . htmlspecialchars(assetUrl($relativePath), ENT_QUOTES, 'UTF-8') . '" defer></script>';
     }
 }
 
@@ -872,9 +1030,122 @@ if (!function_exists('getProductStatusCssClass')) {
 }
 
 if (!function_exists('isProductStatusIndexable')) {
+    /**
+     * Only active (in-stock catalog) products should be indexed.
+     * Coming soon (2) stays crawlable for users but noindex to avoid Soft 404 / thin pages.
+     */
     function isProductStatusIndexable($status): bool
     {
-        return in_array((int) $status, [1, 2], true);
+        return (int) $status === 1;
+    }
+}
+
+if (!function_exists('seoRedirectAwayFromJunkQueryParams')) {
+    /**
+     * 301-strip legacy WordPress / junk query params that waste crawl budget.
+     * Keeps marketing params (utm_*, gclid, fbclid, etc.).
+     */
+    function seoRedirectAwayFromJunkQueryParams(): void
+    {
+        if (empty($_GET) || !is_array($_GET)) {
+            return;
+        }
+
+        $junkKeys = [
+            's', 'p', 'page_id', 'attachment_id', 'cat', 'tag', 'author',
+            'year', 'monthnum', 'day', 'name', 'pagename', 'm', 'replytocom',
+            'preview', 'post_type', 'TB_iframe',
+        ];
+
+        $cleanQuery = $_GET;
+        $hadJunk = false;
+        foreach ($junkKeys as $key) {
+            if (array_key_exists($key, $cleanQuery)) {
+                unset($cleanQuery[$key]);
+                $hadJunk = true;
+            }
+        }
+
+        if (!$hadJunk) {
+            return;
+        }
+
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+        $qs = http_build_query($cleanQuery);
+        $target = $path . ($qs !== '' ? '?' . $qs : '');
+        header('Location: ' . $target, true, 301);
+        exit;
+    }
+}
+
+if (!function_exists('seoEnforceListingPagination')) {
+    /**
+     * Out-of-range ?paged=N listing URLs must hard-404 (not Soft 404 with empty grids).
+     */
+    function seoEnforceListingPagination(int $paged, int $totalPages): void
+    {
+        if ($paged <= 1) {
+            return;
+        }
+        if ($totalPages < 1 || $paged > $totalPages) {
+            http_response_code(404);
+            $notFound = dirname(__DIR__) . '/app/Views/404.php';
+            if (is_file($notFound)) {
+                include $notFound;
+            } else {
+                echo '404 - Page Not Found';
+            }
+            exit;
+        }
+    }
+}
+
+if (!function_exists('seoMerchantShippingDetails')) {
+    /** Google Merchant / Product snippet shippingDetails block. */
+    function seoMerchantShippingDetails(): array
+    {
+        return [
+            '@type' => 'OfferShippingDetails',
+            'shippingRate' => [
+                '@type' => 'MonetaryAmount',
+                'currency' => 'PKR',
+                'value' => '0',
+            ],
+            'shippingDestination' => [
+                '@type' => 'DefinedRegion',
+                'addressCountry' => 'PK',
+            ],
+            'deliveryTime' => [
+                '@type' => 'ShippingDeliveryTime',
+                'handlingTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => 0,
+                    'maxValue' => 1,
+                    'unitCode' => 'DAY',
+                ],
+                'transitTime' => [
+                    '@type' => 'QuantitativeValue',
+                    'minValue' => 1,
+                    'maxValue' => 5,
+                    'unitCode' => 'DAY',
+                ],
+            ],
+        ];
+    }
+}
+
+if (!function_exists('seoMerchantReturnPolicy')) {
+    /** Google Merchant / Product snippet return policy block. */
+    function seoMerchantReturnPolicy(): array
+    {
+        return [
+            '@type' => 'MerchantReturnPolicy',
+            'applicableCountry' => 'PK',
+            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+            'merchantReturnDays' => 14,
+            'returnMethod' => 'https://schema.org/ReturnByMail',
+            'returnFees' => 'https://schema.org/FreeReturn',
+        ];
     }
 }
 

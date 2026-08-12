@@ -9,7 +9,7 @@ $metaKeywords = "Power bank, Power bank price in Pakistan, Best power bank in Pa
 $breadcrumbs = SeoHelper::categoryBreadcrumbs('power-banks', 'Power Banks');
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
-require_once dirname(__DIR__, 2) . '/includes/header.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -21,7 +21,19 @@ if (!$conn) {
 $limit = 16;
 $paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
 $paged = $paged > 0 ? $paged : 1;
+
+$countSql = "SELECT COUNT(*) as total
+             FROM products p
+             JOIN categories c ON p.category_id = c.category_id
+             WHERE c.slug = 'power-banks' AND p.product_status != '0'";
+$stmtCount = $conn->prepare($countSql);
+$stmtCount->execute();
+$totalRows = (int) ($stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+seoEnforceListingPagination($paged, $totalPages);
 $offset = ($paged - 1) * $limit;
+
+require_once dirname(__DIR__, 2) . '/includes/header.php';
 
 $query = "SELECT
             p.product_id,
@@ -113,18 +125,7 @@ foreach ($rawProducts as $product) {
 
         <div class="pb-pagination-wrap">
             <div class="pagination pb-pagination">
-                <?php
-                $countSql = "SELECT COUNT(*) as total
-                             FROM products p
-                             JOIN categories c ON p.category_id = c.category_id
-                             WHERE c.slug = 'power-banks' AND p.product_status != '0'";
-                $stmtCount = $conn->prepare($countSql);
-                $stmtCount->execute();
-                $totalRows = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
-                $totalPages = (int)ceil($totalRows / $limit);
-
-                for ($i = 1; $i <= $totalPages; $i++):
-                ?>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                     <a href="?paged=<?= $i ?>"
                        class="<?= ($i === $paged) ? 'active' : '' ?>"
                        <?= ($i === $paged) ? "aria-current='page'" : '' ?>>

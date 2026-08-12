@@ -11,10 +11,10 @@ $listingCategoryName = (string) ($category['category_name'] ?? 'Category');
 $listingCategorySlug = (string) ($category['slug'] ?? '');
 $listingPath = (string) ($listingPath ?? ($listingCategorySlug . '/' . $brandSlug));
 
-$pageTitle = $brandName . ' ' . $listingCategoryName . ' Price in Pakistan | Phones Dukan';
-$metaDescription = 'Shop ' . $brandName . ' ' . $listingCategoryName . ' at Phones Dukan with updated prices in Pakistan. Browse the latest models and deals.';
+$pageTitle = $brandName . ' ' . $listingCategoryName . ' Price in Pakistan ' . date('F Y') . ' | Phones Dukan';
+$metaDescription = 'Shop latest ' . $brandName . ' ' . $listingCategoryName . ' in Pakistan ' . date('F Y') . '. Updated prices, PTA-approved models, verified specs, and fast delivery at Phones Dukan.';
 $metaRobots = 'index, follow';
-$metaKeywords = $brandName . ' ' . $listingCategoryName . ', ' . $brandName . ' price in pakistan, Phones Dukan';
+$metaKeywords = $brandName . ' ' . $listingCategoryName . ', ' . $brandName . ' price in pakistan, ' . $brandName . ' mobiles pakistan, Phones Dukan';
 
 $breadcrumbs = SeoHelper::categoryBrandBreadcrumbs($listingCategorySlug, $listingCategoryName, $brandSlug, $brandName);
 

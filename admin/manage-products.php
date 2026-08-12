@@ -48,13 +48,22 @@ include __DIR__ . '/admin_header.php';
 $query = "SELECT 
             p.product_id, p.product_name, p.product_slug, p.regular_price, p.sale_price,
             p.stock_quantity, p.created_at,
-            i.image_url, m.alt_text,
+            COALESCE(i.image_url, fallback.image_url) AS image_url,
+            COALESCE(m.alt_text, fallback_meta.alt_text) AS alt_text,
             c.slug AS category_slug,
             b.slug AS brand_slug,
             p.product_status
           FROM products p
           LEFT JOIN product_images i  ON p.product_id = i.product_id AND i.is_primary = 1
           LEFT JOIN image_metadata m  ON i.image_id = m.image_id
+          LEFT JOIN product_images fallback ON fallback.image_id = (
+              SELECT pi2.image_id
+              FROM product_images pi2
+              WHERE pi2.product_id = p.product_id
+              ORDER BY pi2.is_primary DESC, pi2.sort_order ASC, pi2.image_id ASC
+              LIMIT 1
+          )
+          LEFT JOIN image_metadata fallback_meta ON fallback.image_id = fallback_meta.image_id
           LEFT JOIN categories c      ON p.category_id = c.category_id
           LEFT JOIN brands b          ON p.brand_id = b.brand_id
           $whereClause

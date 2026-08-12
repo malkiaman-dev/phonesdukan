@@ -1,14 +1,21 @@
 <?php
 /**
- * One-time repair: sync product_images.status with products.product_status
- * and restore missing primary images.
+ * Repair product image rows:
+ * - sync product_images.status with products.product_status
+ * - restore missing primary images
+ * - fix upload URLs to the folder where files actually exist
+ *   (/wp-content/uploads for legacy WP files, /public/uploads for new files)
  *
- * Run once on each environment after deploying the edit-product image fix:
+ * Does NOT delete any image files.
+ *
+ * Run on each environment after deploying image fixes:
  *   php tools/repair-product-image-status.php
  */
 require dirname(__DIR__) . '/database/db.php';
+require dirname(__DIR__) . '/includes/functions.php';
 
 $db = (new Database())->getConnection();
+$root = dirname(__DIR__);
 
 $fixStatus = $db->exec("
     UPDATE product_images pi
@@ -51,4 +58,66 @@ foreach ($products as $productId) {
     }
 }
 echo "Restored missing primary images: " . $fixedPrimary . PHP_EOL;
-echo "Done.\n";
+
+$urlRows = $db->query('SELECT image_id, image_url FROM product_images')->fetchAll(PDO::FETCH_ASSOC);
+$updateUrl = $db->prepare('UPDATE product_images SET image_url = ? WHERE image_id = ?');
+$fixedUrls = 0;
+$restoredWp = 0;
+$keptPublic = 0;
+$missing = 0;
+
+foreach ($urlRows as $row) {
+    $current = (string) ($row['image_url'] ?? '');
+    if ($current === '') {
+        continue;
+    }
+
+    // Resolve to the web path where the file actually exists.
+    $resolved = resolveExistingUploadWebPath($current);
+    if ($resolved === '' || preg_match('#^https?://#i', $resolved)) {
+        continue;
+    }
+
+    // Prefer storing a clean site-relative path (no /phonesdukan prefix).
+    $resolved = normalizeStoredUploadPath($resolved);
+
+    $rel = ltrim($resolved, '/');
+    $publicFs = $root . '/public/' . (stripos($rel, 'public/') === 0 ? substr($rel, 7) : (preg_match('#^uploads/#i', $rel) ? $rel : ''));
+    $wpFs = null;
+    if (preg_match('#^(?:public/)?uploads/(.+)$#i', $rel, $m) || preg_match('#^wp-content/uploads/(.+)$#i', $rel, $m)) {
+        $suffix = $m[1];
+        $publicFs = $root . '/public/uploads/' . $suffix;
+        $wpFs = $root . '/wp-content/uploads/' . $suffix;
+    }
+
+    $publicExists = is_string($publicFs) && $publicFs !== '' && is_file($publicFs);
+    $wpExists = is_string($wpFs) && $wpFs !== '' && is_file($wpFs);
+
+    $target = $resolved;
+    if ($wpExists && !$publicExists) {
+        $target = '/wp-content/uploads/' . $suffix;
+        if ($target !== $current) {
+            $restoredWp++;
+        }
+    } elseif ($publicExists) {
+        $target = '/public/uploads/' . $suffix;
+        if ($target !== $current) {
+            $keptPublic++;
+        }
+    } elseif (!$wpExists && !$publicExists) {
+        $missing++;
+        // Keep current (or normalized) path — do not invent a location.
+        $target = $resolved !== '' ? $resolved : $current;
+    }
+
+    if ($target !== '' && $target !== $current) {
+        $updateUrl->execute([$target, (int) $row['image_id']]);
+        $fixedUrls++;
+    }
+}
+
+echo "Normalized/restored image URLs: " . $fixedUrls . PHP_EOL;
+echo "  restored to wp-content/uploads: " . $restoredWp . PHP_EOL;
+echo "  pointed at public/uploads: " . $keptPublic . PHP_EOL;
+echo "  files missing in both folders: " . $missing . PHP_EOL;
+echo "Done. No image files were deleted.\n";

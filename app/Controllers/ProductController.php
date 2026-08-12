@@ -67,6 +67,15 @@ class ProductController
         string $product_slug,
         ?string $subcategory_slug = null
     ): void {
+        $status = (int) ($product['product_status'] ?? 0);
+
+        // Inactive / deleted products must hard-404 (not Soft 404 with thin HTML).
+        if ($status === 0) {
+            http_response_code(404);
+            include __DIR__ . '/../Views/404.php';
+            return;
+        }
+
         $dbInstance = new Database();
         $db = $dbInstance->getConnection();
 
@@ -103,20 +112,28 @@ class ProductController
         $pageTitle = $seo['seo_title'] ?? $product['product_name'];
         $metaDescription = $seo['seo_description'] ?? $product['product_description'];
         $metaKeywords = $seo['focus_keyword'] ?? '';
-        $metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
-        $canonicalUrl = $seo['canonical_url'] ?? '';
-        $pageUrl = rtrim(getBaseURL(), '/') . buildProductPathFromRow($product);
 
         $productPrice = (isset($product['sale_price']) && $product['sale_price'] > 0)
             ? $product['sale_price']
             : (isset($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
         $productPrice = is_numeric($productPrice) ? (float) $productPrice : 0;
+
+        // Coming soon / zero-price pages stay usable but must not compete in the index.
+        if ($isComingSoon || $productPrice <= 0 || !isProductStatusIndexable($status)) {
+            $metaRobots = 'noindex, follow';
+        } else {
+            $metaRobots = 'index, follow';
+        }
+
+        $canonicalUrl = $seo['canonical_url'] ?? '';
+        $pageUrl = rtrim(getBaseURL(), '/') . buildProductPathFromRow($product);
+
         $formattedProductPrice = ($productPrice > 0) ? number_format($productPrice, 2) : '0.00';
 
         if ($isComingSoon) {
             $productAvailability = 'comingsoon';
         } else {
-            $productAvailability = ($product['product_status'] == 1 && $product['stock_quantity'] > 0)
+            $productAvailability = ($status === 1 && ($product['stock_quantity'] ?? 0) > 0)
                 ? 'instock'
                 : 'outofstock';
         }

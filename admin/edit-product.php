@@ -42,6 +42,14 @@ require_once dirname(__DIR__, 1) . '/app/Controllers/EditProductController.php';
 $controller = new ProductController();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['remove_attribute_action'])) {
+    // When post_max_size is exceeded, PHP empties $_POST/$_FILES — refuse instead of wiping data.
+    $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+    if ($contentLength > 0 && empty($_POST) && empty($_FILES)) {
+        $_SESSION['message'] = 'Upload too large for the server. Increase post_max_size/upload_max_filesize, or upload fewer/smaller images.';
+        $_SESSION['message_type'] = 'error';
+        header('Location: edit-product.php?id=' . urlencode((string) ($_GET['id'] ?? '')));
+        exit();
+    }
     error_log('POST data: ' . print_r($_POST, true));
     require_once dirname(__DIR__, 1) . '/app/Models/CatalogModel.php';
     $subcategoryId = !empty($_POST['subcategory_id']) ? (int) $_POST['subcategory_id'] : null;
@@ -131,11 +139,23 @@ function epImageCandidates($rawPath)
         return [];
     }
 
+    if (function_exists('normalizeStoredUploadPath')) {
+        $canonical = normalizeStoredUploadPath($raw);
+        if ($canonical !== '') {
+            $raw = $canonical;
+        }
+    }
+
     $normalized = str_replace('\\', '/', $raw);
-    $candidates = [$normalized];
+    $candidates = [];
+
+    if (function_exists('normalizeMediaUrl')) {
+        $candidates[] = normalizeMediaUrl($normalized);
+    }
+    $candidates[] = $normalized;
 
     if (preg_match('/^https?:\/\//i', $normalized)) {
-        return array_values(array_unique($candidates));
+        return array_values(array_unique(array_filter($candidates)));
     }
 
     $trimmed = ltrim($normalized, './');

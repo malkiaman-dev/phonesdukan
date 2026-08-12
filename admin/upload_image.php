@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 
     $originalName = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
     $originalName = preg_replace("/[^a-zA-Z0-9_-]/", "", $originalName);
-    $fileExtension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+    $fileExtension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
     $fileName = $originalName . '.' . $fileExtension;
 
     $counter = 1;
@@ -26,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     }
 
     $filePath = $uploadDir . $fileName;
-    $fileUrl = url('public/uploads/' . $fileName);
+    // Always store a site-relative path so images survive domain/base-path changes.
+    $fileUrl = normalizeStoredUploadPath('/public/uploads/' . $fileName);
 
     if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
         $stmt = $conn->prepare("INSERT INTO product_images (product_id, image_url, is_primary, status) VALUES (NULL, ?, 0, 1)");
@@ -43,7 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
             $metaStmt->execute([$imageId, $altText, $title, $description, $caption]);
         }
 
-        echo "<p class='success'>Image uploaded successfully! <a href='$fileUrl' target='_blank'>View Image</a></p>";
+        $viewUrl = url(ltrim($fileUrl, '/'));
+        echo "<p class='success'>Image uploaded successfully! <a href='$viewUrl' target='_blank'>View Image</a></p>";
     } else {
         echo "<p class='error'>Error uploading file.</p>";
     }

@@ -125,12 +125,13 @@ class SeoHelper
         if (!empty($seoDesc)) {
             return $seoDesc;
         }
+        $monthYear = date('F Y');
         $priceStr = $price && $price > 0
-            ? 'Starting from Rs. ' . number_format($price, 0) . '. '
+            ? 'Price in Pakistan: Rs. ' . number_format($price, 0) . '. '
             : '';
-        return "Buy {$productName} in Pakistan at the best price. {$priceStr}"
-            . "PTA-approved {$brandName} mobile with official warranty. "
-            . "Fast delivery across Pakistan. Shop now at Phones Dukan.";
+        return "{$productName} price in Pakistan {$monthYear}. {$priceStr}"
+            . "Buy PTA-approved {$brandName} with official warranty and fast delivery. "
+            . "Updated specs & deals at Phones Dukan.";
     }
 
     /**
@@ -139,14 +140,15 @@ class SeoHelper
      */
     public static function categoryTitle(string $categoryName): string
     {
-        return $categoryName . ' Prices in Pakistan ' . date('F Y') . ' | Phones Dukan';
+        return $categoryName . ' Prices in Pakistan ' . date('F Y') . ' – Updated Rates | Phones Dukan';
     }
 
     public static function categoryDescription(string $categoryName): string
     {
-        return "Explore the latest {$categoryName} in Pakistan " . date('F Y') . ". "
-            . "Compare prices from top brands, PTA-approved devices, "
-            . "verified specs, and fast delivery across Pakistan. Shop at Phones Dukan.";
+        $monthYear = date('F Y');
+        return "{$categoryName} prices in Pakistan {$monthYear}. "
+            . "Compare latest models from top brands, PTA-approved devices, "
+            . "verified specs, and fast delivery. Shop at Phones Dukan.";
     }
 
     /**
@@ -160,9 +162,10 @@ class SeoHelper
 
     public static function brandDescription(string $brandName, string $categoryName): string
     {
-        return "Buy the latest {$brandName} {$categoryName} in Pakistan. "
-            . "All PTA-approved {$brandName} models with prices, specs, and fast delivery. "
-            . "Best deals on {$brandName} phones at Phones Dukan.";
+        $monthYear = date('F Y');
+        return "{$brandName} {$categoryName} price in Pakistan {$monthYear}. "
+            . "All PTA-approved {$brandName} models with updated prices, specs, and fast delivery. "
+            . "Best {$brandName} deals at Phones Dukan.";
     }
 
     // ── FAQ Schema builder ────────────────────────────────────────────────

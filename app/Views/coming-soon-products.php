@@ -8,7 +8,6 @@ $metaKeywords = 'coming soon products, upcoming mobiles pakistan, phones dukan c
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/functions.php';
-require_once dirname(__DIR__, 2) . '/includes/header.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -20,7 +19,19 @@ if (!$conn) {
 $limit = 12;
 $paged = isset($_GET['paged']) ? (int) $_GET['paged'] : 1;
 $paged = $paged > 0 ? $paged : 1;
+
+$countSql = "SELECT COUNT(DISTINCT p.product_id) AS total
+             FROM products p
+             WHERE (p.product_status = 2 OR p.product_tag LIKE '%coming_soon%')
+               AND p.product_status != '0'";
+$stmtCount = $conn->prepare($countSql);
+$stmtCount->execute();
+$totalRows = (int) ($stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+seoEnforceListingPagination($paged, $totalPages);
 $offset = ($paged - 1) * $limit;
+
+require_once dirname(__DIR__, 2) . '/includes/header.php';
 
 $query = "SELECT
             p.product_id,
@@ -76,14 +87,6 @@ foreach ($rawProducts as $product) {
     ];
 }
 
-$countSql = "SELECT COUNT(DISTINCT p.product_id) AS total
-             FROM products p
-             WHERE (p.product_status = 2 OR p.product_tag LIKE '%coming_soon%')
-               AND p.product_status != '0'";
-$stmtCount = $conn->prepare($countSql);
-$stmtCount->execute();
-$totalRows = (int) ($stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
-$totalPages = (int) ceil($totalRows / $limit);
 ?>
 
 <section class="cs-hero">

@@ -40,21 +40,23 @@ class BrandController
         $offset = ($paged - 1) * $limit;
 
         $totalRows = $productModel->countListingProductsForBrandAndCategory($brandId, $categoryId);
-        $rawProducts = $productModel->getListingProductsForBrandAndCategory($brandId, $categoryId, $limit, $offset);
-
         $categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
 
         if ($totalRows === 0) {
-            header('Location: ' . url($category['slug']), true, 302);
+            header('Location: ' . url($category['slug']), true, 301);
             exit();
         }
+
+        $totalPages = (int) ceil($totalRows / $limit);
+        seoEnforceListingPagination($paged, $totalPages);
+        $offset = ($paged - 1) * $limit;
+
+        $rawProducts = $productModel->getListingProductsForBrandAndCategory($brandId, $categoryId, $limit, $offset);
 
         $products = [];
         foreach ($rawProducts as $row) {
             $products[] = prepareProductCardFromRow($row);
         }
-
-        $totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
 
         $listingPath = rawurlencode((string) $category['slug']) . '/' . rawurlencode((string) $brand['slug']);
 

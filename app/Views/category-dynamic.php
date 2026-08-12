@@ -8,10 +8,10 @@ if (!defined('CATEGORY_LISTING_PAGE')) {
 $categoryName = (string) ($category['category_name'] ?? 'Category');
 $categorySlug = (string) ($category['slug'] ?? '');
 
-$pageTitle = $categoryName . ' Prices in Pakistan | Phones Dukan';
-$metaDescription = 'Shop ' . $categoryName . ' at Phones Dukan with updated prices in Pakistan. Browse the latest products and deals.';
+$pageTitle = $categoryName . ' Prices in Pakistan ' . date('F Y') . ' | Phones Dukan';
+$metaDescription = 'Explore ' . $categoryName . ' prices in Pakistan ' . date('F Y') . '. Compare latest models, deals, and PTA-approved devices with fast delivery from Phones Dukan.';
 $metaRobots = 'index, follow';
-$metaKeywords = $categoryName . ', ' . $categoryName . ' price in pakistan, Phones Dukan';
+$metaKeywords = $categoryName . ', ' . $categoryName . ' price in pakistan, ' . $categoryName . ' pakistan ' . date('Y') . ', Phones Dukan';
 
 $breadcrumbs = SeoHelper::categoryBreadcrumbs($categorySlug, $categoryName);
 

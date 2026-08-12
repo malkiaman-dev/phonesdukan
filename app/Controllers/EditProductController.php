@@ -7,6 +7,7 @@ require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/app/Models/EditProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
+require_once dirname(__DIR__, 2) . '/app/Helpers/ProductMediaHelper.php';
 
 class ProductController
 {
@@ -127,7 +128,8 @@ class ProductController
                 $this->model->insertSeoData($id, $seoData);
             }
         
-            $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId, $imageStatus);
+            $imageUpdate = $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId, $imageStatus);
+            $this->model->normalizeProductImageUrls((int) $id);
             $this->model->ensurePrimaryImageExists((int) $id);
 
             $mediaService = new ProductMediaService((new Database())->getConnection());
@@ -168,8 +170,14 @@ class ProductController
             (new ProductGroupModel($db))->saveGroupProducts((int) $id, $groupIds, $groupPrices);
 
             session_start();
-            $_SESSION['message'] = 'Product updated successfully!';
-            $_SESSION['message_type'] = 'success';
+            $uploadErrors = $imageUpdate['errors'] ?? [];
+            if (!empty($uploadErrors)) {
+                $_SESSION['message'] = 'Product updated, but some images failed to upload: ' . implode(' ', $uploadErrors);
+                $_SESSION['message_type'] = 'error';
+            } else {
+                $_SESSION['message'] = 'Product updated successfully!';
+                $_SESSION['message_type'] = 'success';
+            }
         } catch (Exception $e) {
             session_start();
             $_SESSION['message'] = 'Error updating product: ' . $e->getMessage();
@@ -182,13 +190,50 @@ class ProductController
     
     public function updateProductImages($productId, $primaryImage, $imageMetadata, $primaryImageId = null, $imageStatus = 1)
     {
+        $errors = [];
+        $productId = (int) $productId;
+
+        // Removals first so primary selection cannot target a deleted row.
+        $removeImages = isset($_POST['remove_image']) && is_array($_POST['remove_image'])
+            ? $_POST['remove_image']
+            : [];
+        if (!empty($removeImages)) {
+            foreach ($removeImages as $imageId => $value) {
+                if ((string) $value === '1' || (int) $value === 1) {
+                    $this->model->removeImage((int) $imageId, $productId);
+                }
+            }
+        }
+
+        $hasExistingPrimarySelection = $primaryImageId !== null
+            && $primaryImageId !== ''
+            && ctype_digit((string) $primaryImageId)
+            && !isset($removeImages[(int) $primaryImageId])
+            && !isset($removeImages[(string) $primaryImageId]);
+
+        $existingCount = $this->model->countProductImages($productId);
+        $shouldPromoteNewUpload = !$hasExistingPrimarySelection && $existingCount === 0;
         $isPrimarySet = false;
-        if ($primaryImage && !empty($primaryImage['name'])) {
-            foreach ($primaryImage['tmp_name'] as $key => $tmpName) {
-                if ($primaryImage['error'][$key] === UPLOAD_ERR_OK) {
+
+        if ($primaryImage && isset($primaryImage['name']) && is_array($primaryImage['name'])) {
+            foreach ($primaryImage['name'] as $key => $name) {
+                if ($name === null || trim((string) $name) === '') {
+                    continue;
+                }
+
+                $errorCode = (int) ($primaryImage['error'][$key] ?? UPLOAD_ERR_NO_FILE);
+                if ($errorCode === UPLOAD_ERR_NO_FILE) {
+                    continue;
+                }
+                if ($errorCode !== UPLOAD_ERR_OK) {
+                    $errors[] = $this->uploadErrorMessage((string) $name, $errorCode);
+                    continue;
+                }
+
+                try {
                     $imagePath = $this->uploadImage($primaryImage, $key);
-                    $isPrimary = ($primaryImageId != null && $primaryImageId == $key) ? 1 : 0;
-                    if (!$isPrimary && !$isPrimarySet) {
+                    $isPrimary = 0;
+                    if ($shouldPromoteNewUpload && !$isPrimarySet) {
                         $isPrimary = 1;
                         $isPrimarySet = true;
                     }
@@ -200,12 +245,18 @@ class ProductController
                         'caption' => null
                     ];
                     $this->model->insertImageMetadata($imageId, $metadataToInsert);
+                } catch (Exception $uploadEx) {
+                    $errors[] = $uploadEx->getMessage();
+                    error_log('Product image upload failed: ' . $uploadEx->getMessage());
                 }
             }
         }
     
-        if (!empty($imageMetadata)) {
+        if (!empty($imageMetadata) && !empty($imageMetadata['alt_text']) && is_array($imageMetadata['alt_text'])) {
             foreach ($imageMetadata['alt_text'] as $imageId => $metadata) {
+                if (!$this->model->imageBelongsToProduct((int) $imageId, $productId)) {
+                    continue;
+                }
                 $metadataExists = $this->model->checkIfMetadataExists($imageId);
                 if ($metadataExists) {
                     $metadataToUpdate = [
@@ -227,15 +278,30 @@ class ProductController
             }
         }
     
-        if ($primaryImageId) {
-            $this->model->setPrimaryImage($productId, $primaryImageId);
+        if ($hasExistingPrimarySelection) {
+            $this->model->setPrimaryImage($productId, (int) $primaryImageId);
         }
-    
-        $removeImages = isset($_POST['remove_image']) ? $_POST['remove_image'] : [];
-        if (!empty($removeImages)) {
-            foreach ($removeImages as $imageId => $value) {
-                $this->model->removeImage($imageId);
-            }
+
+        return ['errors' => $errors];
+    }
+
+    private function uploadErrorMessage(string $fileName, int $errorCode): string
+    {
+        $label = $fileName !== '' ? $fileName : 'image';
+        switch ($errorCode) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return "{$label} exceeds the maximum upload size.";
+            case UPLOAD_ERR_PARTIAL:
+                return "{$label} was only partially uploaded.";
+            case UPLOAD_ERR_NO_TMP_DIR:
+                return "Missing temporary folder while uploading {$label}.";
+            case UPLOAD_ERR_CANT_WRITE:
+                return "Failed to write {$label} to disk.";
+            case UPLOAD_ERR_EXTENSION:
+                return "A PHP extension stopped {$label} from uploading.";
+            default:
+                return "Failed to upload {$label}.";
         }
     }
     
@@ -251,20 +317,31 @@ class ProductController
             $filePath = $file['tmp_name'];
             $fileName = $file['name'];
         }
-        $sanitizedFilename = strtolower(str_replace(' ', '-', basename($fileName)));
+
         $targetDir = dirname(__DIR__, 2) . '/public/uploads/';
-        $targetFile = $targetDir . $sanitizedFilename;
-        if (!is_uploaded_file($filePath)) {
-            throw new Exception("File is not uploaded correctly: " . $filePath);
+        if (!is_dir($targetDir) && !mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+            throw new Exception('Upload directory could not be created.');
         }
         if (!is_writable($targetDir)) {
             throw new Exception("Target directory is not writable: $targetDir");
         }
-        if (move_uploaded_file($filePath, $targetFile)) {
-            return '/public/uploads/' . $sanitizedFilename;
-        } else {
-            throw new Exception("Sorry, there was an error uploading your file.");
+        if (!is_uploaded_file($filePath)) {
+            throw new Exception('File is not uploaded correctly.');
         }
+
+        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $ext = strtolower(pathinfo((string) $fileName, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed, true)) {
+            throw new Exception('Unsupported image type. Use JPG, PNG, WEBP, or GIF.');
+        }
+
+        $sanitizedFilename = ProductMediaHelper::sanitizeFilename((string) $fileName);
+        $targetFile = ProductMediaHelper::uniquePath($targetDir, $sanitizedFilename);
+        if (!move_uploaded_file($filePath, $targetFile)) {
+            throw new Exception('Sorry, there was an error uploading your file.');
+        }
+
+        return normalizeStoredUploadPath('/public/uploads/' . basename($targetFile));
     }
 
     public function getAllAttributes()

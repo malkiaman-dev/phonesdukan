@@ -739,6 +739,10 @@ class ProductModel
                 $sale_price = (isset($attribute['sale_price']) && is_numeric($attribute['sale_price'])) ? (float)$attribute['sale_price'] : 0;
                 $variantPrice = ($sale_price > 0) ? $sale_price : $regular_price;
                 $variantPrice = is_numeric($variantPrice) ? number_format((float)$variantPrice, 2, '.', '') : '0.00';
+
+                if ((float) $variantPrice <= 0) {
+                    continue;
+                }
     
                 $variantSku = $sku . '-' . ($attribute['value_id'] ?? ($index + 1));
                 if ($variantSku === '-') {
@@ -752,24 +756,25 @@ class ProductModel
                     'availability' => $availability,
                     'url' => $product_url . '?variant=' . ($attribute['value_id'] ?? ($index + 1)),
                     'itemCondition' => 'https://schema.org/NewCondition',
-                    'priceValidUntil' => date('Y-m-d', strtotime('+5 years')),
-                    'shippingDetails' => [
-                        '@type' => 'OfferShippingDetails',
-                        'shippingRate' => [
-                            '@type' => 'MonetaryAmount',
-                            'currency' => 'PKR',
-                            'value' => '0'
+                    'validFrom' => date('c'),
+                    'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                    'shippingDetails' => function_exists('seoMerchantShippingDetails')
+                        ? seoMerchantShippingDetails()
+                        : [
+                            '@type' => 'OfferShippingDetails',
+                            'shippingRate' => ['@type' => 'MonetaryAmount', 'currency' => 'PKR', 'value' => '0'],
+                            'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'PK'],
                         ],
-                        'shippingDestination' => [
-                            '@type' => 'DefinedRegion',
-                            'addressCountry' => 'PK'
-                        ]
-                    ],
-                    'hasMerchantReturnPolicy' => [
-                        '@type' => 'MerchantReturnPolicy',
-                        'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                        'returnWindow' => 'P14D'
-                    ]
+                    'hasMerchantReturnPolicy' => function_exists('seoMerchantReturnPolicy')
+                        ? seoMerchantReturnPolicy()
+                        : [
+                            '@type' => 'MerchantReturnPolicy',
+                            'applicableCountry' => 'PK',
+                            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                            'merchantReturnDays' => 14,
+                            'returnMethod' => 'https://schema.org/ReturnByMail',
+                            'returnFees' => 'https://schema.org/FreeReturn',
+                        ],
                 ];
     
                 $price_specifications = [
@@ -803,45 +808,48 @@ class ProductModel
                 $offers[] = $offer;
             }
     
-            $prices = array_map(function ($attr): float|int {
-                return (isset($attr['sale_price']) && $attr['sale_price'] > 0)
-                    ? $attr['sale_price']
-                    : (isset($attr['regular_price']) && $attr['regular_price'] > 0 ? $attr['regular_price'] : 0);
-            }, $attributes);
-            $minPrice = !empty($prices) ? min(array_filter($prices, 'is_numeric')) : 0;
-            $maxPrice = !empty($prices) ? max(array_filter($prices, 'is_numeric')) : 0;
-            $minPrice = is_numeric($minPrice) ? number_format((float)$minPrice, 2, '.', '') : '0.00';
-            $maxPrice = is_numeric($maxPrice) ? number_format((float)$maxPrice, 2, '.', '') : '0.00';
-    
-            $main_schema['offers'] = [
-                '@type' => 'AggregateOffer',
-                'priceCurrency' => 'PKR',
-                'lowPrice' => $minPrice,
-                'highPrice' => $maxPrice,
-                'offerCount' => count($attributes),
-                'availability' => $availability,
-                'url' => $product_url,
-                'itemCondition' => 'https://schema.org/NewCondition',
-                'priceValidUntil' => date('Y-m-d', strtotime('+5 years')),
-                'offers' => $offers,
-                'shippingDetails' => [
-                    '@type' => 'OfferShippingDetails',
-                    'shippingRate' => [
-                        '@type' => 'MonetaryAmount',
-                        'currency' => 'PKR',
-                        'value' => '0'
-                    ],
-                    'shippingDestination' => [
-                        '@type' => 'DefinedRegion',
-                        'addressCountry' => 'PK'
-                    ]
-                ],
-                'hasMerchantReturnPolicy' => [
-                    '@type' => 'MerchantReturnPolicy',
-                    'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                    'returnWindow' => 'P14D'
-                ]
-            ];
+            $prices = [];
+            foreach ($offers as $offerRow) {
+                if (isset($offerRow['price']) && is_numeric($offerRow['price'])) {
+                    $prices[] = (float) $offerRow['price'];
+                }
+            }
+
+            if (!empty($offers) && !empty($prices)) {
+                $minPrice = number_format(min($prices), 2, '.', '');
+                $maxPrice = number_format(max($prices), 2, '.', '');
+
+                $main_schema['offers'] = [
+                    '@type' => 'AggregateOffer',
+                    'priceCurrency' => 'PKR',
+                    'lowPrice' => $minPrice,
+                    'highPrice' => $maxPrice,
+                    'offerCount' => count($offers),
+                    'availability' => $availability,
+                    'url' => $product_url,
+                    'itemCondition' => 'https://schema.org/NewCondition',
+                    'validFrom' => date('c'),
+                    'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                    'offers' => $offers,
+                    'shippingDetails' => function_exists('seoMerchantShippingDetails')
+                        ? seoMerchantShippingDetails()
+                        : [
+                            '@type' => 'OfferShippingDetails',
+                            'shippingRate' => ['@type' => 'MonetaryAmount', 'currency' => 'PKR', 'value' => '0'],
+                            'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'PK'],
+                        ],
+                    'hasMerchantReturnPolicy' => function_exists('seoMerchantReturnPolicy')
+                        ? seoMerchantReturnPolicy()
+                        : [
+                            '@type' => 'MerchantReturnPolicy',
+                            'applicableCountry' => 'PK',
+                            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                            'merchantReturnDays' => 14,
+                            'returnMethod' => 'https://schema.org/ReturnByMail',
+                            'returnFees' => 'https://schema.org/FreeReturn',
+                        ],
+                ];
+            }
         } else {
             $regular_price = isset($product['regular_price']) && is_numeric($product['regular_price']) ? (float)$product['regular_price'] : 0;
             $sale_price = isset($product['sale_price']) && is_numeric($product['sale_price']) ? (float)$product['sale_price'] : 0;
@@ -855,7 +863,9 @@ class ProductModel
                 }
             }
             $final_price = number_format($final_price, 2, '.', '');
-    
+
+            // Do not emit zero-price Offers — they trigger Merchant / Soft-404 quality issues.
+            if ((float) $final_price > 0) {
             $main_schema['offers'] = [
                 '@type' => 'Offer',
                 'url' => $product_url,
@@ -863,24 +873,25 @@ class ProductModel
                 'price' => $final_price,
                 'itemCondition' => 'https://schema.org/NewCondition',
                 'availability' => $availability,
-                'priceValidUntil' => date('Y-m-d', strtotime('+5 years')),
-                'shippingDetails' => [
-                    '@type' => 'OfferShippingDetails',
-                    'shippingRate' => [
-                        '@type' => 'MonetaryAmount',
-                        'currency' => 'PKR',
-                        'value' => '0'
+                'validFrom' => date('c'),
+                'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                'shippingDetails' => function_exists('seoMerchantShippingDetails')
+                    ? seoMerchantShippingDetails()
+                    : [
+                        '@type' => 'OfferShippingDetails',
+                        'shippingRate' => ['@type' => 'MonetaryAmount', 'currency' => 'PKR', 'value' => '0'],
+                        'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'PK'],
                     ],
-                    'shippingDestination' => [
-                        '@type' => 'DefinedRegion',
-                        'addressCountry' => 'PK'
-                    ]
-                ],
-                'hasMerchantReturnPolicy' => [
-                    '@type' => 'MerchantReturnPolicy',
-                    'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                    'returnWindow' => 'P14D'
-                ]
+                'hasMerchantReturnPolicy' => function_exists('seoMerchantReturnPolicy')
+                    ? seoMerchantReturnPolicy()
+                    : [
+                        '@type' => 'MerchantReturnPolicy',
+                        'applicableCountry' => 'PK',
+                        'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                        'merchantReturnDays' => 14,
+                        'returnMethod' => 'https://schema.org/ReturnByMail',
+                        'returnFees' => 'https://schema.org/FreeReturn',
+                    ],
             ];
     
             $price_specifications = [
@@ -911,6 +922,7 @@ class ProductModel
             }
     
             $main_schema['offers']['priceSpecification'] = count($price_specifications) > 1 ? $price_specifications : $price_specifications[0];
+            }
         }
     
         if (!empty($reviews_schema)) {

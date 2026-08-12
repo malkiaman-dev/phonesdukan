@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 class ProductModel
 {
@@ -164,12 +165,58 @@ class ProductModel
 
     public function insertProductImage($productId, $imageUrl, $isPrimary, $status = 1)
     {
+        $imageUrl = function_exists('normalizeStoredUploadPath')
+            ? normalizeStoredUploadPath((string) $imageUrl)
+            : $imageUrl;
         $stmt = $this->db->prepare(
             'INSERT INTO product_images (product_id, image_url, is_primary, status)
              VALUES (?, ?, ?, ?)'
         );
         $stmt->execute([$productId, $imageUrl, $isPrimary ? 1 : 0, (int) $status]);
         return $this->db->lastInsertId();
+    }
+
+    public function countProductImages(int $productId): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM product_images WHERE product_id = ?');
+        $stmt->execute([$productId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function imageBelongsToProduct(int $imageId, int $productId): bool
+    {
+        $stmt = $this->db->prepare(
+            'SELECT image_id FROM product_images WHERE image_id = ? AND product_id = ? LIMIT 1'
+        );
+        $stmt->execute([$imageId, $productId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public function normalizeProductImageUrls(int $productId): void
+    {
+        if (!function_exists('normalizeStoredUploadPath')) {
+            return;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT image_id, image_url FROM product_images WHERE product_id = ?'
+        );
+        $stmt->execute([$productId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($rows)) {
+            return;
+        }
+
+        $update = $this->db->prepare(
+            'UPDATE product_images SET image_url = ? WHERE image_id = ? AND product_id = ?'
+        );
+        foreach ($rows as $row) {
+            $current = (string) ($row['image_url'] ?? '');
+            $normalized = normalizeStoredUploadPath($current);
+            if ($normalized !== '' && $normalized !== $current) {
+                $update->execute([$normalized, (int) $row['image_id'], $productId]);
+            }
+        }
     }
 
     public function syncImageStatusForProduct(int $productId, int $status): void
@@ -274,12 +321,51 @@ class ProductModel
         return $stmt->execute([(int) $imageId, (int) $productId]);
     }
 
-    public function removeImage($imageId)
+    public function removeImage($imageId, $productId = null)
     {
+        $imageId = (int) $imageId;
+        if ($imageId <= 0) {
+            return false;
+        }
+
+        if ($productId !== null) {
+            $check = $this->db->prepare(
+                'SELECT image_id, image_url FROM product_images WHERE image_id = ? AND product_id = ? LIMIT 1'
+            );
+            $check->execute([$imageId, (int) $productId]);
+        } else {
+            $check = $this->db->prepare(
+                'SELECT image_id, image_url FROM product_images WHERE image_id = ? LIMIT 1'
+            );
+            $check->execute([$imageId]);
+        }
+
+        $row = $check->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return false;
+        }
+
         $stmt = $this->db->prepare('DELETE FROM image_metadata WHERE image_id = ?');
         $stmt->execute([$imageId]);
         $stmt = $this->db->prepare('DELETE FROM product_images WHERE image_id = ?');
-        return $stmt->execute([$imageId]);
+        $deleted = $stmt->execute([$imageId]);
+
+        // Only unlink the file when no other product_images row still references it.
+        if ($deleted && !empty($row['image_url']) && function_exists('normalizeStoredUploadPath') && function_exists('resolveLocalUploadFilesystemPath')) {
+            $normalized = normalizeStoredUploadPath((string) $row['image_url']);
+            $refCheck = $this->db->prepare(
+                'SELECT COUNT(*) FROM product_images WHERE image_url = ? OR image_url = ?'
+            );
+            $refCheck->execute([(string) $row['image_url'], $normalized]);
+            if ((int) $refCheck->fetchColumn() === 0) {
+                $fullPath = resolveLocalUploadFilesystemPath($normalized);
+                if ($fullPath && is_file($fullPath)) {
+                    @unlink($fullPath);
+                }
+            }
+        }
+
+        return $deleted;
     }
 
     public function getAttributeValues($attributeId)
