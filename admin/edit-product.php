@@ -1028,7 +1028,7 @@ select.vb-input-ep { cursor:pointer; }
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
                 <?= $pillLabel ?>
             </span>
-            <a href="<?= htmlspecialchars($productPermalink . '/') ?>" target="_blank" class="ep-btn ep-btn-secondary" style="text-decoration:none;">View Product</a>
+            <a href="<?= htmlspecialchars(rtrim(url(ltrim($productPermalink, '/')), '/') . '/', ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="ep-btn ep-btn-secondary" style="text-decoration:none;">View Product</a>
             <button type="submit" class="ep-btn ep-btn-primary" form="product-form">Update Product</button>
         </div>
     </div>
@@ -1586,7 +1586,7 @@ select.vb-input-ep { cursor:pointer; }
             <span style="display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border:1px solid <?= $pillColor ?>;border-radius:12px;background:<?= $pillColor ?> !important;color:#fff !important;font-size:0.9rem;font-weight:700;letter-spacing:.3px;white-space:nowrap;">
                 <?= $pillLabel ?>
             </span>
-            <a href="<?= htmlspecialchars($productPermalink . '/') ?>" target="_blank" class="ep-btn ep-btn-secondary" style="text-decoration:none;">View Product</a>
+            <a href="<?= htmlspecialchars(rtrim(url(ltrim($productPermalink, '/')), '/') . '/', ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="ep-btn ep-btn-secondary" style="text-decoration:none;">View Product</a>
             <button type="submit" class="ep-btn ep-btn-primary">Update Product</button>
         </div>
     </form>

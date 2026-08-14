@@ -572,8 +572,10 @@ if (!function_exists('normalizeMediaUrl')) {
             $mediaUrl = normalizeStoredUploadPath($mediaUrl);
         }
 
-        // Point at the folder where the file actually exists (public or wp-content).
-        $mediaUrl = resolveExistingUploadWebPath($mediaUrl);
+        // Fast path only — do NOT probe the filesystem on every page render
+        // (that made admin/home extremely slow on Hostinger). File location
+        // fallback is handled by .htaccess (public/uploads → wp-content/uploads)
+        // and by tools/repair-product-image-status.php for DB paths.
 
         $query = '';
         $fragment = '';

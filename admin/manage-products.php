@@ -43,37 +43,37 @@ if (!empty($search_query)) {
 
 $whereClause = !empty($whereClauses) ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
 
-include __DIR__ . '/admin_header.php';
-
 $query = "SELECT 
             p.product_id, p.product_name, p.product_slug, p.regular_price, p.sale_price,
             p.stock_quantity, p.created_at,
-            COALESCE(i.image_url, fallback.image_url) AS image_url,
-            COALESCE(m.alt_text, fallback_meta.alt_text) AS alt_text,
+            i.image_url,
+            m.alt_text,
             c.slug AS category_slug,
             b.slug AS brand_slug,
+            sc.slug AS subcategory_slug,
             p.product_status
           FROM products p
-          LEFT JOIN product_images i  ON p.product_id = i.product_id AND i.is_primary = 1
-          LEFT JOIN image_metadata m  ON i.image_id = m.image_id
-          LEFT JOIN product_images fallback ON fallback.image_id = (
-              SELECT pi2.image_id
-              FROM product_images pi2
-              WHERE pi2.product_id = p.product_id
-              ORDER BY pi2.is_primary DESC, pi2.sort_order ASC, pi2.image_id ASC
-              LIMIT 1
-          )
-          LEFT JOIN image_metadata fallback_meta ON fallback.image_id = fallback_meta.image_id
-          LEFT JOIN categories c      ON p.category_id = c.category_id
-          LEFT JOIN brands b          ON p.brand_id = b.brand_id
+          LEFT JOIN product_images i
+            ON i.product_id = p.product_id
+           AND i.is_primary = 1
+          LEFT JOIN image_metadata m
+            ON m.image_id = i.image_id
+          LEFT JOIN categories c
+            ON p.category_id = c.category_id
+          LEFT JOIN brands b
+            ON p.brand_id = b.brand_id
+          LEFT JOIN categories sc
+            ON p.subcategory_id = sc.category_id
           $whereClause
           ORDER BY p.created_at DESC";
 
-$result       = $conn->query($query);
+$result = $conn->query($query);
 
 if (!$result) {
     die('Error fetching products: ' . $conn->errorInfo()[2]);
 }
+
+include __DIR__ . '/admin_header.php';
 ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -905,57 +905,21 @@ if (!$result) {
                 <tr>
                     <td data-label="Image">
                         <?php
-                            $rawImg = trim((string)($row['image_url'] ?? ''));
-                            $normalized = str_replace('\\', '/', $rawImg);
-                            $defaultImg = '../public/uploads/default.jpg';
-                            $candidates = [];
-                            if ($normalized !== '') {
-                                if (preg_match('#^(https?:)?//#i', $normalized)) {
-                                    $candidates[] = $normalized;
-                                } elseif (preg_match('/^[A-Za-z]:\//', $normalized)) {
-                                    // Convert local Windows file paths under htdocs to web paths.
-                                    $lower = strtolower($normalized);
-                                    $docRootMarker = '/xampp/htdocs/';
-                                    $projectMarker = '/xampp/htdocs/phonesdukan/';
-                                    if (strpos($lower, $projectMarker) !== false) {
-                                        $pos = strpos($lower, $projectMarker);
-                                        $relative = substr($normalized, $pos + strlen($projectMarker));
-                                        $relative = ltrim(str_replace('\\', '/', $relative), '/');
-                                        $candidates[] = '/phonesdukan/' . $relative;
-                                        $candidates[] = '/' . $relative;
-                                    } elseif (strpos($lower, $docRootMarker) !== false) {
-                                        $pos = strpos($lower, $docRootMarker);
-                                        $relative = substr($normalized, $pos + strlen($docRootMarker));
-                                        $relative = ltrim(str_replace('\\', '/', $relative), '/');
-                                        $candidates[] = '/' . $relative;
-                                    }
-                                } else {
-                                    $trimmed = ltrim($normalized, './');
-                                    // Prioritize base-path-safe URLs first for localhost subfolder setups.
-                                    if (strpos($trimmed, 'public/') === 0) {
-                                        $candidates[] = '/phonesdukan/' . $trimmed;
-                                    } elseif (strpos($trimmed, 'uploads/') === 0) {
-                                        $candidates[] = '/phonesdukan/public/' . $trimmed;
-                                        $candidates[] = '/phonesdukan/' . $trimmed;
-                                    }
-                                    $candidates[] = $normalized;
-                                    $candidates[] = '../' . $trimmed;
-                                    $candidates[] = '/' . $trimmed;
-                                    $candidates[] = '/phonesdukan/' . $trimmed;
-                                    $candidates[] = '/public/' . ltrim($trimmed, '/');
-                                    $candidates[] = '/phonesdukan/public/' . ltrim($trimmed, '/');
-                                    if (strpos($trimmed, 'uploads/') !== false) {
-                                        $uploadsPart = substr($trimmed, strpos($trimmed, 'uploads/'));
-                                        $candidates[] = '/' . $uploadsPart;
-                                        $candidates[] = '/phonesdukan/' . $uploadsPart;
-                                        $candidates[] = '/public/' . $uploadsPart;
-                                        $candidates[] = '/phonesdukan/public/' . $uploadsPart;
-                                    }
-                                }
+                            $rawImg = trim((string) ($row['image_url'] ?? ''));
+                            $defaultImg = url('public/assets/images/Phones_dukan_favicon.png');
+                            if ($rawImg !== '') {
+                                $imgSrc = function_exists('normalizeMediaUrl')
+                                    ? normalizeMediaUrl($rawImg)
+                                    : $rawImg;
+                            } else {
+                                $imgSrc = $defaultImg;
                             }
-                            $candidates[] = $defaultImg;
-                            $candidates = array_values(array_unique(array_filter($candidates)));
-                            $imgSrc = $candidates[0] ?? $defaultImg;
+                            // Lightweight fallbacks only (no localhost-hardcoded /phonesdukan paths).
+                            $candidates = array_values(array_unique(array_filter([
+                                $imgSrc,
+                                $rawImg !== '' ? $rawImg : null,
+                                $defaultImg,
+                            ])));
                             $imgCandidatesAttr = htmlspecialchars(json_encode($candidates), ENT_QUOTES, 'UTF-8');
                         ?>
                         <div class="prd-imgbox">
@@ -984,11 +948,14 @@ if (!$result) {
                                class="prd-btn prd-btn-delete"
                                onclick="return confirm('Are you sure you want to delete this product and all associated data?')">Delete</a>
                             <?php
-                                $viewPath = rawurlencode((string)($row['category_slug'] ?? '')) . '/' .
-                                            rawurlencode((string)($row['brand_slug'] ?? '')) . '/' .
-                                            rawurlencode((string)($row['product_slug'] ?? ''));
+                                $viewPath = ltrim(buildProductPathFromRow([
+                                    'brand_slug' => (string) ($row['brand_slug'] ?? ''),
+                                    'category_slug' => (string) ($row['category_slug'] ?? ''),
+                                    'subcategory_slug' => (string) ($row['subcategory_slug'] ?? ''),
+                                    'product_slug' => (string) ($row['product_slug'] ?? ''),
+                                ]), '/');
                             ?>
-                            <a href="<?= url($viewPath); ?>" class="prd-btn prd-btn-view">View</a>
+                            <a href="<?= htmlspecialchars(url($viewPath), ENT_QUOTES, 'UTF-8'); ?>" class="prd-btn prd-btn-view" target="_blank" rel="noopener">View</a>
                         </div>
                     </td>
                 </tr>

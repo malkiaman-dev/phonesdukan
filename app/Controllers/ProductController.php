@@ -69,12 +69,10 @@ class ProductController
     ): void {
         $status = (int) ($product['product_status'] ?? 0);
 
-        // Inactive / deleted products must hard-404 (not Soft 404 with thin HTML).
-        if ($status === 0) {
-            http_response_code(404);
-            include __DIR__ . '/../Views/404.php';
-            return;
-        }
+        // Inactive products: keep page reachable for admin preview, but noindex
+        // so Google does not treat them as Soft 404 / thin index entries.
+        // Truly missing products still 404 from the lookup above.
+        $forceNoIndex = ($status !== 1);
 
         $dbInstance = new Database();
         $db = $dbInstance->getConnection();
@@ -118,8 +116,8 @@ class ProductController
             : (isset($product['regular_price']) && $product['regular_price'] > 0 ? $product['regular_price'] : 0);
         $productPrice = is_numeric($productPrice) ? (float) $productPrice : 0;
 
-        // Coming soon / zero-price pages stay usable but must not compete in the index.
-        if ($isComingSoon || $productPrice <= 0 || !isProductStatusIndexable($status)) {
+        // Coming soon / inactive / zero-price: usable for preview, but noindex for SEO.
+        if (!empty($forceNoIndex) || $isComingSoon || $productPrice <= 0 || !isProductStatusIndexable($status)) {
             $metaRobots = 'noindex, follow';
         } else {
             $metaRobots = 'index, follow';
