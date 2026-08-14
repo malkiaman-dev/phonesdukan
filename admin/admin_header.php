@@ -189,6 +189,20 @@ $adminPageCssMap = [
             z-index: 1;
             overflow: visible;
         }
+        .admin-logo {
+            display: inline-flex !important;
+            align-items: center;
+            background: #111111;
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+        .admin-logo img {
+            display: block !important;
+            height: 36px !important;
+            width: auto !important;
+            max-height: 40px !important;
+            object-fit: contain;
+        }
         @media (max-width: 992px) {
             html body { padding-left: 0 !important; }
             #sidebar { left: -270px; }
@@ -206,7 +220,7 @@ $adminPageCssMap = [
                 <i class="fas fa-bars"></i>
             </button>
             <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage">
-                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo.webp'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async">
+                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async">
             </a>
         </div>
 

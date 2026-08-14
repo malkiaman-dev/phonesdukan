@@ -454,13 +454,15 @@ html body {
     display: inline-flex;
     align-items: center;
     height: 100%;
-    padding: 0 8px 0 0;
+    padding: 4px 8px 4px 6px;
     text-decoration: none !important;
+    background: #111111;
+    border-radius: 6px;
 }
 
 .admin-logo img {
-    height: 40px;
-    max-height: 44px;
+    height: 36px;
+    max-height: 40px;
     width: auto;
     object-fit: contain;
     display: block;
