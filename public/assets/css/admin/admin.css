@@ -454,10 +454,10 @@ html body {
     display: inline-flex;
     align-items: center;
     height: 100%;
-    padding: 4px 8px 4px 6px;
+    padding: 0;
     text-decoration: none !important;
-    background: #111111;
-    border-radius: 6px;
+    background: transparent;
+    border-radius: 0;
 }
 
 .admin-logo img {

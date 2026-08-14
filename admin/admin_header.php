@@ -192,9 +192,9 @@ $adminPageCssMap = [
         .admin-logo {
             display: inline-flex !important;
             align-items: center;
-            background: #111111;
-            border-radius: 6px;
-            padding: 4px 8px;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
         }
         .admin-logo img {
             display: block !important;
@@ -220,7 +220,7 @@ $adminPageCssMap = [
                 <i class="fas fa-bars"></i>
             </button>
             <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage">
-                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async">
+                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo_yellow.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async">
             </a>
         </div>
 
