@@ -245,13 +245,14 @@ if (!function_exists('ensureDatabaseSchema')) {
         }
         $done = true;
 
-        // Always-run: group products table (safe CREATE IF NOT EXISTS)
-        ensureProductGroupsTable($db);
-
+        // Skip expensive schema checks after first successful migration.
         $lockFile = schemaMigrationLockPath();
         if (is_file($lockFile)) {
             return;
         }
+
+        // First boot only: create/alter missing tables & columns.
+        ensureProductGroupsTable($db);
 
         $functionsFile = dirname(__DIR__) . '/includes/functions.php';
         if (is_file($functionsFile)) {

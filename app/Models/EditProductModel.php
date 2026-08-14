@@ -372,9 +372,36 @@ class ProductModel
     {
         $stmt = $this->db->prepare('SELECT * FROM product_attribute_values WHERE attribute_id = ?');
         $stmt->execute([$attributeId]);
-        $values = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        error_log("Fetched values for attribute_id $attributeId: " . print_r($values, true));
-        return $values;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Load every attribute value in one query, grouped by attribute_id.
+     *
+     * @return array<int, list<array<string, mixed>>>
+     */
+    public function getAllAttributeValuesGrouped(): array
+    {
+        $grouped = [];
+        $stmt = $this->db->query(
+            'SELECT attribute_id, value_id, value
+             FROM product_attribute_values
+             ORDER BY attribute_id ASC, value_id ASC'
+        );
+        if (!$stmt) {
+            return $grouped;
+        }
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $attributeId = (int) ($row['attribute_id'] ?? 0);
+            if ($attributeId <= 0) {
+                continue;
+            }
+            if (!isset($grouped[$attributeId])) {
+                $grouped[$attributeId] = [];
+            }
+            $grouped[$attributeId][] = $row;
+        }
+        return $grouped;
     }
 
     public function getAllAttributes()

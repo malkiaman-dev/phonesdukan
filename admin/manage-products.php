@@ -26,8 +26,16 @@ $statusFilterLabels = [
     'coming_soon' => 'Coming Soon',
 ];
 $search_query  = isset($_GET['search']) ? trim($_GET['search']) : '';
+$perPageOptions = [20, 50, 100];
+$per_page = isset($_GET['per_page']) ? (int) $_GET['per_page'] : 20;
+if (!in_array($per_page, $perPageOptions, true)) {
+    $per_page = 20;
+}
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$page = $page > 0 ? $page : 1;
 
 $whereClauses = [];
+$params = [];
 if ($status_filter === 'active') {
     $whereClauses[] = 'p.product_status = 1';
 } elseif ($status_filter === 'inactive') {
@@ -36,12 +44,21 @@ if ($status_filter === 'active') {
     $whereClauses[] = 'p.product_status = 2';
 }
 
-if (!empty($search_query)) {
-    $safe_search    = $conn->quote('%' . $search_query . '%');
-    $whereClauses[] = "p.product_name LIKE $safe_search";
+if ($search_query !== '') {
+    $whereClauses[] = 'p.product_name LIKE :search';
+    $params[':search'] = '%' . $search_query . '%';
 }
 
 $whereClause = !empty($whereClauses) ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
+
+$countStmt = $conn->prepare("SELECT COUNT(*) FROM products p $whereClause");
+$countStmt->execute($params);
+$totalRows = (int) $countStmt->fetchColumn();
+$totalPages = max(1, (int) ceil($totalRows / $per_page));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $per_page;
 
 $query = "SELECT 
             p.product_id, p.product_name, p.product_slug, p.regular_price, p.sale_price,
@@ -65,21 +82,39 @@ $query = "SELECT
           LEFT JOIN categories sc
             ON p.subcategory_id = sc.category_id
           $whereClause
-          ORDER BY p.created_at DESC";
+          ORDER BY p.created_at DESC
+          LIMIT :limit OFFSET :offset";
 
-$result = $conn->query($query);
-
-if (!$result) {
-    die('Error fetching products: ' . $conn->errorInfo()[2]);
+$stmt = $conn->prepare($query);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value, PDO::PARAM_STR);
 }
+$stmt->bindValue(':limit', $per_page, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 include __DIR__ . '/admin_header.php';
+
+$buildManageUrl = static function (array $overrides = []) use ($status_filter, $search_query, $per_page, $page): string {
+    $query = array_merge([
+        'status' => $status_filter,
+        'search' => $search_query,
+        'per_page' => $per_page,
+        'page' => $page,
+    ], $overrides);
+    if (($query['search'] ?? '') === '') {
+        unset($query['search']);
+    }
+    if (($query['status'] ?? 'all') === 'all') {
+        // keep status for filter UI consistency
+    }
+    return 'manage-products.php?' . http_build_query($query);
+};
 ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Products - Phones Dukan</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -95,7 +130,7 @@ include __DIR__ . '/admin_header.php';
         }
 
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: "Segoe UI", Tahoma, sans-serif;
             background: var(--bg);
             color: var(--black);
         }
@@ -848,19 +883,20 @@ include __DIR__ . '/admin_header.php';
                 <?php if (!empty($search_query)): ?>
                     <input type="hidden" name="search" value="<?= htmlspecialchars($search_query) ?>">
                 <?php endif; ?>
+                <input type="hidden" name="per_page" value="<?= (int) $per_page ?>">
             </form>
 
             <select id="prdPerPage" class="native-filter-select">
-                <option value="20">20 / page</option>
-                <option value="50">50 / page</option>
-                <option value="100">100 / page</option>
+                <option value="20" <?= $per_page === 20 ? 'selected' : '' ?>>20 / page</option>
+                <option value="50" <?= $per_page === 50 ? 'selected' : '' ?>>50 / page</option>
+                <option value="100" <?= $per_page === 100 ? 'selected' : '' ?>>100 / page</option>
             </select>
             <div class="filter-select-wrap" data-per-page-select>
-                <button type="button" class="filter-display" data-per-page-display>20 / page</button>
+                <button type="button" class="filter-display" data-per-page-display><?= (int) $per_page ?> / page</button>
                 <ul class="filter-options" data-per-page-options>
-                    <li><button type="button" class="filter-option is-selected" data-value="20">20 / page</button></li>
-                    <li><button type="button" class="filter-option" data-value="50">50 / page</button></li>
-                    <li><button type="button" class="filter-option" data-value="100">100 / page</button></li>
+                    <li><button type="button" class="filter-option <?= $per_page === 20 ? 'is-selected' : '' ?>" data-value="20">20 / page</button></li>
+                    <li><button type="button" class="filter-option <?= $per_page === 50 ? 'is-selected' : '' ?>" data-value="50">50 / page</button></li>
+                    <li><button type="button" class="filter-option <?= $per_page === 100 ? 'is-selected' : '' ?>" data-value="100">100 / page</button></li>
                 </ul>
             </div>
 
@@ -874,6 +910,7 @@ include __DIR__ . '/admin_header.php';
                        placeholder="Search products..."
                        value="<?= htmlspecialchars($search_query) ?>">
                 <input type="hidden" name="status" value="<?= htmlspecialchars($status_filter) ?>">
+                <input type="hidden" name="per_page" value="<?= (int) $per_page ?>">
                 <button type="submit" class="btn-search">Search</button>
             </form>
         </div>
@@ -896,7 +933,10 @@ include __DIR__ . '/admin_header.php';
                 </tr>
             </thead>
             <tbody id="prdTbody">
-                <?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
+                <?php if (empty($products)): ?>
+                    <tr><td colspan="7" style="padding:24px;text-align:center;color:#6b7280;">No products found.</td></tr>
+                <?php endif; ?>
+                <?php foreach ($products as $row): ?>
                 <?php
                     $stock = (int)$row['stock_quantity'];
                     $stockClass = $stock > 10 ? 'stock-ok' : ($stock > 0 ? 'stock-low' : 'stock-out');
@@ -959,14 +999,34 @@ include __DIR__ . '/admin_header.php';
                         </div>
                     </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 
+
     <div class="prd-pagination">
-        <div class="prd-page-info" id="prdPageInfo"></div>
-        <div class="prd-page-links" id="prdPageLinks"></div>
+        <div class="prd-page-info">
+            Showing <?= $totalRows === 0 ? 0 : ($offset + 1) ?>–<?= min($offset + $per_page, $totalRows) ?>
+            of <?= $totalRows ?> products
+            (Page <?= $page ?> of <?= $totalPages ?>)
+        </div>
+        <div class="prd-page-links">
+            <?php if ($page > 1): ?>
+                <a class="prd-btn" href="<?= htmlspecialchars($buildManageUrl(['page' => $page - 1]), ENT_QUOTES, 'UTF-8') ?>">Previous</a>
+            <?php endif; ?>
+            <?php
+            $windowStart = max(1, $page - 2);
+            $windowEnd = min($totalPages, $page + 2);
+            for ($p = $windowStart; $p <= $windowEnd; $p++):
+            ?>
+                <a class="prd-btn <?= $p === $page ? 'prd-btn-edit' : '' ?>"
+                   href="<?= htmlspecialchars($buildManageUrl(['page' => $p]), ENT_QUOTES, 'UTF-8') ?>"><?= $p ?></a>
+            <?php endfor; ?>
+            <?php if ($page < $totalPages): ?>
+                <a class="prd-btn" href="<?= htmlspecialchars($buildManageUrl(['page' => $page + 1]), ENT_QUOTES, 'UTF-8') ?>">Next</a>
+            <?php endif; ?>
+        </div>
     </div>
 
 </div>
@@ -975,66 +1035,14 @@ include __DIR__ . '/admin_header.php';
 document.addEventListener('DOMContentLoaded', function () {
     const perPageEl = document.getElementById('prdPerPage');
     const exportBtn = document.getElementById('prdExportBtn');
-    const tbody = document.getElementById('prdTbody');
-    const pageInfoEl = document.getElementById('prdPageInfo');
-    const pageLinksEl = document.getElementById('prdPageLinks');
+    const rows = Array.from(document.querySelectorAll('#prdTbody tr'));
 
-    if (!perPageEl || !tbody || !pageInfoEl || !pageLinksEl) return;
-
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    let currentPage = 1;
-
-    function renderPagination(totalPages) {
-        pageLinksEl.innerHTML = '';
-        if (totalPages <= 1) return;
-
-        function makeBtn(label, page, disabled, active) {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'prd-page-link' + (disabled ? ' is-disabled' : '') + (active ? ' is-active' : '');
-            btn.textContent = label;
-            btn.addEventListener('click', function () {
-                if (disabled) return;
-                currentPage = page;
-                applyPagination();
-            });
-            return btn;
-        }
-
-        pageLinksEl.appendChild(makeBtn('Previous', Math.max(1, currentPage - 1), currentPage === 1, false));
-
-        const windowSize = 2;
-        const start = Math.max(1, currentPage - windowSize);
-        const end = Math.min(totalPages, currentPage + windowSize);
-
-        for (let p = start; p <= end; p++) {
-            pageLinksEl.appendChild(makeBtn(String(p), p, false, p === currentPage));
-        }
-
-        pageLinksEl.appendChild(makeBtn('Next', Math.min(totalPages, currentPage + 1), currentPage === totalPages, false));
+    function goWithPerPage(value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('per_page', value);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
     }
-
-    function applyPagination() {
-        const perPage = parseInt(perPageEl.value || '20', 10) || 20;
-        const total = rows.length;
-        const totalPages = Math.max(1, Math.ceil(total / perPage));
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        rows.forEach(function (row) { row.style.display = 'none'; });
-        const start = (currentPage - 1) * perPage;
-        const end = start + perPage;
-        rows.slice(start, end).forEach(function (row) { row.style.display = ''; });
-
-        pageInfoEl.textContent = 'Page ' + currentPage + ' of ' + totalPages;
-        renderPagination(totalPages);
-    }
-
-    perPageEl.addEventListener('change', function () {
-        currentPage = 1;
-        applyPagination();
-    });
 
     document.querySelectorAll('[data-filter-select]').forEach(function (wrap) {
         const display = wrap.querySelector('[data-filter-display]');
@@ -1050,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 opt.classList.toggle('is-selected', opt.dataset.value === value);
             });
             if (submit) {
-                nativeSelect.form?.submit();
+                nativeSelect.form && nativeSelect.form.submit();
             }
         }
 
@@ -1077,17 +1085,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const options = Array.from(wrap.querySelectorAll('.filter-option'));
         if (!display || !perPageEl) return;
 
-        function setValue(value) {
-            perPageEl.value = value;
-            const selected = options.find(function (opt) { return opt.dataset.value === value; });
-            display.textContent = selected ? selected.textContent.trim() : value;
-            options.forEach(function (opt) {
-                opt.classList.toggle('is-selected', opt.dataset.value === value);
-            });
-            currentPage = 1;
-            applyPagination();
-        }
-
         display.addEventListener('click', function (e) {
             e.stopPropagation();
             document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
@@ -1098,13 +1095,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         options.forEach(function (opt) {
             opt.addEventListener('click', function () {
-                setValue(this.dataset.value || '20');
-                wrap.classList.remove('is-open');
+                goWithPerPage(this.dataset.value || '20');
             });
         });
-
-        setValue(perPageEl.value || '20');
     });
+
+    if (perPageEl) {
+        perPageEl.addEventListener('change', function () {
+            goWithPerPage(this.value || '20');
+        });
+    }
 
     document.addEventListener('click', function () {
         document.querySelectorAll('.filter-select-wrap.is-open').forEach(function (openWrap) {
@@ -1112,56 +1112,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    applyPagination();
-
-    // Image fallback resolver for inconsistent stored paths.
     document.querySelectorAll('.prd-image').forEach(function (img) {
         if (!img.getAttribute('src')) {
-            img.closest('.prd-imgbox')?.classList.add('is-placeholder');
+            var box = img.closest('.prd-imgbox');
+            if (box) box.classList.add('is-placeholder');
         }
         img.addEventListener('error', function () {
-            let candidates = [];
-            try {
-                candidates = JSON.parse(this.dataset.candidates || '[]');
-            } catch (e) {
-                candidates = [];
-            }
-            let idx = parseInt(this.dataset.candidateIndex || '0', 10);
-            idx += 1;
+            var candidates = [];
+            try { candidates = JSON.parse(this.dataset.candidates || '[]'); } catch (e) { candidates = []; }
+            var idx = parseInt(this.dataset.candidateIndex || '0', 10) + 1;
             if (idx < candidates.length) {
                 this.dataset.candidateIndex = String(idx);
                 this.src = candidates[idx];
             } else {
-                this.closest('.prd-imgbox')?.classList.add('is-placeholder');
+                var box = this.closest('.prd-imgbox');
+                if (box) box.classList.add('is-placeholder');
                 this.onerror = null;
             }
         });
     });
 
-    exportBtn?.addEventListener('click', function () {
-        const headers = ['Name', 'Price', 'Stock', 'Status', 'Date'];
-        const lines = [headers.join(',')];
-        rows.forEach(function (row) {
-            if (row.style.display === 'none') return;
-            const name = (row.querySelector('.prd-name')?.textContent || '').trim();
-            const price = (row.querySelector('.prd-price')?.textContent || '').trim();
-            const stock = (row.querySelector('.stock-badge')?.textContent || '').trim();
-            const status = (row.querySelector('.status-badge')?.textContent || '').trim();
-            const date = (row.querySelector('td[data-label="Date"]')?.textContent || '').trim();
-            const values = [name, price, stock, status, date].map(function (v) {
-                return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function () {
+            const headers = ['Name', 'Price', 'Stock', 'Status', 'Date'];
+            const lines = [headers.join(',')];
+            rows.forEach(function (row) {
+                const name = (row.querySelector('.prd-name') && row.querySelector('.prd-name').textContent || '').trim();
+                if (!name) return;
+                const price = (row.querySelector('.prd-price') && row.querySelector('.prd-price').textContent || '').trim();
+                const stock = (row.querySelector('.stock-badge') && row.querySelector('.stock-badge').textContent || '').trim();
+                const status = (row.querySelector('.status-badge') && row.querySelector('.status-badge').textContent || '').trim();
+                const dateCell = row.querySelector('td[data-label="Date"]');
+                const date = (dateCell && dateCell.textContent || '').trim();
+                const values = [name, price, stock, status, date].map(function (v) {
+                    return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+                });
+                lines.push(values.join(','));
             });
-            lines.push(values.join(','));
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'manage-products-export.csv';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
         });
-        const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'manage-products-export.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    });
+    }
 });
 </script>

@@ -18,43 +18,8 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
     exit();
 }
 
-// Fetch admin details
-if (isset($_SESSION['admin_id'])) {
-    $admin_id = $_SESSION['admin_id'];
-
-    $sql = "SELECT name FROM admins WHERE id = :admin_id";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":admin_id", $admin_id, PDO::PARAM_INT);
-    $stmt->execute();
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $admin_name = $admin ? htmlspecialchars($admin['name']) : "Admin";
-} else {
-    $admin_name = "Admin";
-}
-
-/**
- * Returns true if a table exists.
- */
-function tableExists(PDO $conn, string $table): bool
-{
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = :table_name");
-    $stmt->execute([':table_name' => $table]);
-    return (int) $stmt->fetchColumn() > 0;
-}
-
-/**
- * Returns true if a column exists in a table.
- */
-function columnExists(PDO $conn, string $table, string $column): bool
-{
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = :table_name AND column_name = :column_name");
-    $stmt->execute([
-        ':table_name' => $table,
-        ':column_name' => $column,
-    ]);
-    return (int) $stmt->fetchColumn() > 0;
-}
+// Prefer session name (already set at login) — avoid an extra admins query.
+$admin_name = (string) ($_SESSION['admin_name'] ?? 'Admin');
 
 /**
  * Run scalar query safely and return int.
@@ -69,87 +34,101 @@ function getCount(PDO $conn, string $query): int
     }
 }
 
-$hasOrders = tableExists($conn, 'orders');
-$hasUsers = tableExists($conn, 'users');
-$hasProducts = tableExists($conn, 'products');
-$hasReviews = tableExists($conn, 'reviews');
-$hasContacts = tableExists($conn, 'contact_messages');
-$hasPosts = tableExists($conn, 'posts');
-$hasB2B = tableExists($conn, 'bulk_inquiries');
-
-$orderHasStatus = $hasOrders && columnExists($conn, 'orders', 'order_status');
-$orderHasCreatedAt = $hasOrders && columnExists($conn, 'orders', 'created_at');
-$orderHasTotal = $hasOrders && columnExists($conn, 'orders', 'total_price');
-$productHasStock = $hasProducts && columnExists($conn, 'products', 'stock_quantity');
-$productHasCreatedAt = $hasProducts && columnExists($conn, 'products', 'created_at');
-$userHasCreatedAt = $hasUsers && columnExists($conn, 'users', 'created_at');
-$reviewHasCreatedAt = $hasReviews && columnExists($conn, 'reviews', 'created_at');
-$contactHasCreatedAt = $hasContacts && columnExists($conn, 'contact_messages', 'created_at');
-$postHasCreatedAt = $hasPosts && columnExists($conn, 'posts', 'created_at');
-$b2bHasStatus = $hasB2B && columnExists($conn, 'bulk_inquiries', 'status');
-
-$kpis = [
-    'total_products' => $hasProducts ? getCount($conn, "SELECT COUNT(*) FROM products") : 0,
-    'total_orders' => $hasOrders ? getCount($conn, "SELECT COUNT(*) FROM orders") : 0,
-    'total_users' => $hasUsers ? getCount($conn, "SELECT COUNT(*) FROM users") : 0,
-    'total_reviews' => $hasReviews ? getCount($conn, "SELECT COUNT(*) FROM reviews") : 0,
-    'total_posts' => $hasPosts ? getCount($conn, "SELECT COUNT(*) FROM posts") : 0,
-    'pending_orders' => ($hasOrders && $orderHasStatus) ? getCount($conn, "SELECT COUNT(*) FROM orders WHERE LOWER(order_status) = 'pending'") : 0,
-    'processing_orders' => ($hasOrders && $orderHasStatus) ? getCount($conn, "SELECT COUNT(*) FROM orders WHERE LOWER(order_status) = 'processing'") : 0,
-    'completed_orders' => ($hasOrders && $orderHasStatus) ? getCount($conn, "SELECT COUNT(*) FROM orders WHERE LOWER(order_status) = 'completed'") : 0,
-    'cancelled_orders' => ($hasOrders && $orderHasStatus) ? getCount($conn, "SELECT COUNT(*) FROM orders WHERE LOWER(order_status) = 'cancelled'") : 0,
-    'out_of_stock' => ($hasProducts && $productHasStock) ? getCount($conn, "SELECT COUNT(*) FROM products WHERE stock_quantity <= 0") : 0,
-    'low_stock' => ($hasProducts && $productHasStock) ? getCount($conn, "SELECT COUNT(*) FROM products WHERE stock_quantity > 0 AND stock_quantity <= 5") : 0,
-    'today_orders' => ($hasOrders && $orderHasCreatedAt) ? getCount($conn, "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURDATE()") : 0,
-    'month_orders' => ($hasOrders && $orderHasCreatedAt) ? getCount($conn, "SELECT COUNT(*) FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE())") : 0,
-    'unread_contacts' => $hasContacts ? getCount($conn, "SELECT COUNT(*) FROM contact_messages") : 0,
-    'b2b_orders' => $hasB2B ? getCount($conn, "SELECT COUNT(*) FROM bulk_inquiries") : 0,
-    'b2b_pending_orders' => ($hasB2B && $b2bHasStatus) ? getCount($conn, "SELECT COUNT(*) FROM bulk_inquiries WHERE LOWER(status) = 'pending'") : 0,
-];
-
-$revenueTotal = 0.0;
-$revenueMonth = 0.0;
-if ($hasOrders && $orderHasTotal) {
+/**
+ * Fetch one associative row; empty array on failure.
+ */
+function getRow(PDO $conn, string $query): array
+{
     try {
-        $revenueTotal = (float) $conn->query("SELECT COALESCE(SUM(total_price), 0) FROM orders")->fetchColumn();
-        if ($orderHasCreatedAt) {
-            $revenueMonth = (float) $conn->query("SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE())")->fetchColumn();
-        }
+        $stmt = $conn->query($query);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) ? $row : [];
     } catch (Throwable $e) {
-        $revenueTotal = 0.0;
-        $revenueMonth = 0.0;
+        return [];
     }
 }
 
+// Batch KPIs — no information_schema probes (those were very slow on Hostinger).
+$productStats = getRow($conn, "
+    SELECT
+        COUNT(*) AS total_products,
+        SUM(CASE WHEN stock_quantity <= 0 THEN 1 ELSE 0 END) AS out_of_stock,
+        SUM(CASE WHEN stock_quantity > 0 AND stock_quantity <= 5 THEN 1 ELSE 0 END) AS low_stock,
+        SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) AS products_added_today
+    FROM products
+");
+
+$orderStats = getRow($conn, "
+    SELECT
+        COUNT(*) AS total_orders,
+        SUM(CASE WHEN LOWER(order_status) = 'pending' THEN 1 ELSE 0 END) AS pending_orders,
+        SUM(CASE WHEN LOWER(order_status) = 'processing' THEN 1 ELSE 0 END) AS processing_orders,
+        SUM(CASE WHEN LOWER(order_status) = 'completed' THEN 1 ELSE 0 END) AS completed_orders,
+        SUM(CASE WHEN LOWER(order_status) = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_orders,
+        SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) AS today_orders,
+        SUM(CASE WHEN YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE()) THEN 1 ELSE 0 END) AS month_orders,
+        COALESCE(SUM(total_price), 0) AS revenue_total,
+        COALESCE(SUM(CASE WHEN YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE()) THEN total_price ELSE 0 END), 0) AS revenue_month
+    FROM orders
+");
+
+$b2bStats = getRow($conn, "
+    SELECT
+        COUNT(*) AS b2b_orders,
+        SUM(CASE WHEN LOWER(status) = 'pending' THEN 1 ELSE 0 END) AS b2b_pending_orders
+    FROM bulk_inquiries
+");
+
+$kpis = [
+    'total_products' => (int) ($productStats['total_products'] ?? 0),
+    'total_orders' => (int) ($orderStats['total_orders'] ?? 0),
+    'total_users' => getCount($conn, 'SELECT COUNT(*) FROM users'),
+    'total_reviews' => getCount($conn, 'SELECT COUNT(*) FROM reviews'),
+    'total_posts' => getCount($conn, 'SELECT COUNT(*) FROM posts'),
+    'pending_orders' => (int) ($orderStats['pending_orders'] ?? 0),
+    'processing_orders' => (int) ($orderStats['processing_orders'] ?? 0),
+    'completed_orders' => (int) ($orderStats['completed_orders'] ?? 0),
+    'cancelled_orders' => (int) ($orderStats['cancelled_orders'] ?? 0),
+    'out_of_stock' => (int) ($productStats['out_of_stock'] ?? 0),
+    'low_stock' => (int) ($productStats['low_stock'] ?? 0),
+    'today_orders' => (int) ($orderStats['today_orders'] ?? 0),
+    'month_orders' => (int) ($orderStats['month_orders'] ?? 0),
+    'unread_contacts' => getCount($conn, 'SELECT COUNT(*) FROM contact_messages'),
+    'b2b_orders' => (int) ($b2bStats['b2b_orders'] ?? 0),
+    'b2b_pending_orders' => (int) ($b2bStats['b2b_pending_orders'] ?? 0),
+];
+
+$revenueTotal = (float) ($orderStats['revenue_total'] ?? 0);
+$revenueMonth = (float) ($orderStats['revenue_month'] ?? 0);
+
 $recentOrders = [];
-if ($hasOrders) {
-    try {
-        $query = "SELECT order_id, customer_name, order_status, total_price, created_at FROM orders ORDER BY created_at DESC LIMIT 5";
-        $recentOrders = $conn->query($query)->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (Throwable $e) {
-        $recentOrders = [];
-    }
+try {
+    $recentOrders = $conn->query(
+        'SELECT order_id, customer_name, order_status, total_price, created_at
+         FROM orders ORDER BY created_at DESC LIMIT 5'
+    )->fetchAll(PDO::FETCH_ASSOC) ?: [];
+} catch (Throwable $e) {
+    $recentOrders = [];
 }
 
 $recentReviews = [];
-if ($hasReviews) {
-    try {
-        $query = "SELECT r.author, r.content, r.rating, r.created_at, p.product_name
-                  FROM reviews r
-                  LEFT JOIN products p ON p.product_id = r.product_id
-                  ORDER BY r.created_at DESC
-                  LIMIT 2";
-        $recentReviews = $conn->query($query)->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (Throwable $e) {
-        $recentReviews = [];
-    }
+try {
+    $recentReviews = $conn->query(
+        'SELECT r.author, r.content, r.rating, r.created_at, p.product_name
+         FROM reviews r
+         LEFT JOIN products p ON p.product_id = r.product_id
+         ORDER BY r.created_at DESC
+         LIMIT 2'
+    )->fetchAll(PDO::FETCH_ASSOC) ?: [];
+} catch (Throwable $e) {
+    $recentReviews = [];
 }
 
 $quickStats = [
-    'new_customers_today' => ($hasUsers && $userHasCreatedAt) ? getCount($conn, "SELECT COUNT(*) FROM users WHERE DATE(created_at) = CURDATE()") : 0,
-    'new_messages_today' => ($hasContacts && $contactHasCreatedAt) ? getCount($conn, "SELECT COUNT(*) FROM contact_messages WHERE DATE(created_at) = CURDATE()") : 0,
-    'new_reviews_today' => ($hasReviews && $reviewHasCreatedAt) ? getCount($conn, "SELECT COUNT(*) FROM reviews WHERE DATE(created_at) = CURDATE()") : 0,
-    'products_added_today' => ($hasProducts && $productHasCreatedAt) ? getCount($conn, "SELECT COUNT(*) FROM products WHERE DATE(created_at) = CURDATE()") : 0,
+    'new_customers_today' => getCount($conn, 'SELECT COUNT(*) FROM users WHERE DATE(created_at) = CURDATE()'),
+    'new_messages_today' => getCount($conn, 'SELECT COUNT(*) FROM contact_messages WHERE DATE(created_at) = CURDATE()'),
+    'new_reviews_today' => getCount($conn, 'SELECT COUNT(*) FROM reviews WHERE DATE(created_at) = CURDATE()'),
+    'products_added_today' => (int) ($productStats['products_added_today'] ?? 0),
 ];
 ?>
 <?php // Only include the sidebar if the admin is logged in

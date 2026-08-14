@@ -6,7 +6,9 @@ class VariationModel {
 
     public function __construct() {
         $this->db = (new Database())->getConnection();
-        self::ensureSchema($this->db);
+        if (!is_file(dirname(__DIR__, 2) . '/storage/.schema_migration_v4.lock')) {
+            self::ensureSchema($this->db);
+        }
     }
 
     public static function ensureSchema(PDO $db): void

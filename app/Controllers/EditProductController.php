@@ -42,11 +42,8 @@ class ProductController
         $categories = $this->model->getAllCategories();
         $brands = $this->model->getAllBrands();
         $productAttributes = $this->model->getAllAttributes();
-        $attributeValues = [];
-        foreach ($productAttributes as $attribute) {
-            $values = $this->model->getAttributeValues($attribute['attribute_id']);
-            $attributeValues[$attribute['attribute_id']] = $values;
-        }
+        // One query for all attribute values instead of N+1 round-trips.
+        $attributeValues = $this->model->getAllAttributeValuesGrouped();
         return [
             'product' => $product,
             'categories' => $categories,

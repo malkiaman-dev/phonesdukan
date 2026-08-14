@@ -26,14 +26,16 @@ $adminPageCssMap = [
 ?>
 
 <!DOCTYPE html>
-<html class="admin-loading" lang="en">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>    
     
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- FontAwesome for Icons (non-blocking load) -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"></noscript>
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/admin/admin.css'), ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/admin/admin-components.css'), ENT_QUOTES, 'UTF-8'); ?>">
     <link rel="stylesheet" href="<?= htmlspecialchars(assetUrl('public/assets/css/frontend/ui-controls.css'), ENT_QUOTES, 'UTF-8'); ?>">
@@ -49,9 +51,6 @@ $adminPageCssMap = [
     <?php endif; ?>
     <style>
         /* Critical shell styles to prevent FOUC */
-        html.admin-loading body {
-            opacity: 0;
-        }
         /* style.css locks storefront scroll; admin must be able to scroll */
         html,
         body {
@@ -78,8 +77,6 @@ $adminPageCssMap = [
             padding-bottom: 0 !important;
             padding-left: 248px !important;
             color: #111111;
-            opacity: 1;
-            transition: opacity 0.15s ease;
         }
         .navbar {
             position: fixed;
@@ -198,8 +195,6 @@ $adminPageCssMap = [
             #sidebar.is-open { left: 0; }
         }
     </style>
-    <script src="<?= htmlspecialchars(assetUrl('public/assets/js/common.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
-    <script src="<?= htmlspecialchars(assetUrl('public/assets/js/faqs.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <script src="<?= htmlspecialchars(assetUrl('public/assets/js/admin/required-fields.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 </head>
 <body>
@@ -211,7 +206,7 @@ $adminPageCssMap = [
                 <i class="fas fa-bars"></i>
             </button>
             <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage">
-                <img src="/public/assets/images/phonesdukan_logo.png" alt="PhonesDukan Logo">
+                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo.webp'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async">
             </a>
         </div>
 
@@ -229,8 +224,7 @@ $adminPageCssMap = [
     </div>
 </nav>
 <script>
-window.addEventListener('load', function () {
-    document.documentElement.classList.remove('admin-loading');
+document.addEventListener('DOMContentLoaded', function () {
     var toggleBtn = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');
     if (toggleBtn && sidebar) {

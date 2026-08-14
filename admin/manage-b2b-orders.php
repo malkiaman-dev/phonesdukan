@@ -31,8 +31,6 @@ $bulkInquiryModel = new BulkInquiryModel();
 $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
 ?>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -48,7 +46,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         }
 
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
             background: #f3f4f6;
             color: var(--brand-black);
             overflow-x: hidden;
@@ -423,7 +421,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             border-radius: 999px;
             background: var(--brand-black);
             color: var(--brand-white);
-            font-family: 'DM Sans', sans-serif;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
             font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;

@@ -10,7 +10,10 @@ class ProductGroupModel
     public function __construct(?PDO $db = null)
     {
         $this->db = $db ?: (new Database())->getConnection();
-        self::ensureSchema($this->db);
+        // Schema is ensured once via database_migrations lock; skip per-request CREATE/ALTER.
+        if (!is_file(dirname(__DIR__, 2) . '/storage/.schema_migration_v4.lock')) {
+            self::ensureSchema($this->db);
+        }
     }
 
     public static function ensureSchema(PDO $db): void

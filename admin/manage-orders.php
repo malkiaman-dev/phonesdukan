@@ -69,8 +69,6 @@ $stmt->execute();
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
         :root{
             --primary:#111111;
@@ -94,7 +92,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             overflow-x: hidden;
         }
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
             background: var(--bg);
             color: var(--text);
             overflow: visible;
