@@ -191,17 +191,21 @@ $adminPageCssMap = [
         }
         .admin-logo {
             display: inline-flex !important;
-            align-items: center;
-            background: transparent;
-            border-radius: 0;
-            padding: 0;
+            align-items: center !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
         }
         .admin-logo img {
             display: block !important;
             height: 36px !important;
             width: auto !important;
             max-height: 40px !important;
-            object-fit: contain;
+            object-fit: contain !important;
+            background: transparent !important;
         }
         @media (max-width: 992px) {
             html body { padding-left: 0 !important; }
@@ -219,8 +223,8 @@ $adminPageCssMap = [
             <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
                 <i class="fas fa-bars"></i>
             </button>
-            <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage">
-                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo_yellow.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async">
+            <a class="navbar-brand admin-logo" href="<?= url(); ?>" aria-label="Go to PhonesDukan homepage" style="background:transparent!important;background-color:transparent!important;padding:0!important;border:0!important;box-shadow:none!important;">
+                <img src="<?= htmlspecialchars(assetUrl('public/assets/images/phonesdukan_logo_yellow.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="PhonesDukan Logo" width="140" height="36" decoding="async" style="background:transparent!important;">
             </a>
         </div>
 

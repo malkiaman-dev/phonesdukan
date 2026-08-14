@@ -454,10 +454,13 @@ html body {
     display: inline-flex;
     align-items: center;
     height: 100%;
-    padding: 0;
+    padding: 0 !important;
     text-decoration: none !important;
-    background: transparent;
-    border-radius: 0;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 .admin-logo img {
@@ -466,6 +469,7 @@ html body {
     width: auto;
     object-fit: contain;
     display: block;
+    background: transparent !important;
 }
 
 .admin-name {
