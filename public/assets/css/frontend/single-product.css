@@ -572,7 +572,7 @@ input#submit:hover {
 /* Product Title */
 .product-summary .product_title {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 15px;
 }
 
@@ -911,7 +911,7 @@ h3.related-mobile-product-title {
 
 .related-mobile-product-title a {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 400;
   line-height: 20px;
   color: #333;
   text-align: center;

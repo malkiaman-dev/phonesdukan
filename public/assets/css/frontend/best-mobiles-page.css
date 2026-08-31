@@ -245,7 +245,7 @@
     text-decoration: none !important;
     font-size: 20px;
     line-height: 1.35;
-    font-weight: 800;
+    font-weight: 400;
     display: -webkit-box;
     /* -webkit-line-clamp: 2; */
     -webkit-box-orient: vertical;
@@ -654,7 +654,7 @@ a.secondary-cta:active {
     }
     .product-title a {
         font-size: 18px;
-        font-weight: 600;
+        font-weight: 400;
     }
     .buy-now {
         width: 100%;

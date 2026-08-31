@@ -305,8 +305,19 @@ h6 {
 .mobile-product-title a,
 .related-mobile-product-title a,
 .na-name a {
-  font-weight: var(--pd-font-weight-semibold);
+  font-weight: var(--pd-font-weight-regular);
   line-height: 1.4;
+}
+
+.product-title,
+.mobile-product-title,
+.related-mobile-product-title,
+.na-name,
+h1.product_title,
+h2.product-title,
+h3.product-title,
+.product-summary .product_title {
+  font-weight: var(--pd-font-weight-regular);
 }
 
 .product-price,
