@@ -156,6 +156,11 @@
 <?= $schema ?>
 </script>
 <?php endif; ?>
+<?php if (!empty($faqSchema)) : ?>
+<script type="application/ld+json">
+<?= $faqSchema ?>
+</script>
+<?php endif; ?>
 <?php if (!isPhonesDukanApp()) : ?>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4182308742558451"
      crossorigin="anonymous"></script>

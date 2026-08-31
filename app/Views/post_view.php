@@ -261,14 +261,31 @@ function pv_share_btns(string $fb, string $x, string $wa, string $li): string {
             <?= $content ?>
         </div>
 
+        <?php
+        // Live product recommendations (helps rankings flow to buyable pages).
+        try {
+            require_once dirname(__DIR__, 2) . '/includes/post_commercial_rewrite.php';
+            $dbShop = (new Database())->getConnection();
+            $shopProducts = pdFindRelatedProductsForPost(
+                $dbShop,
+                (string) ($post['title'] ?? ''),
+                (string) ($post['slug'] ?? ''),
+                4
+            );
+            echo pdRenderRelatedProductsBlock($shopProducts);
+        } catch (Throwable $e) {
+            // ignore shop block failures
+        }
+        ?>
+
         <!-- Inline CTA -->
         <div class="pv-cta-block">
             <div class="pv-cta-text">
-                <p class="pv-cta-eyebrow">Phones Dukan</p>
-                <p class="pv-cta-heading">Looking for the best mobiles or accessories?</p>
-                <p class="pv-cta-sub">Explore the latest deals, compare prices, and shop trusted brands.</p>
+                <p class="pv-cta-eyebrow">Shop Phones Dukan</p>
+                <p class="pv-cta-heading">Ready to buy mobiles or accessories?</p>
+                <p class="pv-cta-sub">Compare live prices, check stock, and order PTA-ready devices with delivery across Pakistan.</p>
             </div>
-            <a href="<?= url() ?>" class="pv-cta-btn">Explore Deals →</a>
+            <a href="<?= url('mobiles/') ?>" class="pv-cta-btn">Shop mobiles →</a>
         </div>
 
         <!-- Bottom share strip -->

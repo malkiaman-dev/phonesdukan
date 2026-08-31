@@ -44,12 +44,15 @@ class ProductSitemapController {
     
                 // Fetch the product images
                 $images = $productSitemapModel->getProductImages($product['product_id']);
+                $lastmod = !empty($product['updated_at'])
+                    ? date('c', strtotime((string) $product['updated_at']))
+                    : date('c');
                 
                 echo '  <url>' . PHP_EOL;
                 echo '    <loc>' . htmlspecialchars($product_url) . '</loc>' . PHP_EOL;
-                echo '    <lastmod>' . date('c') . '</lastmod>' . PHP_EOL;
-                echo '    <changefreq>monthly</changefreq>' . PHP_EOL;
-                echo '    <priority>0.8</priority>' . PHP_EOL;
+                echo '    <lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . PHP_EOL;
+                echo '    <changefreq>weekly</changefreq>' . PHP_EOL;
+                echo '    <priority>0.9</priority>' . PHP_EOL;
     
                 // Loop through images and add image tags
                 foreach ($images as $image) {

@@ -22,6 +22,30 @@ $metaKeywords = $seo['focus_keyword'] ?? '';
 $metaRobots = isProductStatusIndexable($product['product_status'] ?? 0) ? 'index, follow' : 'noindex';
 $pageUrl = rtrim(getBaseURL(), '/') . buildProductPathFromRow($product);
 
+// Product FAQ schema — helps commercial SERP visibility.
+$productNameSafe = (string) ($product['product_name'] ?? 'this product');
+$brandSafe = (string) ($product['brand_name'] ?? 'Phones Dukan');
+$priceLabel = $productPrice > 0 ? ('Rs. ' . number_format($productPrice, 0)) : 'updated market price';
+$faqSchema = SeoHelper::faqSchema([
+    [
+        'question' => "What is the {$productNameSafe} price in Pakistan?",
+        'answer' => "The current {$productNameSafe} price in Pakistan is {$priceLabel} at Phones Dukan. Prices are updated regularly.",
+    ],
+    [
+        'question' => "Is {$productNameSafe} PTA approved?",
+        'answer' => "Buy PTA-approved {$brandSafe} devices from Phones Dukan with verified stock and clear product details before purchase.",
+    ],
+    [
+        'question' => "Does Phones Dukan offer warranty on {$productNameSafe}?",
+        'answer' => "Yes. Eligible products purchased from Phones Dukan include official/brand warranty support as listed on the product page.",
+    ],
+    [
+        'question' => "Can I buy {$productNameSafe} online with delivery in Pakistan?",
+        'answer' => "Yes. You can order {$productNameSafe} online from Phones Dukan with nationwide delivery options and secure checkout.",
+    ],
+]);
+
+
 // Determine product availability with stricter checks
 $productAvailability = 'outofstock'; // Default to out of stock
 $availabilityText = 'Out of Stock';
@@ -114,7 +138,7 @@ require_once dirname(__DIR__, 3) . '/includes/header.php';
                 <?php echo htmlspecialchars($product['product_name']); ?>
             </a>
         </span>
-        <h1 class="product-heading">Buy <?php echo htmlspecialchars($product['product_name']); ?> Price in Pakistan</h1>
+        <h1 class="product-heading"><?php echo htmlspecialchars($product['product_name']); ?> Price in Pakistan</h1>
     </div>
 </div>
 <?php
@@ -231,7 +255,7 @@ $renderedSpecifications = ProductContentHelper::renderSpecifications(
 
             <!-- Product Summary -->
             <div class="product-summary" data-availability="<?php echo htmlspecialchars($productAvailability); ?>">
-                <h2 class="product-title"><?php echo htmlspecialchars($product['product_name']); ?></h2>
+                <p class="product-title"><?php echo htmlspecialchars($product['product_name']); ?></p>
                 
                 <!-- Star Rating Section -->
                 <div class="rating-section" onclick="scrollToReviews()">

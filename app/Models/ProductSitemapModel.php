@@ -17,7 +17,8 @@ class ProductSitemapModel {
             SELECT 
                 p.product_id,
                 p.product_name,
-                p.product_slug, 
+                p.product_slug,
+                p.updated_at,
                 c.slug AS category_slug, 
                 b.slug AS brand_slug,
                 sc.slug AS subcategory_slug
@@ -26,6 +27,7 @@ class ProductSitemapModel {
             LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             INNER JOIN brands b ON p.brand_id = b.brand_id
             WHERE p.product_status = 1
+            ORDER BY p.updated_at DESC
         ";
         
         $stmt = $this->db->prepare($query);
