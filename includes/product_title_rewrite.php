@@ -294,6 +294,29 @@ if (!function_exists('buildProfessionalTitle')) {
     }
 }
 
+if (!function_exists('enrichProductTitleFromContext')) {
+    /**
+     * Expand a short product name into Amazon/Daraz-style title.
+     * Does not change slug — call this after slug is already decided.
+     *
+     * @param array<string,mixed> $productData Must include product_name; ideally short_description / product_description
+     */
+    function enrichProductTitleFromContext(array &$productData, string $brandName = '', string $categoryName = ''): void
+    {
+        $row = [
+            'product_name' => (string) ($productData['product_name'] ?? ''),
+            'brand_name' => $brandName,
+            'category_name' => $categoryName,
+            'short_description' => (string) ($productData['short_description'] ?? ''),
+            'product_description' => (string) ($productData['product_description'] ?? ''),
+        ];
+        $newTitle = buildProfessionalTitle($row);
+        if ($newTitle !== '') {
+            $productData['product_name'] = $newTitle;
+        }
+    }
+}
+
 if (!function_exists('runProductTitleRewrite')) {
     /**
      * @return array{changed:int,skipped:int,total:int,samples:list<array{id:int,old:string,new:string}>}

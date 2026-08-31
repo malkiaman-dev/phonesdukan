@@ -4,6 +4,7 @@ error_reporting(E_ALL);
 
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/functions.php';
+require_once dirname(__DIR__, 2) . '/includes/product_title_rewrite.php';
 require_once dirname(__DIR__, 2) . '/app/Models/AddProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/CatalogModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
@@ -107,6 +108,13 @@ class ProductController
                 $brandStmt = $this->db->prepare('SELECT brand_name, slug FROM brands WHERE brand_id = ?');
                 $brandStmt->execute([$productData['brand_id']]);
                 $brandRow = $brandStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+                // Auto-expand short name into Amazon/Daraz-style title (slug stays as entered).
+                enrichProductTitleFromContext(
+                    $productData,
+                    (string) ($brandRow['brand_name'] ?? ''),
+                    (string) ($catRow['category_name'] ?? '')
+                );
 
                 $subSlug = null;
                 if ($subcategoryId) {

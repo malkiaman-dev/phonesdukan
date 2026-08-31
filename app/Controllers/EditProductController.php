@@ -4,6 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/includes/functions.php';
+require_once dirname(__DIR__, 2) . '/includes/product_title_rewrite.php';
 require_once dirname(__DIR__, 2) . '/app/Models/EditProductModel.php';
 require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
 require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
@@ -79,6 +80,29 @@ class ProductController
         try {
             if (empty($data['product_sku'])) {
                 $data['product_sku'] = null;
+            }
+
+            // Auto-expand title from brand + short description (keeps slug unchanged).
+            try {
+                $brandName = '';
+                $categoryName = '';
+                $dbConn = (new Database())->getConnection();
+                if (!empty($data['brand_id'])) {
+                    $bs = $dbConn->prepare('SELECT brand_name FROM brands WHERE brand_id = ?');
+                    $bs->execute([(int) $data['brand_id']]);
+                    $brandName = (string) ($bs->fetchColumn() ?: '');
+                }
+                if (!empty($data['category_id'])) {
+                    $cs = $dbConn->prepare('SELECT category_name FROM categories WHERE category_id = ?');
+                    $cs->execute([(int) $data['category_id']]);
+                    $categoryName = (string) ($cs->fetchColumn() ?: '');
+                }
+                enrichProductTitleFromContext($data, $brandName, $categoryName);
+                if (empty($seoData['seo_title'])) {
+                    $seoData['seo_title'] = $data['product_name'];
+                }
+            } catch (Throwable $eTitle) {
+                // Keep posted title if enrichment fails
             }
         
             $this->model->updateProduct($id, $data);

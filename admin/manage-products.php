@@ -524,13 +524,24 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
         }
 
         .prd-name {
-            font-weight: 900;
+            font-weight: 400;
             color: var(--black);
-            max-width: 320px;
+            max-width: 440px;
+            min-width: 220px;
+            line-height: 1.45;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .prd-table tbody td.prd-name {
+            padding-top: 14px;
+            padding-bottom: 14px;
+            vertical-align: top;
         }
 
         .prd-price {
