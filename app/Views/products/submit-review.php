@@ -48,7 +48,7 @@ if ($wasSubmitted) {
     ];
 
     // Insert review into database
-    if ($reviewModel->addReview($reviewData)) {
+    if ($product_id && $reviewContent !== '' && $authorName !== '' && $reviewModel->addReview($reviewData)) {
         $_SESSION['review'] = [
             'author' => $authorName,
             'content' => $reviewContent,

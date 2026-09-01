@@ -14,7 +14,8 @@ $userName = $isLoggedIn && !empty($_SESSION['user_name']) && $_SESSION['user_nam
     : 'Guest';
 $userEmail = !empty($_SESSION['email']) ? (string) $_SESSION['email'] : '';
 $returnUrl = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '/';
-$submitAction = function_exists('url') ? url('submit-review') : '/submit-review';
+// Always use trailing slash so live trailing-slash rules never 301 a POST into a GET.
+$submitAction = function_exists('url') ? rtrim(url('submit-review'), '/') . '/' : '/submit-review/';
 ?>
 
 <div class="pd-review-form">

@@ -18,6 +18,9 @@
 
     # Force trailing slash on clean URLs — production only, relative redirect so no domain hardcoded
     # Guard: skip localhost / staging, skip real files, skip URLs with extensions, skip admin/ajax
+    # Also skip non-GET (POST/PUT/PATCH) — a 301 would convert POST→GET and drop form data
+    # (this broke review submit and can break other forms).
+    RewriteCond %{REQUEST_METHOD} ^GET$ [NC]
     RewriteCond %{HTTP_HOST} ^(?:www\.)?phonesdukan\.com$ [NC]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_URI} !/$

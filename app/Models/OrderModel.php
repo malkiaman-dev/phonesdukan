@@ -275,7 +275,7 @@ class OrderModel {
         $body .= "<p style='margin:0 0 20px 0;font-size:13px;color:#777777;font-family:Arial,sans-serif;'>Your feedback helps us serve you better.</p>";
         $body .= "<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='margin:0 auto;'>";
         $body .= "<tr><td style='background:#f7d117;border-radius:6px;'>";
-        $body .= "<a href='https://phonesdukan.com/submit-review' style='display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#111111;text-decoration:none;font-family:Arial,sans-serif;'>Leave a Review</a>";
+        $body .= "<a href='https://www.phonesdukan.com/submit-review/' style='display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#111111;text-decoration:none;font-family:Arial,sans-serif;'>Leave a Review</a>";
         $body .= "</td></tr></table>";
         $body .= "</td></tr></table>";
 
@@ -291,7 +291,7 @@ class OrderModel {
             $mail->addAddress($user_email);
             $mail->Subject = "Your Order #$order_id is Complete - Phones Dukan";
             $mail->Body    = emailShell($body);
-            $mail->AltBody = "Hi $customer_name, your Phones Dukan order #$order_id has been completed.\n\nWe'd love your feedback: https://phonesdukan.com/submit-review\n\nThank you for shopping with us!";
+            $mail->AltBody = "Hi $customer_name, your Phones Dukan order #$order_id has been completed.\n\nWe'd love your feedback: https://www.phonesdukan.com/submit-review/\n\nThank you for shopping with us!";
             $mail->send();
             error_log("Order completion email sent to $user_email for Order ID: $order_id");
         } catch (Exception $e) {
