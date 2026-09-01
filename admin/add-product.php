@@ -171,9 +171,10 @@ select.vb-input { cursor:pointer; }
 }
 .seo-field-hint { display: none !important; }
 /* SEO field header: label LEFT, buttons RIGHT on same row */
-.ap-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-.ap-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; flex-shrink: 0; }
-.ap-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; }
+.ap-seo-field-hdr { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; max-width: 100%; }
+.ap-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; flex: 1 1 auto; min-width: 0; }
+.ap-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; flex: 0 1 auto; max-width: 100%; }
+.admin-page .form-group .ai-field-relative { width: 100%; max-width: 100%; min-width: 0; }
 .seo-fill-all-btn {
     background: #facc15;
     color: #111;
@@ -496,7 +497,7 @@ select.vb-input { cursor:pointer; }
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group full-width">
                     <div class="ap-seo-field-hdr">
                         <label for="focus_keyword">Focus Keyword <?= adminTooltipIcon('Primary keyword for ranking. Use: "brand model price in pakistan"') ?></label>
                         <div class="ap-seo-btn-row">
@@ -511,7 +512,7 @@ select.vb-input { cursor:pointer; }
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group full-width">
                     <div class="ap-seo-field-hdr">
                         <label for="secondary_keywords">Tags <?= adminTooltipIcon('Comma-separated tags for search visibility and discoverability.') ?></label>
                         <div class="ap-seo-btn-row">

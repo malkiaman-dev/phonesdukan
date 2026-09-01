@@ -11,9 +11,9 @@ body {
     overflow-x: hidden;
 }
 
-/* Keep main content clear of the fixed admin sidebar */
+/* Keep main content clear of the fixed admin sidebar (+ gutter) */
 body {
-    padding-left: var(--ad-sidebar-w, 248px) !important;
+    padding-left: calc(var(--ad-sidebar-w, 248px) + var(--ad-content-gutter, 32px)) !important;
     padding-top: var(--ad-topbar-h, 56px) !important;
 }
 
@@ -22,7 +22,7 @@ body {
     width: 100%;
     max-width: 1480px;
     margin: 0 auto;
-    padding: 24px 24px 32px;
+    padding: 24px 28px 32px;
     background: #f8fafc;
     overflow: visible;
     overflow-x: hidden;

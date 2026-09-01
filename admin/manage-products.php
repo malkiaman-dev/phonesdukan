@@ -441,7 +441,8 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
         .prd-table-wrap {
             background: var(--white);
             border-radius: 22px;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             border: 1px solid var(--border);
             box-shadow: 0 12px 30px rgba(17, 17, 17, 0.06);
         }

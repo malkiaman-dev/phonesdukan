@@ -25,15 +25,9 @@ class ReviewModel {
             // Ensure the rating value is valid (1-5)
             $rating = isset($data['rating']) && $data['rating'] >= 1 && $data['rating'] <= 5 ? $data['rating'] : 1;
     
-            // Log the rating before proceeding
-            error_log("Rating before insert: " . $rating);
-    
-            $sql = "INSERT INTO reviews (product_id, user_id, is_guest, author, email, content, rating, created_at) 
-                    VALUES (:product_id, :user_id, :is_guest, :author, :email, :content, :rating, NOW())";
+            $sql = "INSERT INTO reviews (product_id, user_id, is_guest, author, email, content, rating, status, created_at) 
+                    VALUES (:product_id, :user_id, :is_guest, :author, :email, :content, :rating, 'approved', NOW())";
             $stmt = $this->db->prepare($sql);
-    
-            // Log all data being passed to the query
-            error_log("Data being inserted: " . print_r($data, true));
     
             // Bind parameters
             $stmt->bindParam(":product_id", $data['product_id'], PDO::PARAM_INT);
@@ -42,12 +36,9 @@ class ReviewModel {
             $stmt->bindParam(":author", $data['author'], PDO::PARAM_STR);
             $stmt->bindParam(":email", $data['email'], PDO::PARAM_STR);
             $stmt->bindParam(":content", $data['content'], PDO::PARAM_STR);
-            $stmt->bindParam(":rating", $rating, PDO::PARAM_INT);  // Bind rating
-            
-            // Log SQL query before execution
-            error_log("SQL Query: " . $sql);
+            $stmt->bindParam(":rating", $rating, PDO::PARAM_INT);
     
-            return $stmt->execute();  // Execute the SQL query
+            return $stmt->execute();
         } catch (PDOException $e) {
             error_log("❌ Error adding review: " . $e->getMessage());
             return false;

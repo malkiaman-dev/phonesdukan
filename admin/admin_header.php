@@ -70,12 +70,13 @@ $adminPageCssMap = [
             height: 0 !important;
             display: none !important;
         }
-        /* Use longhands only — a later padding:0 shorthand must not wipe the sidebar offset */
+        /* Use longhands only — a later padding:0 shorthand must not wipe the sidebar offset.
+           Extra 32px creates a visible gutter between the fixed sidebar and page content. */
         html body {
             padding-top: 56px !important;
             padding-right: 0 !important;
             padding-bottom: 0 !important;
-            padding-left: 248px !important;
+            padding-left: calc(248px + 32px) !important;
             color: #111111;
         }
         .navbar {

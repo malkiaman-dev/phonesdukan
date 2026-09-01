@@ -320,6 +320,12 @@ h3.product-title,
   font-weight: var(--pd-font-weight-regular);
 }
 
+/* Single product page title stays bold for hierarchy */
+.product-summary .product-title,
+.p-page-container .product-title {
+  font-weight: var(--pd-font-weight-bold);
+}
+
 .product-price,
 .product-price span,
 .mobile-product-price,

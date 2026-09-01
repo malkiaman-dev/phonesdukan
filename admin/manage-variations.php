@@ -207,7 +207,7 @@ include __DIR__ . '/admin_sidebar.php';
 .color-row input[type=color] { width:46px; flex-shrink:0; }
 .color-row input[type=text] { flex:1; }
 /* Table */
-.vtable-wrap { border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+.vtable-wrap { border:1px solid var(--border); border-radius:14px; overflow-x:auto; overflow-y:hidden; }
 .vtable { width:100%; border-collapse:separate; border-spacing:0; }
 .vtable th,.vtable td {
     padding:13px 16px; border-bottom:1px solid var(--border);

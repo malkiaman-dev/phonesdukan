@@ -8,9 +8,9 @@ $wasSubmitted = ($_SERVER['REQUEST_METHOD'] === 'POST');
 if ($wasSubmitted) {
     // Sanitize and validate input
     $product_id = isset($_POST['product_id']) ? (int)$_POST['product_id'] : null;
-    $reviewContent = isset($_POST['content']) ? htmlspecialchars($_POST['content']) : '';
-    $authorName = isset($_POST['author']) ? htmlspecialchars($_POST['author']) : '';
-    $email = isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '';
+    $reviewContent = isset($_POST['content']) ? trim(strip_tags((string) $_POST['content'])) : '';
+    $authorName = isset($_POST['author']) ? trim(strip_tags((string) $_POST['author'])) : '';
+    $email = isset($_POST['email']) ? trim(strip_tags((string) $_POST['email'])) : '';
     $return_url = isset($_POST['return_url']) ? (string)$_POST['return_url'] : '/';
 
     // Keep redirects local-only and fallback safely.
@@ -83,8 +83,8 @@ if ($wasSubmitted) {
 
                 <h1 class="rs-heading">Thank you for your review!</h1>
                 <p class="rs-sub">
-                    Your review has been submitted and is pending approval.
-                    We appreciate your feedback.
+                    Your review is now live on the product page.
+                    Thanks for helping other shoppers.
                 </p>
 
                 <!-- Review preview -->

@@ -253,9 +253,11 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .msg-table tbody tr:hover { background: var(--light-yellow); }
         .msg-table td.message,
         .msg-table td.subject {
-            max-width: 320px;
-            white-space: normal;
-            word-break: break-word;
+            max-width: 260px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: normal;
         }
 
         .msg-pagebar {
@@ -406,7 +408,12 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php foreach ($messages as $message) { ?>
                                 <?php
                                 $decoded_message = html_entity_decode($message['message'] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
-                                $clean_message = str_replace(['<br />', '<br>'], ' ', $decoded_message);
+                                $clean_message = trim(preg_replace('/\s+/u', ' ', str_replace(['<br />', '<br>', "\r", "\n"], ' ', $decoded_message)));
+                                $words = preg_split('/\s+/u', $clean_message, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+                                $preview_message = implode(' ', array_slice($words, 0, 8));
+                                if (count($words) > 8) {
+                                    $preview_message .= '…';
+                                }
                                 $subjectText = trim((string)($message['subject'] ?? ''));
                                 $searchBlob = strtolower(
                                     ((string)($message['name'] ?? '')) . ' ' .
@@ -419,8 +426,8 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <td><?= htmlspecialchars($message['id']) ?></td>
                                     <td><?= htmlspecialchars($message['name']) ?></td>
                                     <td><?= htmlspecialchars($message['email']) ?></td>
-                                    <td class="subject"><?= htmlspecialchars($subjectText !== '' ? $subjectText : 'No Subject') ?></td>
-                                    <td class="message"><?= htmlspecialchars($clean_message) ?></td>
+                                    <td class="subject" title="<?= htmlspecialchars($subjectText !== '' ? $subjectText : 'No Subject') ?>"><?= htmlspecialchars($subjectText !== '' ? $subjectText : 'No Subject') ?></td>
+                                    <td class="message" title="<?= htmlspecialchars($clean_message) ?>"><?= htmlspecialchars($preview_message) ?></td>
                                     <td><?= date('d-M-Y H:i', strtotime($message['created_at'])) ?></td>
                                     <td>
                                         <button class="msg-btn view" data-message-id="<?= htmlspecialchars($message['id']) ?>">View</button>

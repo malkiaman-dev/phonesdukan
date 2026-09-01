@@ -355,6 +355,7 @@ span.admin-name {
     --ad-danger: #ef4444;
     --ad-info: #2563eb;
     --ad-sidebar-w: 248px;
+    --ad-content-gutter: 32px;
     --ad-topbar-h: 56px;
     --ad-navbar-bg: #ffffff;
     --ad-navbar-border: #e5e7eb;
@@ -390,7 +391,7 @@ html body {
     padding-top: var(--ad-topbar-h) !important;
     padding-right: 0 !important;
     padding-bottom: 0 !important;
-    padding-left: var(--ad-sidebar-w) !important;
+    padding-left: calc(var(--ad-sidebar-w) + var(--ad-content-gutter)) !important;
 }
 
 * {
@@ -402,6 +403,140 @@ html body {
     width: 0;
     height: 0;
     display: none;
+}
+
+/* Visible bottom scroller for wide admin tables / panels */
+.admin-hscroll,
+.table-wrap,
+.table-responsive,
+.table-body,
+.msg-table-wrap,
+.rev-table-wrap,
+.prd-table-wrap,
+.mu-table-wrap,
+.cus-table-wrap,
+.attrs-table-wrap,
+.ord-table-wrap,
+.rep-table-wrap,
+.ctable-wrap,
+.vtable-wrap {
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin !important;
+    scrollbar-color: #facc15 #f3f4f6 !important;
+    -ms-overflow-style: auto !important;
+}
+
+.admin-hscroll::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar,
+.table-body::-webkit-scrollbar,
+.msg-table-wrap::-webkit-scrollbar,
+.rev-table-wrap::-webkit-scrollbar,
+.prd-table-wrap::-webkit-scrollbar,
+.mu-table-wrap::-webkit-scrollbar,
+.cus-table-wrap::-webkit-scrollbar,
+.attrs-table-wrap::-webkit-scrollbar,
+.ord-table-wrap::-webkit-scrollbar,
+.rep-table-wrap::-webkit-scrollbar,
+.ctable-wrap::-webkit-scrollbar,
+.vtable-wrap::-webkit-scrollbar {
+    width: 10px !important;
+    height: 10px !important;
+    display: block !important;
+}
+
+.admin-hscroll::-webkit-scrollbar-track,
+.table-wrap::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track,
+.table-body::-webkit-scrollbar-track,
+.msg-table-wrap::-webkit-scrollbar-track,
+.rev-table-wrap::-webkit-scrollbar-track,
+.prd-table-wrap::-webkit-scrollbar-track,
+.mu-table-wrap::-webkit-scrollbar-track,
+.cus-table-wrap::-webkit-scrollbar-track,
+.attrs-table-wrap::-webkit-scrollbar-track,
+.ord-table-wrap::-webkit-scrollbar-track,
+.rep-table-wrap::-webkit-scrollbar-track,
+.ctable-wrap::-webkit-scrollbar-track,
+.vtable-wrap::-webkit-scrollbar-track {
+    background: #f3f4f6 !important;
+    border-radius: 999px;
+}
+
+.admin-hscroll::-webkit-scrollbar-thumb,
+.table-wrap::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb,
+.table-body::-webkit-scrollbar-thumb,
+.msg-table-wrap::-webkit-scrollbar-thumb,
+.rev-table-wrap::-webkit-scrollbar-thumb,
+.prd-table-wrap::-webkit-scrollbar-thumb,
+.mu-table-wrap::-webkit-scrollbar-thumb,
+.cus-table-wrap::-webkit-scrollbar-thumb,
+.attrs-table-wrap::-webkit-scrollbar-thumb,
+.ord-table-wrap::-webkit-scrollbar-thumb,
+.rep-table-wrap::-webkit-scrollbar-thumb,
+.ctable-wrap::-webkit-scrollbar-thumb,
+.vtable-wrap::-webkit-scrollbar-thumb {
+    background: #facc15 !important;
+    border-radius: 999px;
+    border: 2px solid #f3f4f6;
+}
+
+.admin-hscroll::-webkit-scrollbar-thumb:hover,
+.table-wrap::-webkit-scrollbar-thumb:hover,
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.table-body::-webkit-scrollbar-thumb:hover,
+.msg-table-wrap::-webkit-scrollbar-thumb:hover,
+.rev-table-wrap::-webkit-scrollbar-thumb:hover,
+.prd-table-wrap::-webkit-scrollbar-thumb:hover,
+.mu-table-wrap::-webkit-scrollbar-thumb:hover,
+.cus-table-wrap::-webkit-scrollbar-thumb:hover,
+.attrs-table-wrap::-webkit-scrollbar-thumb:hover,
+.ord-table-wrap::-webkit-scrollbar-thumb:hover,
+.rep-table-wrap::-webkit-scrollbar-thumb:hover,
+.ctable-wrap::-webkit-scrollbar-thumb:hover,
+.vtable-wrap::-webkit-scrollbar-thumb:hover {
+    background: #eab308 !important;
+}
+
+.admin-hscroll > table,
+.table-wrap > table,
+.table-responsive > table,
+.table-body > table,
+.msg-table-wrap > table,
+.rev-table-wrap > table,
+.prd-table-wrap > table,
+.mu-table-wrap > table,
+.cus-table-wrap > table,
+.attrs-table-wrap > table,
+.ord-table-wrap > table,
+.rep-table-wrap > table,
+.ctable-wrap > table,
+.vtable-wrap > table {
+    min-width: 760px;
+}
+
+@media (max-width: 768px) {
+    .admin-hscroll > table,
+    .table-wrap > table,
+    .table-responsive > table,
+    .table-body > table,
+    .msg-table-wrap > table,
+    .rev-table-wrap > table,
+    .prd-table-wrap > table,
+    .mu-table-wrap > table,
+    .cus-table-wrap > table,
+    .attrs-table-wrap > table,
+    .ord-table-wrap > table,
+    .rep-table-wrap > table,
+    .ctable-wrap > table,
+    .vtable-wrap > table {
+        min-width: 0;
+    }
 }
 
 .navbar {

@@ -617,9 +617,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const stars = document.querySelectorAll(".star-rating input[type='radio']");
-    const hiddenRating = document.getElementById("hidden-rating");
     stars.forEach(star => {
         star.addEventListener("change", function () {
+            // Radios alone are enough; keep for compatibility if hidden exists.
+            const hiddenRating = document.getElementById("hidden-rating");
             if (hiddenRating) hiddenRating.value = this.value;
         });
     });

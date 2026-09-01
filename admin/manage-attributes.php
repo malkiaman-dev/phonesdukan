@@ -400,7 +400,8 @@ include __DIR__ . '/admin_sidebar.php';
         .attrs-table-wrap {
             border: 1px solid var(--border);
             border-radius: 14px;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             background: #fff;
         }
 

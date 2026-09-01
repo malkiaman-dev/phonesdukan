@@ -948,14 +948,14 @@ if ($cartFormCondition): ?>
         </div>
         <div id="tab-reviews" class="custom-tab reviews" style="display: none;">
             <div class="reviews-section-wrapper">
+                <div class="review-display-box">
+                    <?php require_once __DIR__ . '/reviews_display.php'; ?>
+                </div>
                 <div class="review-form-box">
                     <?php
                     $product_id = $product['product_id'] ?? 0;
                     require_once __DIR__ . '/reviews_form.php';
                     ?>
-                </div>
-                <div class="review-display-box">
-                    <?php require_once __DIR__ . '/reviews_display.php'; ?>
                 </div>
             </div>
         </div>

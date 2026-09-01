@@ -300,7 +300,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-wrap {
         max-width: 1280px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 24px 28px 36px;
         background: var(--bg);
         overflow: visible !important;
     }
@@ -417,10 +417,24 @@ select.vb-input-ep { cursor:pointer; }
 
     .ep-field {
         margin-bottom: 0;
+        min-width: 0;
+        max-width: 100%;
     }
 
     .ep-field.full {
         grid-column: 1 / -1;
+    }
+
+    .ep-field .ai-field-relative,
+    .ep-field input[type="text"],
+    .ep-field input[type="number"],
+    .ep-field input[type="date"],
+    .ep-field select,
+    .ep-field textarea {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 
     .ep-field label {
@@ -984,9 +998,9 @@ select.vb-input-ep { cursor:pointer; }
     }
     .ep-seo-field-hint { display: none; }
     /* SEO field header: label LEFT, buttons RIGHT — on the same row directly above input */
-    .ep-seo-field-hdr { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-    .ep-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; font-size: .9rem; color: var(--black); flex-shrink: 0; }
-    .ep-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; }
+    .ep-seo-field-hdr { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; max-width: 100%; }
+    .ep-seo-field-hdr > label { margin-bottom: 0 !important; font-weight: 700; font-size: .9rem; color: var(--black); flex: 1 1 auto; min-width: 0; }
+    .ep-seo-btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 0; flex: 0 1 auto; max-width: 100%; }
     /* Image field header: label left, AI button right */
     .ep-img-field-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
     .ep-img-field-header label { margin-bottom: 0 !important; font-weight: 700; font-size: .9rem; color: var(--black); }
@@ -1290,7 +1304,7 @@ select.vb-input-ep { cursor:pointer; }
                     </div>
                 </div>
 
-                <div class="ep-field">
+                <div class="ep-field full">
                     <div class="ep-seo-field-hdr">
                         <label for="ep_focus_keyword">Focus Keyword <?= adminTooltipIcon('Primary keyword for ranking. Use: "brand model price in pakistan"') ?></label>
                         <div class="ep-seo-btn-row">
@@ -1306,7 +1320,7 @@ select.vb-input-ep { cursor:pointer; }
                     </div>
                 </div>
 
-                <div class="ep-field">
+                <div class="ep-field full">
                     <div class="ep-seo-field-hdr">
                         <label for="ep_secondary_keywords">Tags <?= adminTooltipIcon('Comma-separated tags for search visibility and discoverability.') ?></label>
                         <div class="ep-seo-btn-row">

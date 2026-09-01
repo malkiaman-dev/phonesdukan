@@ -232,7 +232,8 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             border: 1px solid var(--brand-border);
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(17, 17, 17, 0.06);
-            overflow: visible;
+            overflow-x: auto;
+            overflow-y: hidden;
             width: 100%;
         }
 
