@@ -1,12 +1,171 @@
+# ── Permanently removed resources (410 Gone) ─────────────────────────────
+# 410 tells Google "permanently gone" — clears GSC errors without manual action.
+# mod_alias runs before mod_rewrite so these take precedence over PHP routing.
+<IfModule mod_alias.c>
+    Redirect 410 /news-sitemap.xml
+    Redirect 410 /locations.kml
+</IfModule>
+
+# ── URL Routing ──────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /phonesdukan/
+    Options -MultiViews
+    DirectoryIndex index.php index.html
 
-    # Allow existing files and directories
+    # Force non-www to www — production only
+    RewriteCond %{HTTP_HOST} ^phonesdukan\.com$ [NC]
+    RewriteRule ^ https://www.phonesdukan.com%{REQUEST_URI} [L,R=301,NE]
+
+    # Force trailing slash on clean URLs — production only, relative redirect so no domain hardcoded
+    # Guard: skip localhost / staging, skip real files, skip URLs with extensions, skip admin/ajax
+    # Also skip non-GET (POST/PUT/PATCH) — a 301 would convert POST→GET and drop form data
+    # (this broke review submit and can break other forms).
+    RewriteCond %{REQUEST_METHOD} ^GET$ [NC]
+    RewriteCond %{HTTP_HOST} ^(?:www\.)?phonesdukan\.com$ [NC]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !/$
+    RewriteCond %{REQUEST_URI} !\.(xml|kml|txt|html|php|css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$
+    RewriteCond %{REQUEST_URI} !^/admin
+    RewriteCond %{REQUEST_URI} !^/ajax
+    RewriteCond %{REQUEST_URI} !^/wholesale-verify
+    RewriteCond %{REQUEST_URI} !^/bulk-inquiry
+    RewriteRule ^(.+)$ /$1/ [R=301,L,NE]
+
+    # Fix accidental admin-relative asset URLs like /admin/public/assets/...
+    RewriteRule ^admin/public/(.*)$ public/$1 [L,NC]
+
+    # Legacy WordPress uploads: DB may say /public/uploads/... while files still
+    # live under /wp-content/uploads/... — serve them without moving/deleting files.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^public/uploads/(.*)$ wp-content/uploads/$1 [L]
+
+    # Legacy / root app-icon.png → canonical assets path (with fallback)
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/app-icon.png -f
+    RewriteRule ^app-icon\.png$ public/assets/images/app-icon.png [L,NC]
+    RewriteCond %{DOCUMENT_ROOT}/app-icon.png -f
+    RewriteRule ^app-icon\.png$ app-icon.png [L,NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/Phones_dukan_favicon.png -f
+    RewriteRule ^app-icon\.png$ public/assets/images/Phones_dukan_favicon.png [L,NC]
+
+    # Browsers often request /favicon.ico directly
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/app-icon.png -f
+    RewriteRule ^favicon\.ico$ public/assets/images/app-icon.png [L,NC]
+    RewriteCond %{DOCUMENT_ROOT}/public/assets/images/Phones_dukan_favicon.png -f
+    RewriteRule ^favicon\.ico$ public/assets/images/Phones_dukan_favicon.png [L,NC]
+
+    # Allow existing files and directories (except APK — always resolve latest via PHP)
+    RewriteCond %{REQUEST_URI} !/public/downloads/phonesdukan-app\.apk$ [NC]
+    RewriteCond %{REQUEST_URI} !^/downloads/phonesdukan-app\.apk$ [NC]
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
+    # Serve the Flutter APK through the PHP resolver (never a stale static copy)
+    RewriteRule ^public/downloads/phonesdukan-app\.apk$ public/download-app.php [L,QSA]
+    RewriteRule ^downloads/phonesdukan-app\.apk$ public/download-app.php [L,QSA]
+    # Legacy Java APK filename → Flutter download
+    RewriteRule ^public/downloads/phonesdukan\.apk$ public/download-app.php [L,QSA]
+    RewriteRule ^downloads/phonesdukan\.apk$ public/download-app.php [L,QSA]
+
     # Route all other requests through index.php
     RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+# ── Gzip / Brotli Compression ─────────────────────────────────────────────
+# Reduces HTML/CSS/JS payload by 60-80%, critical for Pakistan 4G connections
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE font/woff
+    AddOutputFilterByType DEFLATE font/woff2
+    AddOutputFilterByType DEFLATE application/font-woff
+    AddOutputFilterByType DEFLATE application/font-woff2
+
+    # Prevent compression of already-compressed formats
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp|avif|ico|zip|gz|bz2)$ no-gzip dont-vary
+</IfModule>
+
+# ── Browser Caching (Cache-Control) ──────────────────────────────────────
+# Versioned assets (emitJs/emitCss append ?v=filemtime) are safe to cache
+# forever with immutable; uploaded images use long-but-not-immutable cache.
+<IfModule mod_headers.c>
+    # CSS & JS — versioned via ?v=filemtime, safe to cache immutably
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+        Header unset ETag
+    </FilesMatch>
+
+    # Fonts — never change once deployed
+    <FilesMatch "\.(woff|woff2|ttf|eot|otf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Images — long cache, no immutable (product images can be updated)
+    <FilesMatch "\.(webp|avif|jpg|jpeg|png|gif|svg|ico)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+
+    # APK — never cache; always fetch the latest build
+    <FilesMatch "\.apk$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # HTML — dynamic content; allow private revalidation in the native app (bfcache-friendly)
+    SetEnvIf User-Agent "PhonesDukanApp" pd_app_request=1
+    SetEnvIf HTTP_X_PhonesDukan_App "1" pd_app_request=1
+    <FilesMatch "\.php$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate" env=!pd_app_request
+        Header set Cache-Control "private, no-cache, must-revalidate, max-age=0" env=pd_app_request
+    </FilesMatch>
+
+    # ── Security headers ──────────────────────────────────────────────────
+    # Prevent MIME-type sniffing (prevents drive-by downloads)
+    Header set X-Content-Type-Options "nosniff"
+    # Prevent clickjacking via iframes from other sites
+    Header set X-Frame-Options "SAMEORIGIN"
+    # Enforce browser XSS filter (legacy browsers)
+    Header set X-XSS-Protection "1; mode=block"
+    # Limit referrer info leaked to third parties
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    # Only allow the site to be embedded by itself
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ── ETags: disable server-generated ETags for static files ───────────────
+# (We use Cache-Control + versioned URLs; ETags add unnecessary header weight)
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|woff|woff2|webp|avif|jpg|jpeg|png|gif|svg|ico)$">
+        Header unset ETag
+    </FilesMatch>
+</IfModule>
+FileETag None
+
+# ── Expires headers (fallback for servers without mod_headers) ────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault                          "access plus 1 month"
+    ExpiresByType text/html                 "access plus 0 seconds"
+    ExpiresByType text/css                  "access plus 1 year"
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType image/webp                "access plus 1 year"
+    ExpiresByType image/avif                "access plus 1 year"
+    ExpiresByType image/jpeg                "access plus 1 year"
+    ExpiresByType image/png                 "access plus 1 year"
+    ExpiresByType image/gif                 "access plus 1 year"
+    ExpiresByType image/svg+xml             "access plus 1 year"
+    ExpiresByType image/x-icon              "access plus 1 year"
+    ExpiresByType font/woff                 "access plus 1 year"
+    ExpiresByType font/woff2                "access plus 1 year"
+    ExpiresByType application/font-woff     "access plus 1 year"
+    ExpiresByType application/font-woff2    "access plus 1 year"
 </IfModule>

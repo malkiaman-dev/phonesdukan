@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/../../database/db.php'; // Ensure correct path to db.php
+require_once __DIR__ . '/../../database/db.php';
+require_once __DIR__ . '/../config/mail.php';
 
 class User {
     private $conn;
@@ -55,22 +56,24 @@ class User {
         }
     
         // Register new user
-        $query = "INSERT INTO users (full_name, email, password_hash, phone, user_role, otp_code, otp_expires_at, is_verified, created_at) 
-                  VALUES (:full_name, :email, :password_hash, :phone, 'user', :otp_code, :otp_expires_at, 0, NOW())";
-    
+        $salt = $this->generateSalt();
+        $query = "INSERT INTO users (full_name, email, password_hash, phone, user_role, salt, otp_code, otp_expires_at, is_verified, created_at)
+                  VALUES (:full_name, :email, :password_hash, :phone, 'customer', :salt, :otp_code, :otp_expires_at, 0, NOW())";
+
         $stmt = $this->conn->prepare($query);
-    
+
         // Sanitize inputs
         $full_name = htmlspecialchars(strip_tags($full_name));
         $email = htmlspecialchars(strip_tags($email));
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $phone = htmlspecialchars(strip_tags($phone));
-    
+
         // Bind parameters
         $stmt->bindParam(':full_name', $full_name);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password_hash', $password_hash);
         $stmt->bindParam(':phone', $phone);
+        $stmt->bindParam(':salt', $salt);
         $stmt->bindParam(':otp_code', $otp);
         $stmt->bindParam(':otp_expires_at', $otp_expires_at);
     
@@ -93,53 +96,41 @@ class User {
 
     // Send OTP email to the user
     public function sendOTP($email, $otp) {
-        // SMTP settings for Hostinger (or another provider)
-        $smtpHost = 'smtp.hostinger.com';
-        $smtpPort = 465;  // Port for SSL
-        $smtpUser = 'info@phonesdukan.com';  // Your email address
-        $smtpPass = '@Azmeryal@123#';  // Your email password (or app-specific password)
-    
-        // Create a connection to the SMTP server using SSL
-        $smtpConnection = fsockopen('ssl://' . $smtpHost, $smtpPort, $errno, $errstr, 30);
-        if (!$smtpConnection) {
-            // Log the error if the connection fails
-            error_log("Error connecting to SMTP server: $errstr ($errno)");
+        $body  = "<tr><td style='padding:36px 40px;'>";
+        $body .= "<h2 style='margin:0 0 12px 0;font-size:22px;color:#111111;font-family:Arial,sans-serif;'>Verify Your Email Address</h2>";
+        $body .= "<p style='margin:0 0 24px 0;font-size:15px;color:#555555;line-height:1.7;font-family:Arial,sans-serif;'>";
+        $body .= "Thanks for signing up with <strong style='color:#111111;'>Phones Dukan</strong>. Enter the code below to verify your account. This code expires in <strong style='color:#111111;'>1 minute</strong>.";
+        $body .= "</p>";
+
+        // OTP box
+        $body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:24px;'>";
+        $body .= "<tr><td style='background:#f8f8f8;border:2px dashed #f7d117;border-radius:8px;padding:32px 20px;text-align:center;'>";
+        $body .= "<p style='margin:0 0 12px 0;font-size:11px;color:#999999;letter-spacing:3px;text-transform:uppercase;font-family:Arial,sans-serif;'>Verification Code</p>";
+        $body .= "<div style='font-size:48px;font-weight:700;letter-spacing:16px;color:#111111;font-family:Courier New,Courier,monospace;line-height:1;padding-left:16px;'>$otp</div>";
+        $body .= "<p style='margin:14px 0 0 0;font-size:12px;color:#cc0000;font-weight:600;font-family:Arial,sans-serif;'>Expires in 1 minute</p>";
+        $body .= "</td></tr></table>";
+
+        // Notice
+        $body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+        $body .= "<tr><td style='background:#fffbf0;border-left:4px solid #f7d117;padding:14px 18px;border-radius:0 6px 6px 0;'>";
+        $body .= "<p style='margin:0;font-size:13px;color:#777777;font-family:Arial,sans-serif;line-height:1.6;'>";
+        $body .= "If you did not create a Phones Dukan account, you can safely ignore this email. Never share this code with anyone.";
+        $body .= "</p></td></tr></table>";
+        $body .= "</td></tr>";
+
+        try {
+            $mail = createMailer();
+            $mail->addAddress($email);
+            $mail->Subject = 'Verify Your Email - Phones Dukan';
+            $mail->Body    = emailShell($body);
+            $mail->AltBody = "Your Phones Dukan verification code is: {$otp}\n\nThis code expires in 1 minute.\nDo not share this code with anyone.\n\nIf you did not sign up, please ignore this email.";
+            $mail->send();
+            error_log("OTP email sent successfully to: $email");
+            return true;
+        } catch (\Exception $e) {
+            error_log("OTP email failed for $email: " . $e->getMessage());
             return false;
         }
-        
-        // Send HELO command to SMTP server
-        $this->sendCommand($smtpConnection, "HELO " . $smtpHost);
-        
-        // Authentication
-        $this->sendCommand($smtpConnection, "AUTH LOGIN");
-        $this->sendCommand($smtpConnection, base64_encode($smtpUser));  // Send encoded username
-        $this->sendCommand($smtpConnection, base64_encode($smtpPass));  // Send encoded password
-        
-        // Send email headers and message
-        $subject = "Your OTP Code";
-        $message = "Your OTP code is: $otp. It will expire in 1 minute.";
-        $headers = "From: no-reply@phonesdukan.com\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";  // Ensure proper character encoding
-        $headers .= "Reply-To: no-reply@phonesdukan.com\r\n";  // Set the reply-to header
-    
-        // Send MAIL FROM command
-        $this->sendCommand($smtpConnection, "MAIL FROM:<$smtpUser>");
-        // Send RCPT TO command (Recipient email)
-        $this->sendCommand($smtpConnection, "RCPT TO:<$email>");
-        // Send DATA command to start the email content
-        $this->sendCommand($smtpConnection, "DATA");
-        
-        // Send the email headers and message body
-        $emailContent = "Subject: $subject\r\n" . $headers . "\r\n\r\n$message\r\n.";
-        $this->sendCommand($smtpConnection, $emailContent);
-    
-        // Close connection
-        fclose($smtpConnection);
-    
-        // Log success message
-        error_log("OTP email sent successfully to: $email");
-    
-        return true;  // Indicate success
     }
     
     public function updateAndSendOTP($email, $otp) {
@@ -177,17 +168,6 @@ class User {
     
     
 
-    // Helper function to send commands to SMTP server and read responses
-    private function sendCommand($connection, $command) {
-        // Write the command to the SMTP server
-        fputs($connection, $command . "\r\n");
-        // Read the response from the server
-        $response = fgets($connection, 512);
-        // Log the server's response for debugging purposes
-        error_log("SMTP Response: $response");
-        return $response;
-    }
-    
     public function verifyOTP($email, $otp) {
         try {
             // Start a transaction to ensure all updates are executed together
@@ -325,57 +305,47 @@ class User {
     }
     
 
-        // Send Password Reset Email to the user
-public function sendPasswordResetEmail($email, $reset_token) {
-    // SMTP settings for Hostinger (or another provider)
-    $smtpHost = 'smtp.hostinger.com';
-    $smtpPort = 465;  // Port for SSL
-    $smtpUser = 'info@phonesdukan.com';  // Your email address
-    $smtpPass = '@Azmeryal@123#';  // Your email password (or app-specific password)
+    public function sendPasswordResetEmail($email, $reset_token) {
+        $resetLink = 'https://phonesdukan.com/reset-password?token=' . urlencode($reset_token);
 
-    // Create a connection to the SMTP server using SSL
-    $smtpConnection = fsockopen('ssl://' . $smtpHost, $smtpPort, $errno, $errstr, 30);
-    if (!$smtpConnection) {
-        // Log the error if the connection fails
-        error_log("Error connecting to SMTP server: $errstr ($errno)");
-        return false;
+        $body  = "<tr><td style='padding:36px 40px;'>";
+        $body .= "<h2 style='margin:0 0 12px 0;font-size:22px;color:#111111;font-family:Arial,sans-serif;'>Reset Your Password</h2>";
+        $body .= "<p style='margin:0 0 28px 0;font-size:15px;color:#555555;line-height:1.7;font-family:Arial,sans-serif;'>";
+        $body .= "We received a request to reset your <strong style='color:#111111;'>Phones Dukan</strong> account password. Click the button below to set a new password. This link expires in <strong style='color:#111111;'>5 minutes</strong>.";
+        $body .= "</p>";
+
+        // CTA button
+        $body .= "<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='margin:0 0 28px 0;'>";
+        $body .= "<tr><td style='background:#f7d117;border-radius:6px;'>";
+        $body .= "<a href='$resetLink' style='display:inline-block;padding:14px 36px;font-size:15px;font-weight:700;color:#111111;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:0.5px;'>";
+        $body .= "Reset My Password &rarr;</a></td></tr></table>";
+
+        // Fallback link
+        $body .= "<p style='margin:0 0 4px 0;font-size:12px;color:#999999;font-family:Arial,sans-serif;'>Button not working? Copy and paste this link into your browser:</p>";
+        $body .= "<p style='margin:0 0 28px 0;font-size:12px;color:#888888;font-family:Arial,sans-serif;word-break:break-all;'>$resetLink</p>";
+
+        // Security notice
+        $body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+        $body .= "<tr><td style='background:#fffbf0;border-left:4px solid #f7d117;padding:14px 18px;border-radius:0 6px 6px 0;'>";
+        $body .= "<p style='margin:0;font-size:13px;color:#777777;font-family:Arial,sans-serif;line-height:1.6;'>";
+        $body .= "<strong style='color:#111111;'>Security Notice:</strong> Phones Dukan will never ask for your password via email. If you did not request this reset, please ignore this email.";
+        $body .= "</p></td></tr></table>";
+        $body .= "</td></tr>";
+
+        try {
+            $mail = createMailer();
+            $mail->addAddress($email);
+            $mail->Subject = 'Password Reset Request - Phones Dukan';
+            $mail->Body    = emailShell($body);
+            $mail->AltBody = "Reset your Phones Dukan password by visiting:\n\n{$resetLink}\n\nThis link expires in 5 minutes.\n\nIf you did not request this, please ignore this email.";
+            $mail->send();
+            error_log("Password reset email sent to: $email");
+            return true;
+        } catch (\Exception $e) {
+            error_log("Password reset email failed for $email: " . $e->getMessage());
+            return false;
+        }
     }
-
-    // Send HELO command to SMTP server
-    $this->sendCommand($smtpConnection, "HELO " . $smtpHost);
-
-    // Authentication
-    $this->sendCommand($smtpConnection, "AUTH LOGIN");
-    $this->sendCommand($smtpConnection, base64_encode($smtpUser));  // Send encoded username
-    $this->sendCommand($smtpConnection, base64_encode($smtpPass));  // Send encoded password
-
-    // Send email headers and message
-    $subject = "Password Reset Request";
-    $message = "Click the link below to reset your password. The link will expire in 5 minutes.\n\n";
-    $message .= "Reset Link: /reset-password?token=$reset_token";
-    $headers = "From: no-reply@phonesdukan.com\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";  // Ensure proper character encoding
-    $headers .= "Reply-To: no-reply@phonesdukan.com\r\n";  // Set the reply-to header
-
-    // Send MAIL FROM command
-    $this->sendCommand($smtpConnection, "MAIL FROM:<$smtpUser>");
-    // Send RCPT TO command (Recipient email)
-    $this->sendCommand($smtpConnection, "RCPT TO:<$email>");
-    // Send DATA command to start the email content
-    $this->sendCommand($smtpConnection, "DATA");
-
-    // Send the email headers and message body
-    $emailContent = "Subject: $subject\r\n" . $headers . "\r\n\r\n$message\r\n.";
-    $this->sendCommand($smtpConnection, $emailContent);
-
-    // Close connection
-    fclose($smtpConnection);
-
-    // Log success message
-    error_log("Password reset email sent successfully to: $email");
-
-    return true;  // Indicate success
-}
 
 }
 ?>

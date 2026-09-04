@@ -22,8 +22,8 @@ class ProductSitemapController {
         echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . PHP_EOL;
     
-        // Get the base domain of the site
-        $domain = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'];
+        // Always use the canonical www domain to prevent duplicate-content issues
+        $domain = 'https://www.phonesdukan.com';
     
         // Initialize the ProductSitemapModel with the DB connection
         try {
@@ -39,16 +39,20 @@ class ProductSitemapController {
             // Loop through the product slugs and generate the XML
             foreach ($product_slugs as $product) {
                 // Construct the product URL in the desired format
-                $product_url = $domain . '/' . $product['category_slug'] . '/' . $product['brand_slug'] . '/' . $product['product_slug'];
+                require_once dirname(__DIR__, 2) . '/includes/functions.php';
+                $product_url = rtrim($domain, '/') . buildProductPathFromRow($product) . '/';
     
                 // Fetch the product images
                 $images = $productSitemapModel->getProductImages($product['product_id']);
+                $lastmod = !empty($product['updated_at'])
+                    ? date('c', strtotime((string) $product['updated_at']))
+                    : date('c');
                 
                 echo '  <url>' . PHP_EOL;
                 echo '    <loc>' . htmlspecialchars($product_url) . '</loc>' . PHP_EOL;
-                echo '    <lastmod>' . date('c') . '</lastmod>' . PHP_EOL;
-                echo '    <changefreq>monthly</changefreq>' . PHP_EOL;
-                echo '    <priority>0.8</priority>' . PHP_EOL;
+                echo '    <lastmod>' . htmlspecialchars($lastmod) . '</lastmod>' . PHP_EOL;
+                echo '    <changefreq>weekly</changefreq>' . PHP_EOL;
+                echo '    <priority>0.9</priority>' . PHP_EOL;
     
                 // Loop through images and add image tags
                 foreach ($images as $image) {

@@ -1,7 +1,82 @@
+var withBase = window.pdWithBase || function (path) {
+    var localBasePath = String(window.__PD_BASE_PATH__ || "").replace(/\/+$/, "");
+    if (!path) return localBasePath + "/";
+    if (/^https?:\/\//i.test(path) || path.startsWith("//")) return path;
+    if (path.startsWith(localBasePath + "/")) return path;
+    if (path.startsWith("/")) return localBasePath + path;
+    return localBasePath + "/" + path;
+};
+
+function resolveGalleryMediaUrl(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path) || path.startsWith("//")) return path;
+    return withBase(path);
+}
+
+function playGalleryVideo(videoEl) {
+    if (!videoEl) return;
+    const playPromise = videoEl.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(function () {
+            // Browser may block autoplay until user interacts; controls remain available.
+        });
+    }
+}
+
+function updateMainMedia(thumb) {
+    const mainImage = document.getElementById("mainImage");
+    const videoContainer = document.getElementById("mainVideoContainer");
+    if (!mainImage || !videoContainer) return;
+
+    const mediaType = thumb.getAttribute("data-media-type") || "image";
+
+    document.querySelectorAll(".gallery-thumb").forEach(function (el) {
+        el.classList.remove("active");
+    });
+    thumb.classList.add("active");
+
+    if (mediaType === "video") {
+        const source = thumb.getAttribute("data-video-source") || "upload";
+        const embedUrl = thumb.getAttribute("data-embed-url") || "";
+        const videoUrl = resolveGalleryMediaUrl(thumb.getAttribute("data-video-url") || "");
+        const posterUrl = resolveGalleryMediaUrl(thumb.getAttribute("data-thumb-src") || "");
+        let html = "";
+
+        if (source === "youtube" || source === "tiktok" || source === "facebook") {
+            let iframeUrl = embedUrl;
+            if (source === "youtube") {
+                iframeUrl = embedUrl + (embedUrl.indexOf("?") >= 0 ? "&" : "?") + "autoplay=1";
+            }
+            html = '<iframe src="' + iframeUrl + '" title="Product video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>';
+        } else {
+            html = '<video controls playsinline preload="auto"'
+                + (posterUrl ? ' poster="' + posterUrl + '"' : "")
+                + ' src="' + videoUrl + '"></video>';
+        }
+
+        videoContainer.innerHTML = html;
+        videoContainer.style.display = "flex";
+        videoContainer.classList.add("is-active");
+        mainImage.style.display = "none";
+        mainImage.classList.add("is-hidden");
+
+        if (source !== "youtube" && source !== "tiktok" && source !== "facebook") {
+            playGalleryVideo(videoContainer.querySelector("video"));
+        }
+        return;
+    }
+
+    mainImage.src = thumb.src;
+    mainImage.alt = thumb.alt || "";
+    mainImage.style.display = "";
+    mainImage.classList.remove("is-hidden");
+    videoContainer.innerHTML = "";
+    videoContainer.style.display = "none";
+    videoContainer.classList.remove("is-active");
+}
+
 function updateMainImage(thumbnail) {
-    document.getElementById("mainImage").src = thumbnail.src;
-    document.querySelectorAll(".thumbnail").forEach(img => img.classList.remove("active"));
-    thumbnail.classList.add("active");
+    updateMainMedia(thumbnail);
 }
 
 function scrollThumbnails(direction) {
@@ -13,15 +88,6 @@ function scrollThumbnails(direction) {
         container.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
 }
-
-var withBase = window.pdWithBase || function (path) {
-    var localBasePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
-    if (!path) return localBasePath + '/';
-    if (/^https?:\/\//i.test(path) || path.startsWith('//')) return path;
-    if (path.startsWith(localBasePath + '/')) return path;
-    if (path.startsWith('/')) return localBasePath + path;
-    return localBasePath + '/' + path;
-};
 
 document.addEventListener("DOMContentLoaded", function () {
     const wrapper = document.querySelector(".image-wrapper");
@@ -49,12 +115,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const endX = e.changedTouches[0].clientX;
         const diffX = endX - startX;
         if (Math.abs(diffX) > 50) {
-            const thumbnails = Array.from(document.querySelectorAll(".thumbnail"));
-            const activeIndex = thumbnails.findIndex(img => img.classList.contains("active"));
+            const thumbnails = Array.from(document.querySelectorAll(".gallery-thumb"));
+            const activeIndex = thumbnails.findIndex(function (el) { return el.classList.contains("active"); });
             if (diffX < 0 && activeIndex < thumbnails.length - 1) {
-                updateMainImage(thumbnails[activeIndex + 1]);
+                updateMainMedia(thumbnails[activeIndex + 1]);
             } else if (diffX > 0 && activeIndex > 0) {
-                updateMainImage(thumbnails[activeIndex - 1]);
+                updateMainMedia(thumbnails[activeIndex - 1]);
             }
         }
     });
@@ -120,8 +186,11 @@ document.addEventListener("DOMContentLoaded", function () {
         element.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Redirecting to wholesale page:', this.className, 'at:', new Date().toISOString());
-            window.location.href = withBase('/wholesale');
+            if (typeof window.pdOpenWholesaleAccess === 'function') {
+                window.pdOpenWholesaleAccess();
+            } else {
+                window.location.href = withBase('/wholesale');
+            }
         });
     });
 
@@ -133,14 +202,23 @@ document.addEventListener("DOMContentLoaded", function () {
             const productName = this.getAttribute('data-product-name') || 'this product';
             const message = encodeURIComponent(`I want to know the retailer price per product of ${productName}.`);
             const whatsappUrl = `https://wa.me/+923116600031?text=${message}`;
-            console.log('Opening WhatsApp with URL:', whatsappUrl);
             window.open(whatsappUrl, '_blank');
         });
     });
 
-    function scrollToReviews() {
-        document.querySelector('.reviews-section-wrapper').scrollIntoView({ behavior: 'smooth' });
-    }
+    window.scrollToReviews = function scrollToReviews() {
+        const reviewTabTitle = document.querySelector('.custom-tab-title[data-tab="tab-reviews"]');
+        const reviewTab = document.getElementById('tab-reviews');
+        if (reviewTabTitle && reviewTab) {
+            document.querySelectorAll('.custom-tab-title').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.custom-tab').forEach(c => { c.classList.remove('active'); c.style.display = 'none'; });
+            reviewTabTitle.classList.add('active');
+            reviewTab.classList.add('active');
+            reviewTab.style.display = 'block';
+        }
+        const el = document.querySelector('.reviews-section-wrapper') || document.querySelector('.custom-tabs');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
 
     const addToCartButtons = {
         desktop: document.getElementById('add-to-cart-btn-desktop'),
@@ -191,11 +269,29 @@ document.addEventListener("DOMContentLoaded", function () {
         applyPaymentDiscount();  // Re-apply discount on current base price
     }
 
+    // Expose applyPaymentDiscount globally so the inline variation script can call it
+    window.pdApplyPaymentDiscount = function() { applyPaymentDiscount(); };
+
+    // Allow variation switcher (inline script) to keep base prices in sync
+    window.pdSyncVariationPrice = function(reg, sale) {
+        originalRegularPrice = Math.max(0, parseFloat(reg) || 0);
+        originalSalePrice    = (sale > 0 && sale < originalRegularPrice) ? Math.max(0, parseFloat(sale)) : 0;
+        baseUnitPrice        = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
+    };
+
     // Apply payment discount and update display/buttons
     function applyPaymentDiscount() {
-        const discountFactor = currentPaymentMethod === 'prepaid' ? 0.94 : 1.0;  // 6% off = *0.94
-        const basePrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
-        const displayPrice = basePrice * discountFactor;
+        const prepaidDiscountPKR = parseFloat(document.querySelector('.payment-btn.prepaid')?.getAttribute('data-prepaid-discount') || 0);
+
+        // Prefer variation-level prices set by pdMatch(); fall back to closure vars for simple products
+        const activeRegular = (window.pdCurrentRegularPrice > 0) ? window.pdCurrentRegularPrice : originalRegularPrice;
+        const activeSale    = (window.pdCurrentBasePrice > 0 && window.pdCurrentBasePrice < activeRegular)
+            ? window.pdCurrentBasePrice
+            : (originalSalePrice > 0 && originalSalePrice < activeRegular ? originalSalePrice : 0);
+        const basePrice     = activeSale > 0 ? activeSale : activeRegular;
+
+        const prepaidDeduction = (currentPaymentMethod === 'prepaid' && prepaidDiscountPKR > 0) ? prepaidDiscountPKR : 0;
+        const displayPrice = Math.max(0, basePrice - prepaidDeduction);
         const formattedDisplay = formatPrice(displayPrice);
 
         // Update price display
@@ -206,20 +302,22 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
         `;
 
-        // Show discount block if applicable
+        // Show discount block when a sale price exists OR when prepaid deduction applies
         let showDiscount = false;
         let oldPrice = 0;
         let totalDiscount = 0;
-        if (originalRegularPrice > basePrice) {
-            // Original sale exists
+        if (activeRegular > basePrice) {
+            // Existing sale discount — combine with any prepaid deduction
             showDiscount = true;
-            oldPrice = originalRegularPrice;  // Keep original regular (not discounted)
-            totalDiscount = Math.round((originalRegularPrice - displayPrice) / originalRegularPrice * 100);
-        } else if (currentPaymentMethod === 'prepaid') {
-            // No original sale, but prepaid discount
+            oldPrice = activeRegular;
+            totalDiscount = activeRegular > 0
+                ? Math.min(100, Math.round((activeRegular - displayPrice) / activeRegular * 100))
+                : 0;
+        } else if (prepaidDeduction > 0 && basePrice > 0) {
+            // Prepaid-only deduction (no existing sale)
             showDiscount = true;
-            oldPrice = originalRegularPrice;
-            totalDiscount = 6;
+            oldPrice = basePrice;
+            totalDiscount = Math.min(100, Math.round((prepaidDeduction / basePrice) * 100));
         }
 
         if (showDiscount) {
@@ -261,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        disableButtons(displayPrice <= 0);
+        disableButtons(displayPrice < 0);
     }
 
     // Event listeners for payment buttons (desktop and mobile)
@@ -290,7 +388,6 @@ document.addEventListener("DOMContentLoaded", function () {
             originalSalePrice = 0;
         }
         baseUnitPrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
-        console.log(`Non-Attributed Product - Original Regular: ${originalRegularPrice}, Original Sale: ${originalSalePrice}, Base Unit: ${baseUnitPrice}`);
         if (baseUnitPrice <= 0) {
             disableButtons(true);
             priceContent.innerHTML = `<div class="product-price"><span class="price-label">Phones Dukan Price</span><span class="error-price">Price not available</span></div>`;
@@ -311,9 +408,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function updatePriceAndButton(button) {
         originalRegularPrice = parseFloat(button.getAttribute('data-regular-price')) || 0;
         originalSalePrice = parseFloat(button.getAttribute('data-sale-price')) || 0;
-        baseUnitPrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;  // Set base before payment discount
+        baseUnitPrice = originalSalePrice > 0 ? originalSalePrice : originalRegularPrice;
         const attributeValue = button.getAttribute('data-attribute-value');
-        console.log(`Attribute Selected - Original Regular: ${originalRegularPrice}, Original Sale: ${originalSalePrice}, Base: ${baseUnitPrice}, Attribute: ${attributeValue}`);
         applyPaymentDiscount();  // Now apply payment on top
         for (let key in addToCartButtons) {
             if (addToCartButtons[key]) {
@@ -359,9 +455,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const quantityInput = quantityInputs[buttonType];
         if (!addToCartButton || !quantityInput) return;
         const productId = addToCartButton.getAttribute('data-product-id');
-        const unitPrice = parseFloat(addToCartButton.getAttribute('data-unit-price') || 0);  // Already discounted
+        const unitPrice = parseFloat(addToCartButton.getAttribute('data-unit-price') || 0);
         const attributeValue = addToCartButton.getAttribute('data-attribute-value') || null;
         const paymentMethod = addToCartButton.getAttribute('data-payment-method') || 'cod';
+        const variationId = addToCartButton.getAttribute('data-variation-id') || null;
+        const variationIdHidden = document.getElementById('selectedVariationId');
+        const resolvedVariationId = variationId || (variationIdHidden ? variationIdHidden.value : null) || null;
         const quantity = parseInt(quantityInput.value) || 1;
         if (!productId || quantity < 1) {
             Swal.fire({
@@ -381,65 +480,114 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             return;
         }
-        console.log(`Sending to Cart - Product ID: ${productId}, Quantity: ${quantity}, Unit Price: ${unitPrice} (discounted), Attribute: ${attributeValue}, Payment: ${paymentMethod}`);
-        $.ajax({
-            url: withBase("/app/Controllers/CartController.php"),
-            type: "POST",
-            data: JSON.stringify({
-                product_id: productId,
-                quantity: quantity,
-                attribute_value: attributeValue,
-                unit_price: unitPrice,  // Send discounted price
-                payment_method: paymentMethod  // New field
-            }),
-            contentType: "application/json",
-            dataType: "json",
-            success: function(response) {
-                console.log("Server Response:", response);
-                if (response.status === "success") {
-                    // Update cart count in the DOM
-                    const cartCountElements = document.querySelectorAll('.cart-count');
-                    const totalQuantity = response.cart_summary.total_quantity || 0;
-                    cartCountElements.forEach(element => {
-                        element.textContent = totalQuantity;
-                    });
-                    if (redirectToCheckout) {
-                        window.location.href = withBase("/checkout");
-                    } else {
-                        Swal.fire({
-                            title: "Added to Cart!",
-                            text: "Your product has been added. What would you like to do next?",
-                            icon: "success",
-                            showCancelButton: true,
-                            confirmButtonText: "View Cart 🛒",
-                            cancelButtonText: "Continue Shopping 🛍️",
-                            reverseButtons: true
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = withBase("/cart");
-                            }
-                        });
+
+        const groupExtras = Array.from(document.querySelectorAll('.pd-group-item__check:checked')).map(function (el) {
+            return {
+                product_id: parseInt(el.getAttribute('data-product-id'), 10),
+                unit_price: parseFloat(el.getAttribute('data-unit-price') || 0),
+                variation_id: el.getAttribute('data-variation-id') || null,
+                quantity: 1,
+                payment_method: paymentMethod
+            };
+        }).filter(function (item) {
+            return item.product_id > 0 && item.unit_price > 0;
+        });
+
+        function postCartItem(payload) {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: withBase("/app/Controllers/CartController.php"),
+                    type: "POST",
+                    data: JSON.stringify(payload),
+                    contentType: "application/json",
+                    dataType: "json",
+                    success: function (response) {
+                        if (response && response.status === "success") {
+                            resolve(response);
+                        } else {
+                            reject(new Error((response && response.message) || "Failed to add item"));
+                        }
+                    },
+                    error: function () {
+                        reject(new Error("Something went wrong, please try again."));
                     }
+                });
+            });
+        }
+
+        const mainPayload = {
+            product_id: productId,
+            quantity: quantity,
+            attribute_value: attributeValue,
+            unit_price: unitPrice,
+            payment_method: paymentMethod,
+            variation_id: resolvedVariationId ? parseInt(resolvedVariationId) : null,
+        };
+
+        postCartItem(mainPayload)
+            .then(function (mainResponse) {
+                let chain = Promise.resolve(mainResponse);
+                groupExtras.forEach(function (extra) {
+                    chain = chain.then(function (last) {
+                        return postCartItem({
+                            product_id: extra.product_id,
+                            quantity: extra.quantity,
+                            unit_price: extra.unit_price,
+                            payment_method: extra.payment_method,
+                            variation_id: extra.variation_id ? parseInt(extra.variation_id, 10) : null,
+                        }).catch(function () {
+                            // Keep main product in cart even if an accessory fails
+                            return last;
+                        });
+                    });
+                });
+                return chain;
+            })
+            .then(function (response) {
+                const cartCountElements = document.querySelectorAll('.cart-count');
+                const totalQuantity = (response.cart_summary && response.cart_summary.total_quantity) || 0;
+                cartCountElements.forEach(function (element) {
+                    element.textContent = totalQuantity;
+                });
+                if (redirectToCheckout) {
+                    window.location.href = withBase("/checkout");
                 } else {
-                    console.error("Server Error:", response.message);
+                    const extrasCount = groupExtras.length;
                     Swal.fire({
-                        title: "Oops!",
-                        text: response.message,
-                        icon: "error",
-                        confirmButtonText: "Try Again"
+                        title: "Added to Cart!",
+                        text: extrasCount > 0
+                            ? ("Product and " + extrasCount + " accessory item(s) added. What would you like to do next?")
+                            : "Your product has been added. What would you like to do next?",
+                        icon: "success",
+                        showCancelButton: true,
+                        confirmButtonText: "View Cart",
+                        cancelButtonText: "Continue Shopping",
+                        reverseButtons: true,
+                        customClass: {
+                            popup: "pd-cart-popup",
+                            icon: "pd-cart-popup__icon",
+                            title: "pd-cart-popup__title",
+                            htmlContainer: "pd-cart-popup__text",
+                            confirmButton: "pd-cart-popup__btn pd-cart-popup__btn--primary",
+                            cancelButton: "pd-cart-popup__btn pd-cart-popup__btn--secondary",
+                            actions: "pd-cart-popup__actions"
+                        },
+                        buttonsStyling: false
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            window.location.href = withBase("/cart");
+                        }
                     });
                 }
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error:", error, xhr.responseText);
+            })
+            .catch(function (err) {
                 Swal.fire({
-                    title: "Error!",
-                    text: "Something went wrong, please try again.",
+                    title: "Oops!",
+                    text: err && err.message ? err.message : "Something went wrong, please try again.",
                     icon: "error",
-                    confirmButtonText: "OK"
+                    confirmButtonText: "Try Again"
                 });
-            }
-        });
+            });
     }
 
     for (let key in addToCartButtons) {
@@ -468,14 +616,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    console.log("JavaScript loaded successfully!");
     const stars = document.querySelectorAll(".star-rating input[type='radio']");
-    const hiddenRating = document.getElementById("hidden-rating");
     stars.forEach(star => {
         star.addEventListener("change", function () {
-            hiddenRating.value = this.value;
-            console.log("Selected Rating: " + this.value);
-            console.log("Hidden Rating Value: " + hiddenRating.value);
+            // Radios alone are enough; keep for compatibility if hidden exists.
+            const hiddenRating = document.getElementById("hidden-rating");
+            if (hiddenRating) hiddenRating.value = this.value;
         });
     });
 
@@ -486,4 +632,78 @@ document.addEventListener("DOMContentLoaded", function () {
             viewersCount.textContent = newCount;
         }, 2000);
     }
+
+    // ---- Related Products: Add to Cart ----
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.rp-cart-btn');
+        if (!btn || btn.disabled) return;
+
+        const productId = btn.getAttribute('data-product-id');
+        const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
+        if (!productId || unitPrice <= 0) return;
+
+        btn.disabled = true;
+        const origText = btn.textContent.trim();
+        btn.textContent = '…';
+
+        $.ajax({
+            url: withBase('/app/Controllers/CartController.php'),
+            type: 'POST',
+            data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    const total = response.cart_summary ? (response.cart_summary.total_quantity || 0) : 0;
+                    document.querySelectorAll('.cart-count').forEach(el => el.textContent = total);
+                    btn.textContent = '✓ Added';
+                    btn.classList.add('na-btn--added');
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = origText;
+                    Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+                btn.textContent = origText;
+                Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+            }
+        });
+    });
+
+    // ---- Related Products: Buy Now ----
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.rp-buy-btn');
+        if (!btn || btn.disabled) return;
+
+        const productId = btn.getAttribute('data-product-id');
+        const unitPrice = parseFloat(btn.getAttribute('data-unit-price')) || 0;
+        if (!productId || unitPrice <= 0) return;
+
+        btn.disabled = true;
+        btn.textContent = '…';
+
+        $.ajax({
+            url: withBase('/app/Controllers/CartController.php'),
+            type: 'POST',
+            data: JSON.stringify({ product_id: parseInt(productId), quantity: 1, unit_price: unitPrice, payment_method: 'cod' }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    window.location.href = withBase('/checkout');
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Buy Now';
+                    Swal.fire({ title: 'Oops!', text: response.message, icon: 'error', confirmButtonText: 'Try Again' });
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+                btn.textContent = 'Buy Now';
+                Swal.fire({ title: 'Error!', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+            }
+        });
+    });
 });

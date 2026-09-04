@@ -29,300 +29,257 @@ if (!$order) {
 }
 
 $product_query = "
-    SELECT oi.quantity, oi.subtotal_price, p.product_name 
+    SELECT oi.quantity, oi.subtotal_price, p.product_name,
+           oi.variation_id, oi.variation_sku, oi.variation_attributes
     FROM order_items oi
     LEFT JOIN products p ON oi.product_id = p.product_id
     WHERE oi.order_id = ?";
 $product_stmt = $conn->prepare($product_query);
 $product_stmt->execute([$order_id]);
 $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$subtotal = 0.0;
+foreach ($products as $product) {
+    $subtotal += (float)($product['subtotal_price'] ?? 0);
+}
+$totalAmount = (float)($order['total_price'] ?? 0);
+$deliveryCharges = $totalAmount - $subtotal;
+if ($deliveryCharges < 0) {
+    $deliveryCharges = 0;
+}
 ?>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
-
-    /* ===== Overlay ===== */
     .custom-order-popup-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.55);
+        background: rgba(17, 17, 17, 0.58);
         z-index: 9999;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 18px;
         font-family: 'DM Sans', sans-serif;
     }
-
-    /* ===== Modal Box ===== */
-    .custom-order-popup {
+    .odm-modal {
         background: #fff;
-        border-radius: 14px;
-        width: 90%;
-        max-width: 620px;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 900px;
         max-height: 88vh;
         overflow-y: auto;
+        box-shadow: 0 24px 70px rgba(17,17,17,0.2);
         position: relative;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
-        animation: popIn 0.22s ease;
         scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
+        scrollbar-color: #facc15 #fff;
     }
-
-    .custom-order-popup::-webkit-scrollbar { width: 5px; }
-    .custom-order-popup::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-    @keyframes popIn {
-        from { opacity: 0; transform: scale(0.95) translateY(14px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    /* ===== Close Button ===== */
-    .custom-close-modal {
-        position: absolute;
-        top: 16px;
-        right: 18px;
-        background: none;
-        border: none;
-        font-size: 1.3rem;
-        color: #999;
-        cursor: pointer;
-        line-height: 1;
-        transition: color 0.15s;
-        padding: 4px 8px;
-        border-radius: 6px;
-    }
-    .custom-close-modal:hover {
-        color: #222;
-        background: #f1f5f9;
-    }
-
-    /* ===== Order Title ===== */
-    .pop-title {
-        text-align: center;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #1a7fe8;
-        padding: 28px 30px 14px;
-        letter-spacing: -0.2px;
-    }
-
-    .pop-title-divider {
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #1a7fe8, transparent);
-        margin: 0 30px 20px;
-        border: none;
-    }
-
-    /* ===== Section ===== */
-    .pop-section {
-        padding: 0 30px 20px;
-    }
-
-    .pop-section-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #e8ecf0;
-    }
-
-    /* ===== Info Rows ===== */
-    .pop-row {
+    .odm-modal::-webkit-scrollbar { width: 8px; }
+    .odm-modal::-webkit-scrollbar-thumb { background: #facc15; border-radius: 999px; }
+    .odm-modal::-webkit-scrollbar-track { background: #fff; }
+    .odm-head {
+        padding: 24px 26px 18px;
+        border-bottom: 1px solid #e5e7eb;
         display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .odm-title { font-size: 1.45rem; font-weight: 800; color: #111111; line-height: 1.2; }
+    .odm-subtitle { margin-top: 4px; font-size: 0.92rem; color: #6b7280; }
+    .custom-close-modal {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        color: #111111;
+        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        transition: color .15s ease, border-color .15s ease;
+    }
+    .custom-close-modal:hover { color: #facc15; border-color: #facc15; }
+    .odm-body {
+        padding: 18px 24px 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+    .odm-section {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px;
+    }
+    .odm-section.odm-full { grid-column: 1 / -1; }
+    .odm-section-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #111111;
+        margin-bottom: 10px;
+    }
+    .odm-row {
+        display: grid;
+        grid-template-columns: 120px 1fr;
         gap: 8px;
-        padding: 6px 0;
+        padding: 7px 0;
+        border-top: 1px solid #f3f4f6;
         font-size: 0.9rem;
-        color: #444;
-        border-bottom: 1px solid #f3f4f6;
     }
-    .pop-row:last-child { border-bottom: none; }
-
-    .pop-label {
-        font-weight: 600;
-        color: #1a1a2e;
-        min-width: 90px;
-        flex-shrink: 0;
-    }
-
-    .pop-value {
-        color: #444;
-        word-break: break-word;
-    }
-
-    .pop-value a {
-        color: #1a7fe8;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    .pop-value a:hover { text-decoration: underline; }
-
-    /* ===== Products Table ===== */
-    .pop-product-table {
+    .odm-row:first-of-type { border-top: 0; }
+    .odm-label { color: #6b7280; font-weight: 600; }
+    .odm-value { color: #111111; font-weight: 700; word-break: break-word; background: transparent; }
+    .odm-value a { color: #111111; text-decoration: underline; text-decoration-color: #facc15; }
+    .odm-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 0.88rem;
-        margin-top: 4px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
     }
-
-    .pop-product-table thead tr {
-        background: #1a7fe8;
-    }
-
-    .pop-product-table thead th {
-        color: #fff;
-        font-weight: 600;
-        font-size: 0.78rem;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        padding: 10px 14px;
-        text-align: left;
-    }
-
-    .pop-product-table tbody tr {
-        border-bottom: 1px solid #e8ecf0;
-        transition: background 0.12s;
-    }
-    .pop-product-table tbody tr:last-child { border-bottom: none; }
-    .pop-product-table tbody tr:hover { background: #f5f8ff; }
-
-    .pop-product-table tbody td {
-        padding: 10px 14px;
-        color: #333;
-        vertical-align: middle;
-    }
-
-    .pop-product-table tfoot tr {
+    .odm-table th {
         background: #f8fafc;
+        color: #111111;
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 0.78rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e5e7eb;
     }
-    .pop-product-table tfoot td {
-        padding: 10px 14px;
-        font-weight: 700;
-        color: #1a1a2e;
-        font-size: 0.9rem;
-        border-top: 2px solid #e8ecf0;
+    .odm-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f3f4f6;
+        color: #111111;
+        background: transparent;
     }
-
-    /* ===== No products ===== */
-    .pop-empty {
+    .odm-table tr:last-child td { border-bottom: 0; }
+    .odm-right { text-align: right; }
+    .odm-summary {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .odm-summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-top: 1px solid #f3f4f6;
+        color: #111111;
+        font-size: 0.92rem;
+    }
+    .odm-summary-row:first-child { border-top: 0; }
+    .odm-summary-row.odm-total { background: #fffbeb; font-weight: 800; }
+    .odm-empty {
         text-align: center;
-        color: #aaa;
-        font-style: italic;
-        padding: 16px 0;
-        font-size: 0.88rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+        padding: 12px;
+        border: 1px dashed #e5e7eb;
+        border-radius: 10px;
     }
-
-    /* ===== Bottom padding ===== */
-    .pop-footer { height: 10px; }
+    @media (max-width: 860px) {
+        .odm-body { grid-template-columns: 1fr; }
+        .odm-section.odm-full { grid-column: auto; }
+        .odm-row { grid-template-columns: 96px 1fr; }
+    }
 </style>
 
 <div class="custom-order-popup-overlay">
-    <div class="custom-order-popup">
-
-        <button class="custom-close-modal" title="Close">&#x2715;</button>
-
-        <!-- Title -->
-        <div class="pop-title">Order #<?= htmlspecialchars($order['order_id'] ?? '') ?></div>
-        <hr class="pop-title-divider">
-
-        <!-- Shipping Details -->
-        <div class="pop-section">
-            <div class="pop-section-title">Shipping Details</div>
-
-            <div class="pop-row">
-                <span class="pop-label">Name:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['customer_name'] ?? '') ?></span>
+    <div class="odm-modal">
+        <div class="odm-head">
+            <div>
+                <div class="odm-title">Order #<?= htmlspecialchars($order['order_id'] ?? '') ?></div>
+                <div class="odm-subtitle">Complete order details</div>
             </div>
-            <div class="pop-row">
-                <span class="pop-label">Address:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['shipping_address'] ?? '') ?></span>
-            </div>
-            <div class="pop-row">
-                <span class="pop-label">City:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['shipping_city'] ?? '') ?></span>
-            </div>
-            <div class="pop-row">
-                <span class="pop-label">Country:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['shipping_country'] ?? '') ?></span>
-            </div>
-            <div class="pop-row">
-                <span class="pop-label">Email:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['customer_email'] ?? '') ?></span>
-            </div>
-            <div class="pop-row">
-                <span class="pop-label">Phone:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['customer_phone'] ?? '') ?></span>
-            </div>
+            <button class="custom-close-modal" title="Close">&#x2715;</button>
         </div>
 
-        <!-- Payment Details -->
-        <div class="pop-section">
-            <div class="pop-section-title">Payment Details</div>
+        <div class="odm-body">
+            <div class="odm-section">
+                <div class="odm-section-title">Shipping Details</div>
+                <div class="odm-row"><span class="odm-label">Name</span><span class="odm-value"><?= htmlspecialchars($order['customer_name'] ?? '') ?></span></div>
+                <div class="odm-row"><span class="odm-label">Address</span><span class="odm-value"><?= htmlspecialchars($order['shipping_address'] ?? '') ?></span></div>
+                <div class="odm-row"><span class="odm-label">City</span><span class="odm-value"><?= htmlspecialchars($order['shipping_city'] ?? '') ?></span></div>
+                <div class="odm-row"><span class="odm-label">Country</span><span class="odm-value"><?= htmlspecialchars($order['shipping_country'] ?? '') ?></span></div>
+                <div class="odm-row"><span class="odm-label">Email</span><span class="odm-value"><?= htmlspecialchars($order['customer_email'] ?? '') ?></span></div>
+                <div class="odm-row"><span class="odm-label">Phone</span><span class="odm-value"><?= htmlspecialchars($order['customer_phone'] ?? '') ?></span></div>
+            </div>
 
-            <div class="pop-row">
-                <span class="pop-label">Payment via:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['payment_method_title'] ?? '') ?></span>
+            <div class="odm-section">
+                <div class="odm-section-title">Payment Details</div>
+                <div class="odm-row"><span class="odm-label">Method</span><span class="odm-value"><?= htmlspecialchars($order['payment_method_title'] ?? '') ?></span></div>
+                <?php if (!empty($order['payment_method']) && $order['payment_method'] === 'prepaid' && !empty($order['payment_screenshot'])): ?>
+                <div class="odm-row">
+                    <span class="odm-label">Proof</span>
+                    <span class="odm-value"><a href="/admin/view-screenshot.php?file=<?= htmlspecialchars($order['payment_screenshot']) ?>" target="_blank">View payment screenshot</a></span>
+                </div>
+                <?php endif; ?>
             </div>
-            <?php if (!empty($order['payment_method']) && $order['payment_method'] === 'prepaid' && !empty($order['payment_screenshot'])): ?>
-            <div class="pop-row">
-                <span class="pop-label">Screenshot:</span>
-                <span class="pop-value">
-                    <a href="/admin/view-screenshot.php?file=<?= htmlspecialchars($order['payment_screenshot']) ?>" target="_blank">View Payment Proof</a>
-                </span>
+
+            <div class="odm-section">
+                <div class="odm-section-title">Tracking Details</div>
+                <div class="odm-row"><span class="odm-label">Customer IP</span><span class="odm-value"><?= htmlspecialchars($order['customer_ip'] ?? 'N/A') ?></span></div>
+                <div class="odm-row"><span class="odm-label">Device Type</span><span class="odm-value"><?= htmlspecialchars($order['device_type'] ?? 'N/A') ?></span></div>
             </div>
-            <?php endif; ?>
+
+            <div class="odm-section">
+                <div class="odm-section-title">Order Summary</div>
+                <div class="odm-summary">
+                    <div class="odm-summary-row"><span>Subtotal</span><span>PKR <?= number_format($subtotal, 2) ?></span></div>
+                    <div class="odm-summary-row"><span>Delivery Charges</span><span>PKR <?= number_format($deliveryCharges, 2) ?></span></div>
+                    <div class="odm-summary-row odm-total"><span>Total Amount</span><span>PKR <?= number_format($totalAmount, 2) ?></span></div>
+                </div>
+            </div>
+
+            <div class="odm-section odm-full">
+                <div class="odm-section-title">Ordered Products</div>
+                <?php if (empty($products)): ?>
+                    <p class="odm-empty">No products found for this order.</p>
+                <?php else: ?>
+                    <table class="odm-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="odm-right">Quantity</th>
+                                <th class="odm-right">Price</th>
+                                <th class="odm-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($products as $product): ?>
+                            <?php
+                                $qty = (float)($product['quantity'] ?? 0);
+                                $lineSubtotal = (float)($product['subtotal_price'] ?? 0);
+                                $unitPrice = $qty > 0 ? ($lineSubtotal / $qty) : 0;
+                            ?>
+                            <tr>
+                                <td>
+                                    <strong><?= htmlspecialchars($product['product_name'] ?? 'Unknown Product') ?></strong>
+                                    <?php if (!empty($product['variation_attributes'])): ?>
+                                    <div style="margin-top:4px">
+                                        <?php foreach (explode(',', $product['variation_attributes']) as $attr): ?>
+                                            <span style="display:inline-block;padding:2px 8px;background:#fffbeb;border:1px solid #facc15;border-radius:999px;font-size:.75rem;font-weight:700;color:#111;margin:2px 2px 0 0"><?= htmlspecialchars(trim($attr)) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($product['variation_sku'])): ?>
+                                    <div style="font-size:.75rem;color:#6b7280;margin-top:3px">SKU: <?= htmlspecialchars($product['variation_sku']) ?></div>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="odm-right"><?= (int)$qty ?></td>
+                                <td class="odm-right">PKR <?= number_format($unitPrice, 2) ?></td>
+                                <td class="odm-right">PKR <?= number_format($lineSubtotal, 2) ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+            </div>
         </div>
-
-        <!-- Tracking Details -->
-        <div class="pop-section">
-            <div class="pop-section-title">Tracking Details</div>
-
-            <div class="pop-row">
-                <span class="pop-label">Customer IP:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['customer_ip'] ?? 'N/A') ?></span>
-            </div>
-            <div class="pop-row">
-                <span class="pop-label">Device Type:</span>
-                <span class="pop-value"><?= htmlspecialchars($order['device_type'] ?? 'N/A') ?></span>
-            </div>
-        </div>
-
-        <!-- Ordered Products -->
-        <div class="pop-section">
-            <div class="pop-section-title">Ordered Products</div>
-
-            <?php if (empty($products)): ?>
-                <p class="pop-empty">No products found for this order.</p>
-            <?php else: ?>
-                <table class="pop-product-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Qty</th>
-                            <th>Tax</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($products as $product): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($product['product_name'] ?? 'Unknown Product') ?></td>
-                            <td><?= htmlspecialchars($product['quantity'] ?? 0) ?></td>
-                            <td>₨ 0</td>
-                            <td>₨ <?= number_format((float)($product['subtotal_price'] ?? 0), 2) ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" style="text-align:right; color:#666; font-weight:600;">Order Total:</td>
-                            <td>₨ <?= number_format((float)($order['total_price'] ?? 0), 2) ?></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            <?php endif; ?>
-        </div>
-
-        <div class="pop-footer"></div>
     </div>
 </div>

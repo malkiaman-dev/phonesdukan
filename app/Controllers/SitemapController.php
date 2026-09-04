@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once __DIR__ . '/../Models/SitemapModel.php';
 require_once __DIR__ . '/../Models/ProductImageSitemapModel.php';
 require_once __DIR__ . '/../Models/NewsSitemapModel.php';
@@ -12,23 +8,29 @@ class SitemapController {
     public function index() {
         header("Content-Type: application/xml; charset=UTF-8");
 
+        ob_clean();
+
         echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
 
+        $today = date('Y-m-d');
+
+        // Priority order: products first (highest crawl value), then posts, then supporting sitemaps
         $sitemaps = [
-            'post-sitemap.xml',
-            'post_category-sitemap.xml',
-            'page-sitemap.xml',
-            'product-sitemap.xml',
-            'images-sitemap.xml',
-            'product_cat-sitemap.xml',
-            'news-sitemap.xml', // Add News Sitemap
+            ['name' => 'product-sitemap.xml',      'lastmod' => $today],
+            ['name' => 'product_cat-sitemap.xml',  'lastmod' => $today],
+            ['name' => 'images-sitemap.xml',       'lastmod' => $today],
+            ['name' => 'post-sitemap.xml',         'lastmod' => $today],
+            ['name' => 'post_category-sitemap.xml','lastmod' => $today],
+            ['name' => 'page-sitemap.xml',         'lastmod' => $today],
+            // news-sitemap.xml removed: blog posts covered by post-sitemap.xml;
+            // the news sitemap was causing "Missing xml tag: url" errors in GSC.
         ];
 
         foreach ($sitemaps as $sitemap) {
             echo '  <sitemap>' . PHP_EOL;
-            echo '    <loc>https://www.phonesdukan.com/' . $sitemap . '</loc>' . PHP_EOL;
-            echo '    <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL;
+            echo '    <loc>https://www.phonesdukan.com/' . htmlspecialchars($sitemap['name']) . '</loc>' . PHP_EOL;
+            echo '    <lastmod>' . $sitemap['lastmod'] . '</lastmod>' . PHP_EOL;
             echo '  </sitemap>' . PHP_EOL;
         }
 

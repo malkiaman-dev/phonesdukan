@@ -1,5 +1,8 @@
 <?php
 return [
+    '/bluetooth-headphones' => '/headphones',
+    '/bluetooth-headphones/' => '/headphones/',
+
     '/yolo/generic-brand/yolo-fortuner-calling-watch/' => '/smart-watches/yolo/yolo-fortuner-calling-watch',
 
     '/yolo/generic-brand/yolo-epic-bluetooth-calling-smart-watch/' => '/smart-watches/yolo/yolo-epic-bluetooth-calling-smart-watch',
@@ -59,6 +62,18 @@ return [
     '/iphone/generic-brand/ronin-r-007-gaming-handsfree/' => '/mobile-accessories/ronin/ronin-r-007-gaming-handsfree',
 
     '/joyroom/joyroom/joyroom-jr-t03s-pro2-anc-tws-wireless-earbuds/' => '/wireless-earbuds/joyroom/joyroom-jr-t03s-pro2-anc-tws-wireless-earbuds',
+    '/bluetooth-speakers/login/L-271%20-%20Wireless-Soundbar' => '/bluetooth-speakers/login/L-271-Wireless-Soundbar',
+    '/bluetooth-speakers/login/Login%20L-274-Vybeon-Wireless-Speaker' => '/bluetooth-speakers/login/Login-L-274-Vybeon-Wireless-Speaker',
+    '/power-banks/login/L-706-Nomad-Power-Bank-15000mAh-Metal%20Blue' => '/power-banks/login/L-706-Nomad-Power-Bank-15000mAh-Metal-Blue',
+    '/public/uploads/faster-rgbp1-%EF%BF%BD-enc-earbuds-price-in-pakistan.webp' => '/public/uploads/faster-rgbp1-enc-earbuds-price-in-pakistan.webp',
+    '/public/uploads/faster-rgbp1-%EF%BF%BD-enc-earbuds-price.webp' => '/public/uploads/faster-rgbp1-enc-earbuds-price.webp',
+    '/public/uploads/faster-rgbp1-%EF%BF%BD-enc-earbuds.webp' => '/public/uploads/faster-rgbp1-enc-earbuds.webp',
+    '/public/uploads/stud-x-earbuds-%EF%BF%BD-bold-beats-black-color.webp' => '/public/uploads/stud-x-earbuds-bold-beats-black-color.webp',
+    '/public/uploads/stud-x-earbuds-%EF%BF%BD-bold-beats-open-cover.webp' => '/public/uploads/stud-x-earbuds-bold-beats-open-cover.webp',
+    '/public/uploads/stud-x-earbuds-%EF%BF%BD-bold-beats-price.webp' => '/public/uploads/stud-x-earbuds-bold-beats-price.webp',
+    '/public/uploads/stud-x-earbuds-%EF%BF%BD-bold-beats.webp' => '/public/uploads/stud-x-earbuds-bold-beats.webp',
+    '/wp-content/uploads/2024/11/LT-X-Series-%EF%BF%BD-Wireless-Speaker-Price.webp' => '/public/uploads/LT-X-Series-Wireless-Speaker-Price.webp',
+    '/blog/mobile-packages/image-placeholder.jpg' => '/public/assets/images/Phones_dukan_favicon.png',
 
     '/login-variety/login/lt-gb20-gaming-earbuds/' => '/wireless-earbuds/login/lt-gb20-gaming-earbuds',
 
@@ -204,7 +219,7 @@ return [
 
     '/tripod/variety/30cm-rgb-ring-light/' => '/accessories/variety/30cm-rgb-ring-light',
 
-    '/tripod/variety/bd-17-tripod/' => '/tripod/variety/bd-17-tripod',
+    '/tripod/variety/bd-17-tripod/' => '/tripod/variety/tripods-stand',
 
     '/uncategorized/joyroom-power-bank-1000-mah/' => '/power-banks/joyroom/joyroom-mini-magnetic-power-bank-jr-w020-10000mah',
 
@@ -226,7 +241,7 @@ return [
 
     '/wireless-earbuds/jmary-mw-16-microphone/' => '/wireless-earbuds/jmary/jmary-mw-16-microphone',
 
-    '/wireless-earbuds/joyroom/joyroom-jr-t03s-pro2-anc-tws-wireless-earbuds/' => '/wireless-earbuds/joyroom/joyroom-jr-t03s-pro2-anc-tws-wireless-earbuds',
+    '/wireless-earbuds/joyroom/joyroom-jr-t03s-pro2-anc-tws-wireless-earbuds/' => '/wireless-earbuds/joyroom/joyroom-jr-t03s-pro2-anc-tws-wireless-earbuds-pro-2',
 
     '/wireless-earbuds/login-lt-n25-free-style-wireless-neckband/' => '/wireless-earbuds/login/login-lt-n25-free-style-wireless-neckband',
 

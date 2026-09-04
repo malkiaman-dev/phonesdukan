@@ -1,4 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap');
+
 :root {
+  /* Typography Tokens */
+  --pd-font-heading: "Poppins", "Inter", sans-serif;
+  --pd-font-body: "Inter", Arial, sans-serif;
+  --pd-font-weight-regular: 400;
+  --pd-font-weight-medium: 500;
+  --pd-font-weight-semibold: 600;
+  --pd-font-weight-bold: 700;
+  --pd-font-weight-extrabold: 800;
+
   /* Primary and Secondary Colors */
   --primary-color: #004080;
   /* Dark blue - conveys reliability and professionalism */
@@ -116,26 +127,51 @@
 html,
 body {
   height: 100%;
-  font-family: Arial, sans-serif;
-  background-color: #f8f8f8;
+  font-family: var(--pd-font-body);
+  font-weight: var(--pd-font-weight-regular);
+  line-height: 1.6;
+  letter-spacing: 0;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
-  padding-top: 32px;
+  overflow: hidden;
+}
+
+body {
+  background-color: #f8f8f8;
+}
+
+body,
+input,
+textarea,
+select,
+button {
+  font-family: var(--pd-font-body);
 }
 
 
 /* --- Base Text Styles --- */
 p,
-a,
-li,
-span {
+li {
   font-size: 16px;
-  color: #333; /* Dark gray for text - kept */
-  line-height: 1.6; /* Slightly increased line-height for better readability */
-  font-weight: 400;
-  margin: 1em 0; /* Use em for vertical margins for better responsiveness relative to font size */
-  text-decoration: none; /* Kept */
+  color: #333;
+  line-height: 1.6;
+  font-weight: var(--pd-font-weight-regular);
+  margin: 0 0 1em;
+}
+
+span {
+  font-size: inherit;
+  color: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  margin: 0;
+}
+
+a {
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: var(--pd-font-weight-medium);
+  text-decoration: none;
 }
 
 a {
@@ -185,19 +221,21 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Times New Roman", Times, serif; /* Kept */
+  font-family: var(--pd-font-heading);
   margin: 0; /* Reset default margins */
   padding: 0; /* Reset default padding */
-  font-weight: bold; /* Kept */
-  line-height: 1.2; /* Kept */
+  font-weight: var(--pd-font-weight-bold);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   color: var(--text-dark-color, #2c3e50); /* Used fallback color if var is not defined, for robustness */
   text-rendering: optimizeLegibility; /* Improves text rendering for headings */
 }
 
 /* --- Specific Heading Sizes and Spans --- */
 h1 {
-  font-size: 2.5em; /* Increased size for prominence, more responsive than px */
+  font-size: clamp(2rem, 3vw, 2.5rem);
   margin-bottom: 0em; /* Adjusted spacing below heading */
+  font-weight: var(--pd-font-weight-extrabold);
 }
 
 h1 span {
@@ -207,8 +245,9 @@ h1 span {
 }
 
 h2 {
-  font-size: 2em; /* Adjusted size */
+  font-size: clamp(1.75rem, 2.5vw, 2rem);
   margin: 1.2em 0 0.8em; /* Top margin, no left/right, bottom margin */
+  font-weight: var(--pd-font-weight-bold);
 }
 
 h2 span {
@@ -218,23 +257,109 @@ h2 span {
 }
 
 h3 {
-  font-size: 1.5em; /* Adjusted size */
+  font-size: clamp(1.3rem, 2vw, 1.5rem);
   margin: 1em 0 0.6em; /* Top margin, no left/right, bottom margin */
+  font-weight: var(--pd-font-weight-semibold);
 }
 
 h4 {
-  font-size: 1.3em; /* Adjusted size */
+  font-size: clamp(1.15rem, 1.6vw, 1.3rem);
   margin: 1em 0 0.5em;
+  font-weight: var(--pd-font-weight-semibold);
 }
 
 h5 {
-  font-size: 1.1em; /* Adjusted size */
+  font-size: clamp(1rem, 1.3vw, 1.1rem);
   margin: 0.8em 0 0.4em;
+  font-weight: var(--pd-font-weight-semibold);
 }
 
 h6 {
-  font-size: 1em; /* Adjusted size (same as base text, but bold) */
+  font-size: 1rem;
   margin-bottom: 0.5em;
+  font-weight: var(--pd-font-weight-semibold);
+}
+
+/* Typography hierarchy for commerce UI */
+.product-title,
+.product-title a,
+.mobile-product-title,
+.mobile-product-title a,
+.related-mobile-product-title,
+.related-mobile-product-title a,
+.na-name,
+.na-name a,
+.view-all-btn,
+.na-btn,
+.pd-hero-btn,
+.best-mobile-button,
+.cart-count,
+.pro-tags span,
+.sold-out span,
+.coming-soon-badge span,
+.out-of-stock-badge {
+  font-family: var(--pd-font-body);
+}
+
+.product-title a,
+.mobile-product-title a,
+.related-mobile-product-title a,
+.na-name a {
+  font-weight: var(--pd-font-weight-regular);
+  line-height: 1.4;
+}
+
+.product-title,
+.mobile-product-title,
+.related-mobile-product-title,
+.na-name,
+h1.product_title,
+h2.product-title,
+h3.product-title,
+.product-summary .product_title {
+  font-weight: var(--pd-font-weight-regular);
+}
+
+/* Single product page title stays bold for hierarchy */
+.product-summary .product-title,
+.p-page-container .product-title {
+  font-weight: var(--pd-font-weight-bold);
+}
+
+.product-price,
+.product-price span,
+.mobile-product-price,
+.mobile-product-price span,
+.single-product-price,
+.r-product-price,
+.new-price,
+.r-sale-price,
+.sale-price,
+.na-price,
+.na-price--new {
+  font-family: var(--pd-font-body);
+  font-weight: var(--pd-font-weight-extrabold);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.old-price,
+.regular-price,
+.r-regular-price,
+.na-price--old,
+.na-price--na,
+.no-price {
+  font-family: var(--pd-font-body);
+  font-weight: var(--pd-font-weight-medium);
+  color: #8a8a8a;
+  line-height: 1.45;
+}
+
+.pro-tags span,
+.sold-out span,
+.coming-soon-badge span,
+.out-of-stock-badge {
+  font-weight: var(--pd-font-weight-bold);
 }
 
 /* --- Accessibility Enhancements (Optional but Recommended for Professionalism) --- */
@@ -363,6 +488,14 @@ h6 {
     text-align: center;
 }
 /* Responsive Adjustments */
+@media (max-width: 1024px) {
+  h1 { font-size: clamp(1.9rem, 3.6vw, 2.3rem); }
+  h2 { font-size: clamp(1.6rem, 3vw, 1.9rem); }
+  h3 { font-size: clamp(1.2rem, 2.3vw, 1.4rem); }
+  p,
+  li { font-size: 15.5px; }
+}
+
 /* --- Media Query for Smaller Screens (max-width: 768px) --- */
 @media (max-width: 768px) {
   h1 {
@@ -398,9 +531,7 @@ h6 {
   }
 
   p,
-  a,
-  li,
-  span {
+  li {
     font-size: 15px; /* Specific size for small screens */
     letter-spacing: 0.1px; /* Added letter-spacing */
     margin: 10px 0px; /* Adjusted margin for smaller screens */
@@ -411,9 +542,6 @@ h6 {
     padding-left: 1em; /* Slightly less padding for lists on smaller screens */
   }
 
-  html, body {
-    padding-top: 20px;
-}
 .ad-container {
   padding: 10px;
 }
@@ -435,6 +563,14 @@ h6 {
 h3.faq-question {
   font-size: 15px;
 }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1.15rem; }
+  p,
+  li { font-size: 14px; }
 }
 
 .faq-item {
@@ -474,4 +610,42 @@ h3.faq-question {
   text-align: center;
   padding: 20px;
   background-color: #f8f9fa;
+}
+
+/* ── PhonesDukan Branded Scrollbar ── */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #f7d117 #111111;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ffe65a 0%, #f7d117 60%, #d4af00 100%);
+  border-radius: 999px;
+  border: 2px solid #111111;
+  min-height: 40px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ffe87a 0%, #f9d93a 60%, #c9a800 100%);
+}
+
+@media (max-width: 768px) {
+  html {
+    scrollbar-width: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }

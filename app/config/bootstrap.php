@@ -3,6 +3,16 @@ if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', realpath(dirname(__DIR__, 2)) ?: dirname(__DIR__, 2));
 }
 
+$functionsFile = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'functions.php';
+if (is_file($functionsFile)) {
+    require_once $functionsFile;
+}
+
+$helpersFile = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'helpers.php';
+if (is_file($helpersFile)) {
+    require_once $helpersFile;
+}
+
 if (!defined('BASE_PATH') || !defined('BASE_URL')) {
     $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
     $scriptFilename = realpath($_SERVER['SCRIPT_FILENAME'] ?? '') ?: '';
@@ -17,7 +27,11 @@ if (!defined('BASE_PATH') || !defined('BASE_URL')) {
         if ($relativeDirFs !== '') {
             $suffix = '/' . $relativeDirFs;
             if (substr($scriptDirUrl, -strlen($suffix)) === $suffix) {
+                // e.g. URL dir "phonesdukan/admin", FS dir "admin" → base is "phonesdukan"
                 $scriptDirUrl = substr($scriptDirUrl, 0, -strlen($suffix));
+            } elseif ($scriptDirUrl === $relativeDirFs) {
+                // URL dir equals FS dir exactly (e.g. both "admin") — site is at web root
+                $scriptDirUrl = '';
             }
         }
 
@@ -26,7 +40,16 @@ if (!defined('BASE_PATH') || !defined('BASE_URL')) {
 
     if ($basePath === '' && $scriptName !== '') {
         $segments = array_values(array_filter(explode('/', trim($scriptName, '/'))));
-        $basePath = isset($segments[0]) ? '/' . $segments[0] : '';
+        $firstSegment = $segments[0] ?? '';
+        $secondSegment = $segments[1] ?? '';
+
+        if (strtolower($firstSegment) === 'admin' && strpos($secondSegment, '.php') !== false) {
+            $basePath = '';
+        } else {
+        $basePath = (strpos($firstSegment, '.php') !== false || $firstSegment === '')
+            ? ''
+            : '/' . $firstSegment;
+        }
     }
 
     if (!defined('BASE_PATH')) {

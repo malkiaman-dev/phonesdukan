@@ -1,0 +1,245 @@
+<?php
+/**
+ * SeoHelper — centralised SEO utilities for PhonesDukan.
+ *
+ * Usage:
+ *   // In a category/brand/product view, set $breadcrumbs before including header.php:
+ *   $breadcrumbs = SeoHelper::categoryBreadcrumbs('mobiles', 'Mobiles');
+ *   $breadcrumbs = SeoHelper::brandBreadcrumbs('mobiles', 'Mobiles', 'samsung', 'Samsung');
+ *   $breadcrumbs = SeoHelper::productBreadcrumbs($category_slug, $category_name, $brand_slug, $brand_name, $product_name);
+ *
+ *   // In a post/blog view:
+ *   $breadcrumbs = SeoHelper::blogBreadcrumbs($category_slug, $category_name, $post_title);
+ */
+
+class SeoHelper
+{
+    private const BASE = 'https://www.phonesdukan.com/';
+
+    // ── Breadcrumb builders ───────────────────────────────────────────────
+
+    /** Homepage-only breadcrumb (used on the home page itself). */
+    public static function homeBreadcrumbs(): array
+    {
+        return [
+            ['name' => 'Home', 'url' => self::BASE],
+        ];
+    }
+
+    /** Category page, e.g. /mobiles/ */
+    public static function categoryBreadcrumbs(string $categorySlug, string $categoryName): array
+    {
+        return [
+            ['name' => 'Home',         'url' => self::BASE],
+            ['name' => $categoryName,  'url' => self::BASE . $categorySlug . '/'],
+        ];
+    }
+
+    /** Brand + category page, e.g. /samsung/mobiles/ */
+    public static function brandBreadcrumbs(
+        string $brandSlug, string $brandName,
+        string $categorySlug, string $categoryName
+    ): array {
+        return [
+            ['name' => 'Home', 'url' => self::BASE],
+            ['name' => $brandName, 'url' => self::BASE . $brandSlug . '/'],
+            ['name' => $categoryName, 'url' => self::BASE . $brandSlug . '/' . $categorySlug . '/'],
+        ];
+    }
+
+    /** Category + brand page, e.g. /mobiles/samsung/ */
+    public static function categoryBrandBreadcrumbs(
+        string $categorySlug, string $categoryName,
+        string $brandSlug, string $brandName
+    ): array {
+        return [
+            ['name' => 'Home', 'url' => self::BASE],
+            ['name' => $categoryName, 'url' => self::BASE . $categorySlug . '/'],
+            ['name' => $brandName, 'url' => self::BASE . $categorySlug . '/' . $brandSlug . '/'],
+        ];
+    }
+
+    /** Product page — last item has no URL (current page). */
+    public static function productBreadcrumbs(
+        string $brandSlug, string $brandName,
+        string $categorySlug, string $categoryName,
+        string $productName, string $productSlug,
+        ?string $subcategorySlug = null,
+        ?string $subcategoryName = null
+    ): array {
+        $items = [
+            ['name' => 'Home', 'url' => self::BASE],
+            ['name' => $brandName, 'url' => self::BASE . $brandSlug . '/'],
+            ['name' => $categoryName, 'url' => self::BASE . $brandSlug . '/' . $categorySlug . '/'],
+        ];
+        if ($subcategorySlug) {
+            $items[] = [
+                'name' => $subcategoryName ?: ucwords(str_replace('-', ' ', $subcategorySlug)),
+                'url' => self::BASE . $brandSlug . '/' . $categorySlug . '/' . $subcategorySlug . '/',
+            ];
+        }
+        $path = $subcategorySlug
+            ? $brandSlug . '/' . $categorySlug . '/' . $subcategorySlug . '/' . $productSlug
+            : $brandSlug . '/' . $categorySlug . '/' . $productSlug;
+        $items[] = ['name' => $productName, 'url' => self::BASE . $path . '/'];
+        return $items;
+    }
+
+    /** Blog post page. */
+    public static function blogBreadcrumbs(
+        string $categorySlug, string $categoryName,
+        string $postTitle,    string $postSlug
+    ): array {
+        return [
+            ['name' => 'Home',          'url' => self::BASE],
+            ['name' => 'Blog',          'url' => self::BASE . 'blog/'],
+            ['name' => $categoryName,   'url' => self::BASE . 'blog/' . $categorySlug . '/'],
+            ['name' => $postTitle,      'url' => self::BASE . 'blog/' . $categorySlug . '/' . $postSlug . '/'],
+        ];
+    }
+
+    // ── Meta title / description generators ──────────────────────────────
+
+    /**
+     * Build a high-CTR product page title.
+     * Pattern: {Product Name} Price in Pakistan {Month Year} | Phones Dukan
+     */
+    public static function productTitle(string $productName, ?string $seoTitle = null): string
+    {
+        if (!empty($seoTitle)) {
+            return $seoTitle;
+        }
+        return $productName . ' Price in Pakistan ' . date('F Y') . ' | Phones Dukan';
+    }
+
+    /**
+     * Build a product meta description.
+     * Injects price when available.
+     */
+    public static function productDescription(
+        string $productName,
+        string $brandName,
+        ?float  $price       = null,
+        ?string $seoDesc     = null
+    ): string {
+        if (!empty($seoDesc)) {
+            return $seoDesc;
+        }
+        $monthYear = date('F Y');
+        $priceStr = $price && $price > 0
+            ? 'Price in Pakistan: Rs. ' . number_format($price, 0) . '. '
+            : '';
+        return "{$productName} price in Pakistan {$monthYear}. {$priceStr}"
+            . "Buy PTA-approved {$brandName} with official warranty and fast delivery. "
+            . "Updated specs & deals at Phones Dukan.";
+    }
+
+    /**
+     * Build a category page title.
+     * Pattern: {Category} Prices in Pakistan {Month Year} | Phones Dukan
+     */
+    public static function categoryTitle(string $categoryName): string
+    {
+        return $categoryName . ' Prices in Pakistan ' . date('F Y') . ' – Updated Rates | Phones Dukan';
+    }
+
+    public static function categoryDescription(string $categoryName): string
+    {
+        $monthYear = date('F Y');
+        return "{$categoryName} prices in Pakistan {$monthYear}. "
+            . "Compare latest models from top brands, PTA-approved devices, "
+            . "verified specs, and fast delivery. Shop at Phones Dukan.";
+    }
+
+    /**
+     * Build a brand page title.
+     * Pattern: {Brand} {Category} Price in Pakistan {Month Year} | Phones Dukan
+     */
+    public static function brandTitle(string $brandName, string $categoryName): string
+    {
+        return "{$brandName} {$categoryName} Price in Pakistan " . date('F Y') . ' | Phones Dukan';
+    }
+
+    public static function brandDescription(string $brandName, string $categoryName): string
+    {
+        $monthYear = date('F Y');
+        return "{$brandName} {$categoryName} price in Pakistan {$monthYear}. "
+            . "All PTA-approved {$brandName} models with updated prices, specs, and fast delivery. "
+            . "Best {$brandName} deals at Phones Dukan.";
+    }
+
+    // ── FAQ Schema builder ────────────────────────────────────────────────
+
+    /**
+     * Generate a FAQPage JSON-LD block ready to embed in a <script> tag.
+     *
+     * @param array<array{question:string,answer:string}> $faqs
+     */
+    public static function faqSchema(array $faqs): string
+    {
+        $items = array_map(fn($faq) => [
+            '@type'          => 'Question',
+            'name'           => $faq['question'],
+            'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text'  => $faq['answer'],
+            ],
+        ], $faqs);
+
+        return json_encode([
+            '@context'   => 'https://schema.org',
+            '@type'      => 'FAQPage',
+            'mainEntity' => $items,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+
+    // ── Article Schema builder (for blog posts) ───────────────────────────
+
+    /**
+     * @param array{title:string,description:string,url:string,image:string,datePublished:string,dateModified:string,authorName:string} $post
+     */
+    public static function articleSchema(array $post): string
+    {
+        return json_encode([
+            '@context'        => 'https://schema.org',
+            '@type'           => 'Article',
+            'headline'        => $post['title'],
+            'description'     => $post['description'],
+            'url'             => $post['url'],
+            'image'           => $post['image'],
+            'datePublished'   => $post['datePublished'],
+            'dateModified'    => $post['dateModified'] ?? $post['datePublished'],
+            'author'          => [
+                '@type' => 'Organization',
+                'name'  => 'Phones Dukan',
+                'url'   => self::BASE,
+            ],
+            'publisher'       => [
+                '@type' => 'Organization',
+                '@id'   => 'https://www.phonesdukan.com/#organization',
+                'name'  => 'Phones Dukan',
+                'logo'  => [
+                    '@type' => 'ImageObject',
+                    'url'   => self::BASE . 'public/assets/images/phonesdukan_logo.webp',
+                ],
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id'   => $post['url'],
+            ],
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+
+    // ── Open Graph image helper ───────────────────────────────────────────
+
+    /**
+     * Return the best available OG image URL, falling back to the store logo.
+     */
+    public static function ogImage(?string $productImageUrl = null): string
+    {
+        if (!empty($productImageUrl)) {
+            return $productImageUrl;
+        }
+        return self::BASE . 'public/assets/images/phonesdukan_logo.webp';
+    }
+}

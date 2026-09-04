@@ -1,4 +1,4 @@
-const pdBasePath = (window.location.pathname.split('/').filter(Boolean)[0] === 'phonesdukan') ? '/phonesdukan' : '';
+const pdBasePath = String(window.__PD_BASE_PATH__ || '').replace(/\/+$/, '');
 window.pdWithBase = window.pdWithBase || function (path) {
     const baseUrl = pdBasePath + '/';
     if (!path) return baseUrl;
@@ -6,6 +6,45 @@ window.pdWithBase = window.pdWithBase || function (path) {
     if (path.startsWith(pdBasePath + '/')) return path;
     if (path.startsWith('/')) return pdBasePath + path;
     return pdBasePath + '/' + path;
+};
+
+window.pdGetScrollRoot = window.pdGetScrollRoot || function () {
+    return document.getElementById('pd-page-scroll')
+        || document.scrollingElement
+        || document.documentElement;
+};
+
+window.pdGetScrollY = window.pdGetScrollY || function () {
+    const root = window.pdGetScrollRoot();
+    if (root === document.scrollingElement || root === document.documentElement || root === document.body) {
+        return window.scrollY || window.pageYOffset || 0;
+    }
+    return root.scrollTop || 0;
+};
+
+window.pdScrollTo = window.pdScrollTo || function (x, y) {
+    const root = window.pdGetScrollRoot();
+    const top = typeof y === 'number' ? y : 0;
+    const left = typeof x === 'number' ? x : 0;
+    if (root === document.scrollingElement || root === document.documentElement || root === document.body) {
+        window.scrollTo(left, top);
+        return;
+    }
+    root.scrollTo(left, top);
+    root.scrollTop = top;
+    root.scrollLeft = left;
+};
+
+window.pdBuildProductPath = window.pdBuildProductPath || function (product) {
+    const parts = [
+        product.brand_slug || '',
+        product.category_slug || '',
+    ];
+    if (product.subcategory_slug) {
+        parts.push(product.subcategory_slug);
+    }
+    parts.push(product.product_slug || '');
+    return '/' + parts.filter(Boolean).join('/');
 };
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -24,13 +63,197 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebarContainer = document.getElementById("sidebar-container");
     const sidebarOverlay = document.getElementById("sidebar-overlay");
     const headerStack = document.querySelector(".pd-header-stack");
+    const announcementBar = document.querySelector(".pd-announcement-bar");
+    const announcementTrack = document.querySelector(".pd-announcement-track");
+
+    function initAnnouncementMarquee() {
+        if (!announcementTrack) return;
+
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reducedMotion) {
+            announcementTrack.classList.remove("pd-marquee-active");
+            announcementTrack.style.animation = "none";
+            return;
+        }
+
+        var resizeTimer = null;
+        var lastHalfWidth = 0;
+        var syncAttempts = 0;
+
+        function syncMarqueeSpeed() {
+            var viewport = announcementTrack.closest(".pd-announcement-viewport");
+            var viewWidth = viewport ? viewport.clientWidth : window.innerWidth;
+            var totalWidth = announcementTrack.scrollWidth;
+            var halfWidth = totalWidth / 2;
+
+            if (!halfWidth || halfWidth < viewWidth * 0.4) {
+                announcementTrack.classList.remove("pd-marquee-active");
+                if (syncAttempts < 12) {
+                    syncAttempts += 1;
+                    window.requestAnimationFrame(function () {
+                        window.setTimeout(syncMarqueeSpeed, 50);
+                    });
+                }
+                return;
+            }
+
+            syncAttempts = 0;
+            if (Math.abs(halfWidth - lastHalfWidth) < 1) {
+                if (!announcementTrack.classList.contains("pd-marquee-active")) {
+                    announcementTrack.classList.add("pd-marquee-active");
+                }
+                return;
+            }
+
+            lastHalfWidth = halfWidth;
+            var pxPerSecond = 38;
+            var duration = Math.max(18, halfWidth / pxPerSecond);
+            announcementTrack.style.setProperty("--pd-ticker-shift", "-" + halfWidth + "px");
+            announcementTrack.style.setProperty("--pd-ticker-duration", duration + "s");
+            announcementTrack.classList.remove("pd-marquee-active");
+            void announcementTrack.offsetWidth;
+            announcementTrack.classList.add("pd-marquee-active");
+        }
+
+        function scheduleSync() {
+            syncAttempts = 0;
+            window.requestAnimationFrame(syncMarqueeSpeed);
+        }
+
+        window.PDAnnouncement = {
+            sync: scheduleSync
+        };
+
+        function debouncedSync() {
+            if (resizeTimer) {
+                clearTimeout(resizeTimer);
+            }
+            resizeTimer = window.setTimeout(scheduleSync, 200);
+        }
+
+        scheduleSync();
+        window.addEventListener("resize", debouncedSync, { passive: true });
+        window.addEventListener("orientationchange", function () {
+            lastHalfWidth = 0;
+            window.setTimeout(scheduleSync, 200);
+        }, { passive: true });
+        window.addEventListener("pageshow", function () {
+            lastHalfWidth = 0;
+            window.setTimeout(scheduleSync, 80);
+        }, { passive: true });
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function () {
+                lastHalfWidth = 0;
+                scheduleSync();
+            }).catch(function () {});
+        }
+
+        window.addEventListener("load", function () {
+            lastHalfWidth = 0;
+            scheduleSync();
+        }, { passive: true });
+
+        if (window.PDSafeArea) {
+            window.setTimeout(function () {
+                lastHalfWidth = 0;
+                scheduleSync();
+            }, 250);
+        }
+    }
+
+    function readSafeAreaTop() {
+        if (window.PDSafeArea && typeof window.PDSafeArea.apply === "function") {
+            window.PDSafeArea.apply();
+            return;
+        }
+        const root = document.documentElement;
+        const probe = document.createElement("div");
+        probe.style.cssText = "position:fixed;padding-top:constant(safe-area-inset-top);padding-top:env(safe-area-inset-top);visibility:hidden;pointer-events:none;";
+        root.appendChild(probe);
+        const inset = parseFloat(window.getComputedStyle(probe).paddingTop) || 0;
+        probe.remove();
+        root.style.setProperty("--safe-area-top", inset + "px");
+    }
+
+    function readCssPx(value) {
+        return parseFloat(value) || 0;
+    }
+
+    function updateFixedChromeMetrics() {
+        const root = document.documentElement;
+        let annH = announcementTrack ? announcementTrack.offsetHeight : 0;
+        let headerH = headerStack ? headerStack.offsetHeight : 0;
+
+        if (announcementTrack && announcementTrack.offsetHeight) {
+            annH = announcementTrack.offsetHeight;
+        } else {
+            annH = 0;
+        }
+        root.style.setProperty("--announcement-height", annH + "px");
+        if (headerStack && headerStack.offsetHeight) {
+            headerH = headerStack.offsetHeight;
+            root.style.setProperty("--header-height", headerH + "px");
+        }
+
+        const padTop = readCssPx(getComputedStyle(root).getPropertyValue("--pd-chrome-pad-top"));
+        let totalOffset = Math.round(padTop + annH + headerH);
+
+        const siteChrome = document.getElementById("pd-site-chrome");
+        const isMobileLayout = window.matchMedia && window.matchMedia("(max-width: 992px)").matches;
+        const scrollY = window.pdGetScrollY ? window.pdGetScrollY() : (window.scrollY || 0);
+        if (scrollY < 2) {
+            if (isMobileLayout && siteChrome) {
+                const chromeBottom = siteChrome.getBoundingClientRect().bottom;
+                if (chromeBottom > 0) {
+                    totalOffset = Math.round(chromeBottom);
+                }
+            } else if (headerStack) {
+                const headerBottom = headerStack.getBoundingClientRect().bottom;
+                if (headerBottom > 0) {
+                    totalOffset = Math.round(headerBottom);
+                }
+            }
+        }
+
+        root.style.setProperty("--pd-chrome-offset", totalOffset + "px");
+
+        const spacer = document.querySelector(".pd-chrome-spacer");
+        if (spacer) {
+            spacer.style.height = totalOffset + "px";
+            spacer.style.minHeight = totalOffset + "px";
+        }
+    }
+
+    window.PDChromeMetrics = {
+        update: updateFixedChromeMetrics
+    };
 
     if (headerStack) {
+        readSafeAreaTop();
+        initAnnouncementMarquee();
+        updateFixedChromeMetrics();
+        window.addEventListener("resize", updateFixedChromeMetrics, { passive: true });
+        window.addEventListener("orientationchange", updateFixedChromeMetrics, { passive: true });
+
+        if (typeof ResizeObserver !== "undefined") {
+            const chromeObserver = new ResizeObserver(updateFixedChromeMetrics);
+            if (headerStack) chromeObserver.observe(headerStack);
+            if (announcementTrack) chromeObserver.observe(announcementTrack);
+            var siteChrome = document.getElementById("pd-site-chrome");
+            if (siteChrome) chromeObserver.observe(siteChrome);
+        }
+
         const setHeaderScrolledState = () => {
-            headerStack.classList.toggle("is-scrolled", window.scrollY > 8);
+            const y = window.pdGetScrollY ? window.pdGetScrollY() : (window.scrollY || 0);
+            headerStack.classList.toggle("is-scrolled", y > 8);
         };
 
         setHeaderScrolledState();
+        const scrollRoot = window.pdGetScrollRoot ? window.pdGetScrollRoot() : window;
+        if (scrollRoot && scrollRoot !== document.documentElement && scrollRoot !== document.body && scrollRoot !== document.scrollingElement) {
+            scrollRoot.addEventListener("scroll", setHeaderScrolledState, { passive: true });
+        }
         window.addEventListener("scroll", setHeaderScrolledState, { passive: true });
     }
 
@@ -57,6 +280,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         body.classList.remove("dimmed"); // Optional: Remove dimming effect from body
     }
+
+    window.PDSidebar = {
+        close: closeSidebarFunction,
+    };
 
     // Mobile hamburger icon click event (for opening sidebar)
     if (mobileMenuToggle) {
@@ -87,27 +314,32 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// dropdwon of mobile
+// Expandable sidebar categories
 document.addEventListener("DOMContentLoaded", function () {
-    const categoryHeading = document.getElementById("mobiles-category");
-    const categoryContent = document.getElementById("mobiles-content");
-    const toggleIcon = document.getElementById("mobiles-toggle-icon");
+    document.querySelectorAll(".sb-category-item--expandable").forEach(function (item) {
+        const categoryHeading = item.querySelector(".category-heading");
+        const categoryContent = item.querySelector(".category-content");
+        const toggleIcon = item.querySelector(".dropdown-icon");
 
-    if (!categoryHeading || !categoryContent || !toggleIcon) {
-        return;
-    }
-
-    // Hide the subcategory list by default
-    categoryContent.style.display = "none";
-
-    categoryHeading.addEventListener("click", function () {
-        if (categoryContent.style.display === "none") {
-            categoryContent.style.display = "block";
-            toggleIcon.innerHTML = "&#x25B2;"; // Change to up arrow
-        } else {
-            categoryContent.style.display = "none";
-            toggleIcon.innerHTML = "&#x25BC;"; // Change to down arrow
+        if (!categoryHeading || !categoryContent || !toggleIcon) {
+            return;
         }
+
+        categoryContent.style.display = "none";
+
+        categoryHeading.addEventListener("click", function (event) {
+            if (event.target.closest(".category-link")) {
+                return;
+            }
+
+            if (categoryContent.style.display === "none") {
+                categoryContent.style.display = "block";
+                toggleIcon.innerHTML = "&#x25B2;";
+            } else {
+                categoryContent.style.display = "none";
+                toggleIcon.innerHTML = "&#x25BC;";
+            }
+        });
     });
 });
 
@@ -146,55 +378,139 @@ if (mobileCloseButton && mobileSearchContainer && mobileSearchInput && mobileSea
     });
 }
 
-// Function to sanitize input by removing unwanted characters
+// Allow normal product-name characters (hyphen, underscore, brackets, etc.)
 function sanitizeInput(input) {
-    return input.replace(/[^a-zA-Z0-9\s]/g, ''); // Removes anything except letters, numbers, and spaces
+    return String(input).replace(/[<>\\`]/g, '');
 }
 
-// Live search on mobile
+function uniqueValues(values) {
+    const seen = new Set();
+    return values.filter((item) => {
+        if (!item || seen.has(item)) return false;
+        seen.add(item);
+        return true;
+    });
+}
+
+function resolveSearchImageCandidates(rawUrl) {
+    const placeholder = window.pdWithBase('/public/assets/images/phonesdukan_logo.webp');
+    if (!rawUrl) return [placeholder];
+
+    const candidates = [];
+    const pushCandidate = (value) => {
+        if (typeof value !== 'string') return;
+        const v = value.trim();
+        if (!v) return;
+        candidates.push(v);
+    };
+
+    let normalized = String(rawUrl).trim().replace(/\\/g, '/');
+    normalized = normalized.replace(/^file:\/\/\/?/i, '');
+    normalized = normalized.replace(/^[A-Za-z]:\/xampp\/htdocs\/phonesdukan\//i, '');
+    normalized = normalized.replace(/^\.\/+/, '');
+
+    if (/^https?:\/\//i.test(normalized)) {
+        pushCandidate(normalized);
+    }
+
+    if (normalized.startsWith('/')) {
+        pushCandidate(normalized);
+        pushCandidate(window.pdWithBase(normalized));
+    } else {
+        pushCandidate('/' + normalized);
+        pushCandidate(window.pdWithBase('/' + normalized));
+    }
+
+    const withoutBase = normalized.replace(/^\/?phonesdukan\//i, '');
+    if (withoutBase !== normalized) {
+        pushCandidate('/' + withoutBase);
+        pushCandidate(window.pdWithBase('/' + withoutBase));
+    }
+
+    const publicUploadsIdx = normalized.toLowerCase().indexOf('public/uploads/');
+    if (publicUploadsIdx >= 0) {
+        const publicPath = normalized.slice(publicUploadsIdx);
+        pushCandidate('/' + publicPath.replace(/^\/+/, ''));
+        pushCandidate(window.pdWithBase('/' + publicPath.replace(/^\/+/, '')));
+    }
+
+    if (/^uploads\//i.test(normalized)) {
+        pushCandidate(window.pdWithBase('/public/' + normalized));
+    }
+
+    if (/^public\//i.test(normalized)) {
+        pushCandidate(window.pdWithBase('/' + normalized));
+    }
+
+    pushCandidate(placeholder);
+    return uniqueValues(candidates);
+}
+
+function createSearchImage(product) {
+    const img = document.createElement('img');
+    img.alt = product.product_name || 'Product';
+    img.className = 'search-img';
+
+    const candidates = resolveSearchImageCandidates(product.image_url || '');
+    let candidateIndex = 0;
+    img.src = candidates[candidateIndex];
+    img.onerror = function () {
+        candidateIndex += 1;
+        if (candidateIndex < candidates.length) {
+            img.src = candidates[candidateIndex];
+            return;
+        }
+        img.onerror = null;
+    };
+
+    return img;
+}
+
+// Live search on mobile (debounced — fires 300ms after user stops typing)
 if (mobileSearchInput && mobileSearchResults) {
-mobileSearchInput.addEventListener("input", function () {
-    let query = mobileSearchInput.value;
-    let sanitizedQuery = sanitizeInput(query);
+    let mobileSearchTimer = null;
+    mobileSearchInput.addEventListener("input", function () {
+        let query = mobileSearchInput.value;
+        let sanitizedQuery = sanitizeInput(query);
 
-    // If the sanitized query is different, update the input value
-    if (sanitizedQuery !== query) {
-        mobileSearchInput.value = sanitizedQuery;
-    }
+        if (sanitizedQuery !== query) mobileSearchInput.value = sanitizedQuery;
 
-    // If input is less than 2 characters, clear results and exit
-    if (sanitizedQuery.trim().length < 2) {
-        mobileSearchResults.innerHTML = ""; // Hide results if less than 2 characters
-        mobileSearchResults.style.display = "none"; // Hide the results dropdown
-        return;
-    }
+        if (sanitizedQuery.trim().length < 2) {
+            mobileSearchResults.innerHTML = "";
+            mobileSearchResults.style.display = "none";
+            return;
+        }
 
-    // Fetch search results
-    fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
-        .then(response => response.json())
-        .then(data => {
-            mobileSearchResults.innerHTML = ""; // Clear previous results
-            if (data.length > 0) {
-                mobileSearchResults.style.display = "block"; // Show results if there are any
-                data.forEach(product => {
-                    const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
-                    const resultItem = document.createElement("div");
-                    resultItem.classList.add("search-item");
-                    resultItem.innerHTML = `
-                        <a href="${productUrl}">
-                            <img src="${product.image_url.replace(/\\/g, '')}" alt="${product.product_name}" class="search-img">
-                            <span class="search-text">${product.product_name}</span>
-                        </a>
-                    `;
-                    mobileSearchResults.appendChild(resultItem);
-                });
-            } else {
-                mobileSearchResults.style.display = "block"; // Show "No results found" if no products match
-                mobileSearchResults.innerHTML = "<div class='search-item'>No results found</div>";
-            }
-        })
-        .catch(error => console.error("Error fetching mobile search results:", error));
-});
+        clearTimeout(mobileSearchTimer);
+        mobileSearchTimer = setTimeout(function () {
+            fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
+                .then(response => response.json())
+                .then(data => {
+                    mobileSearchResults.innerHTML = "";
+                    if (data.length > 0) {
+                        mobileSearchResults.style.display = "block";
+                        data.forEach(product => {
+                            const productUrl = window.pdWithBase(window.pdBuildProductPath(product));
+                            const resultItem = document.createElement("div");
+                            resultItem.classList.add("search-item");
+                            const link = document.createElement('a');
+                            link.href = productUrl;
+                            link.appendChild(createSearchImage(product));
+                            const text = document.createElement('span');
+                            text.className = 'search-text';
+                            text.textContent = product.product_name || '';
+                            link.appendChild(text);
+                            resultItem.appendChild(link);
+                            mobileSearchResults.appendChild(resultItem);
+                        });
+                    } else {
+                        mobileSearchResults.style.display = "block";
+                        mobileSearchResults.innerHTML = "<div class='search-item search-no-results'>No results found</div>";
+                    }
+                })
+                .catch(error => console.error("Error fetching mobile search results:", error));
+        }, 300);
+    });
 }
 
 // Redirect to search results page on Enter key press
@@ -210,57 +526,51 @@ mobileSearchInput.addEventListener("keypress", function (event) {
 }
 
 
-    // Function to sanitize input by removing unwanted characters
-    function sanitizeInput(input) {
-        return input.replace(/[^a-zA-Z0-9\s]/g, ''); // Allows letters, numbers, and spaces
-    }
-
-
     if (!searchInput || !searchResults || !closeButton) {
         return;
     }
 
+    let desktopSearchTimer = null;
     searchInput.addEventListener("input", function () {
-        let query = searchInput.value; // Get the original input value
-
-        // ✅ Sanitize input but allow spaces
+        let query = searchInput.value;
         let sanitizedQuery = sanitizeInput(query);
 
-        // ✅ Update input value only if different (prevents cursor jumping issues)
-        if (sanitizedQuery !== query) {
-            searchInput.value = sanitizedQuery;
-        }
+        if (sanitizedQuery !== query) searchInput.value = sanitizedQuery;
 
-        // ✅ Trim spaces & check length
         if (sanitizedQuery.trim().length < 2) {
             searchResults.innerHTML = "";
             closeButton.style.display = "none";
             return;
         }
 
-        // ✅ Send search request
-        fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
-            .then(response => response.json())
-            .then(data => {
-                searchResults.innerHTML = ""; // Clear previous results
-                if (data.length > 0) {
-                    closeButton.style.display = "flex";
-                    data.forEach(product => {
-                        const productUrl = window.pdWithBase(`/${product.category_slug}/${product.brand_slug}/${product.product_slug}`);
-                        const li = document.createElement("li");
-                        li.innerHTML = `
-                            <a href="${productUrl}" class="search-item">
-                                <img src="${product.image_url.replace(/\\/g, '')}" alt="${product.product_name}" class="search-img">
-                                <span class="search-text">${product.product_name}</span>
-                            </a>
-                        `;
-                        searchResults.appendChild(li);
-                    });
-                } else {
-                    searchResults.innerHTML = "<li>No results found</li>";
-                }
-            })
-            .catch(error => console.error("Error fetching search results:", error));
+        clearTimeout(desktopSearchTimer);
+        desktopSearchTimer = setTimeout(function () {
+            fetch(window.pdWithBase(`/public/ajax/search_products.php?query=${encodeURIComponent(sanitizedQuery)}`))
+                .then(response => response.json())
+                .then(data => {
+                    searchResults.innerHTML = "";
+                    if (data.length > 0) {
+                        closeButton.style.display = "flex";
+                        data.forEach(product => {
+                            const productUrl = window.pdWithBase(window.pdBuildProductPath(product));
+                            const li = document.createElement("li");
+                            const link = document.createElement('a');
+                            link.href = productUrl;
+                            link.className = 'search-item';
+                            link.appendChild(createSearchImage(product));
+                            const text = document.createElement('span');
+                            text.className = 'search-text';
+                            text.textContent = product.product_name || '';
+                            link.appendChild(text);
+                            li.appendChild(link);
+                            searchResults.appendChild(li);
+                        });
+                    } else {
+                        searchResults.innerHTML = "<li class=\"search-no-results\">No results found</li>";
+                    }
+                })
+                .catch(error => console.error("Error fetching search results:", error));
+        }, 300);
     });
 
 
@@ -283,4 +593,17 @@ mobileSearchInput.addEventListener("keypress", function (event) {
         searchInput.value = "";
         closeButton.style.display = "none";
     });
+
+    // Yellow search button click — redirect to search results
+    const searchBtn = document.getElementById("desktop-search-btn");
+    if (searchBtn) {
+        searchBtn.addEventListener("click", function () {
+            let query = sanitizeInput(searchInput.value.trim());
+            if (query.length >= 2) {
+                window.location.href = window.pdWithBase(`/search/?query=${encodeURIComponent(query)}`);
+            } else {
+                searchInput.focus();
+            }
+        });
+    }
 });

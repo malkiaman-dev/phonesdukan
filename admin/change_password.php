@@ -16,10 +16,10 @@ if ($_SESSION['admin_role'] === 'superadmin') {
     $stmt->execute([$_SESSION['admin_id']]);
     $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-include __DIR__ . '/admin_sidebar.php';
-
-// Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar
+include __DIR__ . '/admin_sidebar.php';
 ?>
 
 <!DOCTYPE html>

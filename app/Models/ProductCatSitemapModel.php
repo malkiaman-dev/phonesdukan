@@ -11,19 +11,23 @@ class CategorySitemapModel {
         $this->db = $db;
     }
 
-    // Function to fetch all category slugs, only active categories
+    // Function to fetch all category slugs that have at least one active product
     public function getAllCategorySlugs() {
-        // SQL to fetch category slugs, filtering by category status = 1
         $query = "
             SELECT c.slug AS category_slug
             FROM categories c
-            WHERE c.status = 1  -- Only include active categories (status = 1)
+            WHERE c.status = 1
+              AND EXISTS (
+                  SELECT 1
+                  FROM products p
+                  WHERE p.category_id = c.category_id
+                    AND p.product_status = 1
+              )
         ";
         
         $stmt = $this->db->prepare($query);
-        $stmt->execute(); // Execute the query
+        $stmt->execute();
 
-        // Fetch all the results as an associative array
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

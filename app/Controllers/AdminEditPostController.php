@@ -1,8 +1,11 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ob_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once __DIR__ . '/../Models/AdminPostModel.php';
 
 class AdminEditPostController {
@@ -10,7 +13,7 @@ class AdminEditPostController {
 
     public function __construct() {
         if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-            header("Location: /admin/login.php");
+            header("Location: " . url('admin/login.php'));
             exit();
         }
         $this->postModel = new AdminPostModel();
@@ -24,13 +27,14 @@ class AdminEditPostController {
                 echo "<h1>404 - Post Not Found</h1>";
                 exit();
             }
-            error_log("Loaded post_id: $post_id for editing");
             $categories = $this->postModel->getAllCategories();
             $post_categories = $this->postModel->getPostCategories($post_id);
             $images = $this->postModel->getPostImages($post_id);
             $success = $_GET['success'] ?? null;
             $error = $_GET['error'] ?? null;
-            require_once __DIR__ . '/../../admin/edit_post.php';
+            $GLOBALS['__EDIT_POST_RENDER__'] = true;
+            include __DIR__ . '/../../admin/edit_post.php';
+            unset($GLOBALS['__EDIT_POST_RENDER__']);
         } catch (Exception $e) {
             error_log("Index Error: " . $e->getMessage());
             header("HTTP/1.0 500 Internal Server Error");
@@ -45,8 +49,6 @@ class AdminEditPostController {
             return;
         }
 
-        error_log('POST Data: ' . print_r($_POST, true));
-        error_log('FILES Data: ' . print_r($_FILES, true));
 
         $data = [
             'title' => trim($_POST['title'] ?? ''),
@@ -65,7 +67,6 @@ class AdminEditPostController {
         ];
 
         $main_image_id = isset($_POST['main_image_id']) ? trim($_POST['main_image_id']) : '';
-        error_log("main_image_id received: " . ($main_image_id ?: 'none'));
 
         $upload_dir = dirname(__DIR__, 2) . '/public/uploads/posts/';
         if (!is_dir($upload_dir)) {
@@ -110,7 +111,6 @@ class AdminEditPostController {
 
                     $new_image_id = 'new_' . $key . '_' . time();
                     $is_main = ($main_image_id === $new_image_id);
-                    error_log("New image ID: $new_image_id, is_main: " . ($is_main ? 'true' : 'false'));
                     $data['images'][] = [
                         'url' => '/public/uploads/posts/' . $filename,
                         'name' => $name,
@@ -133,7 +133,6 @@ class AdminEditPostController {
                 $image_data['is_main'] = ($main_image_id === (string)$image_id);
                 $image_data['alt_text'] = trim($image_data['alt_text'] ?? '');
                 $image_data['caption'] = trim($image_data['caption'] ?? '');
-                error_log("Existing image ID: $image_id, is_main: " . ($image_data['is_main'] ? 'true' : 'false'));
             }
         }
 
@@ -150,9 +149,8 @@ class AdminEditPostController {
             if ($seo_count > 1) {
                 error_log("Warning: Multiple SEO rows detected for post_id $post_id");
             }
-            error_log("Post $post_id updated successfully");
             ob_end_clean();
-            header("Location: /admin/edit-post/$post_id?success=" . urlencode("Post updated successfully"));
+            header("Location: " . url('admin/edit-post/' . (int)$post_id . '?success=' . urlencode("Post updated successfully")));
             exit;
         } catch (Exception $e) {
             error_log("Update Error: " . $e->getMessage());
@@ -172,8 +170,9 @@ class AdminEditPostController {
         $post_categories = $this->postModel->getPostCategories($post_id);
         $images = $this->postModel->getPostImages($post_id);
         $success = null;
-        error_log("Rendering edit page for post_id: $post_id with error: " . ($error ?? 'none'));
-        require_once __DIR__ . '/../../admin/edit_post.php';
+        $GLOBALS['__EDIT_POST_RENDER__'] = true;
+        include __DIR__ . '/../../admin/edit_post.php';
+        unset($GLOBALS['__EDIT_POST_RENDER__']);
         ob_end_flush();
     }
 

@@ -52,16 +52,27 @@ class ContactController {
                         $headers .= "MIME-Version: 1.0\r\n";
                         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
-                        // Send the email
-                        if (mail($to, $emailSubject, $emailBody, $headers)) {
-                            // Set success message in session
-                            $_SESSION['success'] = "Your message has been sent successfully.";
-                            // Redirect to avoid duplicate form submission
-                            header('Location: ' . $_SERVER['REQUEST_URI']);
-                            exit();
-                        } else {
-                            $_SESSION['error'] = "Message saved but failed to send email.";
+                        // Try to send email notification, but never break user flow if local SMTP is unavailable.
+                        $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''));
+                        $isLocalHost = $host === 'localhost'
+                            || strpos($host, 'localhost:') === 0
+                            || strpos($host, '127.0.0.1') !== false
+                            || strpos($host, '::1') !== false;
+
+                        $mailSent = false;
+                        if (!$isLocalHost && function_exists('mail')) {
+                            $mailSent = @mail($to, $emailSubject, $emailBody, $headers);
                         }
+
+                        if (!$mailSent) {
+                            error_log("Contact form mail notification failed for {$email} (subject: {$subject}).");
+                        }
+
+                        // Set success message and redirect (PRG) with explicit sent flag for reliable display.
+                        $_SESSION['success'] = "Your message has been sent successfully.";
+                        $requestPath = parse_url((string)($_SERVER['REQUEST_URI'] ?? '/contact-us/'), PHP_URL_PATH) ?: '/contact-us/';
+                        header('Location: ' . $requestPath . '?sent=1');
+                        exit();
                     } else {
                         $this->error = "Failed to save message in database.";
                     }

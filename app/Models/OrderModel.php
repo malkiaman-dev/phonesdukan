@@ -1,12 +1,9 @@
 <?php
 require_once __DIR__ . '/../Models/TrackingModel.php';
 require_once __DIR__ . '/../../database/db.php'; // Ensure correct database connection
-require_once dirname(__DIR__, 2) . '/app/PHPMailer/PHPMailer.php';
-require_once dirname(__DIR__, 2) . '/app/PHPMailer/SMTP.php';
-require_once dirname(__DIR__, 2) . '/app/PHPMailer/Exception.php';
+require_once __DIR__ . '/../config/mail.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 class OrderModel {
@@ -31,28 +28,20 @@ class OrderModel {
         $this->db = $database->getConnection();
         
         if (!$this->db) {
-            error_log("ERROR: Database connection failed.");
             die("Database connection error.");
-        } else {
-            error_log("DEBUG: Database connection established successfully.");
         }
     }
 
 
     public function createOrder($orderData) {
         try {
-            error_log("DEBUG: Received Order Data: " . json_encode($orderData));
-    
-            // Ensure payment_method is set
             if (!isset($orderData['payment_method']) || empty($orderData['payment_method'])) {
-                $orderData['payment_method'] = 'COD'; // Default value
+                $orderData['payment_method'] = 'COD';
             }
-    
-            error_log("DEBUG: Payment Method: " . $orderData['payment_method']);
-    
+
             $query = "INSERT INTO orders (customer_name, customer_email, customer_phone, total_price, order_status, payment_method)
                       VALUES (:customer_name, :customer_email, :customer_phone, :total_price, :order_status, :payment_method)";
-    
+
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':customer_name', $orderData['customer_name']);
             $stmt->bindParam(':customer_email', $orderData['customer_email']);
@@ -60,19 +49,13 @@ class OrderModel {
             $stmt->bindParam(':total_price', $orderData['total_price']);
             $stmt->bindParam(':order_status', $orderData['order_status']);
             $stmt->bindParam(':payment_method', $orderData['payment_method'], PDO::PARAM_STR);
-    
-            error_log("DEBUG: Running Query...");
-    
+
             if ($stmt->execute()) {
-                $orderId = $this->db->lastInsertId();
-                error_log("✅ Order Created! ID: " . $orderId);
-                return ['success' => true, 'order_id' => $orderId];
+                return ['success' => true, 'order_id' => $this->db->lastInsertId()];
             } else {
-                error_log("❌ SQL Error: " . implode(", ", $stmt->errorInfo()));
                 return ['success' => false, 'message' => 'Order creation failed'];
             }
         } catch (Exception $e) {
-            error_log("❌ Exception: " . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
@@ -84,103 +67,90 @@ class OrderModel {
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
     
         if ($order && $order['confirmation_email_sent']) {
-            error_log("Order confirmation email already sent for Order ID: $order_id. Skipping.");
             return false;
         }
     
         // Admin email
         $admin_email = 'admin@phonesdukan.com';
     
-        // Create instance of PHPMailer
-        $mail = new PHPMailer(true);
-    
+        $formattedTotal = 'Rs. ' . number_format((float)$total_price, 2);
+        $orderDate      = date('F j, Y');
+
+        // ── User email body ───────────────────────────────────────────────────
+        $user_body  = "<tr><td style='background:#f7d117;padding:24px 40px;text-align:center;'>";
+        $user_body .= "<p style='margin:0 0 4px 0;font-size:11px;font-weight:700;color:#111111;letter-spacing:3px;text-transform:uppercase;font-family:Arial,sans-serif;'>Order Confirmed</p>";
+        $user_body .= "<h2 style='margin:0;font-size:26px;color:#111111;font-family:Arial,sans-serif;'>Thank You, $customer_name!</h2>";
+        $user_body .= "</td></tr>";
+
+        $user_body .= "<tr><td style='padding:32px 40px;'>";
+        $user_body .= "<p style='margin:0 0 24px 0;font-size:15px;color:#555555;line-height:1.7;font-family:Arial,sans-serif;'>Your order has been received and is now being processed. We will notify you once your order is dispatched.</p>";
+
+        // Order summary box
+        $user_body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;margin-bottom:28px;'>";
+        $user_body .= "<tr><td style='background:#111111;padding:14px 24px;'><span style='font-size:12px;font-weight:700;color:#f7d117;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif;'>Order Summary</span></td></tr>";
+        $user_body .= "<tr><td style='padding:0 24px;'>";
+        $user_body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+        $user_body .= "<tr><td style='padding:14px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#888888;font-family:Arial,sans-serif;'>Order ID</td><td style='padding:14px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#111111;font-family:Arial,sans-serif;text-align:right;'>#$order_id</td></tr>";
+        $user_body .= "<tr><td style='padding:14px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#888888;font-family:Arial,sans-serif;'>Date</td><td style='padding:14px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#111111;font-family:Arial,sans-serif;text-align:right;'>$orderDate</td></tr>";
+        $user_body .= "<tr><td style='padding:14px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#888888;font-family:Arial,sans-serif;'>Status</td><td style='padding:14px 0;border-bottom:1px solid #f0f0f0;text-align:right;'><span style='background:#f7d117;color:#111111;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;font-family:Arial,sans-serif;'>Processing</span></td></tr>";
+        $user_body .= "<tr><td style='padding:16px 0;font-size:15px;font-weight:700;color:#111111;font-family:Arial,sans-serif;'>Total Amount</td><td style='padding:16px 0;font-size:20px;font-weight:700;color:#111111;font-family:Arial,sans-serif;text-align:right;'>$formattedTotal</td></tr>";
+        $user_body .= "</table></td></tr></table>";
+
+        // Track order button
+        $user_body .= "<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='margin:0 auto 28px;'>";
+        $user_body .= "<tr><td style='background:#111111;border-radius:6px;border:2px solid #f7d117;'>";
+        $user_body .= "<a href='https://phonesdukan.com/track-order/' style='display:inline-block;padding:14px 36px;font-size:15px;font-weight:700;color:#f7d117;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:0.5px;'>Track My Order &rarr;</a>";
+        $user_body .= "</td></tr></table>";
+
+        // Help box
+        $user_body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+        $user_body .= "<tr><td style='background:#f8f8f8;border-radius:8px;padding:20px 24px;'>";
+        $user_body .= "<p style='margin:0 0 6px 0;font-size:14px;font-weight:700;color:#111111;font-family:Arial,sans-serif;'>Need Help?</p>";
+        $user_body .= "<p style='margin:0;font-size:13px;color:#777777;font-family:Arial,sans-serif;line-height:1.7;'>WhatsApp: <a href='https://wa.me/+923116600031' style='color:#f7d117;font-weight:600;text-decoration:none;'>+92 311 6600031</a><br>Email: <a href='mailto:info@phonesdukan.com' style='color:#f7d117;text-decoration:none;'>info@phonesdukan.com</a></p>";
+        $user_body .= "</td></tr></table>";
+        $user_body .= "</td></tr>";
+
+        // ── Admin email body (simple internal) ────────────────────────────────
+        $admin_body  = "<tr><td style='padding:32px 40px;'>";
+        $admin_body .= "<h2 style='margin:0 0 20px 0;font-size:20px;color:#111111;font-family:Arial,sans-serif;'>New Order Received</h2>";
+        $admin_body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='border:1px solid #e8e8e8;border-radius:8px;overflow:hidden;'>";
+        $admin_body .= "<tr><td style='background:#111111;padding:12px 20px;'><span style='font-size:12px;font-weight:700;color:#f7d117;letter-spacing:1px;text-transform:uppercase;font-family:Arial,sans-serif;'>Order Details</span></td></tr>";
+        $admin_body .= "<tr><td style='padding:0 20px;'><table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+        $admin_body .= "<tr><td style='padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#888;font-family:Arial,sans-serif;'>Order ID</td><td style='padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;color:#111;font-family:Arial,sans-serif;text-align:right;'>#$order_id</td></tr>";
+        $admin_body .= "<tr><td style='padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#888;font-family:Arial,sans-serif;'>Customer</td><td style='padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#111;font-family:Arial,sans-serif;text-align:right;'>$customer_name</td></tr>";
+        $admin_body .= "<tr><td style='padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#888;font-family:Arial,sans-serif;'>Email</td><td style='padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#111;font-family:Arial,sans-serif;text-align:right;'>$user_email</td></tr>";
+        $admin_body .= "<tr><td style='padding:14px 0;font-size:14px;font-weight:700;color:#111;font-family:Arial,sans-serif;'>Total</td><td style='padding:14px 0;font-size:18px;font-weight:700;color:#111;font-family:Arial,sans-serif;text-align:right;'>$formattedTotal</td></tr>";
+        $admin_body .= "</table></td></tr></table>";
+        $admin_body .= "</td></tr>";
+
         try {
-            // SMTP server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.hostinger.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'info@phonesdukan.com';
-            $mail->Password = '@Azmeryal@123##';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port = 465;
-    
-            // Email debug
-            $mail->SMTPDebug = 0;
-    
-            // User email setup
-            $mail->setFrom('info@phonesdukan.com', 'Phones Dukan');
+            $mail = createMailer();
             $mail->addAddress($user_email);
-            $mail->isHTML(true);
             $mail->Subject = "Order Confirmation - Order #$order_id";
-    
-            // Load external CSS file content
-            $css = file_get_contents('/public/assets/css/frontend/email.css/'); // Make sure this path is correct
-    
-            // Creating a colorful, professional user email message
-            $user_message = "
-            <html>
-            <head>
-                <style>
-                    $css
-                </style>
-            </head>
-            <body>
-                <div class='email-container'>
-                    <div class='email-header'>
-                        <h2>Thank You for Your Order!</h2>
-                    </div>
-                    <div class='email-body'>
-                        <p>Dear $customer_name,</p>
-                        <p>Your order with <strong>Order ID: $order_id</strong> has been successfully placed.</p>
-                        <p><strong>Total Price: $total_price</strong></p>
-                        <p>We will notify you once your order has been processed. You can track your order status in your account.</p>
-                        <a href='https://phonesdukan.com/track-order/' class='cta-button'>Track Your Order</a>
-                    </div>
-                    <div class='email-footer'>
-                        <p>Thank you for shopping with Phones Dukan!</p>
-                        <p>If you have any questions, feel free to contact our support team.</p>
-                    </div>
-                </div>
-            </body>
-            </html>";
-    
-            $mail->Body = $user_message;
-    
+            $mail->Body    = emailShell($user_body);
+            $mail->AltBody = "Hi $customer_name, your Phones Dukan order #$order_id has been confirmed.\nTotal: $formattedTotal\nTrack your order at: https://phonesdukan.com/track-order/";
+
             if (!$mail->send()) {
                 throw new Exception("Error sending email to user: " . $mail->ErrorInfo);
             }
-    
+
             // Send to admin
             $mail->clearAddresses();
             $mail->addAddress($admin_email);
-    
-            // Admin email content
-            $admin_message = "
-            <html>
-            <body>
-                <h2>New Order Received!</h2>
-                <p><strong>Order ID:</strong> $order_id</p>
-                <p><strong>Customer Name:</strong> $customer_name</p>
-                <p><strong>Total Price:</strong> $total_price</p>
-                <p>Please process the order accordingly.</p>
-            </body>
-            </html>";
-            $mail->Body = $admin_message;
-    
+            $mail->Subject = "New Order #$order_id - $customer_name";
+            $mail->Body    = emailShell($admin_body);
+            $mail->AltBody = "New order received. Order #$order_id | Customer: $customer_name | Total: $formattedTotal";
+
             if (!$mail->send()) {
                 throw new Exception("Error sending email to admin: " . $mail->ErrorInfo);
             }
-    
-            // ✅ Update email sent status
+
             $updateStmt = $this->db->prepare("UPDATE orders SET confirmation_email_sent = 1 WHERE order_id = ?");
             $updateStmt->execute([$order_id]);
-    
-            error_log("Order confirmation emails sent and status updated for Order ID: $order_id");
-    
             return true;
-    
+
         } catch (Exception $e) {
-            error_log("Error in sending email: " . $mail->ErrorInfo);
+            error_log('Order email send failed (Order #' . $order_id . '): ' . $e->getMessage());
             return false;
         }
     }
@@ -188,37 +158,21 @@ class OrderModel {
     
     public function addOrderItem($orderId, $item) {
         try {
-            error_log("DEBUG: Entered addOrderItem() for Order ID: " . $orderId);
-            error_log("DEBUG: Order Item Data: " . json_encode($item));
-
-            // Validate required fields
             if (!isset($item['product_id'], $item['quantity'], $item['subtotal_price'])) {
-                error_log("ERROR: Missing required item data. Item: " . json_encode($item));
                 return false;
             }
 
-            $query = "INSERT INTO order_items (order_id, product_id, quantity, subtotal_price) 
-                      VALUES (:order_id, :product_id, :quantity, :subtotal_price)";
-
-            $stmt = $this->db->prepare($query);
+            $stmt = $this->db->prepare(
+                "INSERT INTO order_items (order_id, product_id, quantity, subtotal_price)
+                 VALUES (:order_id, :product_id, :quantity, :subtotal_price)"
+            );
             $stmt->bindParam(':order_id', $orderId, PDO::PARAM_INT);
             $stmt->bindParam(':product_id', $item['product_id'], PDO::PARAM_INT);
             $stmt->bindParam(':quantity', $item['quantity'], PDO::PARAM_INT);
             $stmt->bindParam(':subtotal_price', $item['subtotal_price'], PDO::PARAM_STR);
-
-            error_log("DEBUG: Executing addOrderItem() for Order ID: $orderId, Product ID: " . $item['product_id']);
-
-            if (!$stmt->execute()) {
-                error_log("ERROR: Order item insertion failed - Order ID: $orderId, Product ID: " . $item['product_id']);
-                error_log("SQL Error: " . implode(", ", $stmt->errorInfo()));
-                return false;
-            } 
-
-            error_log("DEBUG: Order item inserted successfully - Order ID: $orderId, Product ID: " . $item['product_id']);
-            return true;
+            return $stmt->execute();
 
         } catch (Exception $e) {
-            error_log("ERROR: Exception in addOrderItem - " . $e->getMessage());
             return false;
         }
     }
@@ -300,37 +254,48 @@ class OrderModel {
     
 
     private function sendOrderCompletionEmail($user_email, $customer_name, $order_id) {
-        $mail = new PHPMailer(true);
-    
+        $completionDate = date('F j, Y');
+
+        $body  = "<tr><td style='background:#111111;padding:32px 40px;text-align:center;border-bottom:4px solid #f7d117;'>";
+        $body .= "<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='margin:0 auto 16px;'>";
+        $body .= "<tr><td style='width:64px;height:64px;background:#f7d117;border-radius:50%;text-align:center;vertical-align:middle;line-height:64px;font-size:32px;font-weight:700;color:#111111;font-family:Arial,sans-serif;'>&#10003;</td></tr></table>";
+        $body .= "<h2 style='margin:0 0 6px 0;font-size:26px;color:#ffffff;font-family:Arial,sans-serif;'>Order Delivered!</h2>";
+        $body .= "<p style='margin:0;font-size:13px;color:#888888;font-family:Arial,sans-serif;'>Order #$order_id &bull; $completionDate</p>";
+        $body .= "</td></tr>";
+
+        $body .= "<tr><td style='padding:32px 40px;'>";
+        $body .= "<p style='margin:0 0 24px 0;font-size:15px;color:#555555;line-height:1.7;font-family:Arial,sans-serif;'>";
+        $body .= "Dear <strong style='color:#111111;'>$customer_name</strong>,<br><br>Your order <strong style='color:#111111;'>#$order_id</strong> has been marked as <strong style='color:#111111;'>Completed</strong>. We hope you are enjoying your new device!";
+        $body .= "</p>";
+
+        // Review request box
+        $body .= "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:28px;'>";
+        $body .= "<tr><td style='background:#fffbf0;border:1px solid #f7d117;border-radius:8px;padding:28px 24px;text-align:center;'>";
+        $body .= "<p style='margin:0 0 6px 0;font-size:16px;font-weight:700;color:#111111;font-family:Arial,sans-serif;'>How was your experience?</p>";
+        $body .= "<p style='margin:0 0 20px 0;font-size:13px;color:#777777;font-family:Arial,sans-serif;'>Your feedback helps us serve you better.</p>";
+        $body .= "<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='margin:0 auto;'>";
+        $body .= "<tr><td style='background:#f7d117;border-radius:6px;'>";
+        $body .= "<a href='https://www.phonesdukan.com/submit-review/' style='display:inline-block;padding:12px 28px;font-size:14px;font-weight:700;color:#111111;text-decoration:none;font-family:Arial,sans-serif;'>Leave a Review</a>";
+        $body .= "</td></tr></table>";
+        $body .= "</td></tr></table>";
+
+        // Shop again button
+        $body .= "<table role='presentation' cellpadding='0' cellspacing='0' border='0' style='margin:0 auto;'>";
+        $body .= "<tr><td style='background:#111111;border-radius:6px;'>";
+        $body .= "<a href='https://phonesdukan.com' style='display:inline-block;padding:12px 32px;font-size:14px;font-weight:700;color:#f7d117;text-decoration:none;font-family:Arial,sans-serif;'>Shop Again &rarr;</a>";
+        $body .= "</td></tr></table>";
+        $body .= "</td></tr>";
+
         try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.hostinger.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'info@phonesdukan.com';
-            $mail->Password = '@Azmeryal@123##';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port = 465;
-    
-            $mail->setFrom('info@phonesdukan.com', 'Phones Dukan');
+            $mail = createMailer();
             $mail->addAddress($user_email);
-    
-            $mail->isHTML(true);
-            $mail->Subject = "Your Order #$order_id is Now Complete!";
-            $mail->Body = "<html><body>
-                            <h2>Order Completed</h2>
-                            <p>Dear $customer_name,</p>
-                            <p>Your order <strong>#$order_id</strong> has been marked as <strong>Complete</strong>.</p>
-                            <p>Thank you for shopping with Phones Dukan!</p>
-                           </body></html>";
-    
-            if (!$mail->send()) {
-                throw new Exception("Error sending order completion email: " . $mail->ErrorInfo);
-            }
-    
-            error_log("✅ Order completion email sent to $user_email for Order ID: $order_id");
-    
+            $mail->Subject = "Your Order #$order_id is Complete - Phones Dukan";
+            $mail->Body    = emailShell($body);
+            $mail->AltBody = "Hi $customer_name, your Phones Dukan order #$order_id has been completed.\n\nWe'd love your feedback: https://www.phonesdukan.com/submit-review/\n\nThank you for shopping with us!";
+            $mail->send();
+            error_log("Order completion email sent to $user_email for Order ID: $order_id");
         } catch (Exception $e) {
-            error_log("❌ Failed to send completion email: " . $e->getMessage());
+            error_log("Failed to send completion email: " . $e->getMessage());
         }
     }
 

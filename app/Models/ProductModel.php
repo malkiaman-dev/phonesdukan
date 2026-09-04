@@ -17,7 +17,6 @@ class ProductModel
             error_log('Database connection failed: ' . $e->getMessage());
             throw new RuntimeException('Failed to connect to database');
         }
-        error_log("Using ProductModel version 2025-05-19-3");
     }
 
     /**
@@ -26,20 +25,144 @@ class ProductModel
      * @param string $product_slug
      * @return array<string,mixed>|null
      */
-    public function getProductBySlug(string $category_slug, string $brand_slug, string $product_slug): ?array
+    private static function normalizeSlug(string $slug): string
     {
-        $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
-                  FROM products p
-                  INNER JOIN categories c ON p.category_id = c.category_id
-                  INNER JOIN brands b ON p.brand_id = b.brand_id
-                  WHERE c.slug = :category_slug
-                  AND b.slug = :brand_slug
-                  AND p.product_slug = :product_slug
+        // Replace spaces and multiple hyphens with a single hyphen, trim edges
+        return trim(preg_replace('/-+/', '-', str_replace(' ', '-', $slug)), '-');
+    }
+
+    private function productSelectSql(): string
+    {
+        return 'SELECT p.*, c.slug AS category_slug, c.category_name,
+                       b.slug AS brand_slug, b.brand_name,
+                       sc.slug AS subcategory_slug, sc.category_name AS subcategory_name,
+                       p.regular_price, p.sale_price
+                FROM products p
+                INNER JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+                INNER JOIN brands b ON p.brand_id = b.brand_id';
+    }
+
+    public function getProductByPermalink(
+        string $brand_slug,
+        string $category_slug,
+        string $subcategory_slug,
+        string $product_slug
+    ): ?array {
+        $product_slug = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug = self::normalizeSlug($brand_slug);
+        $subcategory_slug = self::normalizeSlug($subcategory_slug);
+
+        $query = $this->productSelectSql() . '
+                  WHERE REPLACE(b.slug, " ", "-") = :brand_slug
+                  AND REPLACE(c.slug, " ", "-") = :category_slug
+                  AND REPLACE(sc.slug, " ", "-") = :subcategory_slug
+                  AND REPLACE(p.product_slug, " ", "-") = :product_slug
+                  AND p.subcategory_id IS NOT NULL
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':subcategory_slug', $subcategory_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function getProductByPermalinkNoSub(
+        string $brand_slug,
+        string $category_slug,
+        string $product_slug
+    ): ?array {
+        $product_slug = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug = self::normalizeSlug($brand_slug);
+
+        $query = $this->productSelectSql() . '
+                  WHERE REPLACE(b.slug, " ", "-") = :brand_slug
+                  AND REPLACE(c.slug, " ", "-") = :category_slug
+                  AND REPLACE(p.product_slug, " ", "-") = :product_slug
+                  AND p.subcategory_id IS NULL
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /** Legacy URL order: /category/brand/product */
+    public function getProductByLegacyPermalink(
+        string $category_slug,
+        string $brand_slug,
+        string $product_slug
+    ): ?array {
+        $product_slug = self::normalizeSlug($product_slug);
+        $category_slug = self::normalizeSlug($category_slug);
+        $brand_slug = self::normalizeSlug($brand_slug);
+
+        $query = $this->productSelectSql() . '
+                  WHERE REPLACE(c.slug, " ", "-") = :category_slug
+                  AND REPLACE(b.slug, " ", "-") = :brand_slug
+                  AND REPLACE(p.product_slug, " ", "-") = :product_slug
                   LIMIT 1';
 
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
         $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /** @deprecated Use getProductByLegacyPermalink or getProductByPermalinkNoSub */
+    public function getProductBySlug(string $category_slug, string $brand_slug, string $product_slug): ?array
+    {
+        return $this->getProductByLegacyPermalink($category_slug, $brand_slug, $product_slug);
+    }
+
+    /**
+     * Case-insensitive fallback: useful when URL uses wrong casing.
+     */
+    public function getProductBySlugCaseInsensitive(string $category_slug, string $brand_slug, string $product_slug): ?array
+    {
+        $query = 'SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, p.regular_price, p.sale_price
+                  FROM products p
+                  INNER JOIN categories c ON p.category_id = c.category_id
+                  INNER JOIN brands b ON p.brand_id = b.brand_id
+                  WHERE LOWER(c.slug) = LOWER(:category_slug)
+                  AND LOWER(b.slug) = LOWER(:brand_slug)
+                  AND LOWER(p.product_slug) = LOWER(:product_slug)
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':category_slug', $category_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':brand_slug', $brand_slug, PDO::PARAM_STR);
+        $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /**
+     * Last-resort fallback: find a product by product_slug alone.
+     * Used to detect URL/slug mismatches and issue a 301 redirect.
+     */
+    public function getProductByProductSlugOnly(string $product_slug): ?array
+    {
+        $query = $this->productSelectSql() . '
+                  WHERE p.product_slug = :product_slug
+                  LIMIT 1';
+
+        $stmt = $this->db->prepare($query);
         $stmt->bindParam(':product_slug', $product_slug, PDO::PARAM_STR);
         $stmt->execute();
 
@@ -63,7 +186,7 @@ class ProductModel
             FROM product_images pi
             LEFT JOIN image_metadata im ON pi.image_id = im.image_id
             WHERE pi.product_id = :product_id
-            ORDER BY pi.is_primary DESC, pi.image_id ASC
+            ORDER BY pi.sort_order ASC, pi.is_primary DESC, pi.image_id ASC
         ';
 
         $stmt = $this->db->prepare($sql);
@@ -74,37 +197,349 @@ class ProductModel
     }
 
     /**
+     * Images + video merged for the product page gallery.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public function getProductGalleryMedia(int $product_id): array
+    {
+        require_once dirname(__DIR__) . '/Models/ProductMediaModel.php';
+        $mediaModel = new ProductMediaModel($this->db);
+
+        try {
+            return $mediaModel->getFrontendGalleryMedia($product_id);
+        } catch (PDOException $e) {
+            error_log('getProductGalleryMedia fallback: ' . $e->getMessage());
+            $images = $this->getProductImages($product_id);
+            return array_map(static function (array $img): array {
+                return array_merge($img, ['type' => 'image']);
+            }, $images);
+        }
+    }
+
+    /**
      * @param string $query
      * @param int $limit
      * @return array<int,array<string,mixed>>
      */
+    /**
+     * Synonym / intent groups so casual queries map to the right products.
+     *
+     * @return array<int, array{
+     *   phrases: array<int, string>,
+     *   terms: array<int, string>,
+     *   keywords: array<int, string>,
+     *   category_slugs: array<int, string>
+     * }>
+     */
+    private function searchIntentGroups(): array
+    {
+        return [
+            [
+                'phrases' => ['smart phone', 'smart phones', 'cell phone', 'cell phones', 'mobile phone', 'mobile phones'],
+                'terms' => ['phone', 'phones', 'mobile', 'mobiles', 'smartphone', 'smartphones', 'cellphone', 'cellphones', 'handset', 'handsets'],
+                // Category-only: most phone names are "Samsung Galaxy..." without the word "phone"
+                'keywords' => [],
+                'category_slugs' => ['mobiles'],
+            ],
+            [
+                'phrases' => ['wireless earbuds', 'bluetooth earbuds', 'ear buds', 'air pods', 'neckband'],
+                'terms' => ['earbud', 'earbuds', 'earphone', 'earphones', 'airpod', 'airpods', 'buds', 'tws', 'headset', 'headsets'],
+                'keywords' => ['earbud', 'earphone', 'airpod', 'airpods', 'buds', 'tws', 'headset'],
+                'category_slugs' => ['wireless-earbuds', 'headphones', 'handsfree'],
+            ],
+            [
+                'phrases' => ['bluetooth speaker', 'bluetooth speakers', 'bt speaker'],
+                'terms' => ['speaker', 'speakers'],
+                'keywords' => ['speaker', 'bluetooth'],
+                'category_slugs' => ['bluetooth-speakers'],
+            ],
+            [
+                'phrases' => ['head phone', 'head phones'],
+                'terms' => ['headphone', 'headphones', 'earcup'],
+                'keywords' => ['headphone', 'headset'],
+                'category_slugs' => ['headphones'],
+            ],
+            [
+                'phrases' => ['smart watch', 'smart watches', 'smartwatch'],
+                'terms' => ['smartwatch', 'smartwatches', 'watch', 'watches'],
+                'keywords' => ['watch', 'smartwatch'],
+                'category_slugs' => ['smart-watches'],
+            ],
+            [
+                'phrases' => ['power bank', 'power banks', 'powerbank'],
+                'terms' => ['powerbank', 'powerbanks'],
+                'keywords' => ['powerbank', 'power bank'],
+                'category_slugs' => ['power-banks'],
+            ],
+            [
+                'phrases' => ['mobile charger', 'phone charger', 'wall charger', 'fast charger'],
+                'terms' => ['charger', 'chargers', 'adapter', 'adapters'],
+                'keywords' => ['charger', 'adapter'],
+                'category_slugs' => ['mobile-chargers', 'car-charger'],
+            ],
+            [
+                'phrases' => ['car charger', 'car chargers'],
+                'terms' => [],
+                'keywords' => ['car charger'],
+                'category_slugs' => ['car-charger'],
+            ],
+            [
+                'phrases' => ['mobile cable', 'phone cable', 'charging cable', 'data cable', 'type c', 'type-c', 'usb c', 'usb-c'],
+                'terms' => ['cable', 'cables', 'cord', 'cords'],
+                'keywords' => ['cable', 'type c', 'usb'],
+                'category_slugs' => ['mobile-cables'],
+            ],
+            [
+                'phrases' => ['phone cover', 'mobile cover', 'back cover', 'phone case', 'mobile case'],
+                'terms' => ['cover', 'covers', 'case', 'cases'],
+                'keywords' => ['cover', 'case'],
+                'category_slugs' => ['mobile-cover', 'cases-protection'],
+            ],
+            [
+                'phrases' => ['tempered glass', 'screen protector', 'screen guard'],
+                'terms' => ['protector', 'protectors', 'glass'],
+                'keywords' => ['tempered', 'protector', 'glass'],
+                'category_slugs' => ['tempered-glass', 'cases-protection'],
+            ],
+            [
+                'phrases' => ['cooling fan', 'phone cooler'],
+                'terms' => ['cooler', 'coolers', 'fan', 'fans'],
+                'keywords' => ['cooling', 'cooler', 'fan'],
+                'category_slugs' => ['cooling-fan'],
+            ],
+            [
+                'phrases' => ['mobile accessory', 'mobile accessories', 'phone accessory', 'phone accessories'],
+                'terms' => ['accessory', 'accessories'],
+                'keywords' => ['accessory'],
+                'category_slugs' => ['mobile-accessories', 'accessories'],
+            ],
+            [
+                'phrases' => ['bluetooth'],
+                'terms' => ['bluetooth', 'bt'],
+                'keywords' => ['bluetooth', 'wireless', 'bt'],
+                'category_slugs' => ['wireless-earbuds', 'bluetooth-speakers', 'headphones', 'handsfree'],
+            ],
+        ];
+    }
+
+    /**
+     * Detect intent groups and leftover literal tokens from a normalized query.
+     *
+     * @return array{intents: array<int, array<string, mixed>>, tokens: array<int, string>, consumed: array<int, string>}
+     */
+    private function resolveSearchIntents(string $normalizedQuery): array
+    {
+        $haystack = ' ' . trim(preg_replace('/\s+/', ' ', $normalizedQuery) ?? '') . ' ';
+        $groups = $this->searchIntentGroups();
+        $matchedIndexes = [];
+        $consumed = [];
+
+        // Pass 1: longest phrases first so "car charger" beats bare "charger"
+        $phraseHits = [];
+        foreach ($groups as $index => $group) {
+            foreach ($group['phrases'] as $phrase) {
+                $phraseHits[] = ['index' => $index, 'phrase' => $phrase, 'len' => strlen($phrase)];
+            }
+        }
+        usort($phraseHits, static fn(array $a, array $b): int => $b['len'] <=> $a['len']);
+
+        foreach ($phraseHits as $hit) {
+            $needle = ' ' . $hit['phrase'] . ' ';
+            if (str_contains($haystack, $needle)) {
+                $matchedIndexes[$hit['index']] = true;
+                $consumed[] = $hit['phrase'];
+                $haystack = str_replace($needle, ' ', $haystack);
+            }
+        }
+
+        // Pass 2: single-term intents on whatever is left
+        foreach ($groups as $index => $group) {
+            foreach ($group['terms'] as $term) {
+                if (preg_match('/\b' . preg_quote($term, '/') . '\b/', $haystack)) {
+                    $matchedIndexes[$index] = true;
+                    $consumed[] = $term;
+                    $haystack = preg_replace('/\b' . preg_quote($term, '/') . '\b/', ' ', $haystack) ?? $haystack;
+                }
+            }
+        }
+
+        $matchedIntents = [];
+        foreach (array_keys($matchedIndexes) as $index) {
+            $matchedIntents[] = $groups[$index];
+        }
+
+        $remaining = preg_split('/\s+/', trim(preg_replace('/\s+/', ' ', $haystack) ?? ''), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $stopWords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'on', 'with', 'buy', 'best', 'price', 'pakistan'];
+        $remaining = array_values(array_filter(
+            $remaining,
+            static fn(string $token): bool => strlen($token) >= 2 && !in_array($token, $stopWords, true)
+        ));
+
+        return [
+            'intents' => $matchedIntents,
+            'tokens' => $remaining,
+            'consumed' => array_values(array_unique($consumed)),
+        ];
+    }
+
     public function searchProducts(string $query, int $limit = 10): array
     {
-        $query = trim($query);
-        $query = htmlspecialchars($query, ENT_QUOTES, 'UTF-8');
-        $limit = max(1, $limit);
+        $query = trim(html_entity_decode($query, ENT_QUOTES, 'UTF-8'));
+        if ($query === '') {
+            return [];
+        }
 
-        $stmt = $this->db->prepare('
-            SELECT 
-                p.product_name, 
-                p.product_slug, 
-                c.slug AS category_slug, 
-                b.slug AS brand_slug, 
-                pi.image_url 
+        $limit = max(1, min($limit, 100));
+
+        $normalized = strtolower(preg_replace('/[^a-zA-Z0-9\s]+/', ' ', $query) ?? '');
+        $normalized = trim(preg_replace('/\s+/', ' ', $normalized) ?? '');
+        if ($normalized === '') {
+            return [];
+        }
+
+        $resolved = $this->resolveSearchIntents($normalized);
+        $intents = $resolved['intents'];
+        $literalTokens = $resolved['tokens'];
+
+        // Fallback: if no intents and no leftover tokens, tokenize the whole query
+        if ($intents === [] && $literalTokens === []) {
+            $literalTokens = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $stopWords = ['a', 'an', 'the', 'and', 'or', 'of', 'for', 'to', 'in', 'on', 'with'];
+            $literalTokens = array_values(array_filter(
+                $literalTokens,
+                static fn(string $token): bool => strlen($token) >= 2 && !in_array($token, $stopWords, true)
+            ));
+        }
+
+        // Match against punctuation-stripped product names
+        $nameExpr = "LOWER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(p.product_name, '(', ' '), ')', ' '), '-', ' '), '/', ' '), '.', ' '), ',', ' '))";
+        $categoryExpr = 'LOWER(COALESCE(c.slug, \'\'))';
+        $subcategoryExpr = 'LOWER(COALESCE(sc.slug, \'\'))';
+        $categoryNameExpr = "LOWER(REPLACE(REPLACE(COALESCE(c.category_name, ''), '-', ' '), '_', ' '))";
+        $brandExpr = "LOWER(REPLACE(COALESCE(b.brand_name, ''), '-', ' '))";
+
+        $whereParts = [
+            'p.product_status != 0',
+            "LOWER(CAST(p.product_status AS CHAR)) != 'out of stock'",
+        ];
+        $params = [];
+        $relevanceParts = [];
+        $paramIndex = 0;
+
+        $nextParam = static function (string $prefix) use (&$paramIndex): string {
+            $paramIndex++;
+            return ':' . $prefix . $paramIndex;
+        };
+
+        // Intent groups: match related category OR synonym keywords (OR within group)
+        foreach ($intents as $intent) {
+            $intentClauses = [];
+
+            foreach ($intent['category_slugs'] as $slug) {
+                $catKey = $nextParam('cat');
+                $subKey = $nextParam('sub');
+                $params[$catKey] = $slug;
+                $params[$subKey] = $slug;
+                $intentClauses[] = $categoryExpr . ' = ' . $catKey;
+                $intentClauses[] = $subcategoryExpr . ' = ' . $subKey;
+
+                $boostCat = $nextParam('bcat');
+                $boostSub = $nextParam('bsub');
+                $params[$boostCat] = $slug;
+                $params[$boostSub] = $slug;
+                $relevanceParts[] = 'CASE WHEN ' . $categoryExpr . ' = ' . $boostCat . ' OR ' . $subcategoryExpr . ' = ' . $boostSub . ' THEN 100 ELSE 0 END';
+            }
+
+            foreach ($intent['keywords'] as $keyword) {
+                $nameKey = $nextParam('ikw');
+                $catNameKey = $nextParam('ick');
+                $params[$nameKey] = '%' . $keyword . '%';
+                $params[$catNameKey] = '%' . $keyword . '%';
+                $intentClauses[] = $nameExpr . ' LIKE ' . $nameKey;
+                $intentClauses[] = $categoryNameExpr . ' LIKE ' . $catNameKey;
+
+                $boostKey = $nextParam('bkw');
+                $params[$boostKey] = '%' . $keyword . '%';
+                $relevanceParts[] = 'CASE WHEN ' . $nameExpr . ' LIKE ' . $boostKey . ' THEN 8 ELSE 0 END';
+            }
+
+            if ($intentClauses !== []) {
+                $whereParts[] = '(' . implode(' OR ', $intentClauses) . ')';
+            }
+        }
+
+        // Literal leftover tokens (brands, model names) must still match
+        foreach ($literalTokens as $token) {
+            $nameKey = $nextParam('ltn');
+            $brandKey = $nextParam('ltb');
+            $params[$nameKey] = '%' . $token . '%';
+            $params[$brandKey] = '%' . $token . '%';
+            $whereParts[] = '(' . $nameExpr . ' LIKE ' . $nameKey . ' OR ' . $brandExpr . ' LIKE ' . $brandKey . ')';
+
+            $scoreName = $nextParam('lsn');
+            $scoreBrand = $nextParam('lsb');
+            $params[$scoreName] = '%' . $token . '%';
+            $params[$scoreBrand] = '%' . $token . '%';
+            $relevanceParts[] = 'CASE WHEN ' . $nameExpr . ' LIKE ' . $scoreName . ' THEN 18 ELSE 0 END';
+            $relevanceParts[] = 'CASE WHEN ' . $brandExpr . ' LIKE ' . $scoreBrand . ' THEN 22 ELSE 0 END';
+        }
+
+        // If somehow nothing was added, fall back to simple name contains
+        if (count($whereParts) <= 2) {
+            $fallbackKey = $nextParam('fb');
+            $params[$fallbackKey] = '%' . $normalized . '%';
+            $whereParts[] = $nameExpr . ' LIKE ' . $fallbackKey;
+            $relevanceParts[] = '1';
+        }
+
+        $allTokensForPhrase = array_values(array_unique(array_merge(
+            $literalTokens,
+            $resolved['consumed'] ?? []
+        )));
+        if ($allTokensForPhrase === []) {
+            $allTokensForPhrase = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [$normalized];
+        }
+
+        $phraseKey = $nextParam('ph');
+        $startsKey = $nextParam('st');
+        $params[$phraseKey] = '%' . implode('%', $allTokensForPhrase) . '%';
+        $params[$startsKey] = $allTokensForPhrase[0] . '%';
+
+        $relevanceSql = ($relevanceParts === [] ? '0' : '(' . implode(' + ', $relevanceParts) . ')')
+            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $phraseKey . ' THEN 35 ELSE 0 END'
+            . ' + CASE WHEN ' . $nameExpr . ' LIKE ' . $startsKey . ' THEN 15 ELSE 0 END';
+
+        $sql = '
+            SELECT p.product_id, p.product_name, p.product_slug,
+                   COALESCE(p.regular_price, 0) AS regular_price,
+                   NULLIF(p.sale_price, \'\') AS sale_price,
+                   COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                   p.product_status, p.product_tag,
+                   pi.image_url,
+                   c.slug AS category_slug,
+                   b.slug AS brand_slug,
+                   sc.slug AS subcategory_slug,
+                   (' . $relevanceSql . ') AS relevance_score
             FROM products p
-            LEFT JOIN product_images pi ON p.product_id = pi.product_id
             LEFT JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
-            WHERE p.product_status = 1
-            AND p.product_name LIKE :query
-            AND pi.is_primary = 1
+            LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+            WHERE ' . implode(' AND ', $whereParts) . '
+            GROUP BY p.product_id
+            ORDER BY relevance_score DESC, p.created_at DESC
             LIMIT :limit
-        ');
+        ';
 
-        $stmt->bindValue(':query', "%$query%", PDO::PARAM_STR);
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
@@ -129,14 +564,17 @@ class ProductModel
      */
     public function getProductDetails(int $product_id): ?array
     {
-        $query = 'SELECT p.*, 
-                         b.brand_name, 
-                         c.category_name, 
-                         c.slug AS category_slug, 
-                         b.slug AS brand_slug
+        $query = 'SELECT p.*,
+                         b.brand_name,
+                         c.category_name,
+                         c.slug AS category_slug,
+                         b.slug AS brand_slug,
+                         sc.slug AS subcategory_slug,
+                         sc.category_name AS subcategory_name
                   FROM products p
                   LEFT JOIN brands b ON p.brand_id = b.brand_id
                   LEFT JOIN categories c ON p.category_id = c.category_id
+                  LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
                   WHERE p.product_id = :product_id';
 
         $stmt = $this->db->prepare($query);
@@ -180,14 +618,10 @@ class ProductModel
      */
     public function generateProductSchema(int $product_id): string
     {
-        error_log("START: Generating schema for product ID {$product_id} at " . date('Y-m-d H:i:s'));
-    
         $product = $this->getProductDetails($product_id);
         if (!$product) {
-            error_log("ERROR: No product found for ID {$product_id}");
             return json_encode([], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }
-        error_log("Product data retrieved for ID {$product_id}: " . json_encode($product, JSON_UNESCAPED_UNICODE));
     
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -213,10 +647,8 @@ class ProductModel
             $description = $product['product_name'] . ' is a high-quality mobile phone with advanced features.';
         }
     
-        $category_slug = $product['category_slug'] ?? 'mobiles';
-        $brand_slug = $product['brand_slug'] ?? 'brand';
-        $product_slug = $product['product_slug'] ?? $this->slugify($product['product_name']);
-        $product_url = "{$baseUrl}/{$category_slug}/{$brand_slug}/{$product_slug}";
+        require_once dirname(__DIR__, 2) . '/includes/functions.php';
+        $product_url = rtrim($baseUrl, '/') . buildProductPathFromRow($product);
     
         // Get reviews
         $reviews = $this->getProductReviews($product_id);
@@ -262,12 +694,13 @@ class ProductModel
             'sku' => $sku
         ];
     
-        $availability = ($product['product_status'] == 1 && ($product['stock_quantity'] ?? 0) > 0)
-            ? 'https://schema.org/InStock'
-            : 'https://schema.org/OutOfStock';
+        $availability = isProductComingSoon($product)
+            ? 'https://schema.org/PreOrder'
+            : (($product['product_status'] == 1 && ($product['stock_quantity'] ?? 0) > 0)
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock');
     
         $attributes = $this->getProductAttributes($product_id);
-        error_log("Attributes for product ID {$product_id}: " . (empty($attributes) ? 'None' : json_encode($attributes, JSON_UNESCAPED_UNICODE)));
     
         // Add additionalProperty for attributes (e.g., Storage, Color)
         if (!empty($attributes)) {
@@ -295,12 +728,10 @@ class ProductModel
                     ];
                 }
             }
-            error_log("Added additionalProperty for product ID {$product_id}: " . json_encode($main_schema['additionalProperty'], JSON_UNESCAPED_UNICODE));
         }
     
         // Handle product offers
         if (!empty($attributes)) {
-            error_log("Processing attributed product ID {$product_id}");
             $offers = [];
     
             foreach ($attributes as $index => $attribute) {
@@ -308,6 +739,10 @@ class ProductModel
                 $sale_price = (isset($attribute['sale_price']) && is_numeric($attribute['sale_price'])) ? (float)$attribute['sale_price'] : 0;
                 $variantPrice = ($sale_price > 0) ? $sale_price : $regular_price;
                 $variantPrice = is_numeric($variantPrice) ? number_format((float)$variantPrice, 2, '.', '') : '0.00';
+
+                if ((float) $variantPrice <= 0) {
+                    continue;
+                }
     
                 $variantSku = $sku . '-' . ($attribute['value_id'] ?? ($index + 1));
                 if ($variantSku === '-') {
@@ -321,24 +756,25 @@ class ProductModel
                     'availability' => $availability,
                     'url' => $product_url . '?variant=' . ($attribute['value_id'] ?? ($index + 1)),
                     'itemCondition' => 'https://schema.org/NewCondition',
-                    'priceValidUntil' => date('Y-m-d', strtotime('+5 years')),
-                    'shippingDetails' => [
-                        '@type' => 'OfferShippingDetails',
-                        'shippingRate' => [
-                            '@type' => 'MonetaryAmount',
-                            'currency' => 'PKR',
-                            'value' => '0'
+                    'validFrom' => date('c'),
+                    'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                    'shippingDetails' => function_exists('seoMerchantShippingDetails')
+                        ? seoMerchantShippingDetails()
+                        : [
+                            '@type' => 'OfferShippingDetails',
+                            'shippingRate' => ['@type' => 'MonetaryAmount', 'currency' => 'PKR', 'value' => '0'],
+                            'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'PK'],
                         ],
-                        'shippingDestination' => [
-                            '@type' => 'DefinedRegion',
-                            'addressCountry' => 'PK'
-                        ]
-                    ],
-                    'hasMerchantReturnPolicy' => [
-                        '@type' => 'MerchantReturnPolicy',
-                        'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                        'returnWindow' => 'P14D'
-                    ]
+                    'hasMerchantReturnPolicy' => function_exists('seoMerchantReturnPolicy')
+                        ? seoMerchantReturnPolicy()
+                        : [
+                            '@type' => 'MerchantReturnPolicy',
+                            'applicableCountry' => 'PK',
+                            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                            'merchantReturnDays' => 14,
+                            'returnMethod' => 'https://schema.org/ReturnByMail',
+                            'returnFees' => 'https://schema.org/FreeReturn',
+                        ],
                 ];
     
                 $price_specifications = [
@@ -372,47 +808,49 @@ class ProductModel
                 $offers[] = $offer;
             }
     
-            $prices = array_map(function ($attr): float|int {
-                return (isset($attr['sale_price']) && $attr['sale_price'] > 0)
-                    ? $attr['sale_price']
-                    : (isset($attr['regular_price']) && $attr['regular_price'] > 0 ? $attr['regular_price'] : 0);
-            }, $attributes);
-            $minPrice = !empty($prices) ? min(array_filter($prices, 'is_numeric')) : 0;
-            $maxPrice = !empty($prices) ? max(array_filter($prices, 'is_numeric')) : 0;
-            $minPrice = is_numeric($minPrice) ? number_format((float)$minPrice, 2, '.', '') : '0.00';
-            $maxPrice = is_numeric($maxPrice) ? number_format((float)$maxPrice, 2, '.', '') : '0.00';
-    
-            $main_schema['offers'] = [
-                '@type' => 'AggregateOffer',
-                'priceCurrency' => 'PKR',
-                'lowPrice' => $minPrice,
-                'highPrice' => $maxPrice,
-                'offerCount' => count($attributes),
-                'availability' => $availability,
-                'url' => $product_url,
-                'itemCondition' => 'https://schema.org/NewCondition',
-                'priceValidUntil' => date('Y-m-d', strtotime('+5 years')),
-                'offers' => $offers,
-                'shippingDetails' => [
-                    '@type' => 'OfferShippingDetails',
-                    'shippingRate' => [
-                        '@type' => 'MonetaryAmount',
-                        'currency' => 'PKR',
-                        'value' => '0'
-                    ],
-                    'shippingDestination' => [
-                        '@type' => 'DefinedRegion',
-                        'addressCountry' => 'PK'
-                    ]
-                ],
-                'hasMerchantReturnPolicy' => [
-                    '@type' => 'MerchantReturnPolicy',
-                    'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                    'returnWindow' => 'P14D'
-                ]
-            ];
+            $prices = [];
+            foreach ($offers as $offerRow) {
+                if (isset($offerRow['price']) && is_numeric($offerRow['price'])) {
+                    $prices[] = (float) $offerRow['price'];
+                }
+            }
+
+            if (!empty($offers) && !empty($prices)) {
+                $minPrice = number_format(min($prices), 2, '.', '');
+                $maxPrice = number_format(max($prices), 2, '.', '');
+
+                $main_schema['offers'] = [
+                    '@type' => 'AggregateOffer',
+                    'priceCurrency' => 'PKR',
+                    'lowPrice' => $minPrice,
+                    'highPrice' => $maxPrice,
+                    'offerCount' => count($offers),
+                    'availability' => $availability,
+                    'url' => $product_url,
+                    'itemCondition' => 'https://schema.org/NewCondition',
+                    'validFrom' => date('c'),
+                    'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                    'offers' => $offers,
+                    'shippingDetails' => function_exists('seoMerchantShippingDetails')
+                        ? seoMerchantShippingDetails()
+                        : [
+                            '@type' => 'OfferShippingDetails',
+                            'shippingRate' => ['@type' => 'MonetaryAmount', 'currency' => 'PKR', 'value' => '0'],
+                            'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'PK'],
+                        ],
+                    'hasMerchantReturnPolicy' => function_exists('seoMerchantReturnPolicy')
+                        ? seoMerchantReturnPolicy()
+                        : [
+                            '@type' => 'MerchantReturnPolicy',
+                            'applicableCountry' => 'PK',
+                            'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                            'merchantReturnDays' => 14,
+                            'returnMethod' => 'https://schema.org/ReturnByMail',
+                            'returnFees' => 'https://schema.org/FreeReturn',
+                        ],
+                ];
+            }
         } else {
-            error_log("Processing non-attributed product ID {$product_id}");
             $regular_price = isset($product['regular_price']) && is_numeric($product['regular_price']) ? (float)$product['regular_price'] : 0;
             $sale_price = isset($product['sale_price']) && is_numeric($product['sale_price']) ? (float)$product['sale_price'] : 0;
             $final_price = ($sale_price > 0) ? $sale_price : $regular_price;
@@ -420,16 +858,14 @@ class ProductModel
             if ($final_price <= 0) {
                 if (preg_match('/Price in Pakistan:[\s]*(\d+(?:\.\d{1,2})?)(?:\s*PKR)?/i', $description, $matches)) {
                     $final_price = (float)$matches[1];
-                    error_log("Price extracted from description for product ID {$product_id}: {$final_price}");
                 } else {
-                    error_log("Price extraction failed for product ID {$product_id}. Description: {$description}");
                     $final_price = 0;
                 }
             }
             $final_price = number_format($final_price, 2, '.', '');
-    
-            error_log("Non-attribute product ID {$product_id} - sale_price: {$sale_price}, regular_price: {$regular_price}, final_price: {$final_price}");
-    
+
+            // Do not emit zero-price Offers — they trigger Merchant / Soft-404 quality issues.
+            if ((float) $final_price > 0) {
             $main_schema['offers'] = [
                 '@type' => 'Offer',
                 'url' => $product_url,
@@ -437,24 +873,25 @@ class ProductModel
                 'price' => $final_price,
                 'itemCondition' => 'https://schema.org/NewCondition',
                 'availability' => $availability,
-                'priceValidUntil' => date('Y-m-d', strtotime('+5 years')),
-                'shippingDetails' => [
-                    '@type' => 'OfferShippingDetails',
-                    'shippingRate' => [
-                        '@type' => 'MonetaryAmount',
-                        'currency' => 'PKR',
-                        'value' => '0'
+                'validFrom' => date('c'),
+                'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+                'shippingDetails' => function_exists('seoMerchantShippingDetails')
+                    ? seoMerchantShippingDetails()
+                    : [
+                        '@type' => 'OfferShippingDetails',
+                        'shippingRate' => ['@type' => 'MonetaryAmount', 'currency' => 'PKR', 'value' => '0'],
+                        'shippingDestination' => ['@type' => 'DefinedRegion', 'addressCountry' => 'PK'],
                     ],
-                    'shippingDestination' => [
-                        '@type' => 'DefinedRegion',
-                        'addressCountry' => 'PK'
-                    ]
-                ],
-                'hasMerchantReturnPolicy' => [
-                    '@type' => 'MerchantReturnPolicy',
-                    'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-                    'returnWindow' => 'P14D'
-                ]
+                'hasMerchantReturnPolicy' => function_exists('seoMerchantReturnPolicy')
+                    ? seoMerchantReturnPolicy()
+                    : [
+                        '@type' => 'MerchantReturnPolicy',
+                        'applicableCountry' => 'PK',
+                        'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                        'merchantReturnDays' => 14,
+                        'returnMethod' => 'https://schema.org/ReturnByMail',
+                        'returnFees' => 'https://schema.org/FreeReturn',
+                    ],
             ];
     
             $price_specifications = [
@@ -485,6 +922,7 @@ class ProductModel
             }
     
             $main_schema['offers']['priceSpecification'] = count($price_specifications) > 1 ? $price_specifications : $price_specifications[0];
+            }
         }
     
         if (!empty($reviews_schema)) {
@@ -497,41 +935,37 @@ class ProductModel
         }
     
         // Add BreadcrumbList schema
+        $brand_slug = $product['brand_slug'] ?? 'brand';
+        $category_slug = $product['category_slug'] ?? 'mobiles';
+        $subcategory_slug = $product['subcategory_slug'] ?? null;
+        $breadcrumbItems = [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $baseUrl],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => $product['brand_name'] ?? ucwords(str_replace('-', ' ', $brand_slug)), 'item' => $baseUrl . '/' . $brand_slug],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $product['category_name'] ?? ucwords(str_replace('-', ' ', $category_slug)), 'item' => $baseUrl . '/' . $brand_slug . '/' . $category_slug],
+        ];
+        $position = 4;
+        if ($subcategory_slug) {
+            $breadcrumbItems[] = [
+                '@type' => 'ListItem',
+                'position' => $position++,
+                'name' => $product['subcategory_name'] ?? ucwords(str_replace('-', ' ', $subcategory_slug)),
+                'item' => $baseUrl . '/' . $brand_slug . '/' . $category_slug . '/' . $subcategory_slug,
+            ];
+        }
+        $breadcrumbItems[] = [
+            '@type' => 'ListItem',
+            'position' => $position,
+            'name' => $product['product_name'],
+            'item' => $product_url,
+        ];
         $breadcrumb_schema = [
             '@context' => 'https://schema.org',
             '@type' => 'BreadcrumbList',
-            'itemListElement' => [
-                [
-                    '@type' => 'ListItem',
-                    'position' => 1,
-                    'name' => 'Home',
-                    'item' => $baseUrl
-                ],
-                [
-                    '@type' => 'ListItem',
-                    'position' => 2,
-                    'name' => $product['category_name'] ?? ucwords(str_replace('-', ' ', $category_slug)),
-                    'item' => $baseUrl . '/' . $category_slug
-                ],
-                [
-                    '@type' => 'ListItem',
-                    'position' => 3,
-                    'name' => $product['brand_name'] ?? ucwords(str_replace('-', ' ', $brand_slug)),
-                    'item' => $baseUrl . '/' . $category_slug . '/' . $brand_slug
-                ],
-                [
-                    '@type' => 'ListItem',
-                    'position' => 4,
-                    'name' => $product['product_name'],
-                    'item' => $product_url
-                ]
-            ]
+            'itemListElement' => $breadcrumbItems,
         ];
     
         // Output schema
         $schema_output = [$main_schema, $breadcrumb_schema];
-    
-        error_log("Final schema for product ID {$product_id}: " . json_encode($schema_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     
         return json_encode($schema_output, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     }
@@ -603,19 +1037,24 @@ class ProductModel
                     p.brand_id,
                     p.sale_price,
                     p.regular_price,
+                    p.stock_quantity,
+                    p.product_status,
+                    p.product_tag,
                     c.slug AS category_slug,
                     b.slug AS brand_slug,
+                    sc.slug AS subcategory_slug,
                     (
-                        SELECT pi.image_url 
-                        FROM product_images pi 
-                        WHERE pi.product_id = p.product_id 
-                        ORDER BY pi.is_primary DESC, pi.image_id ASC 
+                        SELECT pi.image_url
+                        FROM product_images pi
+                        WHERE pi.product_id = p.product_id
+                        ORDER BY pi.is_primary DESC, pi.image_id ASC
                         LIMIT 1
                     ) AS image_url
                 FROM products p
                 INNER JOIN categories c ON c.category_id = p.category_id AND c.status = 1
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
                 INNER JOIN brands b ON b.brand_id = p.brand_id
-                WHERE p.product_status = 1
+                WHERE p.product_status IN (1, 2)
                   AND p.category_id = :category_id
                   AND p.brand_id = :brand_id
                   AND p.product_id != :exclude_id
@@ -631,6 +1070,171 @@ class ProductModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getListingProductsForCategory(int $categoryId, int $limit, int $offset): array
+    {
+        $sql = 'SELECT p.product_id, p.product_name, p.product_slug,
+                       COALESCE(p.regular_price, 0) AS regular_price,
+                       NULLIF(p.sale_price, \'\') AS sale_price,
+                       COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                       p.product_status, p.product_tag,
+                       pi.image_url,
+                       c.slug AS category_slug,
+                       b.slug AS brand_slug,
+                       sc.slug AS subcategory_slug
+                FROM products p
+                INNER JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+                INNER JOIN brands b ON p.brand_id = b.brand_id
+                LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+                WHERE p.product_status != 0
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+                LIMIT :limit OFFSET :offset';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function countListingProductsForCategory(int $categoryId): int
+    {
+        $sql = 'SELECT COUNT(DISTINCT p.product_id)
+                FROM products p
+                WHERE p.product_status != 0
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function getListingProductsForBrandAndCategory(int $brandId, int $categoryId, int $limit, int $offset): array
+    {
+        $sql = 'SELECT p.product_id, p.product_name, p.product_slug,
+                       COALESCE(p.regular_price, 0) AS regular_price,
+                       NULLIF(p.sale_price, \'\') AS sale_price,
+                       COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                       p.product_status, p.product_tag,
+                       pi.image_url,
+                       c.slug AS category_slug,
+                       b.slug AS brand_slug,
+                       sc.slug AS subcategory_slug
+                FROM products p
+                INNER JOIN categories c ON p.category_id = c.category_id
+                LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+                INNER JOIN brands b ON p.brand_id = b.brand_id
+                LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
+                WHERE p.product_status != 0
+                  AND LOWER(p.product_status) != \'out of stock\'
+                  AND p.brand_id = :brand_id
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )
+                GROUP BY p.product_id
+                ORDER BY p.created_at DESC
+                LIMIT :limit OFFSET :offset';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':brand_id', $brandId, PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function countListingProductsForBrandAndCategory(int $brandId, int $categoryId): int
+    {
+        $sql = 'SELECT COUNT(DISTINCT p.product_id)
+                FROM products p
+                WHERE p.product_status != 0
+                  AND LOWER(p.product_status) != \'out of stock\'
+                  AND p.brand_id = :brand_id
+                  AND (
+                      p.category_id = :category_id
+                      OR p.subcategory_id IN (
+                          SELECT category_id FROM categories WHERE parent_id = :parent_id
+                      )
+                  )';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':brand_id', $brandId, PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':parent_id', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * For product listing cards: if the product is variable, return the lowest
+     * active variation price with a "from_variation" flag so the template can
+     * render "From Rs. X". Falls back to the regular product price otherwise.
+     */
+    public function getDisplayPrice(int $product_id, string $product_type, float $regular_price, ?float $sale_price): array
+    {
+        if ($product_type !== 'variable') {
+            return [
+                'from_variation' => false,
+                'regular_price'  => $regular_price,
+                'sale_price'     => $sale_price,
+            ];
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT MIN(IFNULL(sale_price, regular_price)) AS lowest
+             FROM product_variations
+             WHERE product_id = ? AND status = 1 AND stock_quantity > 0"
+        );
+        $stmt->execute([$product_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $lowest = $row['lowest'] !== null ? (float)$row['lowest'] : null;
+        if ($lowest !== null) {
+            return [
+                'from_variation' => true,
+                'regular_price'  => $lowest,
+                'sale_price'     => null,
+            ];
+        }
+
+        return [
+            'from_variation' => false,
+            'regular_price'  => $regular_price,
+            'sale_price'     => $sale_price,
+        ];
+    }
+
 }
 ?>

@@ -1,425 +1,440 @@
-/* Mobile Price Info Section */
-.mobile-price-info {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: left;
+/* ============================================================
+   PhonesDukan — Mobile Brand Pages  (mobile_brands.css)
+   Loaded alongside mobiles.css on every /mobiles/{brand} route.
+   mobiles.css already supplies: na-card, mob-hero, mob-brand-bar,
+   mob-products-section, mob-product-grid, and all grid breakpoints.
+   This file adds only brand-page-specific components.
+   Brand: #111 black  |  #f7cf04 yellow  |  #fff white
+   ============================================================ */
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+
+.mb-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 40px;
+    padding-top: 8px;
 }
 
-.content-container {
-  padding: 20px;
-  margin: 20px;
-  background-color: #fff;
-  border-radius: 25px;
-  border: 6px solid #c9d6e3;
+.mb-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 14px;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.18s ease, border-color 0.18s ease;
 }
 
-h2,
-h3 {
-  color: #333;
-  font-weight: 700;
-  margin-bottom: 15px;
+.mb-page-link:hover {
+    background: #fffbe6;
+    border-color: #f7cf04;
+    color: #111;
+    text-decoration: none;
 }
 
-p {
-  color: #555;
-  line-height: 1.8;
-  margin-bottom: 15px;
+.mb-page-link.is-active {
+    background: #f7cf04;
+    border-color: #f7cf04;
+    color: #111;
+    font-weight: 700;
+    cursor: default;
 }
 
-ul {
-  padding-left: 20px;
+/* ============================================================
+   SEO CONTENT SECTION
+   ============================================================ */
+
+.mb-content-section {
+    background: #fff;
+    padding: 52px 20px 8px;
 }
 
-ul li {
-  margin-bottom: 10px;
-  color: #444;
-  font-weight: 500;
+.mb-content-inner {
+    max-width: 1160px;
+    margin: 0 auto;
 }
 
-strong {
-  color: #222;
+.mb-content-inner h2 {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    color: #111;
+    margin: 36px 0 12px;
+    line-height: 1.3;
+    text-align: left;
 }
 
-a {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 600;
+.mb-content-inner h2:first-child {
+    margin-top: 0;
 }
 
-a:hover {
-  text-decoration: underline;
+.mb-content-inner h2 span {
+    color: #f7cf04;
 }
 
-.mobile-price-info p {
-  font-size: 16px;
-  color: #000000bd;
-  line-height: 24px;
-  margin: 0px;
-  letter-spacing: 0.2px;
+.mb-content-inner h3 {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    margin: 22px 0 9px;
+    text-align: left;
 }
 
-.product-section {
-  padding: 20px;
+.mb-content-inner p {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 15px;
+    color: #555;
+    line-height: 1.75;
+    margin: 0 0 14px;
+    text-align: left;
 }
 
-.product-grid-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: left; /* Distribute evenly */
-  gap: 20px; /* Maintain uniform spacing */
+.mb-content-inner ul,
+.mb-content-inner ol {
+    padding-left: 22px;
+    margin: 0 0 14px;
 }
 
-.mobile-product-card {
-  width: calc(25% - 15px); /* Adjust width to fit exactly 4 per row */
-  box-sizing: border-box;
-  padding: 10px;
-  background-color: #00408030;
-  border-radius: 25px;
+.mb-content-inner li {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 15px;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 9px;
 }
 
-.category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.mb-content-inner li ul {
+    margin: 8px 0 0;
 }
 
-.view-all-btn {
-  display: inline-block;
-  font-size: 16px;
-  color: #fff;
-  background-color: #004080;
-  padding: 8px 15px;
-  margin: 0px;
-  border-radius: 5px;
-  text-decoration: none;
+.mb-content-inner strong,
+.mb-content-inner b {
+    color: #111;
+    font-weight: 700;
 }
 
-.mobile-product-img img {
-  border-radius: 25px;
-  width: 100%;
-  height: auto;
-  background-color: #fff;
+.mb-content-inner span {
+    font-weight: 700;
+    color: #111;
 }
 
-.bg-blue {
-  background: #007bff;
-  padding: 10px;
-  border-radius: 10px;
-  color: white;
+.mb-content-inner a {
+    color: #111;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: #f7cf04;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.18s ease;
 }
 
-.bg-blue .mobile-product-price {
-  font-weight: bold;
+.mb-content-inner a:hover {
+    text-decoration-color: #111;
+    color: #111;
 }
 
-.mobile-product-price {
-  text-align: center;
+.mb-content-inner em {
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+    display: block;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
 }
 
-.product-badge span {
-  display: inline-block;
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: #ff0000;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-weight: bold;
-  margin: 0px;
+/* Price table (used by Tecno page) */
+.mb-content-inner table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 20px;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
 }
 
-.sold-out-badge {
-  background: #bdbdbd !important;
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-weight: bold;
-  display: inline-block;
-  margin: 0px;
+.mb-content-inner table th,
+.mb-content-inner table td {
+    padding: 11px 16px;
+    text-align: left;
+    border: 1px solid #e5e7eb;
+    color: #111;
 }
 
-h3.mobile-product-title {
-text-align: center;
+.mb-content-inner table th {
+    background: #f5f5f5;
+    font-weight: 700;
 }
 
-.mobile-product-title a {
-  font-size: 16px;
-  color: #333;
-  font-weight: bold;
-  text-align: center;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: normal;
-  max-width: 100%;
+.mb-content-inner table tr:hover td {
+    background: #fffbe6;
 }
 
-.prodline {
-  display: block;
-  width: 40px;
-  height: 2px;
-  background: #007bff;
-  margin: 0 auto 10px;
+/* ============================================================
+   FAQ SECTION
+   ============================================================ */
+
+.mb-faq-section {
+    background: #f5f5f5;
+    padding: 0 20px 52px;
 }
 
-.prodprice {
-  margin: 10px;
+.mb-faq-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding-top: 36px;
 }
 
-span.r-regular-price.old-price {
-  font-size: 14px;
-  color: #909090;
-  text-decoration: line-through;
-  font-weight: bold;
-  margin: 0px;
+.mb-faq-title {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    color: #111;
+    margin: 0 0 6px;
+    line-height: 1.3;
+    text-align: left;
 }
 
-span.r-sale-price.new-price {
-  font-size: 20px;
-  color: green;
-  font-weight: bold;
-  margin: 0px;
+.mb-faq-title span {
+    color: #f7cf04;
 }
 
-span.r-regular-price {
-  font-size: 20px;
-  color: green;
-  font-weight: bold;
-  margin: 0px;
+.mb-faq-subtitle {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    color: #777;
+    margin: 0 0 24px;
+    text-align: left;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  margin-top: 20px;
+/* Each accordion item */
+.mb-faq-item {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
 }
 
-.pagination a, .pagination span {
-  padding: 8px 12px;
-  border: 1px solid #004080;
-  color: #004080;
-  border-radius: 5px;
-  text-decoration: none;
+.mb-faq-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-/* Pagination Hover */
-.pagination a.page-numbers:hover {
-  background-color: #e0e0e0;
-  color: #000;
+.mb-faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 17px 20px;
+    cursor: pointer;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+    line-height: 1.45;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color 0.18s ease;
 }
 
-/* Disabled State */
-.pagination a.page-numbers.disabled {
-  color: #999;
-  border-color: #ddd;
-  background-color: #f9f9f9;
-  cursor: not-allowed;
+/* Chevron icon via SVG background */
+.mb-faq-question::after {
+    content: '';
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.22s ease;
 }
 
-.pagination .current {
-  background-color: #004080 !important;
-  color: white !important;
+.mb-faq-item.is-open .mb-faq-question {
+    border-bottom: 2px solid #f7cf04;
 }
 
-.pagination .page-numbers {
-  display: inline-block;
-  padding: 10px 15px;
-  margin: 20px 0px;
-  margin: 0 5px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
-  border: 1px solid #eaeaea;
-  border-radius: 5px;
-  background-color: #fff;
-  transition: background-color 0.3s ease;
-  margin: 20px 0px;
-}
-.list-item {
-  margin-left: 20px;
-  margin-bottom: 10px;
-}
-.highlight {
-  color: #e74c3c;
-  font-weight: bold;
+.mb-faq-item.is-open .mb-faq-question::after {
+    transform: rotate(180deg);
 }
 
-em {
-  color: #666;
-}
-.p-note {
-  font-style: italic;
-  color: #000;
-  background-color: #f0f9ff;
-  border-left: 4px solid var(--primary-color);
-  padding: 15px 20px;
-  margin: 20px;
-  border-radius: 8px;
-  text-align: center;
+/* Answer panel — hidden by default, shown when is-open */
+.mb-faq-answer {
+    display: none;
+    padding: 14px 20px 18px;
 }
 
-@media (max-width: 1024px) {
-  .mobile-product-card {
-    flex: 1 1 calc(33.33% - 20px); /* 3 products per row on tablets */
-    max-width: calc(33.33% - 20px);
-  }
+.mb-faq-item.is-open .mb-faq-answer {
+    display: block;
 }
+
+.mb-faq-answer p {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.7;
+    margin: 0 0 10px;
+}
+
+.mb-faq-answer p:last-child { margin-bottom: 0; }
+
+.mb-faq-answer ul {
+    padding-left: 18px;
+    margin: 6px 0 0;
+}
+
+.mb-faq-answer ul li {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.65;
+    margin-bottom: 5px;
+}
+
+.mb-faq-answer span {
+    font-weight: 700;
+    color: #111;
+}
+
+.mb-faq-answer a {
+    color: #111;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: #f7cf04;
+    text-underline-offset: 3px;
+}
+
+.mb-faq-answer a:hover {
+    text-decoration-color: #111;
+}
+
+.mb-faq-note {
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+    margin: 20px 0 0;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+
+/* ============================================================
+   CTA NOTE
+   ============================================================ */
+
+.mb-cta-wrap {
+    background: #f5f5f5;
+    padding: 0 20px 48px;
+}
+
+.mb-cta-note {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 18px 22px;
+    background: #fffbe6;
+    border-left: 4px solid #f7cf04;
+    border-radius: 0 10px 10px 0;
+    font-family: "Inter", Arial, sans-serif;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.65;
+    font-style: italic;
+}
+
+.mb-cta-note a,
+.mb-cta-note a:link,
+.mb-cta-note a:visited {
+    color: #111 !important;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: opacity 0.18s ease;
+}
+
+.mb-cta-note a:hover { opacity: 0.75; }
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
 
 @media (max-width: 768px) {
-  .mobile-price-info {
-    padding: 15px; /* Less padding on smaller screens */
-  }
 
-  .mobile-price-info h3 {
-    font-size: 1.6rem; /* Smaller font size for the title */
-  }
+    .mb-content-section { padding: 36px 14px 8px; }
+    .mb-faq-section     { padding: 0 14px 36px; }
+    .mb-cta-wrap        { padding: 0 14px 36px; }
+    .mb-faq-inner       { padding-top: 28px; }
 
-  .mobile-price-info p {
-    font-size: 0.95rem; /* Slightly smaller text for better fitting */
-  }
+    .mb-content-inner h2,
+    .mb-faq-title {
+        font-size: 17px;
+    }
 
-  .product-section {
-    padding: 10px;
-  }
+    .mb-content-inner h3 {
+        font-size: 15px;
+    }
 
-  .category-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
+    .mb-content-inner p,
+    .mb-content-inner li {
+        font-size: 14px;
+    }
 
-  .product-grid-wrapper {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 products per row */
-    gap: 10px; /* Adjust gap for better spacing */
-    width: 100%; /* Ensure full width */
-  }
+    .mb-faq-question {
+        font-size: 13.5px;
+        padding: 14px 16px;
+    }
 
-  .product-grid-container {
-    margin: 0px;
-  }
+    .mb-faq-answer {
+        padding: 12px 16px 16px;
+    }
 
-  .product-title {
-    line-height: 18px;
+    .mb-pagination { margin-top: 28px; gap: 4px; }
+
+    .mb-page-link {
+        min-width: 36px;
+        height: 36px;
+        font-size: 13px;
+        padding: 0 10px;
+    }
+
+    .mb-content-inner table {
+        font-size: 13px;
+    }
+
+    .mb-content-inner table th,
+    .mb-content-inner table td {
+        padding: 9px 12px;
+    }
 }
 
-  .mobile-product-title a {
-    font-size: 15px;
-    line-height: 18px;
-  }
-
-  .mobile-product-price span {
-    font-size: 15px;
-  }
-
-  .mobile-product-card {
-    width: 100%;
-    max-width: 100%;
-    padding: 6px;
-  }
-
-  .product-card {
-    width: 100%;
-  }
-
-  .product-price {
-    margin: 5px;
-  }
-  
-  span.r-regular-price.old-price {
-    font-size: 12px;
-  }
-  
-  span.r-sale-price.new-price {
-    font-size: 16px;
-  }
-
-  .pagination .page-numbers {
-    font-size: 11px;
-    flex-wrap: wrap;
-    display: flex;
-    align-items: center;
-    margin: 10px 0px;
-  }
-
-  .pagination {
-    margin: 10px 0px; 
-    flex-wrap: wrap;
-  }
-
-  .content-container {
-    margin: 4px;
-    padding: 15px;
-  }
-
-  h3.faq-question {
-    font-size: 15px;
-    letter-spacing: 0.5px;
-    margin: 0px;
-  }
-
-  .faq-item {
-    padding: 5px;
-    margin: 10px 0px;
-  }
-
-  .faq-question::after {
-    content: "+";
-    font-size: 20px;
-    font-weight: bold;
-    margin-left: 10px;
-  }
-
-  em {
-    font-size: 14px;
-  }
-
-  .p-note {
-    margin: 10px 4px;
-    font-size: 14px;
-    line-height: 12px;
-  }
-}
-
-/* mobiles Phones */
 @media (max-width: 480px) {
-  .why-choose-us h3 {
-    font-size: 18px;
-    margin-bottom: 15px;
-  }
+    .mb-pagination { gap: 3px; }
 
-  .why-choose-us-content {
-    flex-direction: column; /* Stack items vertically on smaller screens */
-    justify-content: center; /* Center the content */
-    gap: 15px; /* Reduced gap between items */
-  }
+    .mb-page-link {
+        min-width: 32px;
+        height: 34px;
+        font-size: 12px;
+        padding: 0 8px;
+        border-radius: 6px;
+    }
 
-  .why-choose-us {
-    padding: 10px;
-  }
-
-  .usp-box {
-    flex: 1 1 100%; /* Make each USP box take full width */
-    padding: 15px; /* Reduced padding for mobile */
-  }
-
-  .usp-box i {
-    font-size: 2rem; /* Smaller icons for mobile */
-    margin-right: 8px;
-  }
-
-  .usp-content h4 {
-    font-size: 16px; /* Slightly smaller heading for mobile */
-  }
-
-  .usp-content p {
-    font-size: 0.95rem; /* Smaller font size for mobile paragraphs */
-  }
+    .mb-faq-question { padding: 13px 14px; font-size: 13px; }
+    .mb-faq-answer   { padding: 10px 14px 14px; }
+    .mb-cta-note     { font-size: 13px; }
 }

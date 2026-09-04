@@ -22,9 +22,8 @@ class OrderController
             $this->orderModel = new OrderModel($this->db);
             $this->trackingModel = new TrackingModel($this->db);  // Instantiate TrackingModel
 
-            error_log('✅ DEBUG: Database connection established successfully.');
         } catch (Exception $e) {
-            error_log('❌ ERROR: Failed to initialize OrderController - ' . $e->getMessage());
+            error_log('OrderController init failed: ' . $e->getMessage());
             die('Database connection error: ' . $e->getMessage());
         }
     }
@@ -64,8 +63,6 @@ class OrderController
     public function createOrder($orderData, $cartItems, $screenshotData = null)
     {
         try {
-            error_log('🛠️ DEBUG: Inside OrderController createOrder() function.');
-    
             // Start transaction
             $this->db->beginTransaction();
     
@@ -112,23 +109,41 @@ class OrderController
             $executeResult = $stmt->execute();
     
             if (!$executeResult) {
-                error_log('❌ ERROR: SQL Execution Failed: ' . json_encode($stmt->errorInfo()));
                 $this->db->rollBack();
                 return ['success' => false, 'message' => 'Database insert failed.', 'order_id' => null];
             }
     
             $orderId = $this->db->lastInsertId();
-            error_log('✅ DEBUG: Order Inserted! Order ID: ' . $orderId);
-    
-            // ✅ Insert into order_items table
+
             foreach ($cartItems as $item) {
-                error_log("🛠️ DEBUG: Inserting into order_items - Order ID: $orderId, Product ID: " . $item['product_id']);
-    
-                $stmt = $this->db->prepare('INSERT INTO order_items (order_id, product_id, quantity, subtotal_price) VALUES (?, ?, ?, ?)');
-                $result = $stmt->execute([$orderId, $item['product_id'], $item['quantity'], $item['subtotal']]);
-    
+
+                $variation_id         = isset($item['variation_id']) && $item['variation_id'] ? (int)$item['variation_id'] : null;
+                $variation_attributes = $item['variation_attributes'] ?? null;
+                $variation_sku        = null;
+
+                // Fetch variation SKU if we have a variation_id
+                if ($variation_id) {
+                    $vSkuStmt = $this->db->prepare("SELECT sku FROM product_variations WHERE id=?");
+                    $vSkuStmt->execute([$variation_id]);
+                    $vRow = $vSkuStmt->fetch(PDO::FETCH_ASSOC);
+                    $variation_sku = $vRow ? $vRow['sku'] : null;
+                }
+
+                $stmt = $this->db->prepare(
+                    'INSERT INTO order_items (order_id, product_id, quantity, subtotal_price, variation_id, variation_sku, variation_attributes)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)'
+                );
+                $result = $stmt->execute([
+                    $orderId,
+                    $item['product_id'],
+                    $item['quantity'],
+                    $item['subtotal'],
+                    $variation_id,
+                    $variation_sku,
+                    $variation_attributes,
+                ]);
+
                 if (!$result) {
-                    error_log('❌ ERROR: Failed to insert into order_items. SQL Error: ' . json_encode($stmt->errorInfo()));
                     $this->db->rollBack();
                     return ['success' => false, 'message' => 'Failed to insert order items.', 'order_id' => null];
                 }
@@ -157,7 +172,7 @@ class OrderController
             return ['success' => true, 'order_id' => $orderId];
         } catch (Exception $e) {
             $this->db->rollBack();
-            error_log('🚨 ERROR in OrderModel: ' . $e->getMessage());
+            error_log('OrderController createOrder error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage(), 'order_id' => null];
         }
     }

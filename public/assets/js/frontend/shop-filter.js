@@ -1,211 +1,549 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const checkboxes = document.querySelectorAll(".price-option input[type='checkbox']");
-    const categoryCheckboxes = document.querySelectorAll(".category-filter");
-    const sortRadios = document.querySelectorAll("input[name='sort_by']");
+    var form = document.getElementById("shopFilterForm");
+    if (!form) return;
 
-    function updateFilters(param, selectedValues) {
-        const urlParams = new URLSearchParams(window.location.search);
+    var sidebar = document.getElementById("shopSidebar");
+    var backdrop = document.getElementById("shopDrawerBackdrop");
+    var filterToggleBtn = document.getElementById("shopFilterToggle");
+    var filterCloseBtn = document.getElementById("shopFilterClose");
 
-        if (selectedValues.length > 0) {
-            urlParams.set(param, selectedValues.join(","));
+    var brandSearchInput = document.getElementById("shopBrandSearch");
+    var brandEmptyState = document.getElementById("shopBrandEmptyState");
+
+    var customSortWrap = document.getElementById("shopMobileSortWrap");
+    var customSortBtn = document.getElementById("shopCustomSortBtn");
+    var customSortMenu = document.getElementById("shopCustomSortMenu");
+    var customSortLabel = document.getElementById("shopCustomSortLabel");
+
+    var topSortWrap = document.getElementById("shopTopSortWrap");
+    var topSortBtn = document.getElementById("shopTopSortBtn");
+    var topSortMenu = document.getElementById("shopTopSortMenu");
+    var topSortCurrent = document.getElementById("shopTopSortCurrent");
+
+    var sidebarSortGroup = document.getElementById("shopSidebarSortGroup");
+    var sidebarSortBtn = document.getElementById("shopSidebarSortBtn");
+    var sidebarSortMenu = document.getElementById("shopSidebarSortMenu");
+    var sidebarSortCurrent = document.getElementById("shopSidebarSortCurrent");
+
+    var priceSlider = form.querySelector("[data-price-slider]");
+    var minInput = form.querySelector("[data-range-min]");
+    var maxInput = form.querySelector("[data-range-max]");
+    var selectedPriceLabel = form.querySelector("[data-selected-price-range]");
+    var rangeProgress = form.querySelector("[data-range-progress]");
+    var hiddenMinInput = form.querySelector("[data-hidden-min-price]");
+    var hiddenMaxInput = form.querySelector("[data-hidden-max-price]");
+
+    var ABS_MIN = priceSlider ? (parseInt(priceSlider.getAttribute("data-min"), 10) || 0) : 0;
+    var ABS_MAX = priceSlider ? (parseInt(priceSlider.getAttribute("data-max"), 10) || 200000) : 200000;
+    var STEP_GAP = 500;
+
+    var debounceTimer = null;
+    var requestController = null;
+
+    function showNotice(message) {
+        if (typeof Swal !== "undefined") {
+            Swal.fire({ title: "Oops!", text: message, icon: "error", confirmButtonText: "OK" });
         } else {
-            urlParams.delete(param);
+            alert(message);
         }
+    }
 
-        // ✅ Store selected filters temporarily to fix mobile issue
-        sessionStorage.setItem(param, JSON.stringify(selectedValues));
+    function getSortControls() {
+        return {
+            sidebar: document.getElementById("shopSidebarSort"),
+            top: document.getElementById("shopTopSort"),
+            mobile: document.getElementById("shopMobileSort"),
+        };
+    }
 
-        // ✅ Update URL without refreshing yet
-        window.history.replaceState(null, "", "?" + urlParams.toString());
-
-        // ✅ Delay refresh slightly to ensure UI updates before reload
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                window.location.reload();
-            }, 200);
+    function updateCustomSortDisplay(value) {
+        if (!customSortMenu || !customSortLabel) return;
+        var options = customSortMenu.querySelectorAll(".shop-custom-sort-option");
+        Array.prototype.forEach.call(options, function (opt) {
+            var match = opt.getAttribute("data-value") === value;
+            opt.classList.toggle("is-active", match);
+            opt.setAttribute("aria-selected", match ? "true" : "false");
+            if (match) customSortLabel.textContent = opt.textContent.trim();
         });
     }
 
-    function handleCheckboxChange(checkboxGroup, paramName) {
-        let selectedValues = [];
-        checkboxGroup.forEach(cb => {
-            if (cb.checked) {
-                selectedValues.push(cb.value);
+    function updateTopSortDisplay(value) {
+        var liveMenu = document.getElementById("shopTopSortMenu");
+        var liveCurrent = document.getElementById("shopTopSortCurrent");
+        if (!liveMenu || !liveCurrent) return;
+        var options = liveMenu.querySelectorAll(".shop-top-sort-option");
+        Array.prototype.forEach.call(options, function (opt) {
+            var match = opt.getAttribute("data-value") === value;
+            opt.classList.toggle("is-active", match);
+            opt.setAttribute("aria-selected", match ? "true" : "false");
+            if (match) liveCurrent.textContent = opt.textContent.trim();
+        });
+    }
+
+    function updateSidebarSortDisplay(value) {
+        if (!sidebarSortMenu || !sidebarSortCurrent) return;
+        var options = sidebarSortMenu.querySelectorAll(".shop-sidebar-sort-option");
+        Array.prototype.forEach.call(options, function (opt) {
+            var match = opt.getAttribute("data-value") === value;
+            opt.classList.toggle("is-active", match);
+            opt.setAttribute("aria-selected", match ? "true" : "false");
+            if (match) sidebarSortCurrent.textContent = opt.textContent.trim();
+        });
+    }
+
+    function syncSortControls(value) {
+        var controls = getSortControls();
+        [controls.sidebar, controls.top, controls.mobile].forEach(function (el) {
+            if (el && el.value !== value) {
+                el.value = value;
             }
         });
-
-        updateFilters(paramName, selectedValues);
+        updateCustomSortDisplay(value);
+        updateTopSortDisplay(value);
+        updateSidebarSortDisplay(value);
     }
 
-    // ✅ Apply event listeners to price range checkboxes
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", function () {
-            handleCheckboxChange(checkboxes, "price_range");
-        });
-    });
-
-    // ✅ Apply event listeners to category checkboxes
-    categoryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", function () {
-            handleCheckboxChange(categoryCheckboxes, "category");
-        });
-    });
-
-    // ✅ Handle sorting options
-    sortRadios.forEach(radio => {
-        radio.addEventListener("change", function () {
-            updateFilters("sort_by", [this.value]);
-        });
-    });
-
-    // ✅ Restore checkbox state on page load
-    function restoreCheckboxState(param, checkboxes) {
-        let selectedValues = [];
-
-        if (sessionStorage.getItem(param)) {
-            selectedValues = JSON.parse(sessionStorage.getItem(param));
-        } else {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has(param)) {
-                selectedValues = urlParams.get(param).split(",");
-            }
-        }
-
-        checkboxes.forEach(cb => {
-            cb.checked = selectedValues.includes(cb.value);
-        });
-
-        // ✅ Remove temporary storage after applying to avoid conflicts
-        sessionStorage.removeItem(param);
+    function openDrawer() {
+        if (!sidebar) return;
+        sidebar.classList.add("is-open");
+        if (backdrop) backdrop.classList.add("is-visible");
+        document.body.classList.add("shop-drawer-open");
     }
 
-    restoreCheckboxState("price_range", checkboxes);
-    restoreCheckboxState("category", categoryCheckboxes);
-
-    // ✅ Restore sorting state
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has("sort_by")) {
-        const selectedSort = urlParams.get("sort_by");
-        sortRadios.forEach(radio => {
-            radio.checked = radio.value === selectedSort;
-        });
-    }
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    const mobileCheckboxes = document.querySelectorAll(".mobile-price-option input[type='checkbox']");
-    const mobileCategoryCheckboxes = document.querySelectorAll(".mobile-category-filter");
-    const mobileSortRadios = document.querySelectorAll(".mobile-sort-options input[name='sort_by']");
-
-    function updateMobileFilters(param, selectedValues) {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        if (selectedValues.length > 0) {
-            urlParams.set(param, selectedValues.join(","));
-        } else {
-            urlParams.delete(param);
-        }
-
-        // ✅ Store selected filters temporarily for mobile
-        sessionStorage.setItem(param, JSON.stringify(selectedValues));
-
-        // ✅ Update URL without refreshing yet
-        window.history.replaceState(null, "", "?" + urlParams.toString());
-
-        // ✅ Delay refresh slightly to ensure UI updates before reload
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                window.location.reload();
-            }, 200);
-        });
+    function closeDrawer() {
+        if (!sidebar) return;
+        sidebar.classList.remove("is-open");
+        if (backdrop) backdrop.classList.remove("is-visible");
+        document.body.classList.remove("shop-drawer-open");
     }
 
-    function handleMobileCheckboxChange(checkboxGroup, paramName) {
-        let selectedValues = [];
-        checkboxGroup.forEach(cb => {
-            if (cb.checked) {
-                selectedValues.push(cb.value);
-            }
-        });
-
-        updateMobileFilters(paramName, selectedValues);
+    function formatPrice(value) {
+        return "Rs. " + Number(value).toLocaleString("en-PK");
     }
 
-    // ✅ Apply event listeners to mobile price range checkboxes
-    mobileCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", function () {
-            handleMobileCheckboxChange(mobileCheckboxes, "price_range");
-        });
-    });
+    function syncHiddenPriceInputs(minVal, maxVal) {
+        if (hiddenMinInput) hiddenMinInput.value = String(minVal);
+        if (hiddenMaxInput) hiddenMaxInput.value = String(maxVal);
+    }
 
-    // ✅ Apply event listeners to mobile category checkboxes
-    mobileCategoryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener("change", function () {
-            handleMobileCheckboxChange(mobileCategoryCheckboxes, "category");
-        });
-    });
+    function clampSliderValues(changedInput) {
+        if (!minInput || !maxInput) return { min: ABS_MIN, max: ABS_MAX };
 
-    // ✅ Handle mobile sorting options
-    mobileSortRadios.forEach(radio => {
-        radio.addEventListener("change", function () {
-            updateMobileFilters("sort_by", [this.value]);
-        });
-    });
+        var minVal = parseInt(minInput.value, 10);
+        var maxVal = parseInt(maxInput.value, 10);
 
-    // ✅ Restore mobile checkbox state on page load
-    function restoreMobileCheckboxState(param, checkboxes) {
-        let selectedValues = [];
+        if (isNaN(minVal)) minVal = ABS_MIN;
+        if (isNaN(maxVal)) maxVal = ABS_MAX;
 
-        if (sessionStorage.getItem(param)) {
-            selectedValues = JSON.parse(sessionStorage.getItem(param));
-        } else {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has(param)) {
-                selectedValues = urlParams.get(param).split(",");
+        if (maxVal - minVal < STEP_GAP) {
+            if (changedInput === "min") {
+                minVal = maxVal - STEP_GAP;
+            } else {
+                maxVal = minVal + STEP_GAP;
             }
         }
 
-        checkboxes.forEach(cb => {
-            cb.checked = selectedValues.includes(cb.value);
-        });
+        minVal = Math.max(ABS_MIN, Math.min(minVal, ABS_MAX - STEP_GAP));
+        maxVal = Math.min(ABS_MAX, Math.max(maxVal, ABS_MIN + STEP_GAP));
 
-        // ✅ Remove temporary storage after applying to avoid conflicts
-        sessionStorage.removeItem(param);
+        minInput.value = String(minVal);
+        maxInput.value = String(maxVal);
+
+        return { min: minVal, max: maxVal };
     }
 
-    restoreMobileCheckboxState("price_range", mobileCheckboxes);
-    restoreMobileCheckboxState("category", mobileCategoryCheckboxes);
+    function updateSliderUI(minVal, maxVal) {
+        if (rangeProgress) {
+            var left = ((minVal - ABS_MIN) / (ABS_MAX - ABS_MIN)) * 100;
+            var right = ((ABS_MAX - maxVal) / (ABS_MAX - ABS_MIN)) * 100;
+            rangeProgress.style.left = left + "%";
+            rangeProgress.style.right = right + "%";
+        }
 
-    // ✅ Restore mobile sorting state
-    const mobileUrlParams = new URLSearchParams(window.location.search);
-    if (mobileUrlParams.has("sort_by")) {
-        const selectedSort = mobileUrlParams.get("sort_by");
-        mobileSortRadios.forEach(radio => {
-            radio.checked = radio.value === selectedSort;
-        });
+        if (selectedPriceLabel) {
+            selectedPriceLabel.textContent = formatPrice(minVal) + " — " + formatPrice(maxVal);
+        }
+
+        syncHiddenPriceInputs(minVal, maxVal);
     }
-});
 
+    function hydrateLazyImages() {
+        var lazyImages = document.querySelectorAll(".na-img-box img, .product-img img");
+        Array.prototype.forEach.call(lazyImages, function (img) {
+            var wrapper = img.closest(".product-img-wrapper");
+            if (!wrapper) return;
 
-document.addEventListener("DOMContentLoaded", function () {
-    const filterBtn = document.getElementById("unique-mobile-filter-btn");
-    const filterSidebar = document.getElementById("unique-mobile-filter-sidebar");
-    const closeBtn = document.getElementById("unique-mobile-filter-close");
-
-    if (filterBtn && filterSidebar && closeBtn) {
-        filterBtn.addEventListener("click", function () {
-            filterSidebar.classList.add("active");
-        });
-
-        closeBtn.addEventListener("click", function () {
-            filterSidebar.classList.remove("active");
-        });
-
-        // Close sidebar if clicked outside
-        document.addEventListener("click", function (event) {
-            if (!filterSidebar.contains(event.target) && !filterBtn.contains(event.target)) {
-                filterSidebar.classList.remove("active");
+            if (!img.complete) {
+                wrapper.classList.add("is-loading");
+                img.addEventListener("load", function () {
+                    wrapper.classList.remove("is-loading");
+                }, { once: true });
+                img.addEventListener("error", function () {
+                    wrapper.classList.remove("is-loading");
+                }, { once: true });
             }
         });
     }
+
+    function serializeFilters(resetPaged) {
+        var formData = new FormData(form);
+        var params = new URLSearchParams(formData);
+
+        if (resetPaged) params.delete("paged");
+        if (!params.get("sort_by")) params.set("sort_by", "latest");
+
+        return params;
+    }
+
+    function renderFromHtml(html, requestUrl) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
+        var incomingSection = doc.querySelector(".product-section");
+        var currentSection = document.querySelector(".product-section");
+
+        if (!incomingSection || !currentSection) {
+            throw new Error("Could not parse updated product section.");
+        }
+
+        currentSection.innerHTML = incomingSection.innerHTML;
+
+        // Re-bind the top sort dropdown — its DOM nodes live inside .product-section
+        // and were just replaced, so any previously attached listeners are gone.
+        bindTopSortDropdown();
+
+        var urlObj = new URL(requestUrl, window.location.origin);
+        var sortValue = urlObj.searchParams.get("sort_by") || "latest";
+        syncSortControls(sortValue);
+
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, "", urlObj.pathname + urlObj.search);
+        }
+
+        hydrateLazyImages();
+    }
+
+    function fetchAndRender(params, options) {
+        var opts = options || {};
+        var url = form.action + (params.toString() ? "?" + params.toString() : "");
+
+        if (requestController) {
+            requestController.abort();
+        }
+
+        requestController = new AbortController();
+
+        if (opts.closeDrawer) {
+            closeDrawer();
+        }
+
+        return fetch(url, {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            signal: requestController.signal,
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error("Failed to fetch products.");
+                return response.text();
+            })
+            .then(function (html) {
+                renderFromHtml(html, url);
+            })
+            .catch(function (error) {
+                if (error && error.name === "AbortError") return;
+                showNotice("Could not refresh products. Please try again.");
+            })
+            .finally(function () {
+                requestController = null;
+            });
+    }
+
+    function runRealtimeUpdate(options) {
+        var params = serializeFilters(true);
+        fetchAndRender(params, options || {});
+    }
+
+    function debouncedRealtimeUpdate() {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(function () {
+            runRealtimeUpdate({ closeDrawer: false });
+        }, 140);
+    }
+
+    if (filterToggleBtn) filterToggleBtn.addEventListener("click", openDrawer);
+    if (filterCloseBtn) filterCloseBtn.addEventListener("click", closeDrawer);
+    if (backdrop) backdrop.addEventListener("click", closeDrawer);
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            closeDrawer();
+            closeAllSortMenus();
+        }
+    });
+
+    if (brandSearchInput) {
+        brandSearchInput.addEventListener("input", function () {
+            var query = brandSearchInput.value.trim().toLowerCase();
+            var brandItems = document.querySelectorAll("[data-brand-item]");
+            var visibleCount = 0;
+
+            Array.prototype.forEach.call(brandItems, function (item) {
+                var text = item.textContent ? item.textContent.trim().toLowerCase() : "";
+                var visible = query === "" || text.indexOf(query) !== -1;
+                item.style.display = visible ? "flex" : "none";
+                if (visible) visibleCount++;
+            });
+
+            if (brandEmptyState) {
+                brandEmptyState.hidden = visibleCount !== 0;
+            }
+        });
+    }
+
+    if (priceSlider && minInput && maxInput) {
+        var initialClamped = clampSliderValues("max");
+        updateSliderUI(initialClamped.min, initialClamped.max);
+
+        minInput.addEventListener("input", function () {
+            var clamped = clampSliderValues("min");
+            updateSliderUI(clamped.min, clamped.max);
+            debouncedRealtimeUpdate();
+        });
+
+        maxInput.addEventListener("input", function () {
+            var clamped = clampSliderValues("max");
+            updateSliderUI(clamped.min, clamped.max);
+            debouncedRealtimeUpdate();
+        });
+
+        minInput.addEventListener("change", function () {
+            runRealtimeUpdate({ closeDrawer: false });
+        });
+        maxInput.addEventListener("change", function () {
+            runRealtimeUpdate({ closeDrawer: false });
+        });
+    }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (priceSlider && minInput && maxInput) {
+            var clamped = clampSliderValues("max");
+            updateSliderUI(clamped.min, clamped.max);
+        }
+        runRealtimeUpdate({ closeDrawer: true });
+    });
+
+    document.addEventListener("change", function (event) {
+        var target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        if (target.id === "shopSidebarSort" || target.id === "shopTopSort" || target.id === "shopMobileSort") {
+            syncSortControls(target.value || "latest");
+            runRealtimeUpdate({ closeDrawer: false });
+            return;
+        }
+
+        if (target.matches('input[name="category[]"], input[name="brand[]"]')) {
+            runRealtimeUpdate({ closeDrawer: false });
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        var target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        var paginationLink = target.closest(".pagination a");
+        if (paginationLink) {
+            event.preventDefault();
+            var href = paginationLink.getAttribute("href");
+            if (!href) return;
+            var urlObj = new URL(href, window.location.origin);
+            fetchAndRender(urlObj.searchParams, { closeDrawer: false });
+            return;
+        }
+
+        var resetLink = target.closest(".shop-btn-reset");
+        if (resetLink) {
+            event.preventDefault();
+
+            form.reset();
+            syncSortControls("latest");
+
+            if (priceSlider && minInput && maxInput) {
+                minInput.value = String(ABS_MIN);
+                maxInput.value = String(ABS_MAX);
+                updateSliderUI(ABS_MIN, ABS_MAX);
+            }
+
+            if (brandSearchInput) {
+                brandSearchInput.value = "";
+                brandSearchInput.dispatchEvent(new Event("input"));
+            }
+
+            fetchAndRender(new URLSearchParams(), { closeDrawer: true });
+            return;
+        }
+
+        var cartBtn = target.closest(".na-btn--cart");
+        if (!cartBtn || cartBtn.disabled) return;
+
+        var productId = cartBtn.getAttribute("data-product-id");
+        var unitPrice = parseFloat(cartBtn.getAttribute("data-unit-price") || 0);
+        if (!productId) return;
+
+        var originalText = cartBtn.textContent.trim();
+        cartBtn.disabled = true;
+        cartBtn.textContent = "Adding...";
+
+        fetch(window.pdWithBase("/app/Controllers/CartController.php"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                product_id: parseInt(productId, 10),
+                quantity: 1,
+                unit_price: unitPrice,
+            }),
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                if (data.status === "success") {
+                    cartBtn.textContent = "Added ✓";
+                    cartBtn.classList.add("na-btn--added");
+
+                    var totalQty = 0;
+                    if (data.cart_summary && typeof data.cart_summary.total_quantity !== "undefined") {
+                        totalQty = parseInt(data.cart_summary.total_quantity, 10) || 0;
+                    } else if (Array.isArray(data.cart_items)) {
+                        totalQty = data.cart_items.reduce(function (sum, item) {
+                            return sum + (parseInt(item.total_quantity, 10) || 0);
+                        }, 0);
+                    }
+
+                    document.querySelectorAll(".cart-count").forEach(function (el) {
+                        el.textContent = totalQty;
+                    });
+                    return;
+                }
+
+                cartBtn.disabled = false;
+                cartBtn.textContent = originalText;
+                showNotice(data.message || "Could not add to cart.");
+            })
+            .catch(function () {
+                cartBtn.disabled = false;
+                cartBtn.textContent = originalText;
+                showNotice("Something went wrong. Please try again.");
+            });
+    });
+
+    function closeAllSortMenus() {
+        // mobile (stable — outside .product-section)
+        if (customSortMenu) customSortMenu.classList.remove("is-open");
+        if (customSortBtn) customSortBtn.setAttribute("aria-expanded", "false");
+        if (customSortWrap) customSortWrap.classList.remove("is-open");
+        // top sort — always query live DOM; these nodes are replaced by every AJAX render
+        var liveTopMenu = document.getElementById("shopTopSortMenu");
+        var liveTopBtn  = document.getElementById("shopTopSortBtn");
+        if (liveTopMenu) liveTopMenu.classList.remove("is-open");
+        if (liveTopBtn)  liveTopBtn.setAttribute("aria-expanded", "false");
+        // sidebar (stable — outside .product-section)
+        if (sidebarSortMenu) sidebarSortMenu.classList.remove("is-open");
+        if (sidebarSortBtn)  sidebarSortBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function bindTopSortDropdown() {
+        var btn  = document.getElementById("shopTopSortBtn");
+        var menu = document.getElementById("shopTopSortMenu");
+        if (!btn || !menu) return;
+
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var isOpen = menu.classList.contains("is-open");
+            closeAllSortMenus();
+            if (!isOpen) {
+                menu.classList.add("is-open");
+                btn.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        var options = menu.querySelectorAll(".shop-top-sort-option");
+        Array.prototype.forEach.call(options, function (option) {
+            option.addEventListener("click", function () {
+                var value = option.getAttribute("data-value") || "latest";
+                var topSortSel = document.getElementById("shopTopSort");
+                if (topSortSel) {
+                    topSortSel.value = value;
+                    topSortSel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                closeAllSortMenus();
+            });
+        });
+    }
+
+    if (customSortBtn && customSortMenu) {
+        customSortBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var isOpen = customSortMenu.classList.contains("is-open");
+            closeAllSortMenus();
+            if (!isOpen) {
+                customSortMenu.classList.add("is-open");
+                customSortBtn.setAttribute("aria-expanded", "true");
+                if (customSortWrap) customSortWrap.classList.add("is-open");
+            }
+        });
+
+        var customSortOptions = customSortMenu.querySelectorAll(".shop-custom-sort-option");
+        Array.prototype.forEach.call(customSortOptions, function (option) {
+            option.addEventListener("click", function () {
+                var value = option.getAttribute("data-value") || "latest";
+                var mobileSortSel = document.getElementById("shopMobileSort");
+                if (mobileSortSel) {
+                    mobileSortSel.value = value;
+                    mobileSortSel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                closeAllSortMenus();
+            });
+        });
+    }
+
+    bindTopSortDropdown();
+
+    if (sidebarSortBtn && sidebarSortMenu) {
+        sidebarSortBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var isOpen = sidebarSortMenu.classList.contains("is-open");
+            closeAllSortMenus();
+            if (!isOpen) {
+                sidebarSortMenu.classList.add("is-open");
+                sidebarSortBtn.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        var sidebarSortOptions = sidebarSortMenu.querySelectorAll(".shop-sidebar-sort-option");
+        Array.prototype.forEach.call(sidebarSortOptions, function (option) {
+            option.addEventListener("click", function () {
+                var value = option.getAttribute("data-value") || "latest";
+                var sidebarSortSel = document.getElementById("shopSidebarSort");
+                if (sidebarSortSel) {
+                    sidebarSortSel.value = value;
+                    sidebarSortSel.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+                closeAllSortMenus();
+            });
+        });
+    }
+
+    document.addEventListener("click", function (e) {
+        var inMobile   = customSortWrap && customSortWrap.contains(e.target);
+        var liveTopWrap = document.getElementById("shopTopSortWrap");
+        var inTop      = liveTopWrap && liveTopWrap.contains(e.target);
+        var inSidebar  = sidebarSortGroup && sidebarSortGroup.contains(e.target);
+        if (!inMobile && !inTop && !inSidebar) closeAllSortMenus();
+    });
+
+
+    hydrateLazyImages();
 });

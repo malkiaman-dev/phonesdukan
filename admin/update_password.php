@@ -36,10 +36,10 @@ if (!$target_role) {
     die("Target admin not found.");
 }
 
-include __DIR__ . '/admin_sidebar.php';
-
-// Include the header
 include __DIR__ . '/admin_header.php';
+
+// Include the sidebar
+include __DIR__ . '/admin_sidebar.php';
 
 // Restrict admins from changing superadmin password
 if ($logged_in_role !== 'superadmin' && $target_role === 'superadmin') {

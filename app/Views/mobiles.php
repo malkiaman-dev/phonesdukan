@@ -1,182 +1,262 @@
 <?php
-$pageTitle = "Mobile Prices in Pakistan " . date('F Y') . " – Updated Rates & Top Brands";
-$metaDescription = "Explore mobile prices in Pakistan " . date('F Y') . ". Compare latest models, specs, and deals to find the perfect smartphone for you. Updated daily!";
-$metaRobots = "index, follow";
-$metaKeywords = "mobile mobile prices, Buy mobile Online Pakistan, mobile Pakistan, mobile at lowest price in Pakistan mobile price in pakistan smartphone";
-require_once __DIR__ . '/../../database/db.php';
-require_once dirname(__DIR__, 2) . '/includes/header.php';
-// Create database connection instance
-$database = new Database();
-$conn = $database->getConnection();
+require_once dirname(__DIR__, 1) . '/Helpers/SeoHelper.php';
+require_once dirname(__DIR__, 1) . '/Models/CatalogModel.php';
+require_once dirname(__DIR__, 1) . '/Models/ProductModel.php';
 
-// Check if connection is established
-if (!$conn) {
-    die("Database connection error.");
+$pageTitle       = "Mobile Prices in Pakistan " . date('F Y') . " – Updated Rates & Top Brands";
+$metaDescription = "Explore mobile prices in Pakistan " . date('F Y') . ". Compare latest models from Samsung, Infinix, Oppo, Vivo, Xiaomi & more. Updated daily!";
+$metaRobots      = "index, follow";
+$metaKeywords    = "mobile prices Pakistan, buy mobile online Pakistan, smartphone prices Pakistan";
+
+$breadcrumbs = SeoHelper::categoryBreadcrumbs('mobiles', 'Mobiles');
+
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
+
+$catalogModel = new CatalogModel();
+$productModel = new ProductModel();
+$category = $catalogModel->getActiveParentCategoryBySlug('mobiles');
+
+if (!$category) {
+    http_response_code(404);
+    include __DIR__ . '/404.php';
+    return;
 }
 
-// Define mobile brands
-$brands = array('infinix', 'oppo', 'realme', 'samsung', 'tecno', 'vivo', 'xiaomi');
+$categoryId = (int) $category['category_id'];
+$categorySlug = (string) $category['slug'];
+$categoryBrands = $catalogModel->getBrandsWithProductsInCategory($categoryId);
+
+$limit = 48;
+$paged = isset($_GET['paged']) ? (int) $_GET['paged'] : 1;
+$paged = $paged > 0 ? $paged : 1;
+
+$totalRows = $productModel->countListingProductsForCategory($categoryId);
+$totalPages = $totalRows > 0 ? (int) ceil($totalRows / $limit) : 0;
+seoEnforceListingPagination($paged, $totalPages);
+$offset = ($paged - 1) * $limit;
+
+$rawProducts = $productModel->getListingProductsForCategory($categoryId, $limit, $offset);
+
+$allProducts = [];
+foreach ($rawProducts as $row) {
+    $allProducts[] = prepareProductCardFromRow($row);
+}
+
+$brandList = [];
+foreach ($categoryBrands as $brandRow) {
+    $slug = (string) ($brandRow['slug'] ?? '');
+    if ($slug === '') {
+        continue;
+    }
+    $brandList[$slug] = (string) ($brandRow['brand_name'] ?? $slug);
+}
+
+$totalProducts = count($allProducts);
+$totalBrands   = count($brandList);
+$activeBrandSlug = null;
+$allLabel = 'All Mobiles';
+
+require_once dirname(__DIR__, 2) . '/includes/header.php';
 ?>
 
-<div class="mobiles-section">
-    <!-- Display introduction only once -->
-    <div class="mobile-price-info">
-        <h1><span>Mobiles Price</span> In Pakistan <?php echo date('F Y'); ?></h1>
-        <p>Mobile phone prices in Pakistan are constantly changing due to taxes, exchange rates, and market demand, which makes it challenging for buyers. At Phones Dukan, we provide the most competitive mobile phone prices in Pakistan, We guarantee clarity and provide authentic products.</p>
+<!-- HERO -->
+<section class="mob-hero">
+    <div class="mob-hero-inner">
+        <p class="mob-hero-eyebrow">Pakistan's Trusted Mobile Store</p>
+        <h1 class="mob-hero-title"><span>Latest Smartphones </span> in Pakistan</h1>
+        <p class="mob-hero-sub">Explore the latest smartphones from top mobile brands with PTA-approved devices, competitive prices, verified specifications, and fast delivery across Pakistan.</p>
     </div>
-</div>
+</section>
+
+<!-- BRAND FILTER TABS -->
+<?php include __DIR__ . '/partials/category-brand-tabs.php'; ?>
+
 <?php include_once __DIR__ . '/ad/feed1.php'; ?>
-<?php
-foreach ($brands as $brand) :
-?>
-<div class="product-section">
-    <div class="category-header">
-        <h2><?php echo ucfirst($brand); ?> <span>Mobiles</span></h2>
-        <a href="/mobiles/<?php echo $brand; ?>" class="view-all-btn">View All</a>
-    </div>
 
-    <div class="product-grid-container">
-        <div class="product-grid-wrapper">
-            <?php
-            // Fetch mobiles category products with category_slug, brand_slug, and stock_quantity
-            $query = "SELECT p.product_slug, p.product_name, p.regular_price, p.sale_price, p.stock_quantity,
-            pi.image_url, b.slug AS brand_slug, c.slug AS category_slug
-     FROM products p
-     JOIN brands b ON p.brand_id = b.brand_id
-     JOIN categories c ON p.category_id = c.category_id
-     LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
-     WHERE p.category_id = 2 AND b.slug = :brand AND p.product_status != '0'
-     ORDER BY p.created_at DESC LIMIT 4";
+<!-- PRODUCT GRID -->
+<div class="mob-products-section">
+    <div class="mob-products-inner">
+        <?php if (!empty($allProducts)): ?>
+            <div class="mob-product-grid" id="mobProductGrid">
+                <?php foreach ($allProducts as $product): ?>
+                    <article class="na-card mob-na-card">
 
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(":brand", $brand);
-            $stmt->execute();
-            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
 
-            if (!empty($products)) :
-                foreach ($products as &$product) :
-                    // Process product data
-                    $product['regular_price'] = floatval($product['regular_price']);
-                    $product['sale_price'] = !empty($product['sale_price']) ? floatval($product['sale_price']) : null;
-                    $product['stock_quantity'] = intval($product['stock_quantity']);
-                    $product['is_sold_out'] = ($product['stock_quantity'] <= 0);
-                    $product['is_on_sale'] = ($product['stock_quantity'] > 0 && $product['sale_price'] !== null && $product['sale_price'] > 0 && $product['sale_price'] < $product['regular_price']);
-
-                    // Construct product URL with category_slug, brand_slug, and product_slug
-                    $product_url = "/" . htmlspecialchars($product['category_slug']) . "/" .
-                        htmlspecialchars($product['brand_slug']) . "/" .
-                        htmlspecialchars($product['product_slug']);
-                    
-                    $product_image = !empty($product['image_url']) ? $product['image_url'] : 'default-image.jpg'; // Fallback image
-                    $product_name = htmlspecialchars($product['product_name']);
-                    ?>
-                    <div class="mobile-product-card">
-                        <div class="tagwrap">
-                            <?php if ($product['is_sold_out']): ?>
-                                <div class="sold-out">
-                                    <span>Sold Out</span>
-                                </div>
-                            <?php elseif ($product['is_on_sale']): ?>
-                                <div class="pro-tags">
-                                    <span>Sale</span>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                        <a href="<?php echo $product_url; ?>">
-                            <div class="mobile-product-img-wrapper">
-                                <div class="mobile-product-img">
-                                    <img src="<?php echo $product_image; ?>" alt="<?php echo $product_name; ?>">
-                                </div>
+                        <a href="<?= $product['product_url'] ?>" class="na-img-link">
+                            <div class="na-img-box">
+                                <img
+                                    src="<?= $product['product_image'] ?>"
+                                    alt="<?= $product['product_name'] ?>"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
                             </div>
                         </a>
-                        <h3 class="mobile-product-title">
-                            <a href="<?php echo $product_url; ?>">
-                                <?php echo $product_name; ?>
-                            </a>
-                        </h3>
-                        <span class="prodline"></span>
-                        <div class="mobile-product-price">
-                            <?php
-                            // Check if sale_price exists and is not empty
-                            if (!empty($product['sale_price']) && $product['is_on_sale']) {
-                                echo '<span class="r-regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> ';
-                                echo '<span class="r-sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                            } else {
-                                echo '<span class="r-regular-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-                            }
-                            ?>
+
+                        <div class="na-body">
+                            <h3 class="na-name">
+                                <a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a>
+                            </h3>
+
+                            <div class="na-price">
+                                <?php if ($product['has_sale']): ?>
+                                    <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                                    <span class="na-price--new">Rs.<?= number_format($product['sale_price']) ?></span>
+                                <?php elseif ($product['regular_price'] > 0): ?>
+                                    <span class="na-price--new">Rs.<?= number_format($product['regular_price']) ?></span>
+                                <?php else: ?>
+                                    <span class="na-price--na">Price N/A</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
                         </div>
-                    </div>
+                    </article>
                 <?php endforeach; ?>
-        </div> <!-- End of .product-grid-wrapper -->
-            <?php else : ?>
-                <p>No products found in this brand.</p>
+            </div>
+
+            <?php if ($totalPages > 1): ?>
+                <div class="mob-pagination-wrap">
+                    <div class="pagination mob-pagination">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="<?= htmlspecialchars(url('mobiles') . '?paged=' . $i, ENT_QUOTES, 'UTF-8') ?>"
+                               class="<?= ($i === $paged) ? 'active' : '' ?>"
+                               <?= ($i === $paged) ? "aria-current='page'" : '' ?>>
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
+                </div>
             <?php endif; ?>
-    </div> <!-- End of .product-grid-container -->
+
+        <?php else: ?>
+            <p class="mob-empty">No products found. Please check back soon.</p>
+        <?php endif; ?>
     </div>
-<?php endforeach; ?>
+</div>
+
 <?php include_once __DIR__ . '/ad/feed2.php'; ?>
-<div class="content-container">
-    <h2>Understanding the Agitation: <span>What’s Causing the Pricing Chaos?</span></h2>
-<p>One of the main reasons for the uncertainty in mobile phone prices in Pakistan is the volatile exchange rate. Mobile phones are generally imported from countries like China, South Korea, and the United States, and as the Pakistani Rupee fluctuates against major currencies, the cost of importing phones increases, directly impacting retail prices.</p>
-<p>Furthermore, the addition of taxes, duties, and the lack of regulatory control on prices by the government further contribute to this volatility. In fact, recent studies on mobile pricing in Pakistan highlight how the government-imposed taxes on mobile phones are a significant contributor to the price hike. These taxes are not only limited to smartphones but also to mobile accessories, making it a costly affair for consumers.</p>
-<p>For instance, a recent article on mobile pricing trends in Pakistan <a href="https://profit.pakistantoday.com.pk/2024/07/26/mobile-phones-set-to-become-more-expensive-in-pakistan/">Research Article on Mobile Rates in Pakistan</a> delves deeper into how the rise in taxes and currency depreciation have forced consumers to pay a premium for their favorite devices.</p>
-<p>Another factor is the rapid technological advancements in smartphones. Every year, new models are released, and with each new iteration, manufacturers increase prices due to enhanced features, better cameras, and faster processors. These factors create a gap in the market between older and newer models, leaving customers torn between getting the latest model or purchasing a budget-friendly option.</p>
 
-<h2>The Solution: <span>Finding Affordable and Reliable Mobile Phones in Pakistan</span></h2>
-<p>At Phones Dukan, we understand the challenges of navigating through fluctuating mobile phone prices. Our mission is to offer you the latest mobile phones at competitive prices, ensuring you get the best value for your money. Here’s how we provide a solution to the problem:</p>
-<ul>
-    <li><strong>Transparent Pricing:</strong> We offer clear pricing without hidden fees or confusing charges. Our prices are updated regularly, reflecting the latest market trends, and we ensure that you get an accurate cost for the model you choose. By shopping on Phones Dukan, you can avoid the confusion of varying prices from different retailers.</li>
-    <li><strong>Wide Range of Options:</strong> Whether you’re looking for a budget-friendly phone or a premium device, we have a wide selection of smartphones to suit every need. From trusted brands like Samsung, Huawei, and Xiaomi to the latest iPhones, we ensure that our customers can find the perfect mobile phone based on their preferences and budget. If you're on a budget, explore our collection of <a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-30000/">Best Mobiles Under 30000</a> to find top-rated phones at an affordable price.</li>
-    <li><strong>Latest Models at Competitive Prices:</strong> Despite the rising costs of mobile phones in Pakistan, Phones Dukan remains committed to offering the most competitive prices for the latest models. Our relationships with trusted suppliers allow us to secure phones at lower prices, and we pass those savings on to our customers.</li>
-    <li><strong>Detailed Product Information:</strong> We believe in transparency, and our product listings are designed to give you all the information you need before making a purchase. Our website includes specifications, customer reviews, and detailed descriptions of each phone, making it easier for you to compare different models and make an informed decision.</li>
-    <li><strong>Easy Payment Options:</strong> With flexible payment plans, we ensure that everyone has access to high-quality mobile phones, even if they’re on a tight budget. We also offer cash on delivery and easy installment plans, making the purchasing process smooth and convenient for our customers.</li>
-</ul>
-
-<h2>How Mobile Pricing Trends Are <span>Shaping the Market in Pakistan</span></h2>
-<p>The mobile phone market in Pakistan has been evolving rapidly, with several trends emerging in the past few years. Let’s take a closer look at these trends to understand how they influence mobile pricing and consumer behavior:</p>
-<ul>
-    <li><strong>The Rise of Budget Smartphones:</strong> With increasing demand for affordable smartphones, budget-friendly devices have become more popular in Pakistan. Brands like Xiaomi, Realme, and Infinix have gained significant market share due to their affordable yet feature-packed smartphones. These devices typically cost between <span>PKR 20,000</span> to <span>PKR 40,000</span> and are a hit among first-time smartphone users. For those looking for smartphones in the price range of <a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-40000/">Best Mobiles Under 40000</a>, you can easily find devices that offer great performance without exceeding your budget.</li>
-    <li><strong>Premium Smartphones for the Affluent Market:</strong> On the other end of the spectrum, high-end smartphones from Apple, Samsung, and other premium brands continue to dominate the market. With prices often crossing the <span>PKR 100,000</span> mark, these devices cater to customers who demand cutting-edge technology, high-quality cameras, and superior performance. However, due to the price hike and import duties, the affordability of these models has been affected.</li>
-    <li><strong>Pre-Owned Mobile Phones:</strong> Another growing trend is the demand for pre-owned or refurbished mobile phones. With rising prices, many consumers are opting for second-hand or refurbished phones, which offer a more affordable alternative to brand-new models. These phones are typically tested and restored to near-new condition, making them an attractive option for budget-conscious consumers.</li>
-    <li><strong>Emerging 5G Technology:</strong> With the advent of 5G technology, mobile phone brands are starting to introduce 5G-enabled devices in the Pakistani market. While these phones are more expensive than their 4G counterparts, they promise faster internet speeds and enhanced connectivity. As 5G becomes more widespread in Pakistan, the prices of these devices are expected to remain high, especially in the early stages.</li>
-    <li><strong>Local and International Brands Competing for Market Share:</strong> The competitive landscape is constantly changing, with both local and international brands vying for a piece of the Pakistani mobile market. As new players enter the market, pricing becomes more competitive, which benefits consumers looking for affordable options.</li>
-</ul>
-    </div>
-
-    <!-- Why Choose Us Section -->
-    <div class="why-choose-us">
-    <h2>Why Choose Us – <span>Our Mobile:</span></h2>
-        <div class="why-choose-us-content">
-            <div class="usp-box">
-                <i class="fas fa-shield-alt"></i>
-                <div class="usp-content">
-                    <h4>Daily Updates</h4>
-                    <p>Stay informed with accurate and updated prices from trusted dealers.</p>
-                </div>
-            </div>
-            <div class="usp-box">
-                <i class="fas fa-truck"></i>
-                <div class="usp-content">
-                    <h4>Comprehensive Range</h4>
-                    <p>From flagship models to budget-friendly options, find mobiles that suit your needs and budget.</p>
-                </div>
-            </div>
-            <div class="usp-box">
-                <i class="fas fa-headphones-alt"></i>
-                <div class="usp-content">
-                    <h4>Specs and Comparisons</h4>
-                    <p>Explore detailed specifications, reviews, and comparisons to pick the perfect smartphone.</p>
-                </div>
-            </div>
-            <div class="usp-box">
-                <i class="fas fa-dollar-sign"></i>
-                <div class="usp-content">
-                    <h4>Exclusive Deals</h4>
-                    <p>Enjoy special discounts and offers on your favorite brands.</p>
-                </div>
+<!-- SHOP BY BRAND CAROUSEL -->
+<section class="mob-brands-section">
+    <div class="mob-brands-inner">
+        <h2 class="mob-brands-title">Shop by <span>Brand</span></h2>
+        <div class="mob-brands-carousel-wrap" id="mobBrandsCarousel">
+            <div class="mob-brands-track" id="mobBrandsTrack">
+                <?php foreach ($brandList as $slug => $name):
+                    $logoSrc  = url('public/assets/images/' . $slug . '_logo.webp');
+                    $safeSlug = htmlspecialchars($slug, ENT_QUOTES, 'UTF-8');
+                    $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+                ?>
+                    <a href="<?= url('mobiles/' . $safeSlug) ?>"
+                       class="mob-brand-card"
+                       draggable="false">
+                        <img
+                            src="<?= htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8') ?>"
+                            alt="<?= $safeName ?>"
+                            class="mob-brand-logo"
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
+                            onerror="this.style.display='none'"
+                        >
+                        <span class="mob-brand-card-text">View all mobiles</span>
+                    </a>
+                <?php endforeach; ?>
             </div>
         </div>
-                <p class="p-note">Ready to Find Your Perfect Mobile? <a href="https://www.phonesdukan.com" class="cta-button">Visit Phones Dukan</a> and explore a wide range of smartphones at affordable prices!</p>
+        <div class="mob-brands-dots" id="mobBrandsDots" role="tablist" aria-label="Brand navigation"></div>
     </div>
-    <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section class="mob-why">
+    <div class="mob-why-inner">
+        <h2 class="mob-why-title">Why Choose <span>Phones Dukan</span></h2>
+        <div class="mob-why-grid">
+            <div class="mob-why-card">
+                <div class="mob-why-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <h4>Daily Updates</h4>
+                <p>Prices updated daily from verified dealers across Pakistan.</p>
+            </div>
+            <div class="mob-why-card">
+                <div class="mob-why-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+                <h4>Top Brands</h4>
+                <p>Samsung, Infinix, Oppo, Vivo, Xiaomi, Tecno, Realme and more.</p>
+            </div>
+            <div class="mob-why-card">
+                <div class="mob-why-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <h4>Specs &amp; Comparisons</h4>
+                <p>Detailed specifications and reviews to help you decide.</p>
+            </div>
+            <div class="mob-why-card">
+                <div class="mob-why-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h4>Verified Deals</h4>
+                <p>Exclusive discounts and authenticated offers on every order.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEO CONTENT -->
+<section class="mob-seo">
+    <div class="mob-seo-inner">
+
+        <h2>Understanding Mobile Prices in <span>Pakistan</span></h2>
+        <p>Mobile phone prices in Pakistan are constantly changing due to taxes, exchange rates, and market demand. At Phones Dukan, we provide the most competitive mobile phone prices with full clarity and authentic products. For deeper insight, see this <a href="https://profit.pakistantoday.com.pk/2024/07/26/mobile-phones-set-to-become-more-expensive-in-pakistan/" target="_blank" rel="noopener">research article on mobile rates in Pakistan</a>.</p>
+        <p>One of the main drivers of pricing uncertainty is the volatile exchange rate. Mobile phones are imported from China, South Korea, and the United States, and as the Pakistani Rupee fluctuates, import costs directly impact retail prices. Government-imposed taxes and duties further contribute to this volatility.</p>
+
+        <h2>Finding Affordable &amp; Reliable <span>Options</span></h2>
+        <p>At Phones Dukan, we understand the challenges of navigating fluctuating mobile prices. Our mission is to offer the latest smartphones at competitive prices — ensuring you get the best value for your money.</p>
+        <ul>
+            <li><strong>Transparent Pricing:</strong> Clear prices without hidden fees, updated regularly to reflect the latest market trends.</li>
+            <li><strong>Wide Range of Options:</strong> From budget-friendly phones to premium devices — Samsung, Xiaomi, Infinix, and more. Explore our <a href="/mobiles-price-list/best-mobiles-under-30000/">Best Mobiles Under 30,000</a> collection.</li>
+            <li><strong>Detailed Product Information:</strong> Specifications, reviews, and comparisons to help you make an informed decision.</li>
+            <li><strong>Easy Payment Options:</strong> Cash on delivery and flexible installment plans for your convenience.</li>
+        </ul>
+
+        <h2>Mobile Pricing Trends Shaping <span>Pakistan's Market</span></h2>
+        <p>Budget smartphones from Infinix, Realme, and Tecno have gained massive market share due to affordable yet feature-packed specs in the PKR 20,000–40,000 range. High-end devices from Apple and Samsung continue to cater to premium buyers. 5G technology is gradually entering Pakistan's market, while pre-owned and refurbished devices are rising in popularity as consumers seek more affordable alternatives.</p>
+
+    </div>
+</section>
+
+<script type="application/ld+json">
+<?= SeoHelper::faqSchema([
+    [
+        'question' => 'Are all mobile phones at Phones Dukan PTA approved?',
+        'answer'   => 'Yes. Every smartphone sold at Phones Dukan is 100% PTA (Pakistan Telecommunication Authority) approved. This ensures your device can be legally registered and used on all Pakistani networks without any network-lock issues or extra taxes.'
+    ],
+    [
+        'question' => 'Do you offer cash on delivery across Pakistan?',
+        'answer'   => 'Yes, we offer cash on delivery to all major cities including Islamabad, Lahore, Karachi, Rawalpindi, Faisalabad, Multan, Peshawar, and Quetta. Delivery typically takes 2–4 working days.'
+    ],
+    [
+        'question' => 'What warranty comes with mobile phones purchased at Phones Dukan?',
+        'answer'   => 'All smartphones at Phones Dukan come with an official 1-year brand warranty covering manufacturing defects. Some models may come with up to 2-year warranties. Warranty claims are handled directly through the official brand service centres in Pakistan.'
+    ],
+    [
+        'question' => 'What is the return policy for mobiles?',
+        'answer'   => 'We offer a 7-day return and exchange policy. If you receive a defective or incorrect product, contact us within 7 days of delivery with the original packaging and receipt. Products must be unused and in original condition for a full refund or replacement.'
+    ],
+    [
+        'question' => 'Which mobile brands are available at Phones Dukan?',
+        'answer'   => 'We stock a wide range of brands including Samsung, Apple iPhone, Xiaomi, Redmi, Vivo, Oppo, Infinix, Tecno, Realme, OnePlus, Google Pixel, Honor, and Nothing. All models are PTA approved and available at competitive prices.'
+    ],
+    [
+        'question' => 'What is the best budget smartphone under PKR 50,000 in Pakistan?',
+        'answer'   => 'Top picks under PKR 50,000 include the Infinix Hot series, Samsung Galaxy A series, Realme Narzo, Xiaomi Redmi Note, and Tecno Spark models. These offer a solid balance of performance, camera quality, and battery life for everyday use.'
+    ],
+]) ?>
+</script>
+
+<?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>

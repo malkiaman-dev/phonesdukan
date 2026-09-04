@@ -1,0 +1,5 @@
+<?php
+// Copy to ai-seo.local.php and set your Groq API key.
+// Get your key at: https://console.groq.com/keys
+
+define('GROQ_API_KEY', 'your-groq-api-key-here');

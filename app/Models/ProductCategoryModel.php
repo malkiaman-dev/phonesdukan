@@ -23,13 +23,17 @@ class ProductModel
         $query = "SELECT p.product_id, p.product_name, p.product_slug, 
         COALESCE(p.regular_price, 0) AS regular_price, 
         NULLIF(p.sale_price, '') AS sale_price,  
-        COALESCE(p.stock_quantity, 0) AS stock_quantity, 
+        COALESCE(p.stock_quantity, 0) AS stock_quantity,
+        p.product_status,
+        p.product_tag,
         pi.image_url,
         c.slug AS category_slug,
-        b.slug AS brand_slug
+        b.slug AS brand_slug,
+        sc.slug AS subcategory_slug
  FROM products p
  LEFT JOIN product_images pi ON p.product_id = pi.product_id
- LEFT JOIN categories c ON p.category_id = c.category_id 
+ LEFT JOIN categories c ON p.category_id = c.category_id
+ LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
  LEFT JOIN brands b ON p.brand_id = b.brand_id
  WHERE p.product_id IN ($placeholders)
    AND p.product_status != '0'
@@ -45,15 +49,12 @@ class ProductModel
         $stmt->execute();
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($products as &$product) {
-            $product['regular_price'] = floatval($product['regular_price']);
-            $product['sale_price'] = !empty($product['sale_price']) ? floatval($product['sale_price']) : null;
-            $product['stock_quantity'] = intval($product['stock_quantity']);
-            $product['is_sold_out'] = ($product['stock_quantity'] <= 0);
-            $product['is_on_sale'] = ($product['stock_quantity'] > 0 && $product['sale_price'] !== null && $product['sale_price'] > 0 && $product['sale_price'] < $product['regular_price']);
+        $cards = [];
+        foreach ($products as $product) {
+            $cards[] = prepareProductCardFromRow($product);
         }
 
-        return $products;
+        return $cards;
     }
 
     // For coming soon
@@ -64,16 +65,19 @@ class ProductModel
                    p.product_name, 
                    p.product_slug, 
                    p.regular_price, 
-                   p.sale_price, 
+                   p.sale_price,
+                   p.expected_coming_date,
                    pi.image_url,
                    c.slug AS category_slug, 
-                   b.slug AS brand_slug
+                   b.slug AS brand_slug,
+                   sc.slug AS subcategory_slug
             FROM products p
             LEFT JOIN product_images pi ON p.product_id = pi.product_id
             LEFT JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
             LEFT JOIN brands b ON p.brand_id = b.brand_id
-            WHERE p.product_tag LIKE '%coming_soon%' 
-            AND p.product_status != '0' 
+            WHERE (p.product_status = 2 OR p.product_tag LIKE '%coming_soon%')
+            AND p.product_status != '0'
             AND LOWER(p.product_status) != 'out of stock'
             GROUP BY p.product_id
             ORDER BY p.created_at DESC 
@@ -90,7 +94,9 @@ class ProductModel
         $query = "SELECT p.product_id, p.product_name, p.product_slug, 
                          COALESCE(p.regular_price, 0) AS regular_price, 
                          NULLIF(p.sale_price, '') AS sale_price,  
-                         COALESCE(p.stock_quantity, 0) AS stock_quantity, 
+                         COALESCE(p.stock_quantity, 0) AS stock_quantity,
+                         p.product_status,
+                         p.product_tag,
                          pi.image_url,
                          c.slug AS category_slug,
                          b.slug AS brand_slug
@@ -114,7 +120,8 @@ class ProductModel
     {
         $stmt = $this->db->prepare('
         SELECT p.product_id, p.product_name, p.product_slug, 
-               p.regular_price, p.sale_price, p.stock_quantity, 
+               p.regular_price, p.sale_price, p.stock_quantity,
+               p.product_status, p.product_tag,
                pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
         FROM products p
         JOIN categories c ON p.category_id = c.category_id
@@ -139,8 +146,9 @@ class ProductModel
                 p.product_slug, 
                 p.regular_price, 
                 p.sale_price, 
-                p.stock_quantity, 
+                p.stock_quantity,
                 p.product_status,
+                p.product_tag,
                 pi.image_url, 
                 c.slug AS category_slug, 
                 b.slug AS brand_slug
@@ -165,7 +173,8 @@ class ProductModel
     {
         $stmt = $this->db->prepare('
         SELECT p.product_id, p.product_name, p.product_slug, 
-               p.regular_price, p.sale_price, p.stock_quantity, 
+               p.regular_price, p.sale_price, p.stock_quantity,
+               p.product_status, p.product_tag,
                pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
         FROM products p
         JOIN categories c ON p.category_id = c.category_id
@@ -187,7 +196,8 @@ class ProductModel
     {
         $stmt = $this->db->prepare('
             SELECT p.product_id, p.product_name, p.product_slug, 
-                   p.regular_price, p.sale_price, p.stock_quantity, 
+                   p.regular_price, p.sale_price, p.stock_quantity,
+                   p.product_status, p.product_tag,
                    pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
             FROM products p
             JOIN categories c ON p.category_id = c.category_id
@@ -206,7 +216,8 @@ class ProductModel
     {
         $stmt = $this->db->prepare('
             SELECT p.product_id, p.product_name, p.product_slug, 
-                   p.regular_price, p.sale_price, p.stock_quantity, 
+                   p.regular_price, p.sale_price, p.stock_quantity,
+                   p.product_status, p.product_tag,
                    pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
             FROM products p
             JOIN categories c ON p.category_id = c.category_id
@@ -225,7 +236,8 @@ class ProductModel
     {
         $stmt = $this->db->prepare('
             SELECT p.product_id, p.product_name, p.product_slug, 
-                   p.regular_price, p.sale_price, p.stock_quantity, 
+                   p.regular_price, p.sale_price, p.stock_quantity,
+                   p.product_status, p.product_tag,
                    pi.image_url, c.slug AS category_slug, b.slug AS brand_slug
             FROM products p
             JOIN categories c ON p.category_id = c.category_id

@@ -3,11 +3,28 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
+require_once dirname(__DIR__, 2) . '/includes/product_title_rewrite.php';
 require_once dirname(__DIR__, 2) . '/app/Models/EditProductModel.php';
+require_once dirname(__DIR__, 2) . '/app/Models/VariationModel.php';
+require_once dirname(__DIR__, 2) . '/app/Services/ProductMediaService.php';
+require_once dirname(__DIR__, 2) . '/app/Helpers/ProductMediaHelper.php';
 
 class ProductController
 {
     private $model;
+
+    private function redirectToCurrentEditPage($id)
+    {
+        $requestPath = $_SERVER['REQUEST_URI'] ?? '';
+        $basePath = strtok($requestPath, '?');
+        if (!is_string($basePath) || trim($basePath) === '') {
+            $basePath = 'edit-product.php';
+        }
+
+        header('Location: ' . $basePath . '?id=' . urlencode((string) $id));
+        exit();
+    }
 
     public function __construct()
     {
@@ -26,13 +43,8 @@ class ProductController
         $categories = $this->model->getAllCategories();
         $brands = $this->model->getAllBrands();
         $productAttributes = $this->model->getAllAttributes();
-        $attributeValues = [];
-        foreach ($productAttributes as $attribute) {
-            $values = $this->model->getAttributeValues($attribute['attribute_id']);
-            error_log("Fetched values for attribute_id " . $attribute['attribute_id'] . ": " . print_r($values, true));
-            $attributeValues[$attribute['attribute_id']] = $values;
-        }
-        error_log("Final attributeValues array: " . print_r($attributeValues, true));
+        // One query for all attribute values instead of N+1 round-trips.
+        $attributeValues = $this->model->getAllAttributeValuesGrouped();
         return [
             'product' => $product,
             'categories' => $categories,
@@ -57,24 +69,79 @@ class ProductController
 
     public function updateProduct($id, $data, $seoData, $primaryImage, $galleryImages, $imageMetadata, $primaryImageId = null)
     {
-        error_log('updateProduct called with id: ' . $id);
-        error_log('POST data: ' . print_r($_POST, true));
         
         if (empty($id) || empty($data)) {
             session_start();
             $_SESSION['message'] = 'Error: Invalid product ID or data.';
             $_SESSION['message_type'] = 'error';
-            header('Location: /admin/edit-product.php?id=' . $id);
-            exit();
+            $this->redirectToCurrentEditPage($id);
         }
     
         try {
             if (empty($data['product_sku'])) {
                 $data['product_sku'] = null;
             }
+
+            // Auto-expand title from brand + short description (keeps slug unchanged).
+            try {
+                $brandName = '';
+                $categoryName = '';
+                $dbConn = (new Database())->getConnection();
+                if (!empty($data['brand_id'])) {
+                    $bs = $dbConn->prepare('SELECT brand_name FROM brands WHERE brand_id = ?');
+                    $bs->execute([(int) $data['brand_id']]);
+                    $brandName = (string) ($bs->fetchColumn() ?: '');
+                }
+                if (!empty($data['category_id'])) {
+                    $cs = $dbConn->prepare('SELECT category_name FROM categories WHERE category_id = ?');
+                    $cs->execute([(int) $data['category_id']]);
+                    $categoryName = (string) ($cs->fetchColumn() ?: '');
+                }
+                enrichProductTitleFromContext($data, $brandName, $categoryName);
+                if (empty($seoData['seo_title'])) {
+                    $seoData['seo_title'] = $data['product_name'];
+                }
+            } catch (Throwable $eTitle) {
+                // Keep posted title if enrichment fails
+            }
         
             $this->model->updateProduct($id, $data);
-        
+
+            // Keep gallery image visibility in sync with product status.
+            // Coming Soon / Inactive products store images with status=0;
+            // activating the product must promote those images too.
+            $imageStatus = ((int) ($data['product_status'] ?? 0) === 1) ? 1 : 0;
+            $this->model->syncImageStatusForProduct((int) $id, $imageStatus);
+
+            // Auto-regenerate canonical URL from the current category/brand/product slugs
+            try {
+                $dbSlug = (new Database())->getConnection();
+                $catS = $dbSlug->prepare('SELECT slug FROM categories WHERE category_id = ?');
+                $catS->execute([$data['category_id']]);
+                $catSlugRow = $catS->fetch(PDO::FETCH_ASSOC);
+
+                $brandS = $dbSlug->prepare('SELECT slug FROM brands WHERE brand_id = ?');
+                $brandS->execute([$data['brand_id']]);
+                $brandSlugRow = $brandS->fetch(PDO::FETCH_ASSOC);
+
+                $subSlug = null;
+                if (!empty($data['subcategory_id'])) {
+                    $subS = $dbSlug->prepare('SELECT slug FROM categories WHERE category_id = ? AND parent_id IS NOT NULL LIMIT 1');
+                    $subS->execute([(int) $data['subcategory_id']]);
+                    $subSlugRow = $subS->fetch(PDO::FETCH_ASSOC);
+                    $subSlug = $subSlugRow['slug'] ?? null;
+                }
+
+                $seoData['canonical_url'] = buildProductCanonicalUrl(
+                    (string) ($brandSlugRow['slug'] ?? ''),
+                    (string) ($catSlugRow['slug'] ?? ''),
+                    (string) ($data['product_slug'] ?? ''),
+                    $subSlug
+                );
+            } catch (Exception $eSlug) {
+                // Fall back to client-provided value
+            }
+
             $existingSeo = $this->model->getSeoDataByProductId($id);
             if ($existingSeo) {
                 $this->model->updateSeoData($id, $seoData);
@@ -82,18 +149,56 @@ class ProductController
                 $this->model->insertSeoData($id, $seoData);
             }
         
-            $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId);
+            $imageUpdate = $this->updateProductImages($id, $primaryImage, $imageMetadata, $primaryImageId, $imageStatus);
+            $this->model->normalizeProductImageUrls((int) $id);
+            $this->model->ensurePrimaryImageExists((int) $id);
+
+            $mediaService = new ProductMediaService((new Database())->getConnection());
+            $mediaService->saveFromRequest((int) $id, $_POST, $_FILES);
+            $mediaService->applyGalleryOrder((int) $id, $_POST['gallery_order_json'] ?? '[]', []);
         
             $attributes = $_POST['attributes'] ?? [];
             $removeAttributes = $_POST['remove_attributes'] ?? [];
-            error_log('Attributes sent in POST for product_id ' . $id . ': ' . print_r($attributes, true));
-            error_log('Attributes to remove for product_id ' . $id . ': ' . print_r($removeAttributes, true));
         
             $this->updateAssignedProductAttributes($id, $attributes, $removeAttributes);
-        
+
+            // Save product_type and variations
+            $product_type = in_array($_POST['product_type'] ?? 'simple', ['simple','variable'])
+                ? ($_POST['product_type'] ?? 'simple') : 'simple';
+            $db = (new Database())->getConnection();
+            $db->prepare("UPDATE products SET product_type=? WHERE product_id=?")->execute([$product_type, $id]);
+
+            if ($product_type === 'variable' && isset($_POST['variations_json'])) {
+                $variations = json_decode($_POST['variations_json'], true);
+                if (is_array($variations)) {
+                    $varModel = new VariationModel();
+                    $varModel->saveProductVariations($id, $variations);
+                }
+            } elseif ($product_type === 'simple') {
+                // Clear existing variations when switching back to simple
+                $db->prepare(
+                    "DELETE pv FROM product_variations pv WHERE pv.product_id = ?"
+                )->execute([$id]);
+            }
+
+            require_once __DIR__ . '/../Models/ProductGroupModel.php';
+            $groupIds = isset($_POST['group_product_ids']) && is_array($_POST['group_product_ids'])
+                ? $_POST['group_product_ids']
+                : [];
+            $groupPrices = isset($_POST['group_product_prices']) && is_array($_POST['group_product_prices'])
+                ? $_POST['group_product_prices']
+                : [];
+            (new ProductGroupModel($db))->saveGroupProducts((int) $id, $groupIds, $groupPrices);
+
             session_start();
-            $_SESSION['message'] = 'Product updated successfully!';
-            $_SESSION['message_type'] = 'success';
+            $uploadErrors = $imageUpdate['errors'] ?? [];
+            if (!empty($uploadErrors)) {
+                $_SESSION['message'] = 'Product updated, but some images failed to upload: ' . implode(' ', $uploadErrors);
+                $_SESSION['message_type'] = 'error';
+            } else {
+                $_SESSION['message'] = 'Product updated successfully!';
+                $_SESSION['message_type'] = 'success';
+            }
         } catch (Exception $e) {
             session_start();
             $_SESSION['message'] = 'Error updating product: ' . $e->getMessage();
@@ -101,24 +206,59 @@ class ProductController
             error_log('Update product error: ' . $e->getMessage());
         }
         
-        header('Location: /admin/edit-product.php?id=' . $id);
-        exit();
+        $this->redirectToCurrentEditPage($id);
     }
     
-    public function updateProductImages($productId, $primaryImage, $imageMetadata, $primaryImageId = null)
+    public function updateProductImages($productId, $primaryImage, $imageMetadata, $primaryImageId = null, $imageStatus = 1)
     {
+        $errors = [];
+        $productId = (int) $productId;
+
+        // Removals first so primary selection cannot target a deleted row.
+        $removeImages = isset($_POST['remove_image']) && is_array($_POST['remove_image'])
+            ? $_POST['remove_image']
+            : [];
+        if (!empty($removeImages)) {
+            foreach ($removeImages as $imageId => $value) {
+                if ((string) $value === '1' || (int) $value === 1) {
+                    $this->model->removeImage((int) $imageId, $productId);
+                }
+            }
+        }
+
+        $hasExistingPrimarySelection = $primaryImageId !== null
+            && $primaryImageId !== ''
+            && ctype_digit((string) $primaryImageId)
+            && !isset($removeImages[(int) $primaryImageId])
+            && !isset($removeImages[(string) $primaryImageId]);
+
+        $existingCount = $this->model->countProductImages($productId);
+        $shouldPromoteNewUpload = !$hasExistingPrimarySelection && $existingCount === 0;
         $isPrimarySet = false;
-        if ($primaryImage && !empty($primaryImage['name'])) {
-            foreach ($primaryImage['tmp_name'] as $key => $tmpName) {
-                if ($primaryImage['error'][$key] === UPLOAD_ERR_OK) {
+
+        if ($primaryImage && isset($primaryImage['name']) && is_array($primaryImage['name'])) {
+            foreach ($primaryImage['name'] as $key => $name) {
+                if ($name === null || trim((string) $name) === '') {
+                    continue;
+                }
+
+                $errorCode = (int) ($primaryImage['error'][$key] ?? UPLOAD_ERR_NO_FILE);
+                if ($errorCode === UPLOAD_ERR_NO_FILE) {
+                    continue;
+                }
+                if ($errorCode !== UPLOAD_ERR_OK) {
+                    $errors[] = $this->uploadErrorMessage((string) $name, $errorCode);
+                    continue;
+                }
+
+                try {
                     $imagePath = $this->uploadImage($primaryImage, $key);
-                    $isPrimary = ($primaryImageId != null && $primaryImageId == $key) ? 1 : 0;
-                    if (!$isPrimary && !$isPrimarySet) {
+                    $isPrimary = 0;
+                    if ($shouldPromoteNewUpload && !$isPrimarySet) {
                         $isPrimary = 1;
                         $isPrimarySet = true;
                     }
-                    $imageId = $this->model->insertProductImage($productId, $imagePath, $isPrimary);
-                    error_log("New image uploaded with image_id: $imageId");
+                    $imageId = $this->model->insertProductImage($productId, $imagePath, $isPrimary, (int) $imageStatus);
                     $metadataToInsert = [
                         'alt_text' => null,
                         'title' => null,
@@ -126,12 +266,18 @@ class ProductController
                         'caption' => null
                     ];
                     $this->model->insertImageMetadata($imageId, $metadataToInsert);
+                } catch (Exception $uploadEx) {
+                    $errors[] = $uploadEx->getMessage();
+                    error_log('Product image upload failed: ' . $uploadEx->getMessage());
                 }
             }
         }
     
-        if (!empty($imageMetadata)) {
+        if (!empty($imageMetadata) && !empty($imageMetadata['alt_text']) && is_array($imageMetadata['alt_text'])) {
             foreach ($imageMetadata['alt_text'] as $imageId => $metadata) {
+                if (!$this->model->imageBelongsToProduct((int) $imageId, $productId)) {
+                    continue;
+                }
                 $metadataExists = $this->model->checkIfMetadataExists($imageId);
                 if ($metadataExists) {
                     $metadataToUpdate = [
@@ -140,10 +286,8 @@ class ProductController
                         'description' => isset($imageMetadata['description'][$imageId]) ? $imageMetadata['description'][$imageId] : null,
                         'caption' => isset($imageMetadata['caption'][$imageId]) ? $imageMetadata['caption'][$imageId] : null
                     ];
-                    error_log("Updating metadata for existing image with image_id: $imageId");
                     $this->model->updateImageMetadata($imageId, $metadataToUpdate);
                 } else {
-                    error_log("Metadata not found for image_id $imageId, inserting new metadata with null values.");
                     $metadataToInsert = [
                         'alt_text' => null,
                         'title' => null,
@@ -155,24 +299,36 @@ class ProductController
             }
         }
     
-        if ($primaryImageId) {
-            error_log("Setting image with image_id $primaryImageId as primary image for product_id: $productId");
-            $this->model->setPrimaryImage($productId, $primaryImageId);
+        if ($hasExistingPrimarySelection) {
+            $this->model->setPrimaryImage($productId, (int) $primaryImageId);
         }
-    
-        $removeImages = isset($_POST['remove_image']) ? $_POST['remove_image'] : [];
-        if (!empty($removeImages)) {
-            foreach ($removeImages as $imageId => $value) {
-                error_log("Removing image with image_id: $imageId for product_id: $productId");
-                $this->model->removeImage($imageId);
-            }
+
+        return ['errors' => $errors];
+    }
+
+    private function uploadErrorMessage(string $fileName, int $errorCode): string
+    {
+        $label = $fileName !== '' ? $fileName : 'image';
+        switch ($errorCode) {
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return "{$label} exceeds the maximum upload size.";
+            case UPLOAD_ERR_PARTIAL:
+                return "{$label} was only partially uploaded.";
+            case UPLOAD_ERR_NO_TMP_DIR:
+                return "Missing temporary folder while uploading {$label}.";
+            case UPLOAD_ERR_CANT_WRITE:
+                return "Failed to write {$label} to disk.";
+            case UPLOAD_ERR_EXTENSION:
+                return "A PHP extension stopped {$label} from uploading.";
+            default:
+                return "Failed to upload {$label}.";
         }
     }
     
     public function uploadImage($file, $key = null)
     {
         if (isset($_SERVER['IS_TEST_ENV']) && $_SERVER['IS_TEST_ENV'] === true) {
-            error_log('Mocking file upload for testing');
             return '/public/uploads/mock_image.jpg';
         }
         if ($key !== null) {
@@ -182,20 +338,31 @@ class ProductController
             $filePath = $file['tmp_name'];
             $fileName = $file['name'];
         }
-        $sanitizedFilename = strtolower(str_replace(' ', '-', basename($fileName)));
+
         $targetDir = dirname(__DIR__, 2) . '/public/uploads/';
-        $targetFile = $targetDir . $sanitizedFilename;
-        if (!is_uploaded_file($filePath)) {
-            throw new Exception("File is not uploaded correctly: " . $filePath);
+        if (!is_dir($targetDir) && !mkdir($targetDir, 0755, true) && !is_dir($targetDir)) {
+            throw new Exception('Upload directory could not be created.');
         }
         if (!is_writable($targetDir)) {
             throw new Exception("Target directory is not writable: $targetDir");
         }
-        if (move_uploaded_file($filePath, $targetFile)) {
-            return '/public/uploads/' . $sanitizedFilename;
-        } else {
-            throw new Exception("Sorry, there was an error uploading your file.");
+        if (!is_uploaded_file($filePath)) {
+            throw new Exception('File is not uploaded correctly.');
         }
+
+        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+        $ext = strtolower(pathinfo((string) $fileName, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed, true)) {
+            throw new Exception('Unsupported image type. Use JPG, PNG, WEBP, or GIF.');
+        }
+
+        $sanitizedFilename = ProductMediaHelper::sanitizeFilename((string) $fileName);
+        $targetFile = ProductMediaHelper::uniquePath($targetDir, $sanitizedFilename);
+        if (!move_uploaded_file($filePath, $targetFile)) {
+            throw new Exception('Sorry, there was an error uploading your file.');
+        }
+
+        return normalizeStoredUploadPath('/public/uploads/' . basename($targetFile));
     }
 
     public function getAllAttributes()
@@ -221,18 +388,13 @@ class ProductController
 
     public function updateAssignedProductAttributes($productId, $attributes, $removeAttributes = [])
     {
-        error_log('Updating attributes for product_id: ' . $productId);
-        error_log('Attributes to process: ' . print_r($attributes, true));
-        error_log('Attributes to remove: ' . print_r($removeAttributes, true));
 
         // Remove specified attributes
         if (!empty($removeAttributes)) {
             foreach ($removeAttributes as $index => $attributeId) {
                 if (!empty($attributeId) && is_numeric($attributeId)) {
                     $this->model->clearProductAttributes($productId, $attributeId);
-                    error_log("Removed attribute_id: $attributeId for product_id: $productId");
                 } else {
-                    error_log("Skipping invalid attribute_id: " . var_export($attributeId, true) . " for index: $index");
                 }
             }
         }
@@ -267,7 +429,6 @@ class ProductController
                     );
                 }
             } else {
-                error_log("Skipping attribute at index $index due to missing attribute_id, value_id, or marked for removal");
             }
         }
     }

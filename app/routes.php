@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 require_once dirname(__DIR__, 1) . '/database/db.php';
 
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
@@ -51,6 +49,10 @@ switch (true) {
             $controller->index();
             break;
 
+        case ($request_uri === 'wholesale-verify' && $_SERVER['REQUEST_METHOD'] === 'POST'):
+            include __DIR__ . '/Controllers/WholesaleAccessController.php';
+            break;
+
             case ($request_uri === 'bulk-inquiry' && $_SERVER['REQUEST_METHOD'] === 'POST'):
                 include __DIR__ . '/Controllers/BulkInquiryController.php';
                 break;
@@ -87,6 +89,12 @@ switch (true) {
         include __DIR__ . '/Controllers/GoogleMerchantFeedController.php';
         break;
 
+    case ($request_uri === 'download-app'):
+        include __DIR__ . '/Controllers/AppDownloadController.php';
+        $controller = new AppDownloadController();
+        $controller->download();
+        break;
+
  // User Page Route (e.g., /user/username)
  case (preg_match('#^user/([^/]+)$#', $request_uri, $matches)):
     $query = "
@@ -97,15 +105,13 @@ switch (true) {
     $stmt = $conn->prepare($query);
     $stmt->execute([':username' => trim($matches[1])]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    error_log("User Page Route: username={$matches[1]}, found_user=" . ($user ? $user['id'] : 'none'));
-    if ($user) {
-        $_GET['username'] = $matches[1]; // Pass username (e.g., azmeryalakhtar)
-        error_log("Router: Including AdminsController: " . __DIR__ . '/Controllers/AdminsController.php');
-        include __DIR__ . '/Controllers/AdminsController.php';
+    $adminsControllerPath = __DIR__ . '/Controllers/AdminsController.php';
+    if ($user && file_exists($adminsControllerPath)) {
+        $_GET['username'] = $matches[1];
+        include $adminsControllerPath;
         $controller = new AdminsController();
         $controller->showUserPage();
     } else {
-        error_log("User Page Route: No user found for username={$matches[1]}");
         http_response_code(404);
         include __DIR__ . '/Views/404.php';
     }
@@ -198,6 +204,18 @@ switch (true) {
         include __DIR__ . '/Views/static-pages/return-policy.php';
         break;
 
+    case ($request_uri === 'privacy-policy'):
+        include __DIR__ . '/Views/static-pages/privacy-policy.php';
+        break;
+
+    case ($request_uri === 'shipping-policy'):
+        include __DIR__ . '/Views/static-pages/shipping-policy.php';
+        break;
+
+    case ($request_uri === 'terms-and-conditions'):
+        include __DIR__ . '/Views/static-pages/terms-and-conditions.php';
+        break;
+
         case ($request_uri === 'write-for-us'):
             include __DIR__ . '/Views/static-pages/write-for-us.php';
             break;
@@ -284,6 +302,22 @@ switch (true) {
         include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-50000.php';
         break;
 
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-60000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-60000.php';
+        break;
+
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-80000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-80000.php';
+        break;
+
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-100000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-100000.php';
+        break;
+
+    case ($request_uri === 'mobiles-price-list/best-mobiles-under-150000'):
+        include __DIR__ . '/Views/mobiles-price-list/best-mobiles-under-150000.php';
+        break;
+
     case (preg_match('/^thankyou\/order_id=(\d+)$/', $request_uri, $matches)):
         $_GET['order_id'] = $matches[1];
         include __DIR__ . '/Views/thankyou/order_confirmation.php';
@@ -365,6 +399,10 @@ switch (true) {
             case ($request_uri === 'blog/news'):
                 $redirectTo('/news', 301);
                 break;
+
+            case ($request_uri === 'blog/mobile-reviews'):
+                $redirectTo('/blog/mobile-tips', 301);
+                break;
                 
     // Blog Category Routes (e.g., /blog/category-slug)
     case (preg_match('#^blog/([^/]+)$#', $request_uri, $matches) && in_array($matches[1], $blogCategories)):
@@ -375,6 +413,7 @@ switch (true) {
     // E-commerce Routes (Category, Brand, Product)
     default:
         $segments = explode('/', $request_uri);
+        $segments = array_map('urldecode', $segments);
 
         // Category Page (e.g., /mobiles, /smartwatches, /tablets)
         if (count($segments) === 1 && !empty($segments[0])) {
@@ -382,17 +421,23 @@ switch (true) {
             $controller = new CategoryController();
             $controller->showCategory($segments[0]);
 
-        // Brand Page (e.g., /samsung/mobiles)
+        // Brand + category listing (e.g., /samsung/mobiles)
         } elseif (count($segments) === 2) {
             require_once __DIR__ . '/Controllers/BrandController.php';
             $controller = new BrandController();
             $controller->showBrand($segments[0], $segments[1]);
 
-        // Product Page (e.g., /samsung/mobiles/galaxy-s24)
+        // Product page — new 3-segment (brand/category/product) or legacy 3-segment (category/brand/product)
         } elseif (count($segments) === 3) {
             require_once __DIR__ . '/Controllers/ProductController.php';
             $controller = new ProductController();
-            $controller->showProduct($segments[0], $segments[1], $segments[2]);
+            $controller->showProductThreeSegments($segments[0], $segments[1], $segments[2]);
+
+        // Product page with subcategory (brand/category/subcategory/product)
+        } elseif (count($segments) === 4) {
+            require_once __DIR__ . '/Controllers/ProductController.php';
+            $controller = new ProductController();
+            $controller->showProduct($segments[0], $segments[1], $segments[2], $segments[3]);
 
         // 404 Page for Invalid Routes
         } else {

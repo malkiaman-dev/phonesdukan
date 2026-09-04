@@ -6,48 +6,40 @@
 
         <div class="product-grid-container">
             <div class="product-grid-wrapper">
-                <?php foreach ($relatedProducts as $product): ?>
-                    <?php
-                    // Construct product URL
-                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/'
-                        . htmlspecialchars($product['brand_slug']) . '/'
-                        . htmlspecialchars($product['product_slug']);
+                <?php foreach ($relatedProducts as $row):
+                    $product = prepareProductCardFromRow($row);
+                ?>
+                    <div class="na-card">
+                        <?php include __DIR__ . '/../partials/na-card-badge.php'; ?>
 
-                    // Set product image with fallback
-                    $product_image = !empty($product['image_url']) ? $product['image_url'] : '/public/assets/images/Phones_dukan_favicon.png';
-
-                    // Format product price
-                    $product_price = '';
-
-                    if (!empty($product['sale_price']) && !empty($product['regular_price'])) {
-                        $product_price = '<span class="r-regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> '
-                            . '<span class="r-sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                    } elseif (!empty($product['regular_price'])) {
-                        $product_price = '<span class="regular-price new-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-                    } elseif (!empty($product['sale_price'])) {
-                        $product_price = '<span class="sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                    } else {
-                        $product_price = '<span>Price: Not available</span>';
-                    }
-
-                    ?>
-                    <div class="product-card">
-                        <a href="<?php echo $product_url; ?>">
-                            <div class="product-img-wrapper">
-                                <div class="product-img">
-                                    <img src="<?php echo $product_image; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
-                                </div>
+                        <a href="<?= $product['product_url'] ?>" class="na-img-link">
+                            <div class="na-img-box">
+                                <img src="<?= $product['product_image'] ?>"
+                                     alt="<?= $product['product_name'] ?>"
+                                     loading="lazy">
                             </div>
                         </a>
-                        <h3 class="product-title">
-                            <a href="<?php echo $product_url; ?>">
-                                <?php echo htmlspecialchars($product['product_name']); ?>
-                            </a>
-                        </h3>
-                        <div class="r-product-price">
-    <?php echo $product_price; ?>
-</div>
 
+                        <div class="na-body">
+                            <h3 class="na-name">
+                                <a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a>
+                            </h3>
+
+                            <div class="na-price">
+                                <?php if ($product['has_sale']): ?>
+                                    <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                                    <span class="na-price--new">Rs. <?= number_format($product['sale_price']) ?></span>
+                                <?php elseif ($product['regular_price'] > 0): ?>
+                                    <span class="na-price--new">Rs. <?= number_format($product['regular_price']) ?></span>
+                                <?php elseif ($product['sale_price'] > 0): ?>
+                                    <span class="na-price--new">Rs. <?= number_format($product['sale_price']) ?></span>
+                                <?php else: ?>
+                                    <span class="na-price--na">Price N/A</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php include __DIR__ . '/../partials/na-card-actions.php'; ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>

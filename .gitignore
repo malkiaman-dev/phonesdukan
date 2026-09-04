@@ -1,0 +1,13 @@
+# Local secrets — never commit these
+app/config/chatbot_config.local.php
+app/config/wholesale_config.local.php
+admin/config/ai-seo.local.php
+
+# Flutter build artifacts
+phonesdukan_app/build/
+phonesdukan_app/.dart_tool/
+phonesdukan_app/.flutter-plugins-dependencies
+
+# Runtime cache
+cache/
+storage/

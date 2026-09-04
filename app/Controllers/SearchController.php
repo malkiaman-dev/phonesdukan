@@ -1,13 +1,11 @@
 <?php
 require_once __DIR__ . '/../Models/ProductModel.php';
-require_once __DIR__ . '/../../database/db.php';
 
 class SearchController {
     private $productModel;
 
     public function __construct() {
-        $database = new Database(); // Initialize Database class
-        $this->productModel = new ProductModel($database->getConnection()); // Pass connection
+        $this->productModel = new ProductModel();
     }
 
     public function search() {
@@ -23,10 +21,7 @@ class SearchController {
             return;
         }
 
-        // Prevent XSS while allowing valid search characters
-        $searchQuery = htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8');
-
-        // Fetch results from the model
+        // Fetch results from the model (prepared statements handle SQL safety)
         $results = $this->productModel->searchProducts($searchQuery);
 
         // Return JSON response

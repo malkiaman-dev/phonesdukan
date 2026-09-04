@@ -1,0 +1,9 @@
+# Serve APK files with correct MIME type for Android installs
+<IfModule mod_mime.c>
+    AddType application/vnd.android.package-archive .apk
+</IfModule>
+
+# Allow direct download
+<IfModule mod_headers.c>
+    Header set Content-Disposition "attachment; filename=phonesdukan-app.apk"
+</IfModule>

@@ -40,6 +40,15 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 
+    :root {
+        --brand-black: #111111;
+        --brand-yellow: #facc15;
+        --brand-yellow-light: #fffbeb;
+        --brand-white: #ffffff;
+        --brand-border: #e5e7eb;
+        --brand-muted: #6b7280;
+    }
+
     .custom-order-popup-overlay {
         position: fixed;
         inset: 0;
@@ -52,14 +61,15 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .custom-order-popup {
-        background: #fff;
-        border-radius: 14px;
+        background: var(--brand-white);
+        border: 1px solid var(--brand-border);
+        border-radius: 16px;
         width: 90%;
         max-width: 640px;
         max-height: 88vh;
         overflow-y: auto;
         position: relative;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 20px 50px rgba(17, 17, 17, 0.22);
         animation: popIn 0.22s ease;
         scrollbar-width: thin;
         scrollbar-color: #cbd5e1 transparent;
@@ -88,23 +98,23 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         border-radius: 6px;
     }
     .custom-close-modal:hover {
-        color: #222;
-        background: #f1f5f9;
+        color: var(--brand-black);
+        background: var(--brand-yellow-light);
     }
 
     .pop-title {
         text-align: center;
         font-size: 1.4rem;
         font-weight: 700;
-        color: #1a7fe8;
+        color: var(--brand-black);
         padding: 28px 30px 14px;
         letter-spacing: -0.2px;
     }
 
     .pop-badge {
         display: inline-block;
-        background: #1a7fe8 !important;
-        color: #fff !important;
+        background: var(--brand-black) !important;
+        color: var(--brand-yellow) !important;
         font-size: 0.7rem;
         font-weight: 700;
         letter-spacing: 0.8px;
@@ -118,7 +128,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     .pop-title-divider {
         height: 2px;
-        background: linear-gradient(90deg, transparent, #1a7fe8, transparent);
+        background: linear-gradient(90deg, transparent, var(--brand-yellow), transparent);
         margin: 0 30px 20px;
         border: none;
     }
@@ -130,10 +140,10 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
     .pop-section-title {
         font-size: 0.95rem;
         font-weight: 700;
-        color: #1a1a2e;
+        color: var(--brand-black);
         margin-bottom: 12px;
         padding-bottom: 8px;
-        border-bottom: 1px solid #e8ecf0;
+        border-bottom: 1px solid var(--brand-border);
     }
 
     .custom-order-popup .pop-row {
@@ -149,7 +159,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     .custom-order-popup .pop-label {
         font-weight: 600 !important;
-        color: #1a1a2e !important;
+        color: var(--brand-black) !important;
         min-width: 115px;
         flex-shrink: 0;
         background: transparent !important;
@@ -172,7 +182,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .custom-order-popup .pop-value strong {
-        color: #1a1a2e !important;
+        color: var(--brand-black) !important;
         background: transparent !important;
     }
 
@@ -184,9 +194,13 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         font-weight: 700;
         letter-spacing: 0.4px;
     }
-    .status-pill.pending   { background: #f59e0b !important; color: #fff !important; }
-    .status-pill.completed { background: #22c55e !important; color: #fff !important; }
-    .status-pill.cancelled { background: #ef4444 !important; color: #fff !important; }
+    .status-pill.pending,
+    .status-pill.completed,
+    .status-pill.cancelled {
+        background: var(--brand-black) !important;
+        color: var(--brand-yellow) !important;
+        border: 1px solid var(--brand-black) !important;
+    }
 
     .pop-product-table {
         width: 100%;
@@ -195,10 +209,10 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         margin-top: 4px;
     }
 
-    .pop-product-table thead tr { background: #1a7fe8; }
+    .pop-product-table thead tr { background: #f9fafb; }
 
     .pop-product-table thead th {
-        color: #fff;
+        color: var(--brand-black);
         font-weight: 600;
         font-size: 0.78rem;
         letter-spacing: 0.6px;
@@ -212,7 +226,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         transition: background 0.12s;
     }
     .pop-product-table tbody tr:last-child { border-bottom: none; }
-    .pop-product-table tbody tr:hover { background: #f5f8ff; }
+    .pop-product-table tbody tr:hover { background: var(--brand-yellow-light); }
 
     .pop-product-table tbody td {
         padding: 10px 14px;
@@ -220,11 +234,11 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         vertical-align: middle;
     }
 
-    .pop-product-table tfoot tr { background: #f8fafc; }
+    .pop-product-table tfoot tr { background: #f9fafb; }
     .pop-product-table tfoot td {
         padding: 10px 14px;
         font-weight: 700;
-        color: #1a1a2e;
+        color: var(--brand-black);
         font-size: 0.9rem;
         border-top: 2px solid #e8ecf0;
     }

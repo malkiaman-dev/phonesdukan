@@ -1,11 +1,19 @@
 <?php
 require_once dirname(__DIR__, 2) . '/database/db.php';
 require_once dirname(__DIR__, 2) . '/app/Models/BulkInquiryModel.php';
-
-// Set error reporting for debugging
-error_log("BulkInquiryController accessed at " . date('Y-m-d H:i:s'));
+require_once dirname(__DIR__, 2) . '/app/config/session.php';
+require_once dirname(__DIR__, 2) . '/app/config/wholesale_config.php';
 
 header('Content-Type: application/json');
+
+if (!wholesaleHasAccess()) {
+    http_response_code(403);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Wholesale access denied. Valid shopkeeper code required.',
+    ]);
+    exit;
+}
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -21,9 +29,6 @@ try {
     if ($input === null) {
         throw new Exception('Invalid JSON input.');
     }
-
-    // Log input for debugging
-    error_log("Bulk Inquiry Input: " . json_encode($input));
 
     // Sanitize inputs
     $sanitizeString = function($value) {
@@ -73,8 +78,8 @@ try {
                 $errors[] = 'Invalid product ID in items.';
                 break;
             }
-            if (!isset($item['quantity']) || !is_numeric($item['quantity']) || $item['quantity'] < 5) {
-                $errors[] = 'Product quantity must be at least 5 in items.';
+            if (!isset($item['quantity']) || !is_numeric($item['quantity']) || $item['quantity'] < 1) {
+                $errors[] = 'Product quantity must be at least 1 in items.';
                 break;
             }
 
@@ -96,7 +101,6 @@ try {
         $submittedTotal = (float) ($input['total_price'] ?? 0);
         if (abs($calculatedTotal - $submittedTotal) > 0.01) {
             $errors[] = 'Invalid total price. Calculated: ' . $calculatedTotal . ', Submitted: ' . $submittedTotal;
-            error_log("Total price mismatch: Calculated $calculatedTotal, Submitted $submittedTotal");
         } else {
             $input['total_price'] = $calculatedTotal; // Use calculated value
         }
@@ -133,7 +137,6 @@ try {
         throw new Exception('Failed to save inquiry to database.');
     }
 } catch (Exception $e) {
-    error_log("BulkInquiryController Error: " . $e->getMessage());
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }

@@ -9,46 +9,107 @@ class BulkInquiryModel
     {
         $database = new Database();
         $this->db = $database->getConnection();
+        $this->ensureStatusSchema();
+    }
+
+    private function ensureStatusSchema(): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+
+        try {
+            $col = $this->db->query("SHOW COLUMNS FROM bulk_inquiries LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
+            $type = strtolower((string) ($col['Type'] ?? ''));
+            if ($type !== '' && strpos($type, "'processing'") === false) {
+                $this->db->exec(
+                    "ALTER TABLE bulk_inquiries
+                     MODIFY COLUMN status ENUM('Pending','Processing','Cancelled','Completed')
+                     NOT NULL DEFAULT 'Pending'"
+                );
+                // Repair rows that became empty when an invalid ENUM value was written
+                $this->db->exec(
+                    "UPDATE bulk_inquiries
+                     SET status = 'Pending'
+                     WHERE status IS NULL OR status = ''"
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('BulkInquiryModel ensureStatusSchema: ' . $e->getMessage());
+        }
+    }
+
+    public function updateB2BOrderStatus(int $inquiryId, string $status): bool
+    {
+        $allowed = ['Pending', 'Processing', 'Cancelled', 'Completed'];
+        if ($inquiryId <= 0 || !in_array($status, $allowed, true)) {
+            return false;
+        }
+
+        $query = "UPDATE bulk_inquiries SET status = ? WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        if (!$stmt->execute([$status, $inquiryId])) {
+            return false;
+        }
+
+        return $stmt->rowCount() >= 0;
     }
 
     public function getB2BProducts()
     {
         $query = "
-            SELECT p.product_id, p.product_name, p.b2b_regular_price, p.stock_quantity, pi.image_url
+            SELECT p.product_id, p.product_name, p.b2b_regular_price, p.stock_quantity,
+                   COALESCE(
+                       (
+                           SELECT pi.image_url
+                           FROM product_images pi
+                           WHERE pi.product_id = p.product_id
+                             AND pi.is_primary = 1
+                           ORDER BY pi.image_id ASC
+                           LIMIT 1
+                       ),
+                       (
+                           SELECT pi2.image_url
+                           FROM product_images pi2
+                           WHERE pi2.product_id = p.product_id
+                           ORDER BY pi2.sort_order ASC, pi2.image_id ASC
+                           LIMIT 1
+                       )
+                   ) AS image_url,
+                   c.category_id, c.slug AS category_slug, c.category_name
             FROM products p
-            LEFT JOIN product_images pi ON p.product_id = pi.product_id AND pi.is_primary = 1
-            WHERE p.is_b2b_available = 1
-            AND p.product_status = 1
-            AND p.stock_quantity >= 5
+            LEFT JOIN categories c ON c.category_id = p.category_id
+            WHERE CAST(p.is_b2b_available AS UNSIGNED) = 1
+              AND CAST(p.product_status AS UNSIGNED) = 1
+              AND CAST(p.stock_quantity AS SIGNED) >= 1
+              AND p.b2b_regular_price IS NOT NULL
+              AND CAST(p.b2b_regular_price AS DECIMAL(12,2)) > 0
             ORDER BY p.product_name
         ";
         $stmt = $this->db->prepare($query);
         $stmt->execute();
-        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-        // Log raw query results for debugging
-        error_log("getB2BProducts: Raw query results: " . json_encode($products));
-
-        // Prepend base URL to image_url
-        $baseUrl = $this->getBaseUrl();
-        foreach ($products as &$product) {
-            if (!empty($product['image_url'])) {
-                // Ensure image_url doesn't already have the base URL
-                if (!preg_match('#^https?://#', $product['image_url'])) {
-                    $product['image_url'] = rtrim($baseUrl, '/') . '/' . ltrim($product['image_url'], '/');
-                }
-                error_log("getB2BProducts: Processed image_url for product {$product['product_id']}: {$product['image_url']}");
-            } else {
-                // Fallback default image
-                $product['image_url'] = rtrim($baseUrl, '/') . '/public/assets/images/default.jpg';
-                error_log("getB2BProducts: Using default image for product {$product['product_id']}: {$product['image_url']}");
-            }
-        }
-
-        // Log final products array
-        error_log("getB2BProducts: Final products: " . json_encode($products));
-
-        return $products;
+    public function getB2BCategories(): array
+    {
+        $query = "
+            SELECT c.category_id, c.category_name, c.slug
+            FROM categories c
+            INNER JOIN products p ON p.category_id = c.category_id
+            WHERE CAST(p.is_b2b_available AS UNSIGNED) = 1
+              AND CAST(p.product_status AS UNSIGNED) = 1
+              AND CAST(p.stock_quantity AS SIGNED) >= 1
+              AND p.b2b_regular_price IS NOT NULL
+              AND CAST(p.b2b_regular_price AS DECIMAL(12,2)) > 0
+            GROUP BY c.category_id, c.category_name, c.slug
+            ORDER BY c.category_name ASC
+        ";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getProductById(int $productId): array|bool
@@ -57,20 +118,15 @@ class BulkInquiryModel
             SELECT product_id, b2b_regular_price, stock_quantity
             FROM products
             WHERE product_id = :product_id
-            AND is_b2b_available = 1
-            AND product_status = 1
-            AND stock_quantity >= 5
+              AND CAST(is_b2b_available AS UNSIGNED) = 1
+              AND CAST(product_status AS UNSIGNED) = 1
+              AND CAST(stock_quantity AS SIGNED) >= 1
+              AND b2b_regular_price IS NOT NULL
+              AND CAST(b2b_regular_price AS DECIMAL(12,2)) > 0
         ";
         $stmt = $this->db->prepare($query);
         $stmt->execute([':product_id' => $productId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    private function getBaseUrl()
-    {
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'];
-        return $protocol . '://' . $host;
     }
 
     public function saveInquiry(array $data): int|false
@@ -138,13 +194,6 @@ class BulkInquiryModel
         $query = "SELECT COUNT(*) FROM bulk_inquiries WHERE status = 'Pending'";
         $stmt = $this->db->query($query);
         return (int) $stmt->fetchColumn();
-    }
-
-    public function updateB2BOrderStatus(int $inquiryId, string $status): bool
-    {
-        $query = "UPDATE bulk_inquiries SET status = ? WHERE id = ?";
-        $stmt = $this->db->prepare($query);
-        return $stmt->execute([$status, $inquiryId]);
     }
 }
 ?>

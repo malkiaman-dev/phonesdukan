@@ -1,30 +1,27 @@
 <?php
-$pageTitle = "Vivo Mobile Price in Pakistan  " . date('F Y') . " - Latest Deals & Offers";
+require_once dirname(__DIR__, 2) . '/Helpers/SeoHelper.php';
+
+$pageTitle = "Vivo Mobile Price in Pakistan " . date('F Y') . " - Latest Deals & Offers";
 $metaDescription = "Check Vivo mobile price in Pakistan at Phones Dukan. Get the latest deals and fast delivery in cities like Islamabad, Lahore, Karachi, and more.";
-$metaKeywords = "Vivo mobiles Pakistan, Vivo lowest prices, lowest prices for Vivo mobiles, Vivo mobiles prices in Pakistan, Vivo mobile specifications, Vivo mobile features";
+$metaKeywords = "Vivo mobiles Pakistan, Vivo lowest prices, Vivo mobiles prices in Pakistan, Vivo mobile specifications, Vivo mobile features";
 $metaRobots = "index, follow";
+
+$breadcrumbs = SeoHelper::brandBreadcrumbs('vivo', 'Vivo', 'mobiles', 'Mobiles');
+
 require_once dirname(__DIR__, 3) . '/includes/header.php';
 require_once dirname(__DIR__, 3) . '/database/db.php';
 
-// Create database connection instance
 $database = new Database();
 $conn = $database->getConnection();
+if (!$conn) die('Database connection error.');
 
-// Check if connection is established
-if (!$conn) {
-    die('Database connection error.');
-}
-
-// Set brand slug for "Vivo"
 $brand = 'vivo';
-
-// Pagination setup
 $limit = 8;
 $paged = isset($_GET['paged']) ? (int)$_GET['paged'] : 1;
 $offset = ($paged - 1) * $limit;
 
-// Fetch products using prepared statement
-$query = "SELECT p.product_slug, p.product_name, p.regular_price, p.sale_price, p.stock_quantity,
+$query = "SELECT p.product_id, p.product_slug, p.product_name, p.regular_price, p.sale_price, p.stock_quantity,
+                 p.product_status, p.product_tag,
                  pi.image_url, b.slug AS brand_slug, c.slug AS category_slug
           FROM products p
           JOIN brands b ON p.brand_id = b.brand_id
@@ -33,230 +30,195 @@ $query = "SELECT p.product_slug, p.product_name, p.regular_price, p.sale_price, 
           WHERE c.slug = 'mobiles' AND b.slug = :brand AND p.product_status != '0'
           ORDER BY p.created_at DESC
           LIMIT :limit OFFSET :offset";
-
 $stmt = $conn->prepare($query);
 $stmt->bindValue(':brand', $brand, PDO::PARAM_STR);
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
-<div class="mobiles-section">
-    <div class="mobile-price-info">
-        <h1><span>Vivo Mobile</span> Prices in Pakistan - <?php echo date('F Y'); ?></h1>
-        <p>Looking for the best deals on Vivo mobiles in Pakistan? At Phones Dukan, you can get the latest Vivo smartphones starting from just <span>21,999 PKR</span>, with prices updated daily for <span><?php echo date('F Y'); ?></span>. We offer genuine Vivo mobile phones, fast delivery, and exclusive discounts, so you always get the best value for your money. Whether you love gaming, photography, or need a reliable phone for daily use, we have the perfect Vivo mobile for you.</p>
-    </div>
-</div>
-<?php include_once(__DIR__ . '/../ad/feed1.php'); ?>
-<div class="product-section">
-    <div class="category-header">
-        <h2>Vivo <span>Mobiles</span></h2>
-    </div>
-    <div class="product-grid-container">
-        <div class="product-grid-wrapper">
-            <?php if (!empty($products)): ?>
-                <?php
-                foreach ($products as &$product):
-                    // Process product data
-                    $product['regular_price'] = floatval($product['regular_price']);
-                    $product['sale_price'] = !empty($product['sale_price']) ? floatval($product['sale_price']) : null;
-                    $product['stock_quantity'] = intval($product['stock_quantity']);
-                    $product['is_sold_out'] = ($product['stock_quantity'] <= 0);
-                    $product['is_on_sale'] = ($product['stock_quantity'] > 0 && $product['sale_price'] !== null && $product['sale_price'] > 0 && $product['sale_price'] < $product['regular_price']);
 
-                    // Construct product URL
-                    $product_url = '/' . htmlspecialchars($product['category_slug']) . '/' .
-                                   htmlspecialchars($product['brand_slug']) . '/' .
-                                   htmlspecialchars($product['product_slug']);
-
-                    // Set product image (fallback if empty)
-                    $product_image = !empty($product['image_url']) ? $product['image_url'] : 'default-image.jpg';
-                    ?>
-                    <div class="mobile-product-card">
-                        <div class="tagwrap">
-                            <?php if ($product['is_sold_out']): ?>
-                                <div class="sold-out">
-                                    <span>Sold Out</span>
-                                </div>
-                            <?php elseif ($product['is_on_sale']): ?>
-                                <div class="pro-tags">
-                                    <span>Sale</span>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                        <a href="<?php echo $product_url; ?>">
-                            <div class="mobile-product-img-wrapper">
-                                <div class="mobile-product-img">
-                                    <img src="<?php echo $product_image; ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
-                                </div>
-                            </div>
-                        </a>
-                        <h3 class="mobile-product-title">
-                            <a href="<?php echo $product_url; ?>">
-                                <?php echo htmlspecialchars($product['product_name']); ?>
-                            </a>
-                        </h3>
-                        <span class="prodline"></span>
-                        <div class="mobile-product-price">
-                            <?php
-                            // Check if sale_price exists and product is on sale
-                            if ($product['is_on_sale']) {
-                                echo '<span class="r-regular-price old-price">Rs. ' . number_format($product['regular_price']) . '</span> ';
-                                echo '<span class="r-sale-price new-price">Rs. ' . number_format($product['sale_price']) . '</span>';
-                            } else {
-                                echo '<span class="r-regular-price">Rs. ' . number_format($product['regular_price']) . '</span>';
-                            }
-                            ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No products found in this brand.</p>
-            <?php endif; ?>
-        </div>
-    </div>
-    <?php include_once(__DIR__ . '/../ad/feed2.php'); ?>
-    <!-- Pagination -->
-    <div class="pagination">
-        <?php
-        // Count total products
-        $count_sql = "SELECT COUNT(*) as total FROM products p
-                      JOIN brands b ON p.brand_id = b.brand_id
-                      JOIN categories c ON p.category_id = c.category_id
-                      WHERE c.slug = 'mobiles' AND b.slug = :brand";
-        $stmt_count = $conn->prepare($count_sql);
-        $stmt_count->bindValue(':brand', $brand, PDO::PARAM_STR);
-        $stmt_count->execute();
-        $total_rows = $stmt_count->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
-        $total_pages = ceil($total_rows / $limit);
-
-        for ($i = 1; $i <= $total_pages; $i++):
-            ?>
-            <a href="?paged=<?= $i ?>" class="<?= ($i == $paged) ? 'active' : '' ?>">
-                <?= $i ?>
-            </a>
-        <?php endfor; ?>
-    </div>
-</div>
-<?php 
-// Close connection
+$count_sql = "SELECT COUNT(*) as total FROM products p
+              JOIN brands b ON p.brand_id = b.brand_id
+              JOIN categories c ON p.category_id = c.category_id
+              WHERE c.slug = 'mobiles' AND b.slug = :brand AND p.product_status != '0'";
+$stmt_count = $conn->prepare($count_sql);
+$stmt_count->bindValue(':brand', $brand, PDO::PARAM_STR);
+$stmt_count->execute();
+$total_rows = $stmt_count->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+$total_pages = ceil($total_rows / $limit);
 $conn = null;
 ?>
-<div class="content-container">
-<h2>Vivo <span>Mobile Prices in Pakistan - February 2025</span></h2>
-    <ul>
-        <li><b>Value-Packed Features for Every Budget:</b> Vivo is famous for offering premium features at a reasonable cost. Vivo believes that with features like powerful CPUs, bright screens, and AI-enhanced cameras, even low-cost phones provide an outstanding user experience.
-For example, Vivo's V series is for people who look for phones with outstanding performance and cameras, while the Y series offers affordable phones with long-lasting batteries.</li>
-<li><b>Creative Camera Technology:</b> If you're passionate about photography, Vivo specialises in providing modern camera functionality. Many Vivo phones, like the Vivo V27, have features like video stabilisation, night photography, and portrait mode that guarantee you can shoot photos with outstanding quality.</li>
-<li><b>Competitive Pricing in Pakistan:</b>Many various different kinds of Pakistani mobile buyers could prefer Vivo mobiles since they are made to be fairly priced. Vivo offers a wide choice of items to fit your needs, whether you're looking for the finest mobile phone or more economical solutions. Take a look at these suggestions based on expected pricing points:</li>
+
+<!-- HERO -->
+<div class="mob-hero">
+    <div class="mob-hero-inner">
+        <p class="mob-hero-eyebrow">Mobile Phones · Pakistan</p>
+        <h1 class="mob-hero-title"><span>Vivo Mobiles</span> Prices in Pakistan</h1>
+        <p class="mob-hero-sub">Get the latest Vivo smartphones with genuine products, exclusive discounts, and fast delivery across Pakistan. Starting from PKR 21,999 · <?php echo date('F Y'); ?></p>
+    </div>
+</div>
+
+<!-- BRAND TABS -->
+<div class="mob-brand-bar">
+    <div class="mob-brand-bar-inner">
+        <a href="/mobiles" class="mob-brand-tab">All Mobiles</a>
+        <a href="/mobiles/infinix" class="mob-brand-tab">Infinix</a>
+        <a href="/mobiles/oppo" class="mob-brand-tab">Oppo</a>
+        <a href="/mobiles/realme" class="mob-brand-tab">Realme</a>
+        <a href="/mobiles/samsung" class="mob-brand-tab">Samsung</a>
+        <a href="/mobiles/tecno" class="mob-brand-tab">Tecno</a>
+        <a href="/mobiles/vivo" class="mob-brand-tab is-active">Vivo</a>
+        <a href="/mobiles/xiaomi" class="mob-brand-tab">Xiaomi</a>
+    </div>
+</div>
+
+<?php include_once(__DIR__ . '/../ad/feed1.php'); ?>
+
+<!-- PRODUCT GRID -->
+<div class="mob-products-section">
+    <div class="mob-products-inner">
+        <?php if (!empty($products)): ?>
+        <div class="mob-product-grid">
+            <?php foreach ($products as $row):
+                $product = prepareProductCardFromRow($row);
+            ?>
+            <article class="na-card mob-na-card">
+                <?php include __DIR__ . '/../partials/na-card-badge.php'; ?>
+                <a href="<?= $product['product_url'] ?>" class="na-img-link">
+                    <div class="na-img-box">
+                        <img src="<?= $product['product_image'] ?>" alt="<?= $product['product_name'] ?>" loading="lazy" decoding="async">
+                    </div>
+                </a>
+                <div class="na-body">
+                    <h3 class="na-name"><a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a></h3>
+                    <div class="na-price">
+                        <?php if ($product['has_sale']): ?>
+                            <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                            <span class="na-price--new">Rs. <?= number_format($product['sale_price']) ?></span>
+                        <?php elseif ($product['regular_price'] > 0): ?>
+                            <span class="na-price--new">Rs. <?= number_format($product['regular_price']) ?></span>
+                        <?php else: ?>
+                            <span class="na-price--na">Price on request</span>
+                        <?php endif; ?>
+                    </div>
+                    <?php include __DIR__ . '/../partials/na-card-actions.php'; ?>
+                </div>
+            </article>
+            <?php endforeach; ?>
+        </div>
+        <?php else: ?>
+            <p class="mob-empty">No products found for this brand. Please check back soon.</p>
+        <?php endif; ?>
+
+        <?php include_once(__DIR__ . '/../ad/feed2.php'); ?>
+
+        <?php if ($total_pages > 1): ?>
+        <div class="mb-pagination">
+            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                <a href="?paged=<?= $i ?>" class="mb-page-link <?= ($i == $paged) ? 'is-active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- SEO CONTENT -->
+<div class="mb-content-section">
+<div class="mb-content-inner">
+
+<h2>Vivo <span>Mobile Prices in Pakistan</span></h2>
 <ul>
-    <li><a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-30000">Best Mobiles Under 30000</a></li>
-    <li><a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-40000">Best Mobiles Under 40000</a></li>
-    <li><a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-50000/">Best Mobiles Under 50000</a></li>
+    <li><strong>Value-Packed Features for Every Budget:</strong> Vivo is famous for offering premium features at a reasonable cost. With features like powerful CPUs, bright screens, and AI-enhanced cameras, even low-cost phones provide an outstanding user experience. For example, Vivo's V series is for people who look for phones with outstanding performance and cameras, while the Y series offers affordable phones with long-lasting batteries.</li>
+    <li><strong>Creative Camera Technology:</strong> If you're passionate about photography, Vivo specialises in providing modern camera functionality. Many Vivo phones have features like video stabilisation, night photography, and portrait mode that guarantee you can shoot photos with outstanding quality.</li>
+    <li><strong>Competitive Pricing in Pakistan:</strong> Vivo mobiles are made to be fairly priced, covering a wide range of buyers. Take a look at suggestions based on expected pricing points:
+        <ul>
+            <li><a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-30000">Best Mobiles Under 30000</a></li>
+            <li><a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-40000">Best Mobiles Under 40000</a></li>
+            <li><a href="https://www.phonesdukan.com/mobiles-price-list/best-mobiles-under-50000/">Best Mobiles Under 50000</a></li>
+        </ul>
+    </li>
+    <li><strong>Durable and Stylish Designs:</strong> Vivo phones focus on being strong and stylish. They are made with good materials, bright colors, and slim designs to stand out.</li>
 </ul>
-<li><b>Durable and Stylish Designs:</b> Vivo phones focus on being strong and stylish. They are made with good materials, bright colors, and slim designs to stand out.</li>
-    </ul>
-    <h2>Tecno <span>Mobile Prices - Trends and Insights</span></h2>
-<p>
-Vivo mobile phones in Pakistan range in price from <span>PKR 150,000</span> to <span>20,000</span>, making them accessible to a wide range of people. According to a recent study, rising import taxes and changing exchange rates caused fluctuations in smartphone pricing.</p>
-<h2>Tecno <span>Mobile Price in Pakistan - Compare the Best Deals</span></h2>
+
+<h2>Vivo <span>Mobile Price Trends and Insights</span></h2>
+<p>Vivo mobile phones in Pakistan range in price from <span>PKR 20,000</span> to <span>PKR 150,000</span>, making them accessible to a wide range of people. According to a recent study, rising import taxes and changing exchange rates caused fluctuations in smartphone pricing.</p>
+
+<h2>Compare the <span>Best Vivo Deals</span></h2>
 <p>It can be tough to find the best Vivo phone as there are a lot of them available. Phones Dukan has a website that assists you in determining how to choose a Vivo phone by allowing users to compare Vivo mobiles. You will notice that there are several models available and you can select the appropriate phone by checking its features, specifics, and cost.</p>
+
 <h3>Comparison Made Easy at Phones Dukan</h3>
 <p>Selecting the best option might be challenging if there are too many options. Phones Dukan provides features for comparing Vivo mobile phones. You can make decisions with confidence when you compare features, specifications, and prices side by side.</p>
+
 <h3>Why Choose Phones Dukan for Your Vivo Mobile?</h3>
-<p>We focus on making your shopping experience great. Here's why thousands of customers choose us for their mobile phone needs:</p>
 <ul>
-    <li><b>Authenticity Guaranteed:</b>All Vivo mobiles sold through our platform are 100% original and come with a company warranty.</li>
-    <li><b>Up-to-Date Pricing:</b>We ensure real-time price updates so you always know the best deals.</li>
-    <li><b>Customer-Centric Services:</b> Our user-friendly interface and detailed product information make shopping effortless.</li>
+    <li><strong>Authenticity Guaranteed:</strong> All Vivo mobiles sold through our platform are 100% original and come with a company warranty.</li>
+    <li><strong>Up-to-Date Pricing:</strong> We ensure real-time price updates so you always know the best deals.</li>
+    <li><strong>Customer-Centric Services:</strong> Our user-friendly interface and detailed product information make shopping effortless.</li>
 </ul>
-<h2>Final Thoughts on <span>Samsung Mobiles</span></h2>
+
+<h2>Final Thoughts on <span>Vivo Mobiles</span></h2>
 <p>Vivo phones are popular in Pakistan because they are reliable, affordable, and have cool features. If you're a student searching for a reliable mobile or a qualified IT expert wanting advanced features, Vivo's selection might meet all of your needs.</p>
 <p>For the best deals and to check real-time updates on <a href="https://www.phonesdukan.com/mobiles/">Mobile Prices in Pakistan</a>, be sure to visit Phones Dukan.</p>
-<div class="faq-container">
-<h2>FAQs About <span>Vivo Mobile Prices in Pakistan</span></h2>
-<p>Find answers to the most common questions about Vivo mobile prices, features, and availability in Pakistan.</p>
 
-<div class="faq-item">
-    <h3 class="faq-question">What is the price range of Vivo mobiles in Pakistan?</h3>
-    <p class="faq-answer">Vivo offers smartphones in a wide price range in Pakistan. Entry-level models start from around <span>PKR 20,000</span>, while premium models can go up to approximately <span>PKR 150,000</span>. Whether you're looking for an affordable phone or a high-end device, Vivo has something for everyone.</p>
+</div>
 </div>
 
-<div class="faq-item">
-    <h3 class="faq-question">Which Vivo mobile is the best under PKR 40,000?</h3>
-    <p class="faq-answer">A popular option under <span>PKR 40,000</span> is the <a href="https://www.phonesdukan.com/mobiles/vivo/vivo-y19s/">Vivo Y19s</a>. At just <span>PKR 38,999</span>, it offers an excellent combination of features and performance, making it a wonderful choice for buyers on a budget.</p>
+<!-- FAQ -->
+<div class="mb-faq-section">
+<div class="mb-faq-inner">
+
+<h2 class="mb-faq-title">FAQs About <span>Vivo Mobile Prices in Pakistan</span></h2>
+<p class="mb-faq-subtitle">Find answers to the most common questions about Vivo mobile prices, features, and availability in Pakistan.</p>
+
+<div class="mb-faq-item">
+    <h3 class="mb-faq-question">What is the price range of Vivo mobiles in Pakistan?</h3>
+    <div class="mb-faq-answer"><p>Vivo offers smartphones in a wide price range in Pakistan. Entry-level models start from around <span>PKR 20,000</span>, while premium models can go up to approximately <span>PKR 150,000</span>. Whether you're looking for an affordable phone or a high-end device, Vivo has something for everyone.</p></div>
 </div>
 
-<div class="faq-item">
-    <h3 class="faq-question">Can I buy Vivo smartphones online in Pakistan?</h3>
-    <p class="faq-answer">Yes, Vivo smartphones are available for purchase online in Pakistan through various platforms, including the official Vivo website and trusted online retailers. These platforms offer the convenience of home delivery and exclusive online discounts.</p>
+<div class="mb-faq-item">
+    <h3 class="mb-faq-question">Which Vivo mobile is the best under PKR 40,000?</h3>
+    <div class="mb-faq-answer"><p>A popular option under <span>PKR 40,000</span> is the <a href="https://www.phonesdukan.com/mobiles/vivo/vivo-y19s/">Vivo Y19s</a>. At just <span>PKR 38,999</span>, it offers an excellent combination of features and performance, making it a wonderful choice for buyers on a budget.</p></div>
 </div>
 
-<div class="faq-item">
-    <h3 class="faq-question">What are the features of the Vivo V40e?</h3>
-    <p class="faq-answer">The <a href="https://www.phonesdukan.com/mobiles/vivo/vivo-v40e/">Vivo V40e</a>, priced at <span>PKR 92,999</span>, is packed with great features. It offers a stunning <span>6.77-inch AMOLED display</span> with a <span>120Hz refresh rate</span>, a powerful <span>MediaTek Dimensity processor</span>, <span>8GB RAM</span>, and a <span>5000mAh battery</span> with fast charging. It also has a <span>triple rear camera setup</span>, including a <span>50MP primary sensor</span>.</p>
+<div class="mb-faq-item">
+    <h3 class="mb-faq-question">Can I buy Vivo smartphones online in Pakistan?</h3>
+    <div class="mb-faq-answer"><p>Yes, Vivo smartphones are available for purchase online in Pakistan through various platforms, including the official Vivo website and trusted online retailers. These platforms offer the convenience of home delivery and exclusive online discounts.</p></div>
 </div>
 
-<div class="faq-item">
-    <h3 class="faq-question">How does the Vivo Y37 compare to other models in terms of pricing?</h3>
-    <p class="faq-answer">The <span>Vivo Y37</span> is priced at <span>PKR 82,999</span>, making it a mid-range option. It offers a solid combination of features, ideal for users who want more than an entry-level smartphone but aren't looking for a flagship model.</p>
+<div class="mb-faq-item">
+    <h3 class="mb-faq-question">What are the features of the Vivo V40e?</h3>
+    <div class="mb-faq-answer"><p>The <a href="https://www.phonesdukan.com/mobiles/vivo/vivo-v40e/">Vivo V40e</a>, priced at <span>PKR 92,999</span>, is packed with great features. It offers a stunning <span>6.77-inch AMOLED display</span> with a <span>120Hz refresh rate</span>, a powerful <span>MediaTek Dimensity processor</span>, <span>8GB RAM</span>, and a <span>5000mAh battery</span> with fast charging. It also has a <span>triple rear camera setup</span>, including a <span>50MP primary sensor</span>.</p></div>
 </div>
 
-<em>Prices and availability are subject to change. Please check official retailers or our website for the latest updates.</em>
+<div class="mb-faq-item">
+    <h3 class="mb-faq-question">How does the Vivo Y37 compare to other models in terms of pricing?</h3>
+    <div class="mb-faq-answer"><p>The <span>Vivo Y37</span> is priced at <span>PKR 82,999</span>, making it a mid-range option. It offers a solid combination of features, ideal for users who want more than an entry-level smartphone but aren't looking for a flagship model.</p></div>
+</div>
+
+<p class="mb-faq-note">Prices and availability are subject to change. Please check official retailers or our website for the latest updates.</p>
 </div>
 </div>
-<p class="p-note">Looking for the best Vivo mobile? Explore the latest Vivo smartphones at <a href="https://www.phonesdukan.com" class="cta-button">Phones Dukan</a> and get the perfect mobile at unbeatable prices!</p>
+
+<!-- CTA -->
+<div class="mb-cta-wrap">
+    <div class="mb-cta-note">
+        Looking for the best Vivo mobile? Explore the latest Vivo smartphones at <a href="https://www.phonesdukan.com">Phones Dukan</a> and get the perfect mobile at unbeatable prices!
+    </div>
+</div>
+
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What is the price range of Vivo mobiles in Pakistan?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Vivo offers smartphones in a wide price range in Pakistan. Entry-level models start from around PKR 20,000, while premium models can go up to approximately PKR 150,000. Whether you're looking for an affordable phone or a high-end device, Vivo has something for everyone."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which Vivo mobile is the best under PKR 40,000?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A popular option under PKR 40,000 is the Vivo Y19s. At just PKR 38,999, it offers an excellent combination of features and performance, making it a wonderful choice for buyers on limited funds."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I buy Vivo smartphones online in Pakistan?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, Vivo smartphones are available for purchase online in Pakistan through various platforms, including the official Vivo website and trusted online retailers. These platforms offer the convenience of home delivery and exclusive online discounts."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What are the features of the Vivo V40e?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The Vivo V40e, priced at PKR 92,999, is packed with great features. It offers a stunning 6.77-inch AMOLED display with a 120Hz refresh rate, a powerful MediaTek Dimensity processor, 8GB RAM, and a 5000mAh battery with fast charging. It also has a triple rear camera setup, including a 50MP primary sensor."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does the Vivo Y37 compare to other models in terms of pricing?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The Vivo Y37 is priced at PKR 82,999, making it a mid-range option. It offers a solid combination of features, ideal for users who want more than an entry-level smartphone but aren't looking for a flagship model."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the price range of Vivo mobiles in Pakistan?","acceptedAnswer":{"@type":"Answer","text":"Vivo offers smartphones in a wide price range in Pakistan. Entry-level models start from around PKR 20,000, while premium models can go up to approximately PKR 150,000."}},{"@type":"Question","name":"Which Vivo mobile is the best under PKR 40,000?","acceptedAnswer":{"@type":"Answer","text":"A popular option under PKR 40,000 is the Vivo Y19s. At just PKR 38,999, it offers an excellent combination of features and performance."}},{"@type":"Question","name":"Can I buy Vivo smartphones online in Pakistan?","acceptedAnswer":{"@type":"Answer","text":"Yes, Vivo smartphones are available for purchase online in Pakistan through various platforms, including trusted online retailers like Phones Dukan."}},{"@type":"Question","name":"What are the features of the Vivo V40e?","acceptedAnswer":{"@type":"Answer","text":"The Vivo V40e, priced at PKR 92,999, offers a 6.77-inch AMOLED display with 120Hz refresh rate, MediaTek Dimensity processor, 8GB RAM, 5000mAh battery with fast charging, and a triple rear camera setup including a 50MP primary sensor."}},{"@type":"Question","name":"How does the Vivo Y37 compare to other models in terms of pricing?","acceptedAnswer":{"@type":"Answer","text":"The Vivo Y37 is priced at PKR 82,999, making it a mid-range option ideal for users who want more than an entry-level smartphone."}}]}
+</script>
 
-            </script>
-<?php
-// Close connection
-$conn = null;
-?>
+<script>
+document.querySelectorAll('.mb-faq-question').forEach(function (q) {
+    q.addEventListener('click', function () {
+        var item = this.closest('.mb-faq-item');
+        var isOpen = item.classList.contains('is-open');
+        document.querySelectorAll('.mb-faq-item.is-open').forEach(function (o) { o.classList.remove('is-open'); });
+        if (!isOpen) item.classList.add('is-open');
+    });
+});
+</script>
+
 <?php require_once dirname(__DIR__, 3) . '/includes/footer.php'; ?>

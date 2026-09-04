@@ -3,6 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../database/db.php';
+require_once __DIR__ . '/../includes/functions.php';
 $database = new Database();
 $conn = $database->getConnection();
 
@@ -15,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 
     $originalName = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
     $originalName = preg_replace("/[^a-zA-Z0-9_-]/", "", $originalName);
-    $fileExtension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+    $fileExtension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
     $fileName = $originalName . '.' . $fileExtension;
 
     $counter = 1;
@@ -25,10 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     }
 
     $filePath = $uploadDir . $fileName;
-    $fileUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/public/uploads/' . $fileName;
+    // Always store a site-relative path so images survive domain/base-path changes.
+    $fileUrl = normalizeStoredUploadPath('/public/uploads/' . $fileName);
 
     if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
-        $stmt = $conn->prepare("INSERT INTO product_images (product_id, image_url, is_primary) VALUES (NULL, ?, 0)");
+        $stmt = $conn->prepare("INSERT INTO product_images (product_id, image_url, is_primary, status) VALUES (NULL, ?, 0, 1)");
         $stmt->execute([$fileUrl]);
         $imageId = $conn->lastInsertId();
 
@@ -42,84 +44,137 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
             $metaStmt->execute([$imageId, $altText, $title, $description, $caption]);
         }
 
-        echo "<p class='success'>Image uploaded successfully! <a href='$fileUrl' target='_blank'>View Image</a></p>";
+        $viewUrl = url(ltrim($fileUrl, '/'));
+        echo "<p class='success'>Image uploaded successfully! <a href='$viewUrl' target='_blank'>View Image</a></p>";
     } else {
         echo "<p class='error'>Error uploading file.</p>";
     }
 }
 ?>
-
-    <title>Pro Image Upload</title>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image</title>
     <style>
-
-        h2 {
-            color: #333;
-            font-size: 22px;
+        :root {
+            --black: #111111;
+            --yellow: #facc15;
+            --light-yellow: #fffbeb;
+            --white: #ffffff;
+            --border: #e5e7eb;
+            --muted: #6b7280;
+        }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #fff;
+            color: var(--black);
+        }
+        .up-wrap {
+            padding: 12px;
+        }
+        .up-title {
+            margin: 0 0 14px;
+            font-size: 1.35rem;
+            font-weight: 800;
         }
         #drop-area {
             width: 100%;
-            height: 200px;
-            border: 2px dashed #6c757d;
-            border-radius: 10px;
+            min-height: 190px;
+            border: 1px dashed var(--border);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             text-align: center;
-            background-color: #f1f3f5;
-            transition: 0.3s;
+            background-color: #fff;
+            transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
             cursor: pointer;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
+            color: var(--muted);
+            font-weight: 700;
+            padding: 12px;
         }
         #drop-area:hover, #drop-area.highlight {
-            border-color: #007bff;
-            background-color: #e9f5ff;
+            border-color: var(--yellow);
+            background-color: var(--light-yellow);
+            box-shadow: 0 10px 22px rgba(17, 17, 17, 0.06);
+            color: var(--black);
         }
         #preview {
             width: 100%;
             height: auto;
             max-height: 180px;
             margin-top: 10px;
-            border-radius: 5px;
+            border-radius: 10px;
             display: none;
+            object-fit: contain;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+        label {
+            display: block;
+            margin: 8px 0 6px;
+            font-size: 0.88rem;
+            font-weight: 700;
         }
         input, textarea {
             width: 100%;
-            padding: 8px;
-            margin: 6px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 10px 12px;
+            margin: 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+        textarea { min-height: 92px; resize: vertical; }
+        input:focus, textarea:focus, input:focus-visible, textarea:focus-visible {
+            outline: none !important;
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px rgba(250,204,21,0.18);
         }
         button {
             width: 100%;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
+            height: 44px;
+            background-color: var(--black);
+            color: #fff;
+            border: 1px solid var(--black);
+            padding: 0 12px;
+            font-size: 0.92rem;
+            font-weight: 800;
+            border-radius: 12px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: color .15s ease;
+            margin-top: 12px;
         }
-        button:hover {
-            background-color: #0056b3;
+        button:hover { color: var(--yellow); }
+        .success, .error {
+            margin: 0 0 10px;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-weight: 800;
+            font-size: 0.88rem;
         }
         .success {
-            color: green;
-            font-weight: bold;
-            margin-top: 10px;
+            background: #111111;
+            color: #ffffff;
+            border: 1px solid #111111;
         }
+        .success a { color: #facc15; text-decoration: none; }
         .error {
-            color: red;
-            font-weight: bold;
-            margin-top: 10px;
+            background: var(--light-yellow);
+            color: var(--black);
+            border: 1px solid var(--yellow);
         }
     </style>
-
-
-<div class="container">
-    <h2>Upload an Image</h2>
+</head>
+<body>
+<div class="up-wrap">
+    <h2 class="up-title">Upload Image</h2>
 
     <form action="" method="POST" enctype="multipart/form-data">
         <div id="drop-area">
@@ -128,16 +183,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
             <img id="preview" src="" alt="">
         </div>
 
-        <label>Alt Text:</label>
+        <label>Alt Text</label>
         <input type="text" name="alt_text">
 
-        <label>Title:</label>
+        <label>Title</label>
         <input type="text" name="title">
 
-        <label>Description:</label>
+        <label>Description</label>
         <textarea name="description"></textarea>
 
-        <label>Caption:</label>
+        <label>Caption</label>
         <input type="text" name="caption">
 
         <button type="submit">Upload Image</button>
@@ -185,4 +240,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
         }
     }
 </script>
-
+</body>
+</html>

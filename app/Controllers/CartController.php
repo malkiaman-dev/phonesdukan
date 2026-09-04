@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Clear output buffer to prevent stray output
 ob_start();
 header('Content-Type: application/json');
@@ -32,11 +29,13 @@ class CartController {
     
         $data = json_decode(file_get_contents("php://input"), true);
     
-        $product_id = isset($data['product_id']) ? (int)$data['product_id'] : 0;
-        $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 1;
-        $attribute_value = isset($data['attribute_value']) ? $data['attribute_value'] : null;
-        $unit_price = isset($data['unit_price']) ? (float)$data['unit_price'] : 0;
-        $payment_method = isset($data['payment_method']) ? $data['payment_method'] : 'cod';
+        $product_id       = isset($data['product_id']) ? (int)$data['product_id'] : 0;
+        $quantity         = isset($data['quantity']) ? (int)$data['quantity'] : 1;
+        $attribute_value  = isset($data['attribute_value']) ? $data['attribute_value'] : null;
+        $unit_price       = isset($data['unit_price']) ? (float)$data['unit_price'] : 0;
+        $payment_method   = isset($data['payment_method']) ? $data['payment_method'] : 'cod';
+        $variation_id     = isset($data['variation_id']) && $data['variation_id'] ? (int)$data['variation_id'] : null;
+        $variation_attributes = isset($data['variation_attributes']) ? $data['variation_attributes'] : null;
     
         $userId = $_SESSION['user_id'] ?? null;
         $sessionId = session_id();
@@ -50,11 +49,25 @@ class CartController {
             $this->sendResponse('error', 'Product not found');
         }
     
-        if (!isset($product['stock_quantity']) || $product['stock_quantity'] < $quantity) {
+        // For variable products, validate variation stock instead of base product stock
+        if ($variation_id) {
+            require_once __DIR__ . '/../Models/VariationModel.php';
+            $varModel = new VariationModel();
+            $variation = $varModel->getVariationById($variation_id);
+            if (!$variation || $variation['product_id'] != $product_id) {
+                $this->sendResponse('error', 'Invalid variation');
+            }
+            if ($variation['stock_quantity'] < $quantity) {
+                $this->sendResponse('error', 'Not enough stock for this variation');
+            }
+            if (!$variation_attributes) {
+                $variation_attributes = $varModel->buildAttributesLabel($variation_id);
+            }
+        } elseif (!isset($product['stock_quantity']) || $product['stock_quantity'] < $quantity) {
             $this->sendResponse('error', 'Not enough stock available');
         }
-    
-        $result = $this->cartModel->addToCart($product_id, $quantity, $userId, $sessionId, $unit_price, $attribute_value, $payment_method);
+
+        $result = $this->cartModel->addToCart($product_id, $quantity, $userId, $sessionId, $unit_price, $attribute_value, $payment_method, $variation_id, $variation_attributes);
         if ($result) {
             $cartItems = $this->cartModel->fetchCartItems($sessionId, $userId);
             $totals = $this->calculateCartTotals($cartItems);
@@ -68,8 +81,7 @@ class CartController {
     }
     
     public function getCartItems() {
-        session_start();
-        $sessionId = $_SESSION['session_id'] ?? session_id();  
+        $sessionId = session_id();
         $userId = $_SESSION['user_id'] ?? null;
     
         $cartItems = $this->cartModel->fetchCartItems($sessionId, $userId);
@@ -91,23 +103,19 @@ class CartController {
         }
     
         $data = json_decode(file_get_contents("php://input"), true);
-        error_log("RemoveCartItem Input: " . json_encode($data));
-    
         $productId = isset($data['product_id']) ? (int)$data['product_id'] : 0;
     
         if ($productId <= 0) {
             $this->sendResponse('error', 'Invalid product ID');
         }
     
-        $sessionId = $_SESSION['session_id'] ?? session_id();
+        $sessionId = session_id();
         $userId = $_SESSION['user_id'] ?? null;
-    
+
         $removed = $this->cartModel->removeCartItem($sessionId, $userId, $productId);
         if ($removed) {
             $cartItems = $this->cartModel->fetchCartItems($sessionId, $userId);
             $totals = $this->calculateCartTotals($cartItems);
-            $response = ['status' => 'success', 'message' => 'Item removed from cart', 'cart_items' => $cartItems, 'cart_summary' => $totals];
-            error_log("RemoveCartItem Response: " . json_encode($response));
             $this->sendResponse('success', 'Item removed from cart', [
                 'cart_items' => $cartItems,
                 'cart_summary' => $totals

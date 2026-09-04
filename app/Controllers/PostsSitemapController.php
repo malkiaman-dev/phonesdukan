@@ -28,8 +28,8 @@ class PostsSitemapController {
                     echo '  <url>' . PHP_EOL;
                     echo '    <loc>' . htmlspecialchars($post['url']) . '</loc>' . PHP_EOL;
                     echo '    <lastmod>' . $post['lastmod'] . '</lastmod>' . PHP_EOL;
-                    echo '    <changefreq>weekly</changefreq>' . PHP_EOL;
-                    echo '    <priority>0.8</priority>' . PHP_EOL;
+                    echo '    <changefreq>monthly</changefreq>' . PHP_EOL;
+                    echo '    <priority>0.4</priority>' . PHP_EOL;
                     echo '  </url>' . PHP_EOL;
                 }
             }

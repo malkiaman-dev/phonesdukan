@@ -55,10 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['otp'])) {
 
             if ($updateSuccess) {
                 $_SESSION['is_verified'] = 1;  // Store the verified status in session
-
-                // Redirect to the dashboard after successful OTP verification
-                header("Location: /login");
-                exit();
+                $verified = true;
             } else {
                 // If database update failed, show error
                 $error = "Error verifying the OTP, please try again.";
@@ -83,65 +80,180 @@ if (isset($_POST['resend_otp'])) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Verification</title>
-    <script>
-        // Calculate the time remaining for the button to be enabled (1 minute countdown)
-        let otpTimestamp = <?php echo $_SESSION['otp_timestamp']; ?>;
-        let currentTime = <?php echo $currentTime; ?>;
-        let timeRemaining = 60 - (currentTime - otpTimestamp);
-
-        // Function to update the countdown timer
-        function updateTimer() {
-            if (timeRemaining > 0) {
-                document.getElementById('timer').innerText = "Time remaining: " + timeRemaining + " seconds";
-                timeRemaining--;
-            } else {
-                document.getElementById('timer').innerText = "You can now resend the OTP.";
-                document.getElementById('resendButton').disabled = false; // Enable the resend button
-            }
-        }
-
-        // Start the timer
-        setInterval(updateTimer, 1000);
-    </script>
-</head>
-<body>
-    <div class="verify-form-wrapper">
-<div class="verify-container">
-        <h2>Enter OTP</h2>
-
-        <?php if (isset($error)) { echo "<p class='error-message'>$error</p>"; } ?>
-        <?php if (isset($success)) { echo "<p class='success-message'>$success</p>"; } ?>
-
-        <!-- OTP Form -->
-        <form method="POST">
-            <div class="form-group">
-                <label for="otp">OTP: </label>
-                <input type="text" name="otp" id="otp" required>
-            </div>
-            <div class="form-group">
-                <button type="submit">Verify OTP</button>
-            </div>
-        </form>
-
-        <!-- Timer for OTP -->
-        <div id="timer">
-            <!-- Timer will display here -->
-        </div>
-
-        <!-- Resend OTP Form -->
-        <div class="resend-otp">
-            <form method="POST">
-                <button type="submit" name="resend_otp" id="resendButton" disabled>Resend OTP</button>
-            </form>
-        </div>
+<?php
+$otpTimeLeft = max(0, 60 - ($currentTime - $_SESSION['otp_timestamp']));
+?>
+<?php if (!empty($verified)): ?>
+<div class="verify-form-wrapper">
+  <div class="verify-container">
+    <div class="vt-success-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+        <path d="M7 12.5l3.5 3.5L17 8" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
+    <h2 class="vt-success-title">Registration Successful!</h2>
+    <p class="vt-success-text">Your account has been verified successfully. You can now log in to your account.</p>
+    <p class="vt-redirect-note">Redirecting to login in <strong id="vtRedirectCount">3</strong> seconds…</p>
+    <a href="/login" class="vt-login-btn">Go to Login</a>
+  </div>
+</div>
+<style>
+.vt-success-icon { margin: 0 auto 16px; width: 72px; height: 72px; }
+.vt-success-icon svg { width: 72px; height: 72px; }
+.vt-success-title { margin: 0 0 10px; font-size: 22px; font-weight: 700; color: #166534; }
+.vt-success-text { margin: 0 0 16px; font-size: 14px; color: #4b5563; line-height: 1.6; }
+.vt-redirect-note { font-size: 13px; color: #6b7280; margin: 0 0 20px; }
+.vt-login-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 13px;
+    background: #111111;
+    color: #f7d117;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}
+.vt-login-btn:hover { background: #222222; }
+</style>
+<script>
+(function () {
+    var count = 3;
+    var el = document.getElementById('vtRedirectCount');
+    var t = setInterval(function () {
+        count--;
+        if (el) el.textContent = count;
+        if (count <= 0) { clearInterval(t); window.location.href = '/login'; }
+    }, 1000);
+})();
+</script>
+<?php else: ?>
+<div class="verify-form-wrapper">
+  <div class="verify-container">
+
+    <h2>OTP Verification</h2>
+    <p class="verify-hint">Code sent to <strong><?= htmlspecialchars($email) ?></strong></p>
+
+    <?php if (isset($error)): ?>
+      <p class="verify-msg verify-msg--error"><?= htmlspecialchars($error) ?></p>
+    <?php endif; ?>
+    <?php if (isset($success)): ?>
+      <p class="verify-msg verify-msg--success"><?= htmlspecialchars($success) ?></p>
+    <?php endif; ?>
+
+    <!-- Countdown ring -->
+    <div class="vt-ring-wrap">
+      <svg class="vt-svg" viewBox="0 0 100 100">
+        <circle class="vt-bg"   cx="50" cy="50" r="40"/>
+        <circle class="vt-ring" cx="50" cy="50" r="40" id="vtRing"
+                stroke-dasharray="251.33" stroke-dashoffset="0"/>
+      </svg>
+      <div class="vt-center">
+        <span class="vt-number" id="vtNumber"><?= $otpTimeLeft ?></span>
+        <span class="vt-unit">sec</span>
+      </div>
     </div>
-</body>
-</html>
+    <p class="vt-status" id="vtStatus">Time remaining</p>
+
+    <!-- OTP form (hidden when expired) -->
+    <div id="otpFormWrap">
+      <form method="POST" id="otpForm">
+        <div class="form-group">
+          <input type="text" name="otp" id="otpInput"
+                 maxlength="6" placeholder="Enter 6-digit code"
+                 autocomplete="one-time-code" inputmode="numeric" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" id="submitBtn">Verify OTP</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Expired banner (shown when timer hits 0) -->
+    <div class="vt-expired" id="vtExpired" style="display:none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      OTP Expired — request a new code below
+    </div>
+
+    <!-- Resend form -->
+    <div class="resend-otp">
+      <form method="POST">
+        <button type="submit" name="resend_otp" id="resendButton" <?= $otpTimeLeft > 0 ? 'disabled' : '' ?>>
+          Resend OTP
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+<?php endif; ?>
+
+<?php if (empty($verified)): ?>
+<script>
+(function () {
+  const TOTAL       = 60;
+  const CIRC        = 251.33;
+  let   timeLeft    = <?= $otpTimeLeft ?>;
+
+  const ring        = document.getElementById('vtRing');
+  const number      = document.getElementById('vtNumber');
+  const status      = document.getElementById('vtStatus');
+  const formWrap    = document.getElementById('otpFormWrap');
+  const expiredBanner = document.getElementById('vtExpired');
+  const resendBtn   = document.getElementById('resendButton');
+  const otpInput    = document.getElementById('otpInput');
+  const submitBtn   = document.getElementById('submitBtn');
+
+  function setExpired() {
+    ring.style.stroke          = '#cc0000';
+    ring.style.strokeDashoffset = CIRC;
+    number.textContent         = '0';
+    status.textContent         = 'OTP Expired';
+    status.style.color         = '#cc0000';
+    formWrap.style.display     = 'none';
+    expiredBanner.style.display = 'flex';
+    resendBtn.disabled         = false;
+  }
+
+  function tick() {
+    if (timeLeft <= 0) { setExpired(); return; }
+
+    const fraction = timeLeft / TOTAL;
+    ring.style.strokeDashoffset = CIRC * (1 - fraction);
+
+    // Colour shifts: gold → orange → red as time runs low
+    if (timeLeft > 20) {
+      ring.style.stroke = '#f7d117';
+    } else if (timeLeft > 10) {
+      ring.style.stroke = '#f59e0b';
+    } else {
+      ring.style.stroke = '#ef4444';
+    }
+
+    number.textContent = timeLeft;
+    timeLeft--;
+  }
+
+  tick(); // draw immediately
+  const interval = setInterval(function () {
+    tick();
+    if (timeLeft < 0) clearInterval(interval);
+  }, 1000);
+
+  // If already expired on load
+  if (timeLeft <= 0) setExpired();
+})();
+</script>
+<?php endif; ?>
+
 <?php require_once dirname(__DIR__, 3) . '/includes/footer.php'; ?>

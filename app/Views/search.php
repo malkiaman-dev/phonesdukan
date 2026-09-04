@@ -1,67 +1,106 @@
 <?php
-require_once __DIR__ . '/../../includes/header.php'; 
-require_once dirname(__DIR__, 2) . '/database/db.php';
+$metaRobots = 'noindex, follow';
+
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 require_once dirname(__DIR__, 2) . '/app/Models/ProductModel.php';
 
-// Initialize Database & Product Model
-$database = new Database();
-$conn = $database->getConnection();
-$productModel = new ProductModel($conn);
-
-if (!$conn) {
-    die('Database connection error.');
+if (!defined('SEARCH_RESULTS_PAGE')) {
+    define('SEARCH_RESULTS_PAGE', true);
 }
 
-// Get search query from GET request
-$searchQuery = isset($_GET['query']) ? trim($_GET['query']) : '';
+$searchQuery = isset($_GET['query']) ? trim((string) $_GET['query']) : '';
+$pageTitle = $searchQuery !== ''
+    ? 'Search Results for ' . $searchQuery . ' | Phones Dukan'
+    : 'Search | Phones Dukan';
 
-$results = [];
+$products = [];
 
-if (!empty($searchQuery)) {
-    // Use the search function from ProductModel
-    $results = $productModel->searchProducts($searchQuery);
+if ($searchQuery !== '') {
+    $productModel = new ProductModel();
+    $rawResults = $productModel->searchProducts($searchQuery, 48);
+
+    foreach ($rawResults as $row) {
+        $products[] = prepareProductCardFromRow($row);
+    }
 }
+
+require_once dirname(__DIR__, 2) . '/includes/header.php';
 ?>
 
+<div class="sr-page">
+    <section class="sr-section">
+        <div class="sr-container">
+            <header class="sr-header">
+                <h1 class="sr-title">
+                    <?php if ($searchQuery !== ''): ?>
+                        Search Results for: <span><?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?></span>
+                    <?php else: ?>
+                        Search Products
+                    <?php endif; ?>
+                </h1>
+                <?php if ($searchQuery !== '' && !empty($products)): ?>
+                    <p class="sr-count">
+                        <?= count($products) ?> product<?= count($products) !== 1 ? 's' : '' ?> found
+                    </p>
+                <?php endif; ?>
+            </header>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <main class="product-section">
-        <div class="product-grid-container">
-            <div class="category-header">
-                <h2>Search Results for: <span><?php echo htmlspecialchars($searchQuery); ?></span></h2>
-            </div>
-            <div class="product-grid-wrapper">
-                <?php if (!empty($results)): ?>
-                    <?php foreach ($results as $product): ?>
-                        <div class="product-card">
-                            <a href="/<?php echo htmlspecialchars($product['category_slug']); ?>/<?php echo htmlspecialchars($product['brand_slug']); ?>/<?php echo htmlspecialchars($product['product_slug']); ?>">
-                                <div class="product-img-wrapper">
-                                    <div class="product-img">
-                                        <img alt="<?php echo htmlspecialchars($product['product_name']); ?>" width="300" height="300" src="<?php echo htmlspecialchars($product['image_url']); ?>">
-                                    </div>
+            <?php if ($searchQuery === ''): ?>
+                <div class="sr-empty">
+                    <h2>Enter a search term</h2>
+                    <p>Use the search bar above to find mobiles, accessories, earbuds, and more.</p>
+                </div>
+            <?php elseif (!empty($products)): ?>
+                <div class="sr-product-grid">
+                    <?php foreach ($products as $product): ?>
+                        <article class="na-card">
+                            <?php include __DIR__ . '/partials/na-card-badge.php'; ?>
+
+                            <a href="<?= $product['product_url'] ?>" class="na-img-link">
+                                <div class="na-img-box">
+                                    <img
+                                        src="<?= $product['product_image'] ?>"
+                                        alt="<?= $product['product_name'] ?>"
+                                        loading="lazy"
+                                        decoding="async"
+                                    >
                                 </div>
                             </a>
-                            <h3 class="product-title">
-                                <a href="/<?php echo htmlspecialchars($product['category_slug']); ?>/<?php echo htmlspecialchars($product['brand_slug']); ?>/<?php echo htmlspecialchars($product['product_slug']); ?>">
-                                    <?php echo htmlspecialchars($product['product_name']); ?>
-                                </a>
-                            </h3>
-                        </div>
+
+                            <div class="na-body">
+                                <h3 class="na-name">
+                                    <a href="<?= $product['product_url'] ?>"><?= $product['product_name'] ?></a>
+                                </h3>
+
+                                <div class="na-price">
+                                    <?php if ($product['has_sale']): ?>
+                                        <span class="na-price--old">Rs. <?= number_format($product['regular_price']) ?></span>
+                                        <span class="na-price--new">Rs. <?= number_format($product['sale_price']) ?></span>
+                                    <?php elseif ($product['regular_price'] > 0): ?>
+                                        <span class="na-price--new">Rs. <?= number_format($product['regular_price']) ?></span>
+                                    <?php else: ?>
+                                        <span class="na-price--na">Price N/A</span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?php include __DIR__ . '/partials/na-card-actions.php'; ?>
+                            </div>
+                        </article>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No results found for "<?php echo htmlspecialchars($searchQuery); ?>"</p>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php else: ?>
+                <div class="sr-empty">
+                    <h2>No results found</h2>
+                    <p>
+                        We couldn't find any products matching
+                        "<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>".
+                        Try different keywords or browse our shop.
+                    </p>
+                    <a class="sr-empty-btn" href="<?= htmlspecialchars(url('shop'), ENT_QUOTES, 'UTF-8') ?>">Browse Shop</a>
+                </div>
+            <?php endif; ?>
         </div>
-    </main>
-</body>
-</html>
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+    </section>
+</div>
+
+<?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>

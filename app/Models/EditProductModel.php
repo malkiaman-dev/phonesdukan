@@ -3,6 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/database/db.php';
+require_once dirname(__DIR__, 2) . '/includes/functions.php';
 
 class ProductModel
 {
@@ -15,21 +16,26 @@ class ProductModel
 
     public function getProductById($id)
     {
-        $stmt = $this->db->prepare('SELECT * FROM products WHERE product_id = ? LIMIT 1');
+        $stmt = $this->db->prepare('SELECT p.*, c.slug AS category_slug, b.slug AS brand_slug, sc.slug AS subcategory_slug
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.category_id
+            LEFT JOIN categories sc ON p.subcategory_id = sc.category_id
+            LEFT JOIN brands b ON p.brand_id = b.brand_id
+            WHERE p.product_id = ? LIMIT 1');
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getAllCategories()
     {
-        $stmt = $this->db->prepare('SELECT * FROM categories');
+        $stmt = $this->db->prepare('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY category_name ASC');
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAllBrands()
     {
-        $stmt = $this->db->prepare('SELECT * FROM brands');
+        $stmt = $this->db->prepare('SELECT * FROM brands ORDER BY brand_name ASC');
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -43,35 +49,42 @@ class ProductModel
         $heightCm = empty($data['height_cm']) ? null : $data['height_cm'];
         $taxClass = empty($data['tax_class']) ? null : $data['tax_class'];
         $b2bRegularPrice = empty($data['b2b_regular_price']) ? null : $data['b2b_regular_price'];
+        $expectedComingDate = normalizeExpectedComingDate($data['expected_coming_date'] ?? null);
     
-        $stmt = $this->db->prepare('UPDATE products SET 
-            product_name = ?, 
-            product_slug = ?, 
-            product_description = ?, 
-            short_description = ?, 
-            product_status = ?, 
-            stock_quantity = ?, 
-            regular_price = ?, 
-            sale_price = ?, 
-            product_sku = ?, 
-            weight_kg = ?, 
-            length_cm = ?, 
-            width_cm = ?, 
-            height_cm = ?, 
-            tax_class = ?, 
-            product_tag = ?, 
-            category_id = ?, 
+        $prepaidDiscountAmount = isset($data['prepaid_discount_amount']) && is_numeric($data['prepaid_discount_amount']) ? max(0, (float)$data['prepaid_discount_amount']) : 0;
+
+        $stmt = $this->db->prepare('UPDATE products SET
+            product_name = ?,
+            product_slug = ?,
+            product_description = ?,
+            short_description = ?,
+            product_status = ?,
+            expected_coming_date = ?,
+            stock_quantity = ?,
+            regular_price = ?,
+            sale_price = ?,
+            product_sku = ?,
+            weight_kg = ?,
+            length_cm = ?,
+            width_cm = ?,
+            height_cm = ?,
+            tax_class = ?,
+            product_tag = ?,
+            category_id = ?,
+            subcategory_id = ?,
             brand_id = ?,
             is_b2b_available = ?,
-            b2b_regular_price = ?
+            b2b_regular_price = ?,
+            prepaid_discount_amount = ?
             WHERE product_id = ?');
-    
+
         return $stmt->execute([
             $data['product_name'],
             $data['product_slug'],
             $data['product_description'],
             $data['short_description'],
             $data['product_status'],
+            $expectedComingDate,
             $data['stock_quantity'],
             $data['regular_price'],
             $salePrice,
@@ -83,9 +96,11 @@ class ProductModel
             $taxClass,
             $data['product_tag'],
             $data['category_id'],
+            !empty($data['subcategory_id']) ? (int) $data['subcategory_id'] : null,
             $data['brand_id'],
             $data['is_b2b_available'],
             $b2bRegularPrice,
+            $prepaidDiscountAmount,
             $id
         ]);
     }
@@ -99,38 +114,48 @@ class ProductModel
 
     public function updateSeoData($productId, $data)
     {
-        $stmt = $this->db->prepare('UPDATE product_seo SET 
-            focus_keyword = ?, 
-            seo_title = ?, 
-            seo_description = ? 
+        $stmt = $this->db->prepare('UPDATE product_seo SET
+            focus_keyword      = ?,
+            seo_title          = ?,
+            seo_description    = ?,
+            canonical_url      = ?,
+            secondary_keywords = ?
             WHERE product_id = ?');
         return $stmt->execute([
             $data['focus_keyword'],
             $data['seo_title'],
             $data['seo_description'],
-            $productId
+            $data['canonical_url'] ?? null,
+            $data['secondary_keywords'] ?? null,
+            $productId,
         ]);
     }
 
     public function insertSeoData($productId, $data)
     {
-        $stmt = $this->db->prepare('INSERT INTO product_seo (product_id, focus_keyword, seo_title, seo_description) VALUES (?, ?, ?, ?)');
+        $stmt = $this->db->prepare(
+            'INSERT INTO product_seo (product_id, focus_keyword, seo_title, seo_description, canonical_url, secondary_keywords)
+             VALUES (?, ?, ?, ?, ?, ?)'
+        );
         return $stmt->execute([
             $productId,
             $data['focus_keyword'],
             $data['seo_title'],
-            $data['seo_description']
+            $data['seo_description'],
+            $data['canonical_url'] ?? null,
+            $data['secondary_keywords'] ?? null,
         ]);
     }
 
     public function getProductImages($productId)
     {
         $stmt = $this->db->prepare('
-            SELECT pi.image_id, pi.image_url, pi.is_primary, 
+            SELECT pi.image_id, pi.image_url, pi.is_primary, pi.sort_order,
                    im.alt_text, im.title, im.description, im.caption
             FROM product_images pi
             LEFT JOIN image_metadata im ON pi.image_id = im.image_id
             WHERE pi.product_id = ?
+            ORDER BY pi.sort_order ASC, pi.is_primary DESC, pi.image_id ASC
         ');
         $stmt->execute([$productId]);
         $productImages = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -138,12 +163,99 @@ class ProductModel
         return $productImages;
     }
 
-    public function insertProductImage($productId, $imageUrl, $isPrimary)
+    public function insertProductImage($productId, $imageUrl, $isPrimary, $status = 1)
     {
-        $stmt = $this->db->prepare('INSERT INTO product_images (product_id, image_url, is_primary) 
-                                VALUES (?, ?, ?)');
-        $stmt->execute([$productId, $imageUrl, $isPrimary]);
+        $imageUrl = function_exists('normalizeStoredUploadPath')
+            ? normalizeStoredUploadPath((string) $imageUrl)
+            : $imageUrl;
+        $stmt = $this->db->prepare(
+            'INSERT INTO product_images (product_id, image_url, is_primary, status)
+             VALUES (?, ?, ?, ?)'
+        );
+        $stmt->execute([$productId, $imageUrl, $isPrimary ? 1 : 0, (int) $status]);
         return $this->db->lastInsertId();
+    }
+
+    public function countProductImages(int $productId): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM product_images WHERE product_id = ?');
+        $stmt->execute([$productId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function imageBelongsToProduct(int $imageId, int $productId): bool
+    {
+        $stmt = $this->db->prepare(
+            'SELECT image_id FROM product_images WHERE image_id = ? AND product_id = ? LIMIT 1'
+        );
+        $stmt->execute([$imageId, $productId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public function normalizeProductImageUrls(int $productId): void
+    {
+        if (!function_exists('normalizeStoredUploadPath')) {
+            return;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT image_id, image_url FROM product_images WHERE product_id = ?'
+        );
+        $stmt->execute([$productId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($rows)) {
+            return;
+        }
+
+        $update = $this->db->prepare(
+            'UPDATE product_images SET image_url = ? WHERE image_id = ? AND product_id = ?'
+        );
+        foreach ($rows as $row) {
+            $current = (string) ($row['image_url'] ?? '');
+            $normalized = normalizeStoredUploadPath($current);
+            if ($normalized !== '' && $normalized !== $current) {
+                $update->execute([$normalized, (int) $row['image_id'], $productId]);
+            }
+        }
+    }
+
+    public function syncImageStatusForProduct(int $productId, int $status): void
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE product_images SET status = ? WHERE product_id = ?'
+        );
+        $stmt->execute([$status === 1 ? 1 : 0, $productId]);
+    }
+
+    public function ensurePrimaryImageExists(int $productId): void
+    {
+        $countStmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM product_images WHERE product_id = ?'
+        );
+        $countStmt->execute([$productId]);
+        if ((int) $countStmt->fetchColumn() === 0) {
+            return;
+        }
+
+        $primaryStmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM product_images WHERE product_id = ? AND is_primary = 1'
+        );
+        $primaryStmt->execute([$productId]);
+        if ((int) $primaryStmt->fetchColumn() > 0) {
+            return;
+        }
+
+        $firstStmt = $this->db->prepare(
+            'SELECT image_id FROM product_images
+             WHERE product_id = ?
+             ORDER BY sort_order ASC, image_id ASC
+             LIMIT 1'
+        );
+        $firstStmt->execute([$productId]);
+        $firstImageId = $firstStmt->fetchColumn();
+        if ($firstImageId) {
+            $this->setPrimaryImage($productId, (int) $firstImageId);
+        }
     }
 
     public function insertImageMetadata($imageId, $metadata)
@@ -195,27 +307,101 @@ class ProductModel
 
     public function setPrimaryImage($productId, $imageId)
     {
+        $check = $this->db->prepare(
+            'SELECT image_id FROM product_images WHERE image_id = ? AND product_id = ? LIMIT 1'
+        );
+        $check->execute([(int) $imageId, (int) $productId]);
+        if (!$check->fetchColumn()) {
+            return false;
+        }
+
         $stmt = $this->db->prepare('UPDATE product_images SET is_primary = 0 WHERE product_id = ?');
-        $stmt->execute([$productId]);
-        $stmt = $this->db->prepare('UPDATE product_images SET is_primary = 1 WHERE image_id = ?');
-        $stmt->execute([$imageId]);
+        $stmt->execute([(int) $productId]);
+        $stmt = $this->db->prepare('UPDATE product_images SET is_primary = 1 WHERE image_id = ? AND product_id = ?');
+        return $stmt->execute([(int) $imageId, (int) $productId]);
     }
 
-    public function removeImage($imageId)
+    public function removeImage($imageId, $productId = null)
     {
+        $imageId = (int) $imageId;
+        if ($imageId <= 0) {
+            return false;
+        }
+
+        if ($productId !== null) {
+            $check = $this->db->prepare(
+                'SELECT image_id, image_url FROM product_images WHERE image_id = ? AND product_id = ? LIMIT 1'
+            );
+            $check->execute([$imageId, (int) $productId]);
+        } else {
+            $check = $this->db->prepare(
+                'SELECT image_id, image_url FROM product_images WHERE image_id = ? LIMIT 1'
+            );
+            $check->execute([$imageId]);
+        }
+
+        $row = $check->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return false;
+        }
+
         $stmt = $this->db->prepare('DELETE FROM image_metadata WHERE image_id = ?');
         $stmt->execute([$imageId]);
         $stmt = $this->db->prepare('DELETE FROM product_images WHERE image_id = ?');
-        return $stmt->execute([$imageId]);
+        $deleted = $stmt->execute([$imageId]);
+
+        // Only unlink the file when no other product_images row still references it.
+        if ($deleted && !empty($row['image_url']) && function_exists('normalizeStoredUploadPath') && function_exists('resolveLocalUploadFilesystemPath')) {
+            $normalized = normalizeStoredUploadPath((string) $row['image_url']);
+            $refCheck = $this->db->prepare(
+                'SELECT COUNT(*) FROM product_images WHERE image_url = ? OR image_url = ?'
+            );
+            $refCheck->execute([(string) $row['image_url'], $normalized]);
+            if ((int) $refCheck->fetchColumn() === 0) {
+                $fullPath = resolveLocalUploadFilesystemPath($normalized);
+                if ($fullPath && is_file($fullPath)) {
+                    @unlink($fullPath);
+                }
+            }
+        }
+
+        return $deleted;
     }
 
     public function getAttributeValues($attributeId)
     {
         $stmt = $this->db->prepare('SELECT * FROM product_attribute_values WHERE attribute_id = ?');
         $stmt->execute([$attributeId]);
-        $values = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        error_log("Fetched values for attribute_id $attributeId: " . print_r($values, true));
-        return $values;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Load every attribute value in one query, grouped by attribute_id.
+     *
+     * @return array<int, list<array<string, mixed>>>
+     */
+    public function getAllAttributeValuesGrouped(): array
+    {
+        $grouped = [];
+        $stmt = $this->db->query(
+            'SELECT attribute_id, value_id, value
+             FROM product_attribute_values
+             ORDER BY attribute_id ASC, value_id ASC'
+        );
+        if (!$stmt) {
+            return $grouped;
+        }
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $attributeId = (int) ($row['attribute_id'] ?? 0);
+            if ($attributeId <= 0) {
+                continue;
+            }
+            if (!isset($grouped[$attributeId])) {
+                $grouped[$attributeId] = [];
+            }
+            $grouped[$attributeId][] = $row;
+        }
+        return $grouped;
     }
 
     public function getAllAttributes()

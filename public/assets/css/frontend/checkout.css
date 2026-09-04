@@ -1,476 +1,930 @@
-/* Wrapper to center the form */
-.checkout-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 0;
-  background: #f8f9fa;
+/* ============================================================
+   PHONESDUKAN — CHECKOUT PAGE
+   Design system: #111 black  |  #f7cf04 yellow  |  #fff white
+   ============================================================ */
+
+/* ── Tokens ── */
+:root {
+    --co-black:      #111111;
+    --co-yellow:     #f7cf04;
+    --co-yellow-dk:  #ddb900;
+    --co-white:      #ffffff;
+    --co-bg:         #f5f5f5;
+    --co-border:     #e5e7eb;
+    --co-muted:      #6b7280;
+    --co-radius-sm:  8px;
+    --co-radius:     14px;
+    --co-shadow:     0 4px 20px rgba(0,0,0,0.06);
+    --co-shadow-lg:  0 8px 32px rgba(0,0,0,0.10);
 }
 
-/* Form Container */
+/* ── Page shell ── */
+.checkout-page {
+    background: var(--co-bg);
+    min-height: 60vh;
+    padding-bottom: 60px;
+}
+
+/* ── Page header ── */
+.co-page-header {
+    background: var(--co-white);
+    border-bottom: 1px solid var(--co-border);
+    padding: 28px 24px 24px;
+    margin-bottom: 32px;
+}
+
+.co-page-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--co-black);
+    margin: 0 0 6px;
+    line-height: 1.2;
+    text-align: left;
+}
+
+.co-page-subtitle {
+    font-size: 0.9rem;
+    color: var(--co-muted);
+    margin: 0;
+    text-align: left;
+}
+
+/* ── Max-width container ── */
 .checkout-container {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  max-width: 1440px;
-  margin: 20px;
-  padding: 20px;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
 }
 
+/* ── Empty state ── */
+.co-empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    background: var(--co-white);
+    border-radius: var(--co-radius);
+    box-shadow: var(--co-shadow);
+}
+
+.co-empty-state p {
+    font-size: 1.1rem;
+    color: var(--co-muted);
+    margin: 16px 0 24px;
+}
+
+.co-empty-btn,
+.co-empty-btn:link,
+.co-empty-btn:visited {
+    display: inline-block;
+    background: var(--co-yellow);
+    color: var(--co-black) !important;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: var(--co-radius-sm);
+    text-decoration: none !important;
+    transition: background 0.2s ease;
+}
+
+.co-empty-btn:hover { background: var(--co-yellow-dk); }
+
+/* ── Two-column layout ── */
 .checkout-content {
-  display: flex;
-  gap: 30px;
-  align-items: flex-start;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
 }
 
 .form-section {
-  flex: 1;
-  max-width: 50%;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: none;
 }
 
 .order-section {
-  flex: 1;
-  max-width: 50%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    width: 400px;
+    flex-shrink: 0;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 90px;
+    gap: 0;
 }
 
-h1,
-h2,
-h3 {
-  text-align: left;
-  color: #333;
+/* ============================================================
+   FORM CARDS
+   ============================================================ */
+
+.co-card {
+    background: var(--co-white);
+    border-radius: var(--co-radius);
+    border: 1px solid var(--co-border);
+    box-shadow: var(--co-shadow);
+    padding: 26px 28px;
 }
 
-h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  font-size: 18px;
+.co-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--co-border);
 }
 
-/* Form Fields */
+.co-card-icon {
+    color: var(--co-black);
+    flex-shrink: 0;
+}
+
+/* Scope h2 to inside checkout form cards only */
+.co-card-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--co-black);
+    margin: 0;
+    text-align: left;
+}
+
+/* ── Form group ── */
 .form-group {
-  margin-bottom: 15px;
-  position: relative;
+    margin-bottom: 18px;
+    position: relative;
 }
 
-label {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 5px;
+.form-group:last-child {
+    margin-bottom: 0;
 }
 
-input#cod {
-  width: auto;
-}
-input,
-textarea {
-  width: 100%;
-  padding: 10px;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-  transition: border-color 0.3s;
+/* Scope labels to checkout page only */
+.checkout-page .form-group label,
+.checkout-page .order-notes label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--co-black);
+    margin-bottom: 7px;
+    text-align: left;
 }
 
-input:focus,
-textarea:focus {
-  border-color: #28a745;
-  outline: none;
+.co-req { color: #e53e3e; margin-left: 2px; }
+.co-optional { font-weight: 400; color: var(--co-muted); font-size: 0.78rem; }
+
+/* Two-column form row */
+.co-form-row {
+    display: flex;
+    gap: 16px;
 }
 
-/* Buttons */
-.btn {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s, border 0.3s;
-  margin-top: 10px;
+.co-form-row .form-group {
+    flex: 1;
 }
 
-.btn-primary {
-  background: #28a745;
-  color: white;
-  border: 2px solid #28a745;
+/* ── Input wrapper with icon ── */
+.co-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.btn-primary:hover {
-  background: #218838;
-  border-color: #218838;
+.co-input-wrap--area {
+    align-items: flex-start;
 }
 
-/* Modal Popup Styling */
-#validationModal,
-#phoneModal,
-#locationModal {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  white-space: pre-line;
+.co-input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--co-muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    line-height: 0;
 }
 
-#validationModal p,
-#phoneModal p,
-#locationModal p {
-  font-size: 16px;
-  color: #333;
+.co-input-icon--top {
+    top: 15px;
+    transform: none;
 }
 
-#validationModal button,
-#phoneModal button,
-#locationModal button {
-  background: #004080;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 10px;
-  font-size: 16px;
+/* ── Inputs ── */
+.checkout-page #checkoutForm input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]),
+.checkout-page #checkoutForm textarea,
+.checkout-page #checkoutForm select {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px 0 44px;
+    font-size: 0.92rem;
+    color: var(--co-black);
+    background: var(--co-white);
+    border: 1.5px solid var(--co-border);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-#validationModal button:hover,
-#phoneModal button:hover,
-#locationModal button:hover {
-  background: #e04e2a;
+.checkout-page #checkoutForm textarea {
+    height: auto;
+    padding: 13px 14px 13px 44px;
+    resize: vertical;
+    line-height: 1.5;
 }
 
-/* Input Focus Border Effect */
-input:focus,
-textarea:focus {
-  border: 2px solid #007bff !important;
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+.checkout-page #checkoutForm input::placeholder,
+.checkout-page #checkoutForm textarea::placeholder {
+    color: #aab;
+    font-size: 0.88rem;
 }
 
-select[name="shipping_country"] {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-  appearance: none; /* Removes default browser styling */
-  cursor: pointer;
-  transition: border-color 0.3s ease-in-out;
+.checkout-page #checkoutForm input:focus:not([type="file"]):not([type="hidden"]),
+.checkout-page #checkoutForm textarea:focus,
+.checkout-page #checkoutForm select:focus {
+    border-color: var(--co-yellow);
+    box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.18);
+    outline: none;
 }
 
-select[name="shipping_country"]:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-#locationModal {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 25px;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  font-family: Arial, sans-serif;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-#locationModal h2 {
-  font-size: 20px;
-  margin-bottom: 10px;
-  color: #333;
-}
-
-#locationModal p {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-#locationModal button {
-  background-color: #004080;
-  color: white;
-  border: none;
-  padding: 12px 18px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s ease-in-out;
-}
-
-#locationModal button:hover {
-  background-color: #0056b3;
-}
-
-/* Smooth fade-in animation */
-@keyframes fadeIn {
-  from {
+/* ── Hidden real select (kept for form submission + JS validation) ── */
+.co-select-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     opacity: 0;
-    transform: translate(-50%, -55%);
-  }
-  to {
+    pointer-events: none;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+/* ============================================================
+   CUSTOM COUNTRY SELECT
+   ============================================================ */
+
+.co-custom-select {
+    position: relative;
+    width: 100%;
+    user-select: none;
+}
+
+/* ── Trigger (looks identical to other inputs) ── */
+.co-select-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 48px;
+    border: 1.5px solid var(--co-border);
+    border-radius: 10px;
+    background: var(--co-white);
+    cursor: pointer;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    outline: none;
+    position: relative;
+    padding: 0 12px 0 44px;
+    box-sizing: border-box;
+}
+
+.co-select-trigger:hover {
+    border-color: #c5c9d0;
+}
+
+.co-select-trigger:focus,
+.co-select-trigger--open {
+    border-color: var(--co-yellow);
+    box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.18);
+}
+
+/* Globe icon reuses .co-input-icon — already positioned absolute at left:14px */
+
+/* Display text */
+.co-select-display {
+    flex: 1;
+    font-size: 0.92rem;
+    color: #aab;          /* placeholder colour */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 48px;
+}
+
+.co-select-display--chosen {
+    color: var(--co-black);
+}
+
+/* Caret arrow */
+.co-select-caret {
+    display: flex;
+    align-items: center;
+    color: var(--co-muted);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    line-height: 0;
+}
+
+.co-select-trigger--open .co-select-caret {
+    transform: rotate(180deg);
+}
+
+/* ── Dropdown panel ── */
+.co-select-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--co-white);
+    border: 1.5px solid var(--co-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
+}
+
+.co-select-panel--open {
     opacity: 1;
-    transform: translate(-50%, -50%);
-  }
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
 }
 
-#checkoutForm {
-  background: #fff;
-  border-radius: 10px;
-  max-width: 100%;
+/* ── Options ── */
+.co-select-option {
+    padding: 11px 16px 11px 16px;
+    font-size: 0.9rem;
+    color: var(--co-black);
+    cursor: pointer;
+    transition: background 0.12s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.payment-container h2 {
-  text-align: left;
-  margin-bottom: 15px;
-  color: #333;
+.co-select-option--placeholder {
+    color: #9ca3af;
 }
+
+.co-select-option:hover,
+.co-select-option--focused {
+    background: #fffde6;
+}
+
+.co-select-option--selected {
+    background: #fff9c0;
+    font-weight: 700;
+    color: var(--co-black);
+}
+
+.co-select-option--selected::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--co-yellow);
+    border-radius: 50%;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   PAYMENT METHOD PILL
+   ============================================================ */
+
+.payment-method {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    background: transparent;
+    margin-bottom: 0;
+}
+
+.co-payment-pill {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #fffde6;
+    border: 1.5px solid var(--co-yellow);
+    border-radius: 12px;
+}
+
+.co-payment-pill-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--co-yellow);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--co-black);
+}
+
+.co-payment-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--co-black);
+    margin: 0 0 3px;
+}
+
+.co-payment-hint {
+    font-size: 0.78rem;
+    color: var(--co-muted);
+    margin: 0;
+}
+
+.co-payment-check {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    background: var(--co-yellow);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--co-black);
+}
+
+/* ── Order notes section ── */
+.order-notes {
+    margin-top: 20px;
+    display: block;
+}
+
+/* ============================================================
+   COPY TOOLTIP (JS-injected — keep exact class names)
+   ============================================================ */
 
 .copy-wrapper {
-  position: relative; /* For absolute tooltip positioning */
-  display: inline-block; /* Keeps it tight */
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .copied-tooltip {
-  position: absolute;
-  top: -35px; /* Above the wrapper */
-  left: 100%;
-  transform: translateX(-50%);
-  background: #28a745; /* Green bg */
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-  pointer-events: none; /* No click interference */
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--co-black);
+    color: var(--co-white);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 10;
 }
 
-.copied-tooltip.show {
-  opacity: 1;
-}
+.copied-tooltip.show { opacity: 1; }
 
 .copy-icon.copied {
-  filter: invert(48%) sepia(13%) saturate(3207%) hue-rotate(130deg)
-    brightness(95%) contrast(80%); /* Turns to green */
-  transition: filter 0.3s ease;
+    filter: invert(78%) sepia(73%) saturate(600%) hue-rotate(0deg) brightness(103%);
+    transition: filter 0.3s ease;
 }
 
-.payment-method {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background: #fff;
-  padding: 10px 0;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  flex-direction: column;
-  align-content: flex-start;
-  flex-wrap: wrap;
+/* ============================================================
+   ORDER SUMMARY CARD  (right column)
+   ============================================================ */
+
+.co-summary-card {
+    background: var(--co-white);
+    border-radius: var(--co-radius);
+    border: 1px solid var(--co-border);
+    box-shadow: var(--co-shadow);
+    padding: 26px 24px;
 }
 
-.order-notes {
-  display: flex;
-  flex-direction: column;
-  margin-top: 20px;
-}
-
-.order-notes label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.order-notes textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.submit-button {
-  display: block;
-  width: 100%;
-  background: #004080;
-  color: white;
-  padding: 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 15px;
-  transition: background 0.3s ease-in-out;
-}
-
-.order-summary {
-  margin: 0 0 20px 0;
-}
-h3 {
-  font-size: 20px;
-  margin-top: 0;
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-.summary-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.summary-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 8px 0;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.summary-item:last-child {
-  border-bottom: none;
-  font-weight: bold;
-  font-size: 18px;
-  color: #004080;
-}
-
-.summary-item-label {
-  font-size: 14px;
-  font-weight: bold;
-  flex: 1;
-}
-
-.summary-item-value {
-  font-size: 14px;
-  color: #333;
-  text-align: right;
-  flex: 1;
-}
-
-/* Style for product image in summary */
-.summary-item img {
-  border-radius: 5px;
-  margin-bottom: 5px;
-  max-width: 60px;
-  height: auto;
-}
-
-.submit-button:hover {
-  background: #0056b3;
-}
-
-.submit-button {
-  background: #004080;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s;
-  width: 100%;
-}
-
-.submit-button:hover {
-  background-color: #0056b3; /* Darker blue */
-  transform: scale(1.02);
-}
-
-@media (max-width: 768px) {
-  .checkout-wrapper {
-    margin: 0 !important; /* Full-width: No side margins */
-    padding: 0 !important;
-    width: 100vw; /* Viewport width for edge-to-edge */
-  }
-
-  .checkout-container {
-    margin: 0 !important; /* Ditch the 10px—full bleed */
-    padding: 10px; /* Light padding inside for breathing room */
-    width: 100%; /* Force full container width */
-    border-radius: 0; /* No rounded corners on mobile */
-    box-shadow: none; /* Flatten for native feel */
-  }
-
-  .checkout-content {
-    flex-direction: column;
-    gap: 15px; /* Tighter gap on small screens */
-  }
-
-  .form-section,
-  .order-section {
-    max-width: 100%;
-    width: 100%; /* Ensure sections span full */
-  }
-
-  .checkout-container h1 {
-    font-size: 25px;
-  }
-
-  #prepaid-details ol {
-    margin: 5px 0px 20px 0px;
-  }
-
-  #prepaid-details strong {
-    font-size: 14px;
-  }
-
-  .summary-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .summary-item {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .summary-item-value {
+/* Scope h3 to summary card only */
+.co-summary-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--co-black);
+    margin: 0 0 20px;
     text-align: left;
-  }
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--co-border);
+}
 
-  .summary-item:last-child,
-  .summary-item:nth-last-child(2) {
-    width: 100%;
+/* ── Product rows ── */
+.co-summary-products {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.co-summary-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.co-summary-img {
+    width: 62px;
+    height: 62px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--co-border);
+    flex-shrink: 0;
+}
+
+.co-summary-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.co-summary-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--co-black);
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.co-summary-meta {
+    font-size: 0.78rem;
+    color: var(--co-muted);
+    margin: 0;
+}
+
+.co-summary-price {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--co-black);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ── Pricing breakdown ── */
+.co-pricing-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.co-pricing-row {
+    display: flex;
     justify-content: space-between;
-  }
+    align-items: center;
+}
 
-  /* Bonus: Ensure copy tooltip doesn't overflow on mobile */
-  .copy-wrapper {
-    position: relative;
-    display: block; /* Block for better mobile flow */
+.co-pricing-label {
+    font-size: 0.85rem;
+    color: var(--co-muted);
+}
+
+.co-pricing-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--co-black);
+}
+
+.co-pricing-divider {
+    height: 1px;
+    background: var(--co-border);
+    margin: 4px 0 16px;
+}
+
+.co-pricing-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.co-pricing-total-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--co-black);
+}
+
+.co-pricing-total-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--co-black);
+}
+
+/* ============================================================
+   PLACE ORDER BUTTON
+   ============================================================ */
+
+.submit-button,
+.submit-button:link,
+.submit-button:visited {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
-  }
+    height: 52px;
+    background: var(--co-yellow);
+    color: var(--co-black) !important;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none !important;
+    letter-spacing: 0.02em;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(247, 207, 4, 0.35);
+    margin-bottom: 18px;
+    outline: none;
+}
 
-  .copied-tooltip {
-    top: -35px; /* Slight nudge up for smaller screens */
-    left: 62%; /* Center-ish on mobile */
-    transform: none; /* No translateX—let left handle it */
-    font-size: 11px; /* Smaller text */
-  }
+.submit-button:hover,
+.submit-button:focus,
+.submit-button:active {
+    background: var(--co-yellow-dk) !important;
+    color: var(--co-black) !important;
+    text-decoration: none !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(247, 207, 4, 0.45);
+    outline: none;
+}
+
+/* ── Trust signals ── */
+.co-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--co-border);
+    flex-wrap: wrap;
+}
+
+.co-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: var(--co-muted);
+    font-weight: 500;
+}
+
+.co-trust-item svg {
+    color: var(--co-black);
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   VALIDATION MODAL
+   ============================================================ */
+
+.co-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.co-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+}
+
+.co-modal-box {
+    position: relative;
+    z-index: 1;
+    background: var(--co-white);
+    border-radius: var(--co-radius);
+    box-shadow: var(--co-shadow-lg);
+    padding: 32px 28px 28px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    animation: coModalIn 0.22s ease;
+}
+
+@keyframes coModalIn {
+    from { opacity: 0; transform: scale(0.94) translateY(-8px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+
+.co-modal-icon-wrap {
+    margin-bottom: 14px;
+    line-height: 0;
+}
+
+.co-modal-box p {
+    font-size: 0.92rem;
+    color: #333;
+    line-height: 1.6;
+    margin: 0 0 20px;
+    white-space: pre-line;
+    text-align: left;
+}
+
+.co-modal-btn {
+    display: inline-block;
+    background: var(--co-yellow);
+    color: var(--co-black);
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 11px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    outline: none;
+}
+
+.co-modal-btn:hover { background: var(--co-yellow-dk); }
+
+/* ── Server-side error ── */
+.co-server-error {
+    max-width: 1160px;
+    margin: 16px auto;
+    padding: 14px 20px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    color: var(--co-black);
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   INLINE FIELD VALIDATION
+   ============================================================ */
+
+/* Error message shown below each invalid field */
+.co-field-error {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #dc2626;
+    margin: 6px 0 0;
+    line-height: 1.4;
+}
+
+.co-field-error::before {
+    content: '';
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+/* Red border + shadow on invalid inputs */
+.checkout-page #checkoutForm input.co-input--invalid:not([type="file"]):not([type="hidden"]):not([type="checkbox"]),
+.checkout-page #checkoutForm textarea.co-input--invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10) !important;
+}
+
+/* Red border on custom country select trigger */
+.co-select-trigger.co-input--invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10) !important;
+}
+
+/* File input error outline */
+.checkout-page #checkoutForm input[type="file"].co-input--invalid {
+    outline: 2px solid #dc2626;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Yellow focus overrides red border once user starts fixing a field */
+.checkout-page #checkoutForm input.co-input--invalid:focus:not([type="file"]):not([type="hidden"]),
+.checkout-page #checkoutForm textarea.co-input--invalid:focus {
+    border-color: var(--co-yellow) !important;
+    box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.18) !important;
+}
+
+/* ============================================================
+   RESPONSIVE  ≤ 1024px
+   ============================================================ */
+@media (max-width: 1024px) {
+    .order-section {
+        width: 340px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE  ≤ 768px  — MOBILE
+   ============================================================ */
+@media (max-width: 768px) {
+
+    .co-page-header {
+        padding: 20px 16px 18px;
+        margin-bottom: 20px;
+    }
+
+    .co-page-title  { font-size: 1.35rem; }
+    .co-page-subtitle { font-size: 0.82rem; }
+
+    .checkout-container {
+        padding: 0 12px;
+    }
+
+    .checkout-content {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-section,
+    .order-section {
+        width: 100%;
+        position: static;
+    }
+
+    .co-card {
+        padding: 18px 16px;
+        border-radius: 12px;
+    }
+
+    .co-form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .co-summary-card {
+        padding: 18px 16px;
+        border-radius: 12px;
+    }
+
+    .co-trust {
+        gap: 12px;
+    }
+
+    .co-trust-item {
+        font-size: 0.68rem;
+    }
+
+    .co-summary-name {
+        white-space: normal;
+        font-size: 0.82rem;
+    }
+
+    /* Copy tooltip mobile */
+    .copied-tooltip {
+        left: 40%;
+        transform: none;
+    }
+
+    .copy-wrapper {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE  ≤ 480px
+   ============================================================ */
+@media (max-width: 480px) {
+
+    .checkout-container {
+        padding: 0 8px;
+    }
+
+    .co-summary-product {
+        gap: 10px;
+    }
+
+    .co-summary-img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .submit-button {
+        font-size: 0.95rem;
+        height: 48px;
+    }
 }

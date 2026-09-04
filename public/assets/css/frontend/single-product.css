@@ -22,6 +22,79 @@
   align-items: flex-start;
 }
 
+/* Themed SweetAlert popup for add-to-cart flow */
+.pd-cart-popup {
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem 1.5rem;
+  font-family: var(--pd-font-body);
+}
+
+.pd-cart-popup__icon {
+  margin-top: 0.25rem;
+}
+
+.pd-cart-popup__title {
+  font-family: var(--pd-font-heading);
+  font-weight: var(--pd-font-weight-bold);
+  color: var(--text-dark-color);
+}
+
+.pd-cart-popup__text {
+  color: var(--text-light-color);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.pd-cart-popup__actions {
+  width: 100%;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.pd-cart-popup__btn {
+  border: none;
+  border-radius: 8px;
+  font-family: var(--pd-font-body);
+  font-weight: var(--pd-font-weight-semibold);
+  font-size: 1rem;
+  padding: 0.8rem 1.1rem;
+  min-width: 185px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.pd-cart-popup__btn:hover {
+  transform: translateY(-1px);
+}
+
+.pd-cart-popup__btn--primary {
+  background-color: #f1c40f;
+  color: #111111;
+}
+
+.pd-cart-popup__btn--primary:hover {
+  background-color: #d4ac0d;
+}
+
+.pd-cart-popup__btn--secondary {
+  background-color: #111111;
+  color: #ffffff;
+}
+
+.pd-cart-popup__btn--secondary:hover {
+  background-color: #333333;
+}
+
+@media (max-width: 575px) {
+  .pd-cart-popup__actions {
+    flex-direction: column;
+  }
+
+  .pd-cart-popup__btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* Styling for the icon and label */
 .mtr-icon {
   display: flex;
@@ -499,7 +572,7 @@ input#submit:hover {
 /* Product Title */
 .product-summary .product_title {
   font-size: 2rem;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 15px;
 }
 
@@ -838,7 +911,7 @@ h3.related-mobile-product-title {
 
 .related-mobile-product-title a {
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 400;
   line-height: 20px;
   color: #333;
   text-align: center;
@@ -1175,3 +1248,27 @@ h3.related-mobile-product-title {
     cursor: pointer;
 }
 }
+
+/* ── Single product ads: collapse unfilled, show filled ── */
+.ad-container {
+    display: none;
+    height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+.ad-container:has(.adsbygoogle[data-ad-status="filled"]) {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 10px !important;
+}
+.ad-container:has(.adsbygoogle[data-ad-status="unfilled"]),
+.ad-container:has(.adsbygoogle iframe[height="1"]) {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+

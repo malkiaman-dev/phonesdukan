@@ -39,8 +39,6 @@ class AdminPostModel {
         }
         $query .= " GROUP BY p.id ORDER BY p.updated_at DESC";
 
-        error_log("AdminPostModel: getAllPosts query: $query");
-        error_log("AdminPostModel: getAllPosts params: " . print_r($params, true));
 
         $stmt = $this->db->prepare($query);
         if (!$stmt) {
@@ -53,7 +51,6 @@ class AdminPostModel {
         try {
             $stmt->execute();
             $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            error_log("AdminPostModel: getAllPosts fetched " . count($posts) . " posts with status_filter: $status_filter, search_query: $search_query");
             return $posts ?: [];
         } catch (PDOException $e) {
             error_log("AdminPostModel: getAllPosts Error: " . $e->getMessage());
@@ -80,7 +77,6 @@ class AdminPostModel {
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         try {
             $stmt->execute();
-            error_log("Fetched post_id: $id");
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("getPostById Error: " . $e->getMessage());
@@ -126,7 +122,6 @@ class AdminPostModel {
         }
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        error_log("Checking slug: $slug, count: $count, exclude_post_id: " . ($exclude_post_id ?? 'none'));
         return $count == 0;
     }
 
@@ -137,7 +132,6 @@ class AdminPostModel {
         try {
             $stmt->execute();
             $count = $stmt->fetchColumn();
-            error_log("SEO row count for post_id $post_id: $count");
             return $count;
         } catch (PDOException $e) {
             error_log("getSeoRowCount Error: " . $e->getMessage());
@@ -180,7 +174,6 @@ class AdminPostModel {
                     ':meta_description' => $data['meta_description'] !== '' ? $data['meta_description'] : null,
                     ':meta_keywords' => $data['meta_keywords'] !== '' ? $data['meta_keywords'] : null
                 ]);
-                error_log("SEO data inserted for post_id: $post_id");
             } catch (PDOException $e) {
                 error_log("SEO Insert Error: " . $e->getMessage());
                 throw new Exception("Failed to insert SEO data: " . $e->getMessage());
@@ -212,12 +205,10 @@ class AdminPostModel {
                         ':alt_text' => $image['alt_text'] ?? null,
                         ':caption' => $image['caption'] ?? null
                     ]);
-                    error_log("Inserted image for post_id $post_id: URL={$image['url']}, is_main={$image['is_main']}");
                 }
             }
 
             $this->db->commit();
-            error_log("Post created successfully: $post_id");
             return $post_id;
         } catch (Exception $e) {
             $this->db->rollBack();
@@ -231,7 +222,6 @@ class AdminPostModel {
             throw new Exception("Slug is already in use by another post.");
         }
     
-        error_log("Updating post_id: $post_id with data: " . print_r($data, true));
     
         $this->db->beginTransaction();
         try {
@@ -253,7 +243,6 @@ class AdminPostModel {
                 ':updated_at' => !empty($data['updated_at']) ? date('Y-m-d H:i:s', strtotime($data['updated_at'])) : date('Y-m-d H:i:s'),
                 ':published_at' => !empty($data['published_at']) ? $data['published_at'] : ($data['status'] === 'published' ? date('Y-m-d H:i:s') : null)
             ];
-            error_log("Executing posts update query with params: " . print_r($params, true));
             $stmt->execute($params);
     
             // Check if a post_seo record exists
@@ -278,7 +267,6 @@ class AdminPostModel {
                     ':meta_description' => $data['meta_description'] !== '' ? $data['meta_description'] : null,
                     ':meta_keywords' => $data['meta_keywords'] !== '' ? $data['meta_keywords'] : null
                 ];
-                error_log("Executing SEO update query with params: " . print_r($params, true));
                 $stmt->execute($params);
             } else {
                 // Insert new post_seo record
@@ -293,7 +281,6 @@ class AdminPostModel {
                     ':meta_description' => $data['meta_description'] !== '' ? $data['meta_description'] : null,
                     ':meta_keywords' => $data['meta_keywords'] !== '' ? $data['meta_keywords'] : null
                 ];
-                error_log("Executing SEO insert query with params: " . print_r($params, true));
                 $stmt->execute($params);
             }
     
@@ -301,7 +288,6 @@ class AdminPostModel {
             $query = "DELETE FROM post_category_mappings WHERE post_id = :post_id";
             $stmt = $this->db->prepare($query);
             $params = [':post_id' => $post_id];
-            error_log("Executing category mappings delete query with params: " . print_r($params, true));
             $stmt->execute($params);
     
             // Insert new category mappings
@@ -313,7 +299,6 @@ class AdminPostModel {
                         ':post_id' => $post_id,
                         ':category_id' => (int)$category_id
                     ];
-                    error_log("Executing category mapping insert query with params: " . print_r($params, true));
                     $stmt->execute($params);
                 }
             }
@@ -324,7 +309,6 @@ class AdminPostModel {
                 $query = "DELETE FROM post_images WHERE post_id = :post_id AND id IN ($placeholders)";
                 $stmt = $this->db->prepare($query);
                 $params = array_merge([':post_id' => $post_id], array_map('intval', $data['remove_image_ids']));
-                error_log("Executing image deletion query with params: " . print_r($params, true));
                 $stmt->execute($params);
             }
     
@@ -345,7 +329,6 @@ class AdminPostModel {
                         ':caption' => $image_data['caption'] ?: null,
                         ':is_main' => $is_main
                     ];
-                    error_log("Executing image update query for ID $image_id, is_main: $is_main");
                     $stmt->execute($params);
                 }
             }
@@ -367,7 +350,6 @@ class AdminPostModel {
                         ':alt_text' => $image['alt_text'] ?: null,
                         ':caption' => $image['caption'] ?: null
                     ];
-                    error_log("Executing image insert query for URL {$image['url']}, is_main: $is_main");
                     $stmt->execute($params);
                 }
             }
@@ -389,7 +371,6 @@ class AdminPostModel {
                                 ':post_id' => $post_id,
                                 ':image_url' => $image['url']
                             ]);
-                            error_log("Set new image as main: {$image['url']}");
                             break;
                         }
                     }
@@ -400,12 +381,10 @@ class AdminPostModel {
                         ':post_id' => $post_id,
                         ':image_id' => (int)$main_image_id
                     ]);
-                    error_log("Set existing image as main: $main_image_id");
                 }
             }
     
             $this->db->commit();
-            error_log("Post updated successfully: $post_id");
             return true;
         } catch (Exception $e) {
             $this->db->rollBack();
@@ -440,7 +419,6 @@ class AdminPostModel {
                 ':slug' => $data['slug'],
                 ':status' => $data['status']
             ]);
-            error_log("Category created: {$data['category_name']}, slug: {$data['slug']}");
         } catch (PDOException $e) {
             error_log("Create Category Error: " . $e->getMessage());
             throw new Exception("Failed to create category: " . $e->getMessage());
@@ -465,9 +443,7 @@ class AdminPostModel {
             ':status' => $data['status']
         ];
         try {
-            error_log("Updating category ID $category_id with params: " . print_r($params, true));
             $stmt->execute($params);
-            error_log("Category updated: ID $category_id, {$data['category_name']}");
         } catch (PDOException $e) {
             error_log("Update Category Error: " . $e->getMessage());
             throw new Exception("Failed to update category: " . $e->getMessage());
@@ -490,7 +466,6 @@ class AdminPostModel {
         $stmt = $this->db->prepare($query);
         try {
             $stmt->execute([':category_id' => $category_id]);
-            error_log("Category deleted: ID $category_id");
         } catch (PDOException $e) {
             error_log("Delete Category Error: " . $e->getMessage());
             throw new Exception("Failed to delete category: " . $e->getMessage());
@@ -509,7 +484,6 @@ class AdminPostModel {
         }
         $stmt->execute();
         $count = $stmt->fetchColumn();
-        error_log("Checking category slug: $slug, count: $count, exclude_category_id: " . ($exclude_category_id ?? 'none'));
         return $count == 0;
     }
 }

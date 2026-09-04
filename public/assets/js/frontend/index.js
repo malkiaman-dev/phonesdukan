@@ -11,21 +11,60 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentIndex < 0) currentIndex = 0;
 
         let autoplayTimer = null;
-        const autoplayDelay = 5000;
+        const autoplayDelay = 3000;
         let touchStartX = 0;
         let touchEndX = 0;
 
-        const setActiveSlide = (index) => {
+        const setActiveSlide = (index, direction) => {
             if (!slides.length) return;
+            if (direction === undefined) direction = 1;
 
             const safeIndex = (index + slides.length) % slides.length;
-            currentIndex = safeIndex;
+            if (safeIndex === currentIndex) return;
 
-            slides.forEach((slide, i) => {
-                const isActive = i === safeIndex;
-                slide.classList.toggle("is-active", isActive);
-                slide.setAttribute("aria-hidden", isActive ? "false" : "true");
-            });
+            const outgoing = slides[currentIndex];
+            const incoming = slides[safeIndex];
+
+            if (direction >= 0) {
+                // Forward: outgoing exits left, incoming enters from right
+                outgoing.classList.remove("is-active");
+                outgoing.classList.add("is-exiting");
+                outgoing.setAttribute("aria-hidden", "true");
+
+                incoming.classList.remove("is-exiting");
+                incoming.classList.add("is-active");
+                incoming.setAttribute("aria-hidden", "false");
+
+                const done = outgoing;
+                setTimeout(() => {
+                    done.style.transition = "none";
+                    done.classList.remove("is-exiting");
+                    void done.offsetWidth;
+                    done.style.transition = "";
+                }, 700);
+            } else {
+                // Backward: outgoing exits right, incoming enters from left
+                incoming.classList.add("is-entering-left");
+                void incoming.offsetWidth; // commit start position before animating
+
+                outgoing.classList.remove("is-active");
+                outgoing.classList.add("is-exiting-right");
+                outgoing.setAttribute("aria-hidden", "true");
+
+                incoming.classList.remove("is-entering-left");
+                incoming.classList.add("is-active");
+                incoming.setAttribute("aria-hidden", "false");
+
+                const doneOut = outgoing;
+                setTimeout(() => {
+                    doneOut.style.transition = "none";
+                    doneOut.classList.remove("is-exiting-right");
+                    void doneOut.offsetWidth;
+                    doneOut.style.transition = "";
+                }, 700);
+            }
+
+            currentIndex = safeIndex;
 
             dots.forEach((dot, i) => {
                 const isActive = i === safeIndex;
@@ -34,20 +73,27 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         };
 
-        const goNext = () => setActiveSlide(currentIndex + 1);
-        const goPrev = () => setActiveSlide(currentIndex - 1);
+        const goNext = () => setActiveSlide(currentIndex + 1, 1);
+        const goPrev = () => setActiveSlide(currentIndex - 1, -1);
 
         const stopAutoplay = () => {
             if (autoplayTimer) {
-                clearInterval(autoplayTimer);
+                clearTimeout(autoplayTimer);
                 autoplayTimer = null;
             }
         };
 
+        const queueNextAutoplay = () => {
+            stopAutoplay();
+            autoplayTimer = setTimeout(() => {
+                goNext();
+                queueNextAutoplay();
+            }, autoplayDelay);
+        };
+
         const startAutoplay = () => {
             if (slides.length < 2) return;
-            stopAutoplay();
-            autoplayTimer = setInterval(goNext, autoplayDelay);
+            queueNextAutoplay();
         };
 
         if (prevBtn) {
@@ -68,7 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
             dot.addEventListener("click", () => {
                 const index = Number(dot.getAttribute("data-pd-hero-dot"));
                 if (!Number.isNaN(index)) {
-                    setActiveSlide(index);
+                    const dir = index >= currentIndex ? 1 : -1;
+                    setActiveSlide(index, dir);
                     startAutoplay();
                 }
             });
@@ -78,6 +125,19 @@ document.addEventListener("DOMContentLoaded", function () {
         heroSlider.addEventListener("mouseleave", startAutoplay);
         heroSlider.addEventListener("focusin", stopAutoplay);
         heroSlider.addEventListener("focusout", startAutoplay);
+
+        const onVisibilityChange = () => {
+            if (document.hidden) { stopAutoplay(); } else { startAutoplay(); }
+        };
+        const onPageShow = () => startAutoplay();
+
+        document.addEventListener("visibilitychange", onVisibilityChange);
+        window.addEventListener("pageshow", onPageShow);
+
+        heroSlider.addEventListener("remove", () => {
+            document.removeEventListener("visibilitychange", onVisibilityChange);
+            window.removeEventListener("pageshow", onPageShow);
+        });
 
         heroSlider.addEventListener("keydown", (event) => {
             if (event.key === "ArrowRight") {
@@ -91,6 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         heroSlider.addEventListener("touchstart", (event) => {
             touchStartX = event.changedTouches[0].screenX;
+            stopAutoplay();
         }, { passive: true });
 
         heroSlider.addEventListener("touchend", (event) => {
@@ -103,11 +164,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     goPrev();
                 }
-                startAutoplay();
             }
+            startAutoplay();
         }, { passive: true });
 
-        setActiveSlide(currentIndex);
         startAutoplay();
     }
 
@@ -118,19 +178,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const nextBtn = wrapper.querySelector(".next-btn");
 
         if (!container || !grid || !prevBtn || !nextBtn) {
-            console.error("One or more elements are missing in a section!", { container, grid, prevBtn, nextBtn });
             return;
         }
 
-        let scrollAmount = container.clientWidth * 0.8; // Scroll by 80% of container width
+        const getScrollAmount = () => container.clientWidth * 0.8;
 
         nextBtn.addEventListener("click", () => {
-            container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            container.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
             setTimeout(() => updateButtonState(container, prevBtn, nextBtn, grid), 500);
         });
 
         prevBtn.addEventListener("click", () => {
-            container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+            container.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
             setTimeout(() => updateButtonState(container, prevBtn, nextBtn, grid), 500);
         });
 
@@ -140,6 +199,52 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         updateButtonState(container, prevBtn, nextBtn, grid); // Initial check
+    });
+
+    // ── New Arrivals: Add to Cart ────────────────
+    document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".na-btn--cart");
+        if (!btn) return;
+
+        const productId = btn.getAttribute("data-product-id");
+        const unitPrice = parseFloat(btn.getAttribute("data-unit-price") || 0);
+        if (!productId) return;
+
+        const originalText = btn.textContent.trim();
+        btn.disabled = true;
+
+        fetch(window.pdWithBase("/app/Controllers/CartController.php"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: productId, quantity: 1, unit_price: unitPrice })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                // Permanently mark as added — no reset
+                btn.textContent = "Added ✓";
+                btn.disabled = true;
+                btn.classList.add("na-btn--added");
+
+                // Sync header badge from server total
+                const items = Array.isArray(data.cart_items) ? data.cart_items : [];
+                const realTotal = items.reduce(
+                    (sum, item) => sum + (parseInt(item.total_quantity, 10) || 0), 0
+                );
+                if (realTotal > 0) {
+                    document.querySelectorAll(".cart-count").forEach(el => {
+                        el.textContent = realTotal;
+                    });
+                }
+            } else {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        });
     });
 });
 

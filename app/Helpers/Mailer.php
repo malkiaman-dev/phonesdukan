@@ -1,22 +1,26 @@
 <?php
 class Email {
     public function sendOTP($to, $otp) {
+        $config = $this->getConfig();
         $subject = "Your OTP Code";
         $message = "Your OTP code is: $otp. It will expire in 1 minute.";
-        $headers = "From: no-reply@phonesdukan.com\r\n";
+        $headers = "From: " . $config['from'] . "\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $smtpHost = $config['host'];
+        $smtpPort = (int)$config['port'];
+        $smtpUser = $config['user'];
+        $smtpPass = $config['pass'];
 
-        // SMTP configuration for Hostinger
-        $smtpHost = 'smtp.hostinger.com';
-        $smtpPort = 465;  // Port for SSL
-        $smtpUser = 'no-reply@yourdomain.com';  // Your Hostinger email address
-        $smtpPass = '@Azmeryal@123#';  // Your email password (or app-specific password)
+        // Fallback for local environments when SMTP credentials are not configured.
+        if ($smtpUser === '' || $smtpPass === '') {
+            return mail($to, $subject, $message, $headers);
+        }
 
-        // Create a connection to the SMTP server using SSL
-        $smtpConnection = fsockopen('ssl://' . $smtpHost, $smtpPort, $errno, $errstr, 30);
+        $transport = $config['encryption'] === 'tls' ? 'tcp://' : 'ssl://';
+        $smtpConnection = fsockopen($transport . $smtpHost, $smtpPort, $errno, $errstr, 30);
 
         if (!$smtpConnection) {
-            echo "Error connecting to SMTP server: $errstr ($errno)";
+            error_log("Error connecting to SMTP server: $errstr ($errno)");
             return false;
         }
 
@@ -45,6 +49,54 @@ class Email {
         $response = fgets($connection, 512);
         // Optional: You can log the server response here for debugging
         return $response;
+    }
+
+    private function getConfig() {
+        $isLocal = $this->isLocalEnvironment();
+
+        $defaultFrom = $this->env('MAIL_FROM', 'no-reply@phonesdukan.com');
+        $defaultHost = $this->env('MAIL_HOST', 'smtp.hostinger.com');
+        $defaultPort = $this->env('MAIL_PORT', '465');
+        $defaultEncryption = $this->env('MAIL_ENCRYPTION', 'ssl');
+
+        return [
+            'from' => $defaultFrom,
+            'host' => $defaultHost,
+            'port' => $defaultPort,
+            'encryption' => $defaultEncryption,
+            'user' => $this->env('MAIL_USERNAME', 'no-reply@yourdomain.com'),
+            'pass' => $this->env('MAIL_PASSWORD', '@Azmeryal@123#'),
+            'is_local' => $isLocal,
+        ];
+    }
+
+    private function env($key, $default = null) {
+        $value = getenv($key);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+
+        if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
+            return $_ENV[$key];
+        }
+
+        if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
+            return $_SERVER[$key];
+        }
+
+        return $default;
+    }
+
+    private function isLocalEnvironment() {
+        $host = strtolower((string)($_SERVER['HTTP_HOST'] ?? ''));
+
+        if ($host === '' && PHP_SAPI === 'cli') {
+            return true;
+        }
+
+        return $host === 'localhost'
+            || strpos($host, '127.0.0.1') !== false
+            || strpos($host, '.local') !== false;
     }
 }
 

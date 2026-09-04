@@ -1,408 +1,338 @@
+:root {
+    --primary: #111111;
+    --accent: #facc15;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text-primary: #111111;
+    --text-secondary: #6b7280;
+    --radius: 12px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text-primary);
+}
+
 .order_container {
-    max-width: 800px; /* Set a max width to keep the content readable */
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    font-size: 16px;
-    width: 100%; /* Make it responsive */
-    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    width: min(100%, 920px);
+    margin: 0 auto;
+    padding: 16px;
+    box-sizing: border-box;
 }
 
-
-/* Card Styling */
 .card {
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 20px rgba(17, 17, 17, 0.06);
 }
 
+.section-card {
+    margin-top: 16px;
+    padding: 20px;
+}
 
-.card-header {
-    background: linear-gradient(to right, #004080, #4681bb);
-    color: white;
-    padding: 15px;
+.fade-in {
+    animation: fadeIn 0.45s ease both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero {
+    margin-top: 12px;
+    padding: 28px 20px;
+    text-align: center;
+}
+
+.hero-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 12px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: #fef3c7;
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.hero h1 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtext {
+    margin: 10px 0 16px;
+    color: var(--text-secondary);
+    font-size: 0.96rem;
+}
+
+.hero-order-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f3f4f6;
+    border-radius: 999px;
+    padding: 8px 12px;
+}
+
+.hero-order-label {
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+}
+
+.hero-order-number {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.copy-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: #d1d5db;
+    transform: translateY(-1px);
+}
+
+.copy-btn.copied {
+    background: var(--accent);
+}
+
+.section-title {
     display: flex;
     align-items: center;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
-.card-header i {
-    margin-right: 10px;
-    font-size: 1.5rem;
+.section-title i {
+    color: var(--primary);
 }
 
-.card-body {
-    padding: 20px;
-    font-size: 1rem;
-}
-
-.card-body p {
-    margin-bottom: 10px;
-}
-
-/* Order Details Styling */
-.order-details h2, .customer-info h2, .shipping-info h2, .card-header h2 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #fff;
-}
-
-.status-processing {
-    color: #ffc107;
-    font-weight: bold;
-}
-
-/* Icons and Section Header */
-.card-header i {
-    font-size: 1.6rem;
-}
-h1 {
-    font-size: 2rem;
-    color: #004080;
-    margin-bottom: 20px;
-    text-align: center; /* Center the heading */
-}
-
-h2 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-h2 i {
-    margin-right: 10px;
-    color: #004080;
-}
-
-h3 {
-    font-size: 1.25rem;
-    margin-bottom: 10px;
-}
-
-p {
-    font-size: 1rem;
-    margin-bottom: 5px;
-    text-align: center;
-    margin: 5px 0;
-}
-
-strong {
-    font-weight: bold;
-    color: #3f7bb5;
-}
-
-.order-details {
-    margin: 20px 0px;
-}
-
-.customer-info {
-    margin: 20px 0px;
-}
-
-.order-items {
-    margin: 20px 0px;
-}
-
-/* General Styles for Thank You Section */
-.thank-you-message {
-    background: linear-gradient(to right, #004080, #4681bb);
-    color: #fff;
-    text-align: center;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-.thank-you-icon {
-    font-size: 3rem; /* Large icon size */
-    margin-bottom: 20px;
-}
-
-.thank-you-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 15px;
-    letter-spacing: 1px;
-    color: #fff;
-}
-
-.thank-you-text {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    color: #fefefe;
-}
-
-.highlighted {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #ffde00;
-    text-transform: capitalize;
-    font-style: normal;
-}
-
-.thank-you-subtext {
-    font-size: 1rem;
-    font-weight: normal;
-    opacity: 0.9;
-    margin-top: 10px;
-    color: #fefefe;
-}
-
-.card-header h2 {
-    margin: 0px;
-}
-
-/* Table Styling */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th, table td {
-    padding: 12px;
-    text-align: left;
-    font-size: 1rem;
-    border-bottom: 1px solid #ddd;
-}
-
-thead {
-    background: linear-gradient(to right, #004080, #4681bb);
-    color: #fff;
-}
-
-table td img {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    margin-right: 10px;
-}
-
-.table-price {
-    font-weight: bold;
-    color: #28a745;
-}
-
-.summary {
-    margin-top: 20px;
+.section-title h2 {
+    margin: 0;
     font-size: 1.1rem;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-weight: 700;
 }
 
-.summary .total-price {
-    font-size: 1.5rem;
-    color: #27ae60;
+.section-title.mini h3 {
+    margin: 0;
+    font-size: 0.98rem;
 }
 
-/* Button Styling */
-.btn {
-    display: inline-block;
-    padding: 12px 24px;
-    margin-top: 20px;
-    background-color: #004080;
-    color: #fff;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 1rem;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    display: block;
+.info-grid {
+    display: grid;
+    gap: 10px;
 }
 
-.btn:hover {
-    background-color: #218838;
+.info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eef2f7;
 }
 
-/* Status Styling */
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.value {
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+}
+
 .status-processing {
-    color: #ffc107;
-    font-weight: bold;
+    color: #a16207;
 }
 
-/* Copy button style */
-.copy-btn {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    color: #004080;
-    font-size: 1.2rem;
-    margin-left: 10px;
-    transition: color 0.3s ease;
+.total-row .value,
+.total-price {
+    color: #a16207;
+    font-weight: 700;
 }
 
-/* Hover effect on the copy button */
-.copy-btn:hover {
-    color: #218838; /* Change to a green color when hovered */
+.split-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
 }
 
-/* Copy icon style */
-.copy-btn i {
-    font-size: 1.2rem;
+.address {
+    margin: 8px 0 0;
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
-/* Order number style */
-#orderNumber {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: #333;
+.products-wrap {
+    margin-top: 16px;
 }
 
-span.delivery-price {
-    color: #000;
+.products-list {
+    display: grid;
+    gap: 12px;
 }
 
-/* Mobile Styling */
-@media (max-width: 768px) {
-    h1{
-        font-size: 27px;
-    }
-    /* Order Container */
+.product-item {
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 68px 1fr;
+    gap: 12px;
+}
+
+.product-left img {
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #f3f4f6;
+}
+
+.product-center h3 {
+    margin: 0 0 4px;
+    font-size: 0.98rem;
+    font-weight: 600;
+}
+
+.product-center p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.product-right {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid #eef2f7;
+}
+
+.qty {
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+}
+
+.price {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.cta-wrap {
+    margin: 20px 0 8px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 12px 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.cta-wrap .btn,
+.cta-wrap .btn:link,
+.cta-wrap .btn:visited {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.cta-wrap .btn i {
+    color: inherit;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(17, 17, 17, 0.18);
+}
+
+.cta-wrap .btn-primary:hover,
+.cta-wrap .btn-primary:focus,
+.cta-wrap .btn-primary:focus-visible {
+    transform: translateY(-1px);
+    background: #000000;
+    color: var(--accent);
+    text-decoration: none;
+    outline: none;
+}
+
+@media (min-width: 768px) {
     .order_container {
-        padding: 20px; /* Reduced padding for mobile */
-        font-size: 14px;
-        margin: 0px;
+        padding: 28px;
     }
 
-    /* Card Styling */
-    .card {
-        padding: 15px;
+    .hero {
+        padding: 34px 28px;
     }
 
-    /* Card Header */
-    .card-header {
-        font-size: 1.2rem;
-        padding: 10px;
+    .hero h1 {
+        font-size: 1.9rem;
     }
 
-    .card-header i {
-        font-size: 1.3rem;
+    .section-card {
+        padding: 24px;
+        margin-top: 20px;
     }
 
-    /* Card Body */
-    .card-body {
-        font-size: 1rem;
-        padding: 10px;
+    .split-grid {
+        grid-template-columns: 1fr 1fr;
     }
 
-    /* Table Styling */
-    table th, table td {
-        font-size: 0.9rem; /* Reduce font size in table */
-        padding: 8px;
+    .product-item {
+        grid-template-columns: 80px 1fr auto;
+        align-items: center;
+        padding: 16px;
     }
 
-    table td img {
-        width: 50px;
-        height: 50px;
+    .product-left img {
+        width: 80px;
+        height: 80px;
     }
 
-    /* Thank You Section */
-    .thank-you-message {
-        padding: 20px;
-        font-size: 1rem;
+    .product-right {
+        grid-column: auto;
+        display: grid;
+        justify-items: end;
+        gap: 8px;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
     }
 
-    .thank-you-title {
-        font-size: 1.8rem;
-    }
-
-    .thank-you-text {
-        font-size: 1rem;
-    }
-
-    /* Buttons */
     .btn {
-        padding: 10px 20px;
-        font-size: 1rem;
-    }
-
-    /* Text Styling */
-    .thank-you-title, .thank-you-text, .thank-you-subtext, .thank-you-message {
-        text-align: center; /* Center the text on smaller screens */
-    }
-
-    .thank-you-title {
-    font-size: 25px;
-}
-
-.order-details h2, .customer-info h2, .shipping-info h2{
-    font-size: 20px;
-}
-
-h2{
-    font-size: 20px;
-}
-    .highlighted {
-        font-size: 1.2rem;
-    }
-
-    .summary .total-price {
-        font-size: 1.2rem;
-    }
-
-    /* Responsive Table */
-    table {
-        font-size: 0.9rem; /* Smaller font for mobile */
-    }
-
-    /* Align Text to Center */
-    .order-details, .customer-info, .shipping-info {
-        text-align: center; /* Center text in these sections */
-    }
-
-    .card-body p {
-        text-align: center; /* Center the paragraphs */
-    }
-
-    .status-processing {
-        font-size: 1rem; /* Adjust font size */
-    }
-       /* Convert table to flex for mobile */
-       table, thead, tbody, th, td, tr {
-        display: block;
-    }
-
-    /* Style for table header */
-    table th {
-        text-align: left; /* Header stays aligned to left */
-        font-size: 1.1rem;
-    }
-
-    /* Style for table data */
-    table td {
-        text-align: center; /* Data cells aligned to the right on mobile */
-        padding-left: 20px; /* Padding for a little space between text and right edge */
-        padding-right: 20px; /* Ensure data is centered properly */
-    }
-
-    /* Make each row look like a "card" on mobile */
-    table tr {
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-        background-color: #fff;
-    }
-
-    /* For a better mobile view, show data as label-style */
-    table td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-        color: #004080;
-    }
-
-    /* Header row style */
-    table thead {
-        display: none; /* Hide table header on mobile */
+        width: auto;
+        min-width: 230px;
     }
 }

@@ -1,0 +1,47 @@
+/* ── WhatsApp floating button (in-app only) ───────────────────────────────── */
+#pd-whatsapp-toggle.pd-whatsapp-fab {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+    right: 16px;
+    z-index: 10000;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #111111;
+    color: #f7d117;
+    border: 2px solid #f7d117;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(247, 209, 23, 0.28);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+}
+
+#pd-whatsapp-toggle.pd-whatsapp-fab:hover {
+    background: #1a1a1a;
+    border-color: #ffe65a;
+    transform: scale(1.06);
+}
+
+#pd-whatsapp-toggle.pd-whatsapp-fab img {
+    width: 28px;
+    height: 28px;
+    display: block;
+    filter: brightness(0) saturate(100%) invert(84%) sepia(62%) saturate(638%) hue-rotate(5deg) brightness(103%) contrast(101%);
+}
+
+.pd-product-page #pd-whatsapp-toggle.pd-whatsapp-fab {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 100px);
+}
+
+/* Legacy chatbot UI must never appear in the native app shell */
+html[data-pd-app="1"] #pd-chatbot-toggle,
+html[data-pd-app="1"] #pd-chatbot-win,
+html[data-pd-app="1"] .pd-chatbot-desktop,
+html[data-pd-app="1"] .pd-chatbot-fab {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}

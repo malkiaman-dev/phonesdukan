@@ -1,0 +1,646 @@
+/* =========================================================
+   PhonesDukan Admin — shared UI components
+   Loaded after page styles (via admin_sidebar.php)
+   ========================================================= */
+
+/* ── Required field asterisk ── */
+.req-star,
+label .req-star,
+.ep-field .req-star,
+.cp-field .req-star,
+.form-group .req-star,
+.field .req-star {
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+  margin-left: 2px;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+:root {
+  --ad-btn-primary: #f7cf04;
+  --ad-btn-primary-hover: #e6bd00;
+  --ad-btn-primary-text: #111111;
+  --ad-btn-secondary-bg: #ffffff;
+  --ad-btn-secondary-border: #e5e7eb;
+  --ad-btn-secondary-text: #111111;
+  --ad-btn-danger: #ef4444;
+  --ad-btn-danger-hover: #dc2626;
+  --ad-btn-radius: 10px;
+
+  /* Typography scale */
+  --ad-h1-size: clamp(1.5rem, 2vw, 1.75rem);
+  --ad-h1-weight: 600;
+  --ad-h1-lh: 1.25;
+  --ad-h1-tracking: -0.02em;
+  --ad-h2-size: 1.125rem;
+  --ad-h2-weight: 600;
+  --ad-h2-lh: 1.35;
+  --ad-h3-size: 1rem;
+  --ad-h3-weight: 600;
+  --ad-h3-lh: 1.4;
+  --ad-lead-size: 0.875rem;
+  --ad-lead-weight: 400;
+  --ad-lead-lh: 1.5;
+  --ad-lead-color: #6b7280;
+  --ad-heading-color: #111111;
+}
+
+/* ── Page titles (H1 level) ── */
+body .dashboard-page-header h1,
+body .admin-page .page-header h1,
+body .page-header-card h1,
+body .orders-page-header h1,
+body .orders-page-header h2,
+body .msg-title,
+body .cp-header h1,
+body .vp-header h1,
+body .ep-header h2,
+body .prd-title,
+body .cus-title,
+body .rep-title,
+body .mu-title,
+body .ml-title,
+body .content-wrapper h2:first-child,
+body .posts-card > h2,
+body .set-header h1,
+body .pro-header h1,
+body .pro-title,
+body .rev-header h1,
+body .rev-header h2,
+body .rev-title,
+body .attr-page-header h1 {
+  margin: 0 !important;
+  font-size: var(--ad-h1-size) !important;
+  font-weight: var(--ad-h1-weight) !important;
+  line-height: var(--ad-h1-lh) !important;
+  letter-spacing: var(--ad-h1-tracking) !important;
+  color: var(--ad-heading-color) !important;
+}
+
+/* ── Page subtitles / lead text ── */
+body .dashboard-page-header p,
+body .admin-page .page-header p,
+body .page-header-card p,
+body .orders-page-header p,
+body .msg-subtitle,
+body .cp-header p,
+body .vp-header p,
+body .ep-header p,
+body .prd-subtitle,
+body .cus-subtitle,
+body .mu-subtitle,
+body .ml-subtitle,
+body .rep-subtitle,
+body .page-subtitle,
+body .set-header p,
+body .pro-header p,
+body .pro-subtitle,
+body .rev-subtitle {
+  margin: 6px 0 0 !important;
+  font-size: var(--ad-lead-size) !important;
+  font-weight: var(--ad-lead-weight) !important;
+  line-height: var(--ad-lead-lh) !important;
+  color: var(--ad-lead-color) !important;
+}
+
+/* ── Section / panel titles (H2 level) ── */
+body .panel-header h2,
+body .admin-page .form-card-header h2,
+body .cp-form h2,
+body .section-head h2,
+body .vp-form h2,
+body .cp-modal h3,
+body .vp-modal h3,
+body .vb-step-title,
+body .mo-section-title,
+body .confirm-title {
+  margin: 0 !important;
+  font-size: var(--ad-h2-size) !important;
+  font-weight: var(--ad-h2-weight) !important;
+  line-height: var(--ad-h2-lh) !important;
+  letter-spacing: -0.01em !important;
+  color: var(--ad-heading-color) !important;
+}
+
+/* ── Card / subsection titles (H3 level) ── */
+body .ep-card h3,
+body .form-card-header h2 {
+  font-size: var(--ad-h2-size) !important;
+  font-weight: var(--ad-h2-weight) !important;
+  line-height: var(--ad-h2-lh) !important;
+  color: var(--ad-heading-color) !important;
+}
+
+/* ── KPI / stat numbers (not section headings) ── */
+body .kpi-meta h3.kpi-value,
+body h3.kpi-value {
+  font-size: clamp(1.5rem, 2vw, 1.875rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--ad-heading-color) !important;
+}
+
+/* ── Sidebar (high-contrast — must win on live/cached CSS) ── */
+#sidebar .nav-link {
+  color: #374151 !important;
+}
+
+#sidebar ul.nav li .nav-link:hover,
+#sidebar ul.nav li .nav-link.active,
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+  background: #fffbeb !important;
+  color: #111111 !important;
+  border-left: 3px solid #f7cf04 !important;
+}
+
+#sidebar ul.nav li .nav-link:hover i,
+#sidebar ul.nav li .nav-link.active i,
+#sidebar .nav-link:hover i,
+#sidebar .nav-link.active i {
+  color: #111111 !important;
+  opacity: 1 !important;
+}
+
+#sidebar .nav-link i {
+  color: #6b7280 !important;
+}
+
+#sidebar .nav-link.logout {
+  color: #ef4444 !important;
+}
+
+#sidebar .nav-link.logout:hover {
+  color: #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+#sidebar .logout:hover i {
+  color: #ef4444 !important;
+}
+
+#sidebar .submenu .nav-link {
+  color: #374151 !important;
+}
+
+#sidebar .submenu .nav-link:hover,
+#sidebar .submenu .nav-link.active {
+  color: #111111 !important;
+  background: #fffbeb !important;
+}
+
+/* Parent submenu labels stay neutral — only sub-items show active/hover state */
+#sidebar .nav-item.has-submenu > .nav-link:hover,
+#sidebar .nav-item.has-submenu > .nav-link.active {
+  background: transparent !important;
+  border-left-color: transparent !important;
+  color: #374151 !important;
+}
+
+#sidebar .nav-item.has-submenu > .nav-link:hover i,
+#sidebar .nav-item.has-submenu > .nav-link.active i {
+  color: #6b7280 !important;
+}
+
+/* ── Primary buttons ── */
+body .btn-add,
+body .btn-search,
+body .cp-btn,
+body .cp-btn-sm:not(.cp-btn-danger),
+body .dashboard-content .quick-btn,
+body .admin-page .submit-btn,
+body .prd-btn-edit,
+body .prd-btn-view,
+body .mo-btn-primary,
+body .mo-btn-save,
+body .var-btn-primary,
+body .pro-save-btn,
+body .ml-btn,
+body .ml-btn-upload,
+body .vb-btn-ep:not(.vb-btn-ep-outline):not(.vb-btn-ep-del),
+body .vb-btn:not(.vb-btn-outline):not(.vb-btn-del),
+body .chat-button,
+body .ep-btn-primary,
+body button.ep-btn-primary,
+body .ep-seo-fill-btn,
+body .seo-fill-all-btn,
+body .post-seo-fill-btn,
+body .pm-btn:not(.pm-btn-outline),
+body .rep-btn:not(.rep-btn-outline),
+body .custom-btn:not(.custom-btn-danger),
+body .action-buttons .custom-btn:not(.custom-btn-danger),
+body .custom-btn-warning,
+body .custom-btn-primary,
+body .custom-btn-success,
+body .ord-btn:not(.ghost),
+body .msg-btn:not(.msg-btn-outline),
+body .mu-btn-search,
+body .rev-btn:not(.rev-btn-outline),
+body .attr-btn:not(#confirmCancelBtn),
+body .vp-btn:not(.delete-action),
+body .vp-btn-sm:not(.delete-action),
+body .cus-btn-search,
+body .set-btn:not(.set-btn-outline),
+body .update-btn,
+body .primary-btn,
+body .confirm-btn.confirm-yes,
+body .mini-btn:not(.delete-action),
+body .mu-action-btn:not(.mu-action-btn-danger),
+body button.ad-primary,
+body a.ad-primary,
+body .btn:not(.btn-outline):not(.sidebar-toggle),
+body input[type="submit"]:not(.danger):not(.btn-danger),
+body button[type="submit"]:not(.danger):not(.btn-danger):not(.delete-btn):not(.logout):not(#confirmCancelBtn):not(#revCancel) {
+  background: var(--ad-btn-primary) !important;
+  background-color: var(--ad-btn-primary) !important;
+  color: var(--ad-btn-primary-text) !important;
+  border: 1px solid var(--ad-btn-primary-hover) !important;
+  border-radius: var(--ad-btn-radius) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22) !important;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+body .btn-add:hover,
+body .btn-search:hover,
+body .cp-btn:hover,
+body .cp-btn-sm:not(.cp-btn-danger):hover,
+body .dashboard-content .quick-btn:hover,
+body .admin-page .submit-btn:hover,
+body .prd-btn-edit:hover,
+body .prd-btn-view:hover,
+body .ml-btn:hover,
+body .ep-btn-primary:hover,
+body .seo-fill-all-btn:hover,
+body .pm-btn:not(.pm-btn-outline):hover,
+body .vb-btn:not(.vb-btn-outline):not(.vb-btn-del):hover,
+body .vb-btn-ep:not(.vb-btn-ep-outline):not(.vb-btn-ep-del):hover,
+body .rep-btn:not(.rep-btn-outline):hover,
+body .custom-btn:not(.custom-btn-danger):hover,
+body .action-buttons .custom-btn:not(.custom-btn-danger):hover,
+body .ord-btn:not(.ghost):hover,
+body .msg-btn:not(.msg-btn-outline):hover,
+body .mu-btn-search:hover,
+body .rev-btn:not(.rev-btn-outline):hover,
+body .attr-btn:not(#confirmCancelBtn):hover,
+body .vp-btn:not(.delete-action):hover,
+body .vp-btn-sm:not(.delete-action):hover,
+body .cus-btn-search:hover,
+body .set-btn:not(.set-btn-outline):hover,
+body .update-btn:hover,
+body .primary-btn:hover,
+body .confirm-btn.confirm-yes:hover,
+body .mini-btn:not(.delete-action):hover,
+body .btn:not(.btn-outline):not(.sidebar-toggle):hover,
+body button[type="submit"]:not(.danger):not(.delete-btn):not(#confirmCancelBtn):hover {
+  background: var(--ad-btn-primary-hover) !important;
+  background-color: var(--ad-btn-primary-hover) !important;
+  color: var(--ad-btn-primary-text) !important;
+  border-color: #d4af00 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 20px rgba(247, 207, 4, 0.28) !important;
+}
+
+/* ── Secondary / outline ── */
+body .btn-export,
+body .msg-btn-outline,
+body .cp-btn-outline,
+body .mo-btn-secondary,
+body .ep-btn-secondary,
+body a.ep-btn-secondary,
+body .ep-seo-auto-btn,
+body .seo-auto-btn,
+body .ai-refresh-score-btn,
+body .post-seo-auto-btn,
+body .ai-slug-btn.manual,
+body .pm-btn-outline,
+body .rep-btn-outline,
+body .rev-btn-outline,
+body .set-btn-outline,
+body .btn-outline,
+body .ord-btn.ghost,
+body .mu-btn,
+body .cus-btn:not(.cus-btn-search),
+body .vb-btn-outline,
+body .vb-btn-ep-outline,
+body .secondary-cta,
+body .table-action,
+body .confirm-btn:not(.confirm-yes),
+body #confirmCancelBtn,
+body #revCancel,
+body .attr-btn#confirmCancelBtn {
+  background: var(--ad-btn-secondary-bg) !important;
+  background-color: var(--ad-btn-secondary-bg) !important;
+  color: var(--ad-btn-secondary-text) !important;
+  border: 1.5px solid var(--ad-btn-secondary-border) !important;
+  border-radius: var(--ad-btn-radius) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+body .btn-export:hover,
+body .msg-btn-outline:hover,
+body .ep-btn-secondary:hover,
+body .ep-seo-auto-btn:hover,
+body .seo-auto-btn:hover,
+body .ai-refresh-score-btn:hover,
+body .post-seo-auto-btn:hover,
+body .pm-btn-outline:hover,
+body .ai-slug-btn.manual:hover,
+body .rep-btn-outline:hover,
+body .rev-btn-outline:hover,
+body .set-btn-outline:hover,
+body .btn-outline:hover,
+body .ord-btn.ghost:hover,
+body .mu-btn:hover,
+body .secondary-cta:hover,
+body .table-action:hover,
+body .confirm-btn:not(.confirm-yes):hover,
+body #confirmCancelBtn:hover,
+body #revCancel:hover {
+  background: #fffef8 !important;
+  background-color: #fffef8 !important;
+  color: var(--ad-btn-primary-text) !important;
+  border-color: var(--ad-btn-primary) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15) !important;
+}
+
+/* ── Danger / delete ── */
+body .prd-btn-delete,
+body .ep-btn-danger,
+body .custom-btn-danger,
+body .action-buttons .custom-btn-danger,
+body .delete-btn,
+body .cp-btn-danger,
+body .cp-btn-sm.cp-btn-danger,
+body a.delete-action,
+body .mini-btn.delete-action,
+body .attr-btn.delete-action,
+body .vp-btn.delete-action,
+body .vp-btn-sm.delete-action,
+body .mu-action-btn-danger,
+body button.danger,
+body .btn-danger,
+body #revConfirm,
+body #confirmYesBtn:not(.confirm-yes),
+body button[data-delete-review] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: var(--ad-btn-danger) !important;
+  border: 1.5px solid #fecaca !important;
+  border-radius: var(--ad-btn-radius) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+body .prd-btn-delete:hover,
+body .ep-btn-danger:hover,
+body .custom-btn-danger:hover,
+body .action-buttons .custom-btn-danger:hover,
+body .delete-btn:hover,
+body .cp-btn-danger:hover,
+body a.delete-action:hover,
+body .mu-action-btn-danger:hover,
+body #revConfirm:hover,
+body #confirmYesBtn:not(.confirm-yes):hover,
+body button[data-delete-review]:hover {
+  background: var(--ad-btn-danger) !important;
+  background-color: var(--ad-btn-danger) !important;
+  color: #ffffff !important;
+  border-color: var(--ad-btn-danger) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.22) !important;
+}
+
+/* ── Pills / badges ── */
+body .prd-count-pill,
+body .table-count-pill {
+  background: #fffbeb !important;
+  border: 1px solid rgba(247, 207, 4, 0.45) !important;
+  color: var(--ad-btn-primary-text) !important;
+  box-shadow: 0 4px 12px rgba(247, 207, 4, 0.12) !important;
+}
+
+body .prd-count-pill span,
+body .prd-count-pill strong,
+body .table-count-pill:hover {
+  color: var(--ad-btn-primary-text) !important;
+}
+
+/* ── Toasts ── */
+body .ep-toast-success,
+body .pro-toast-success,
+body .cp-toast,
+body .vp-toast {
+  background: #ffffff !important;
+  color: var(--ad-btn-primary-text) !important;
+  border-color: #e5e7eb !important;
+  border-left: 5px solid var(--ad-btn-primary) !important;
+}
+
+/* ── Login page ── */
+body.admin-login-page .btn {
+  background: var(--ad-btn-primary) !important;
+  color: var(--ad-btn-primary-text) !important;
+  border: 1px solid var(--ad-btn-primary-hover) !important;
+  box-shadow: 0 4px 14px rgba(247, 207, 4, 0.22) !important;
+}
+
+body.admin-login-page .btn:hover {
+  background: var(--ad-btn-primary-hover) !important;
+  color: var(--ad-btn-primary-text) !important;
+}
+
+/* ── Admin field tooltips (hover / focus) ── */
+.ad-tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.ad-tooltip--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  color: #9ca3af;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.ad-tooltip--icon i {
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.ad-tooltip--label {
+  display: inline;
+}
+
+.ad-tooltip:focus-visible {
+  outline: 2px solid var(--ad-btn-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ad-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  z-index: 15000;
+  min-width: 200px;
+  max-width: 300px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: normal;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  transform: translateY(4px);
+  box-shadow: 0 10px 24px rgba(17, 17, 17, 0.18);
+}
+
+.ad-tooltip::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: calc(100% + 4px);
+  z-index: 15000;
+  border: 6px solid transparent;
+  border-top-color: #111111;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+  transform: translateY(4px);
+}
+
+.ad-tooltip--icon::after {
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+
+.ad-tooltip--icon::before {
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+
+.cp-check-label:hover .ad-tooltip::after,
+.cp-check-label:hover .ad-tooltip::before,
+label:hover .ad-tooltip::after,
+label:hover .ad-tooltip::before,
+.ad-tooltip:hover::after,
+.ad-tooltip:hover::before,
+.ad-tooltip:focus-visible::after,
+.ad-tooltip:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.ad-tooltip--icon:hover::after,
+.ad-tooltip--icon:focus-visible::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+.ad-tooltip--icon:hover::before,
+.ad-tooltip--icon:focus-visible::before {
+  transform: translateX(-50%) translateY(0);
+}
+
+.cp-check-field,
+.form-group,
+.ep-field,
+.vp-field,
+.cp-field,
+.pm-thumb-section {
+  overflow: visible;
+}
+
+/* ── Admin enable/disable toggles ── */
+.ad-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ad-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ad-toggle-track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: #ff6347;
+  box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.35);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ad-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(17, 17, 17, 0.22);
+  transition: transform 0.2s ease;
+}
+
+.ad-toggle-input:checked + .ad-toggle-track {
+  background: #22c55e;
+  box-shadow: inset 0 0 0 1px rgba(21, 128, 61, 0.45);
+}
+
+.ad-toggle-input:checked + .ad-toggle-track::after {
+  transform: translateX(20px);
+}
+
+.ad-toggle-input:focus-visible + .ad-toggle-track {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
+.ad-toggle-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dc2626;
+  min-width: 58px;
+}
+
+.ad-toggle-input:checked ~ .ad-toggle-text {
+  color: #15803d;
+}
+
+.ad-toggle.is-busy {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.ad-toggle.is-error .ad-toggle-track {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
