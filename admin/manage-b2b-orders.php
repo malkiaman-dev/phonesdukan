@@ -15,8 +15,8 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $inquiry_id = (int)$_POST['inquiry_id'];
-    $new_status = $_POST['inquiry_status'];
+    $inquiry_id = (int) ($_POST['inquiry_id'] ?? 0);
+    $new_status = trim((string) ($_POST['inquiry_status'] ?? ''));
     $bulkInquiryModel = new BulkInquiryModel();
     $result = $bulkInquiryModel->updateB2BOrderStatus($inquiry_id, $new_status);
 
@@ -815,25 +815,33 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                     <td data-label="Tel No"><?= htmlspecialchars($order['tel_no'] ?? 'N/A') ?></td>
                     <td data-label="Price"><strong>PKR <?= number_format((float)($order['total_price'] ?? 0), 0) ?></strong></td>
                     <td class="ord-status-cell" data-label="Status">
-                        <form method="post" style="margin:0;">
-                            <input type="hidden" name="inquiry_id" value="<?= htmlspecialchars($order['id']) ?>">
+                        <?php
+                            $statusFormId = 'b2b-status-form-' . (int) $order['id'];
+                            $currentStatus = trim((string) ($order['status'] ?? ''));
+                            if ($currentStatus === '') {
+                                $currentStatus = 'Pending';
+                            }
+                        ?>
+                        <form method="post" id="<?= htmlspecialchars($statusFormId) ?>" style="margin:0;">
+                            <input type="hidden" name="inquiry_id" value="<?= (int) $order['id'] ?>">
                             <select name="inquiry_status" class="native-status-select" aria-label="Inquiry status">
-                                <option value="Pending"    <?= ($order['status'] === 'Pending')    ? 'selected' : '' ?>>Pending</option>
-                                <option value="Processing" <?= ($order['status'] === 'Processing') ? 'selected' : '' ?>>Processing</option>
-                                <option value="Cancelled"  <?= ($order['status'] === 'Cancelled')  ? 'selected' : '' ?>>Cancelled</option>
-                                <option value="Completed"  <?= ($order['status'] === 'Completed')  ? 'selected' : '' ?>>Completed</option>
+                                <option value="Pending"    <?= $currentStatus === 'Pending'    ? 'selected' : '' ?>>Pending</option>
+                                <option value="Processing" <?= $currentStatus === 'Processing' ? 'selected' : '' ?>>Processing</option>
+                                <option value="Cancelled"  <?= $currentStatus === 'Cancelled'  ? 'selected' : '' ?>>Cancelled</option>
+                                <option value="Completed"  <?= $currentStatus === 'Completed'  ? 'selected' : '' ?>>Completed</option>
                             </select>
                             <div class="status-select-wrap" data-status-select>
                                 <button type="button" class="status-display" data-status-display>
-                                    <?= htmlspecialchars($order['status'] ?? 'Pending') ?>
+                                    <?= htmlspecialchars($currentStatus) ?>
                                 </button>
                                 <ul class="status-options" data-status-options>
-                                    <li><button type="button" class="status-option <?= ($order['status'] === 'Pending') ? 'is-selected' : '' ?>" data-value="Pending">Pending</button></li>
-                                    <li><button type="button" class="status-option <?= ($order['status'] === 'Processing') ? 'is-selected' : '' ?>" data-value="Processing">Processing</button></li>
-                                    <li><button type="button" class="status-option <?= ($order['status'] === 'Cancelled') ? 'is-selected' : '' ?>" data-value="Cancelled">Cancelled</button></li>
-                                    <li><button type="button" class="status-option <?= ($order['status'] === 'Completed') ? 'is-selected' : '' ?>" data-value="Completed">Completed</button></li>
+                                    <li><button type="button" class="status-option <?= $currentStatus === 'Pending' ? 'is-selected' : '' ?>" data-value="Pending">Pending</button></li>
+                                    <li><button type="button" class="status-option <?= $currentStatus === 'Processing' ? 'is-selected' : '' ?>" data-value="Processing">Processing</button></li>
+                                    <li><button type="button" class="status-option <?= $currentStatus === 'Cancelled' ? 'is-selected' : '' ?>" data-value="Cancelled">Cancelled</button></li>
+                                    <li><button type="button" class="status-option <?= $currentStatus === 'Completed' ? 'is-selected' : '' ?>" data-value="Completed">Completed</button></li>
                                 </ul>
                             </div>
+                        </form>
                     </td>
                     <td data-label="Date"><?= date('d-M-Y H:i', strtotime($order['created_at'])) ?></td>
                     <td class="ord-note" data-label="Note">
@@ -846,9 +854,8 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                         <?php endif; ?>
                     </td>
                     <td class="ord-action" data-label="Action">
-                        <button type="submit" name="update_status" class="ord-btn upd">Update</button>
-                        </form>
-                        <button type="button" class="ord-btn view" data-inquiry-id="<?= $order['id'] ?>">View</button>
+                        <button type="submit" name="update_status" value="1" class="ord-btn upd" form="<?= htmlspecialchars($statusFormId) ?>">Update</button>
+                        <button type="button" class="ord-btn view" data-inquiry-id="<?= (int) $order['id'] ?>">View</button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -1117,7 +1124,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".ord-btn.upd").forEach(function (btn) {
         btn.addEventListener("click", function (event) {
             event.preventDefault();
-            const form = this.closest("td")?.previousElementSibling?.querySelector("form") || this.closest("tr")?.querySelector("form");
+            const formId = this.getAttribute("form");
+            const form = (formId && document.getElementById(formId))
+                || this.closest("tr")?.querySelector("form");
             if (!form) return;
             pendingSubmitForm = form;
             confirmOverlay?.classList.add("is-open");

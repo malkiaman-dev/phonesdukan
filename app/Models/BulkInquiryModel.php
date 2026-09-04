@@ -9,6 +9,52 @@ class BulkInquiryModel
     {
         $database = new Database();
         $this->db = $database->getConnection();
+        $this->ensureStatusSchema();
+    }
+
+    private function ensureStatusSchema(): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+
+        try {
+            $col = $this->db->query("SHOW COLUMNS FROM bulk_inquiries LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
+            $type = strtolower((string) ($col['Type'] ?? ''));
+            if ($type !== '' && strpos($type, "'processing'") === false) {
+                $this->db->exec(
+                    "ALTER TABLE bulk_inquiries
+                     MODIFY COLUMN status ENUM('Pending','Processing','Cancelled','Completed')
+                     NOT NULL DEFAULT 'Pending'"
+                );
+                // Repair rows that became empty when an invalid ENUM value was written
+                $this->db->exec(
+                    "UPDATE bulk_inquiries
+                     SET status = 'Pending'
+                     WHERE status IS NULL OR status = ''"
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('BulkInquiryModel ensureStatusSchema: ' . $e->getMessage());
+        }
+    }
+
+    public function updateB2BOrderStatus(int $inquiryId, string $status): bool
+    {
+        $allowed = ['Pending', 'Processing', 'Cancelled', 'Completed'];
+        if ($inquiryId <= 0 || !in_array($status, $allowed, true)) {
+            return false;
+        }
+
+        $query = "UPDATE bulk_inquiries SET status = ? WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        if (!$stmt->execute([$status, $inquiryId])) {
+            return false;
+        }
+
+        return $stmt->rowCount() >= 0;
     }
 
     public function getB2BProducts()
@@ -148,13 +194,6 @@ class BulkInquiryModel
         $query = "SELECT COUNT(*) FROM bulk_inquiries WHERE status = 'Pending'";
         $stmt = $this->db->query($query);
         return (int) $stmt->fetchColumn();
-    }
-
-    public function updateB2BOrderStatus(int $inquiryId, string $status): bool
-    {
-        $query = "UPDATE bulk_inquiries SET status = ? WHERE id = ?";
-        $stmt = $this->db->prepare($query);
-        return $stmt->execute([$status, $inquiryId]);
     }
 }
 ?>
