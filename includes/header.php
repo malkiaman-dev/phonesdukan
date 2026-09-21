@@ -143,6 +143,12 @@ $productImageAlt     = isset($product['product_name']) ? $product['product_name'
 <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
 <link rel="dns-prefetch" href="//cdn.onesignal.com">
 <link rel="dns-prefetch" href="//www.clarity.ms">
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4182308742558451"
+     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3704413216952034"
+     crossorigin="anonymous"></script>
 <?php endif; ?>
 
 <script>

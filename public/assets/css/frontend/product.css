@@ -75,10 +75,8 @@
 }
 
 .image-wrapper {
-  border: 1px solid #ebebeb;
   border-radius: 16px;
   overflow: hidden;
-  background: #f8f8f8;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -113,10 +111,6 @@
   background: #111;
   opacity: 0.85;
   animation: comingSoonPulse 2s ease-in-out infinite;
-}
-
-.product-gallery--coming-soon .image-wrapper {
-  border-color: #fcd34d;
 }
 
 .primary-image {

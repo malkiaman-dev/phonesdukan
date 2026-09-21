@@ -76,6 +76,7 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
+                    <span class="pd-hero-eyebrow">⚡ Flash Deals Live</span>
                     <h1>Premium <br><span>Gadgets & More</span></h1>
                     <p>Shop PTA-approved mobiles, wireless earbuds, smart watches, and genuine accessories with fast nationwide delivery and trusted support.</p>
                     <div class="pd-hero-cta-wrap">
@@ -92,6 +93,7 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
+                    <span class="pd-hero-eyebrow">🚀 New Arrivals</span>
                     <h2>Authentic Tech, <br>Fast Delivery,<br><span>Trusted Warranty</span></h2>
                     <p>Get genuine mobile phones and accessories with secure ordering, replacement support, and reliable delivery across Pakistan.</p>
                     <div class="pd-hero-cta-wrap">
@@ -108,6 +110,7 @@ foreach ($latest_posts_raw as $post) {
             </div>
             <div class="pd-hero-overlay">
                 <div class="pd-hero-content">
+                    <span class="pd-hero-eyebrow">🛡️ Trusted Nationwide</span>
                     <h2>Upgrade Your Everyday <br><span>Tech Experience</span></h2>
                     <p>Discover premium earbuds, smart watches, chargers, power banks, and mobile accessories built for modern lifestyles.</p>
                     <div class="pd-hero-cta-wrap">
@@ -118,11 +121,6 @@ foreach ($latest_posts_raw as $post) {
             </div>
         </article>
 
-        <div class="pd-hero-dots" role="tablist" aria-label="Hero slide navigation">
-            <button class="pd-hero-dot is-active" type="button" role="tab" aria-label="Slide 1" aria-selected="true" data-pd-hero-dot="0"></button>
-            <button class="pd-hero-dot" type="button" role="tab" aria-label="Slide 2" aria-selected="false" data-pd-hero-dot="1"></button>
-            <button class="pd-hero-dot" type="button" role="tab" aria-label="Slide 3" aria-selected="false" data-pd-hero-dot="2"></button>
-        </div>
     </div>
 </section>
 

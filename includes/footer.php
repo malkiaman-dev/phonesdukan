@@ -162,9 +162,6 @@
 </script>
 <?php endif; ?>
 <?php if (!isPhonesDukanApp()) : ?>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4182308742558451"
-     crossorigin="anonymous"></script>
-     
      <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
