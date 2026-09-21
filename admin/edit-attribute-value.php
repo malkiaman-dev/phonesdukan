@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_value'])) {
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 0 14px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             outline: none;
             font-size: 0.92rem;
@@ -145,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_value'])) {
             border: 1px solid var(--black);
             border-radius: 10px;
             background: var(--black);
-            color: #fff !important;
+            color: var(--white) !important;
             font-size: 0.88rem;
             font-weight: 700;
             text-decoration: none !important;
@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_value'])) {
             border: 1px dashed var(--border);
             border-radius: 12px;
             color: var(--muted);
-            background: #fcfcfd;
+            background: var(--white);
         }
 
         .toast {

@@ -138,7 +138,7 @@ include __DIR__ . '/admin_sidebar.php';
             height: 48px;
             border: 1px solid var(--border);
             border-radius: 10px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             padding: 0 14px;
             font-size: 0.92rem;
@@ -147,7 +147,7 @@ include __DIR__ . '/admin_sidebar.php';
             transition: border-color .15s ease, box-shadow .15s ease;
         }
         .pro-input[readonly] {
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--muted);
         }
         .pro-input:focus, .pro-input:focus-visible {
@@ -170,7 +170,7 @@ include __DIR__ . '/admin_sidebar.php';
             border-radius: 12px;
             border: 1px solid var(--black);
             background: var(--black);
-            color: #fff !important;
+            color: var(--white) !important;
             font-size: 0.9rem;
             font-weight: 800;
             text-decoration: none !important;
@@ -187,7 +187,7 @@ include __DIR__ . '/admin_sidebar.php';
 
         .pro-btn-outline {
             border: 1px solid var(--border);
-            background: #fff;
+            background: var(--white);
             color: var(--black) !important;
         }
         .pro-btn-outline:hover {

@@ -117,6 +117,13 @@ include __DIR__ . '/admin_sidebar.php';
         --border: #e4e4e7;
         --text-soft: #5b5b66;
     }
+    /* --muted here is a section BACKGROUND tint (not text), unlike other admin pages —
+       override locally so the global dark-mode palette doesn't turn it into gray text-on-gray */
+    :root[data-theme="dark"] {
+        --black-soft: #1e293b;
+        --muted: #1e293b;
+        --text-soft: #94a3b8;
+    }
     .set-wrap,
     .set-wrap * {
         box-sizing: border-box;
@@ -202,7 +209,7 @@ include __DIR__ . '/admin_sidebar.php';
         min-width: 0;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         font-size: .92rem;
         padding: 11px 13px;
@@ -328,7 +335,7 @@ include __DIR__ . '/admin_sidebar.php';
         text-decoration: none !important;
     }
     .set-btn-outline {
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         border-color: var(--border);
     }

@@ -237,6 +237,15 @@ include __DIR__ . '/admin_sidebar.php';
         --muted: #f7f7f8;
         --border: #e4e4e7;
         --text-soft: #5b5b66;
+        --light-yellow: #fffbeb;
+    }
+    /* --muted here is a section BACKGROUND tint (not text), unlike other admin pages —
+       override locally so the global dark-mode palette doesn't turn it into gray text-on-gray */
+    :root[data-theme="dark"] {
+        --black-soft: #1e293b;
+        --muted: #1e293b;
+        --text-soft: #94a3b8;
+        --light-yellow: rgba(250, 204, 21, 0.14);
     }
     .deal-wrap,
     .deal-wrap * { box-sizing: border-box; }
@@ -359,7 +368,7 @@ include __DIR__ . '/admin_sidebar.php';
         min-width: 0;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         font-size: .92rem;
         padding: 11px 13px;
@@ -468,7 +477,7 @@ include __DIR__ . '/admin_sidebar.php';
         text-decoration: none !important;
     }
     .deal-btn-outline {
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         border-color: var(--border);
     }
@@ -500,7 +509,7 @@ include __DIR__ . '/admin_sidebar.php';
         filter: drop-shadow(0 16px 24px rgba(0,0,0,.45));
     }
     .deal-preview-copy {
-        background: #fff;
+        background: var(--white);
         padding: 18px;
     }
     .deal-preview-badge {
@@ -519,7 +528,7 @@ include __DIR__ . '/admin_sidebar.php';
         margin: 0 0 8px;
         font-size: 1.05rem;
         font-weight: 800;
-        color: #111;
+        color: var(--black);
         line-height: 1.25;
     }
     .deal-preview-prices {
@@ -532,10 +541,10 @@ include __DIR__ . '/admin_sidebar.php';
     .deal-preview-sale {
         font-size: 1.35rem;
         font-weight: 900;
-        color: #111;
+        color: var(--black);
     }
     .deal-preview-old {
-        color: #9ca3af;
+        color: var(--text-soft);
         text-decoration: line-through;
         font-weight: 600;
         font-size: 0.92rem;
@@ -583,7 +592,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 48px;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         padding: 0 44px 0 14px;
         display: flex;
@@ -640,7 +649,7 @@ include __DIR__ . '/admin_sidebar.php';
         top: 100%;
         z-index: 90;
         display: none;
-        background: #fff;
+        background: var(--white);
         border: 1px solid var(--yellow);
         border-top: 0;
         border-radius: 0 0 14px 14px;
@@ -652,8 +661,8 @@ include __DIR__ . '/admin_sidebar.php';
     }
     .deal-custom-select-search {
         padding: 10px 10px 8px;
-        border-bottom: 1px solid #eee;
-        background: #fff;
+        border-bottom: 1px solid var(--border);
+        background: var(--white);
     }
     .deal-custom-select-search input {
         width: 100%;
@@ -663,13 +672,14 @@ include __DIR__ . '/admin_sidebar.php';
         padding: 0 12px;
         font-size: .88rem;
         outline: none;
-        background: #fafafa;
+        background: var(--white);
+        color: var(--black);
         box-sizing: border-box;
         box-shadow: none;
     }
     .deal-custom-select-search input:focus {
-        border-color: #e5e7eb;
-        background: #fff;
+        border-color: var(--border);
+        background: var(--white);
         box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.14);
     }
     .deal-custom-select-search input::-webkit-search-decoration,
@@ -681,7 +691,7 @@ include __DIR__ . '/admin_sidebar.php';
         max-height: 260px;
         overflow: auto;
         padding: 6px;
-        background: #fff;
+        background: var(--white);
     }
     .deal-custom-select-option {
         padding: 10px 12px;
@@ -689,17 +699,17 @@ include __DIR__ . '/admin_sidebar.php';
         cursor: pointer;
         font-size: .88rem;
         font-weight: 600;
-        color: #374151;
+        color: var(--black);
         line-height: 1.35;
     }
     .deal-custom-select-option:hover,
     .deal-custom-select-option.is-active {
-        background: #fffbeb;
-        color: #111;
+        background: var(--light-yellow);
+        color: var(--black);
     }
     .deal-custom-select-option.is-selected {
-        background: #fffbeb;
-        color: #111;
+        background: var(--light-yellow);
+        color: var(--black);
         border-left: 3px solid var(--yellow);
     }
     .deal-custom-select-empty {
@@ -714,7 +724,7 @@ include __DIR__ . '/admin_sidebar.php';
         padding: 20px;
         border: 1px dashed var(--border);
         border-radius: 14px;
-        background: #fff;
+        background: var(--white);
         cursor: pointer;
         transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
         user-select: none;
@@ -722,7 +732,7 @@ include __DIR__ . '/admin_sidebar.php';
     .deal-upload-box:hover,
     .deal-upload-box.is-dragging {
         border-color: var(--yellow);
-        background: #fffbeb;
+        background: var(--light-yellow);
         box-shadow: 0 10px 22px rgba(17, 17, 17, 0.05);
     }
     .deal-upload-icon {
@@ -738,16 +748,16 @@ include __DIR__ . '/admin_sidebar.php';
     }
     .deal-upload-title {
         font-weight: 700;
-        color: #111;
+        color: var(--black);
         font-size: 14px;
     }
     .deal-upload-help {
         font-size: 12px;
-        color: #6b7280;
+        color: var(--text-soft);
     }
     .deal-upload-filename {
         font-size: 12px;
-        color: #111;
+        color: var(--black);
         opacity: 0.85;
         white-space: nowrap;
         overflow: hidden;

@@ -137,7 +137,7 @@ include __DIR__ . '/admin_sidebar.php';
             border-radius: 12px;
             padding: 0 14px;
             outline: none;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
         }
         .rev-input:focus { border-color: var(--yellow); box-shadow: 0 0 0 3px rgba(250,204,21,0.18); }
@@ -169,7 +169,7 @@ include __DIR__ . '/admin_sidebar.php';
 
         .rev-btn-outline {
             border: 1px solid var(--border);
-            background: #fff;
+            background: var(--white);
             color: var(--black) !important;
             display: inline-flex;
             align-items: center;
@@ -189,7 +189,7 @@ include __DIR__ . '/admin_sidebar.php';
         table { width: 100%; border-collapse: separate; border-spacing: 0; }
         th, td { border: 0; padding: 14px; text-align: left; background: transparent; vertical-align: top; }
         thead th {
-            background: #f9fafb;
+            background: var(--bg);
             border-bottom: 1px solid var(--border);
             color: var(--black);
             font-size: 0.78rem;
@@ -254,7 +254,7 @@ include __DIR__ . '/admin_sidebar.php';
             height: 38px;
             border: 1px solid var(--border);
             border-radius: 10px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             font-size: 0.84rem;
             font-weight: 800;
@@ -325,7 +325,7 @@ include __DIR__ . '/admin_sidebar.php';
             height: 44px;
             border: 1px solid var(--border);
             border-radius: 12px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             padding: 0 36px 0 12px;
             font-size: 0.86rem;
@@ -357,7 +357,7 @@ include __DIR__ . '/admin_sidebar.php';
             right: 0;
             top: calc(100% + 6px);
             z-index: 9999;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 14px 28px rgba(17,17,17,0.12);
@@ -422,7 +422,7 @@ include __DIR__ . '/admin_sidebar.php';
         .rev-modal {
             width: 100%;
             max-width: 520px;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 16px;
             box-shadow: 0 20px 45px rgba(17,17,17,0.18);

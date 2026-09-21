@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
             border: 1px solid var(--border);
             border-radius: 10px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             font-size: 0.92rem;
             font-family: inherit;
@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 12px;
             border: 1px solid var(--black);
             background: var(--black);
-            color: #fff !important;
+            color: var(--white) !important;
             font-size: 0.9rem;
             font-weight: 800;
             text-decoration: none !important;
@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .btn-outline {
-            background: #fff;
+            background: var(--white);
             color: var(--black) !important;
             border-color: var(--border);
         }

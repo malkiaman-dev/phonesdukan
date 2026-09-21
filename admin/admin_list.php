@@ -59,6 +59,24 @@ $stmt = $conn->query("SELECT id, name, email, role FROM admins ORDER BY role DES
             text-align: center;
             margin-top: 30px;
         }
+
+        [data-theme="dark"] table {
+            background: #1e293b;
+        }
+
+        [data-theme="dark"] th,
+        [data-theme="dark"] td {
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] th {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] td {
+            color: #e2e8f0;
+        }
     </style>
 </head>
 <body>

@@ -47,7 +47,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
 
         body {
             font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-            background: #f3f4f6;
+            background: var(--ad-bg);
             color: var(--brand-black);
             overflow-x: hidden;
         }
@@ -68,8 +68,8 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         }
 
         .orders-page-header {
-            background: #fff;
-            border: 1px solid #e5e7eb;
+            background: var(--brand-white);
+            border: 1px solid var(--brand-border);
             border-radius: 16px;
             box-shadow: 0 12px 30px rgba(17,17,17,0.06);
             padding: 20px 24px;
@@ -118,7 +118,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             font-size: 0.9rem;
             color: var(--brand-black);
             border: 1px solid var(--brand-border);
-            background: #fff;
+            background: var(--brand-white);
             border-radius: 12px;
             padding: 9px 12px;
             outline: none;
@@ -156,7 +156,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             border: 1px solid var(--brand-border);
             border-radius: 12px;
             padding: 10px 34px 10px 12px;
-            background: #fff;
+            background: var(--brand-white);
             color: var(--brand-black);
             font-size: 0.9rem;
             font-weight: 700;
@@ -174,8 +174,8 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             top: 50%;
             width: 8px;
             height: 8px;
-            border-right: 2px solid #111;
-            border-bottom: 2px solid #111;
+            border-right: 2px solid var(--brand-black);
+            border-bottom: 2px solid var(--brand-black);
             transform: translateY(-65%) rotate(45deg);
         }
 
@@ -194,7 +194,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             right: 0;
             margin-top: 6px;
             list-style: none;
-            background: #fff;
+            background: var(--brand-white);
             border: 1px solid var(--brand-border);
             border-radius: 12px;
             box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
@@ -442,7 +442,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         }
 
         .ord-btn.ghost {
-            background: #fff;
+            background: var(--brand-white);
             color: var(--brand-black);
             border-color: var(--brand-border);
             border-radius: 10px;
@@ -509,7 +509,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             padding: 0 10px;
             border-radius: 10px;
             border: 1px solid var(--brand-border);
-            background: #fff;
+            background: var(--brand-white);
             color: var(--brand-black);
             font-weight: 700;
             font-size: 0.86rem;
@@ -550,7 +550,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         .confirm-modal {
             width: 100%;
             max-width: 420px;
-            background: #fff;
+            background: var(--brand-white);
             border-radius: 16px;
             border: 1px solid var(--brand-border);
             box-shadow: 0 20px 40px rgba(17,17,17,0.18);
@@ -578,13 +578,13 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             padding: 8px 12px;
             font-weight: 700;
             border: 1px solid var(--brand-border);
-            background: #fff;
+            background: var(--brand-white);
             color: var(--brand-black);
             cursor: pointer;
         }
         .confirm-btn.confirm-yes {
             background: var(--brand-black);
-            color: #fff;
+            color: var(--brand-white);
             border-color: var(--brand-black);
         }
         .confirm-btn.confirm-yes:hover {
@@ -625,7 +625,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
         }
 
         .modal-content {
-            background: #fff;
+            background: var(--brand-white);
             border-radius: 12px;
             padding: 30px;
             width: 90%;
@@ -649,13 +649,13 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
             right: 18px;
             font-size: 1.4rem;
             cursor: pointer;
-            color: #888;
+            color: var(--brand-muted);
             background: none;
             border: none;
             transition: color 0.15s;
         }
         .modal-content .close:hover,
-        .custom-close-modal:hover { color: #222; }
+        .custom-close-modal:hover { color: var(--brand-black); }
 
         /* ===== Responsive ===== */
         @media (max-width: 900px) {
@@ -686,7 +686,7 @@ $b2b_orders = $bulkInquiryModel->getAllB2BOrders();
                 border: 1px solid var(--brand-border);
                 border-radius: 12px;
                 margin-bottom: 10px;
-                background: #fff;
+                background: var(--brand-white);
                 overflow: hidden;
             }
             .ord-table tbody td {

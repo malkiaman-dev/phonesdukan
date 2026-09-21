@@ -209,7 +209,7 @@ include __DIR__ . '/admin_header.php';
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 9px 34px 9px 12px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             font-size: 14px;
             font-weight: 700;
@@ -227,8 +227,8 @@ include __DIR__ . '/admin_header.php';
             top: 50%;
             width: 8px;
             height: 8px;
-            border-right: 2px solid #111;
-            border-bottom: 2px solid #111;
+            border-right: 2px solid var(--black);
+            border-bottom: 2px solid var(--black);
             transform: translateY(-65%) rotate(45deg);
         }
 
@@ -245,7 +245,7 @@ include __DIR__ . '/admin_header.php';
             right: 0;
             margin-top: 6px;
             list-style: none;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 10px;
             box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
@@ -301,7 +301,7 @@ include __DIR__ . '/admin_header.php';
         }
 
         .table th {
-            background-color: #f3f4f6;
+            background-color: var(--bg);
             font-weight: 700;
             color: var(--black);
             white-space: nowrap;
@@ -321,7 +321,7 @@ include __DIR__ . '/admin_header.php';
             border-radius: 10px;
             object-fit: cover;
             border: 1px solid var(--border);
-            background: #f9fafb;
+            background: var(--bg);
         }
 
         .post-title {
@@ -341,7 +341,7 @@ include __DIR__ . '/admin_header.php';
             padding: 4px 9px;
             border-radius: 999px;
             border: 1px solid var(--border);
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black) !important;
             font-size: 12px;
             font-weight: 600;
@@ -352,7 +352,7 @@ include __DIR__ . '/admin_header.php';
             padding: 4px 10px;
             border-radius: 999px;
             border: 1px solid var(--border);
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black) !important;
             font-size: 12px;
             font-weight: 700;

@@ -93,7 +93,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 12px;
             padding: 0 14px;
             outline: none;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
         }
         .msg-input:focus {
@@ -135,13 +135,13 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         .msg-btn-outline {
             border: 1.5px solid var(--border);
-            background: #fff;
+            background: var(--white);
             color: var(--black) !important;
             box-shadow: none;
         }
         .msg-btn-outline:hover {
             border-color: #f7cf04;
-            background: #fffef8;
+            background: var(--light-yellow);
             color: var(--black) !important;
             transform: translateY(-1px);
             box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
@@ -169,7 +169,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 44px;
             border: 1px solid var(--border);
             border-radius: 12px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             padding: 0 36px 0 12px;
             font-size: 0.86rem;
@@ -201,7 +201,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             right: 0;
             top: calc(100% + 6px);
             z-index: 9999;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 14px 28px rgba(17,17,17,0.12);
@@ -243,7 +243,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: transparent;
         }
         .msg-table th {
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black);
             font-size: 0.78rem;
             letter-spacing: 0.04em;
@@ -280,7 +280,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             height: 38px;
             border: 1px solid var(--border);
             border-radius: 10px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             font-size: 0.84rem;
             font-weight: 800;
@@ -304,7 +304,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items: center;
         }
         .modal-content {
-            background: #fff;
+            background: var(--white);
             padding: 20px;
             border-radius: 8px;
             max-width: 600px;

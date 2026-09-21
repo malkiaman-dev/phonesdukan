@@ -255,7 +255,8 @@ html, body {
 .content {
     padding: 20px;
     font-family: 'Arial', sans-serif;
-    background: #f4f7fc;
+    background: var(--ad-bg);
+    color: var(--ad-text);
     min-height: 100vh;
 }
 
@@ -362,6 +363,94 @@ span.admin-name {
     --ad-sidebar-bg: #ffffff;
     --ad-sidebar-text: #4b5563;
     --ad-sidebar-active-bg: #fffbeb;
+}
+
+/* ===== Dark mode override (toggled via [data-theme="dark"] on <html>) ===== */
+:root[data-theme="dark"] {
+    --ad-dark: #f1f5f9;
+    --ad-yellow: #f7cf04;
+    --ad-yellow-hover: #ffdf33;
+    --ad-bg: #0f172a;
+    --ad-card: #1e293b;
+    --ad-border: #334155;
+    --ad-text: #e2e8f0;
+    --ad-muted: #94a3b8;
+    --ad-success: #22c55e;
+    --ad-warning: #fbbf24;
+    --ad-danger: #f87171;
+    --ad-info: #60a5fa;
+    --ad-navbar-bg: #1e293b;
+    --ad-navbar-border: #334155;
+    --ad-sidebar-bg: #1e293b;
+    --ad-sidebar-text: #cbd5e1;
+    --ad-sidebar-active-bg: rgba(247, 207, 4, 0.14);
+    --ad-heading-color: #f1f5f9;
+    --ad-lead-color: #94a3b8;
+    --ad-btn-secondary-bg: #1e293b;
+    --ad-btn-secondary-border: #334155;
+    --ad-btn-secondary-text: #e2e8f0;
+
+    /*
+     * Most admin/*.php pages (manage-products, manage-orders, customers, manage-users,
+     * manage-reviews, manage-b2b-orders, add_post, edit_post, categories, reports, etc.)
+     * declare their OWN local :root variables for card/text/border colors instead of the
+     * --ad-* system above. Since :root[data-theme="dark"] is more specific than a plain
+     * :root, redefining those same variable names here overrides every page at once
+     * without editing each file's inline <style> block.
+     */
+
+    /* Family A: --black/--white/--bg/--border/--muted/--light-yellow (most list & edit pages) */
+    --black: #e2e8f0;
+    --white: #1e293b;
+    --bg: #0f172a;
+    --border: #334155;
+    --muted: #94a3b8;
+    --light-yellow: rgba(250, 204, 21, 0.14);
+    --yellow-glow: rgba(250, 204, 21, 0.25);
+
+    /* Family B: --brand-* (manage-b2b-orders, get_b2b_order_details) */
+    --brand-black: #e2e8f0;
+    --brand-white: #1e293b;
+    --brand-border: #334155;
+    --brand-muted: #94a3b8;
+    --brand-yellow-light: rgba(250, 204, 21, 0.14);
+    --header-bg: #0f172a;
+
+    /* Family C: manage-orders.php */
+    --primary: #e2e8f0;
+    --card: #1e293b;
+    --text: #e2e8f0;
+    --divider: #334155;
+    --lightYellow: rgba(250, 204, 21, 0.14);
+
+    /* Family D: --mu-* (manage-users.php) */
+    --mu-black: #e2e8f0;
+    --mu-white: #1e293b;
+    --mu-muted: #94a3b8;
+    --mu-border: #334155;
+    --mu-bg: #0f172a;
+    --mu-soft-yellow: rgba(250, 204, 21, 0.14);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: var(--ad-card);
+    color: var(--ad-text);
+    border-color: var(--ad-border);
+}
+
+[data-theme="dark"] ::placeholder {
+    color: var(--ad-muted);
+    opacity: 1;
+}
+
+[data-theme="dark"] table {
+    color: var(--ad-text);
+}
+
+[data-theme="dark"] .admin-table tbody tr:hover {
+    background: rgba(148, 163, 184, 0.08);
 }
 
 html,
@@ -563,7 +652,7 @@ html body {
     height: 34px;
     border-radius: 10px;
     border: 1px solid var(--ad-border);
-    background: #fff;
+    background: var(--ad-card);
     color: var(--ad-text);
     cursor: pointer;
 }
@@ -571,6 +660,31 @@ html body {
 .sidebar-toggle:hover {
     border-color: var(--ad-yellow);
     color: var(--ad-text);
+    background: var(--ad-sidebar-active-bg);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--ad-border);
+    background: var(--ad-card);
+    color: var(--ad-text);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle:hover {
+    border-color: var(--ad-yellow);
     background: var(--ad-sidebar-active-bg);
 }
 
@@ -614,7 +728,7 @@ html body {
     font-size: 14px;
     font-weight: 600;
     color: var(--ad-text);
-    background: #f9fafb;
+    background: var(--ad-card);
     border: 1px solid var(--ad-border);
     border-radius: 12px;
     text-decoration: none !important;
@@ -649,7 +763,7 @@ html body {
     list-style: none;
     border: 1px solid var(--ad-border);
     border-radius: 14px;
-    background: #ffffff;
+    background: var(--ad-card);
     box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
     display: block;
     opacity: 0;
@@ -859,7 +973,7 @@ html body {
 
 .submenu {
     border: 1px solid var(--ad-border);
-    background: #ffffff;
+    background: var(--ad-card);
     border-radius: 12px;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
     z-index: 9000;
@@ -1124,19 +1238,20 @@ html body {
 .admin-table th,
 .admin-table td {
     padding: 12px 14px;
-    border-bottom: 1px solid #f0f2f5;
+    border-bottom: 1px solid var(--ad-border);
     font-size: 13px;
     text-align: left;
+    color: var(--ad-text);
 }
 
 .admin-table th {
-    background: #f8fafc;
+    background: var(--ad-bg);
     color: var(--ad-muted);
     font-weight: 700;
 }
 
 .admin-table tbody tr:hover {
-    background: #fffbeb;
+    background: var(--ad-sidebar-active-bg);
 }
 
 .interactive-row {
@@ -1332,11 +1447,11 @@ html body {
 }
 
 .quick-action-card {
-    border: 1px solid #eceff3;
+    border: 1px solid var(--ad-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--ad-card);
     text-decoration: none;
-    color: #111;
+    color: var(--ad-text);
     padding: 12px;
     display: flex;
     align-items: center;

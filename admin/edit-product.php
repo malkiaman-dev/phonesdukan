@@ -349,8 +349,8 @@ select.vb-input-ep { cursor:pointer; }
     }
 
     .ep-toast-error {
-        background: #fffbeb;
-        color: #111111;
+        background: var(--light-yellow);
+        color: var(--black);
         border-color: #facc15;
     }
 
@@ -465,7 +465,7 @@ select.vb-input-ep { cursor:pointer; }
         width: 100%;
         border: 1px solid var(--border);
         border-radius: 10px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         font-family: inherit;
         font-size: 0.92rem;
@@ -510,7 +510,7 @@ select.vb-input-ep { cursor:pointer; }
         height: 52px;
         border: 1px solid var(--border);
         border-radius: 14px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         padding: 0 44px 0 16px;
         text-align: left;
@@ -542,7 +542,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-dropdown.is-open .ep-dropdown-display {
         border-color: var(--yellow);
         box-shadow: 0 0 0 4px rgba(250,204,21,0.18);
-        background: #fff;
+        background: var(--white);
     }
 
     .ep-dropdown-options {
@@ -550,7 +550,7 @@ select.vb-input-ep { cursor:pointer; }
         top: calc(100% + 6px);
         left: 0;
         right: 0;
-        background: #fff;
+        background: var(--white);
         border: 1px solid var(--border);
         border-radius: 14px;
         box-shadow: 0 12px 24px rgba(17, 17, 17, 0.12);
@@ -577,7 +577,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-dropdown-option {
         width: 100%;
         border: none;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         border-radius: 14px;
         padding: 10px 12px;
@@ -607,7 +607,7 @@ select.vb-input-ep { cursor:pointer; }
         min-height: 60px;
         border: 1px solid var(--border);
         border-radius: 16px;
-        background: #ffffff;
+        background: var(--white);
         padding: 18px 20px;
         font-size: 0.95rem;
         font-weight: 700;
@@ -639,7 +639,7 @@ select.vb-input-ep { cursor:pointer; }
         height: 24px;
         border: 1px solid var(--yellow);
         border-radius: 6px;
-        background: #fff;
+        background: var(--white);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -761,7 +761,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-upload-box {
         border: 1px dashed var(--border);
         border-radius: 14px;
-        background: #fff;
+        background: var(--white);
         padding: 16px;
         display: flex;
         flex-direction: column;
@@ -816,7 +816,7 @@ select.vb-input-ep { cursor:pointer; }
     .ep-image-row {
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         padding: 12px;
         display: grid;
         grid-template-columns: 96px 1fr auto;
@@ -830,7 +830,7 @@ select.vb-input-ep { cursor:pointer; }
         border-radius: 12px;
         border: 1px solid var(--border);
         object-fit: cover;
-        background: #f8fafc;
+        background: var(--bg);
     }
 
     .ep-thumb-placeholder {
@@ -881,7 +881,7 @@ select.vb-input-ep { cursor:pointer; }
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 12px;
-        background: #fff;
+        background: var(--white);
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
@@ -905,7 +905,7 @@ select.vb-input-ep { cursor:pointer; }
         padding: 0 12px;
         font-family: inherit;
         outline: none;
-        background: #fff;
+        background: var(--white);
     }
 
     .attribute select {
@@ -913,9 +913,12 @@ select.vb-input-ep { cursor:pointer; }
         -webkit-appearance: none;
         padding-right: 36px;
         background:
-            #fff
+            var(--white)
             url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
             no-repeat right 12px center;
+    }
+    [data-theme="dark"] .attribute select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     }
 
     .attribute input:focus,

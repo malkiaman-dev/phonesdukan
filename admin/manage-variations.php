@@ -182,7 +182,7 @@ include __DIR__ . '/admin_sidebar.php';
 }
 .vp-field select {
     -webkit-appearance:none; appearance:none; padding-right:36px;
-    background-image:linear-gradient(45deg,transparent 50%,#111 50%),linear-gradient(135deg,#111 50%,transparent 50%);
+    background-image:linear-gradient(45deg,transparent 50%,var(--black) 50%),linear-gradient(135deg,var(--black) 50%,transparent 50%);
     background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%;
     background-size:6px 6px,6px 6px; background-repeat:no-repeat;
 }
@@ -213,7 +213,7 @@ include __DIR__ . '/admin_sidebar.php';
     padding:13px 16px; border-bottom:1px solid var(--border);
     text-align:left; font-size:.88rem; vertical-align:top;
 }
-.vtable th { background:#f9fafb; font-weight:800; color:var(--black); }
+.vtable th { background:var(--bg); font-weight:800; color:var(--black); }
 .vtable tbody tr:hover { background:var(--light-yellow); }
 .vtable tbody tr:last-child td { border-bottom:0; }
 .vbadge {
@@ -244,7 +244,7 @@ include __DIR__ . '/admin_sidebar.php';
 }
 .vp-overlay.open { display:flex; }
 .vp-modal {
-    width:100%; max-width:480px; background:#fff; border:1px solid var(--border);
+    width:100%; max-width:480px; background:var(--white); border:1px solid var(--border);
     border-radius:16px; box-shadow:0 24px 48px rgba(17,17,17,.22); padding:24px;
 }
 .vp-modal h3 { margin:0 0 18px; font-size:1.125rem; font-weight:600; line-height:1.35; letter-spacing:-0.01em; color:var(--black); }

@@ -160,7 +160,7 @@ include __DIR__ . '/admin_sidebar.php';
             height: 44px;
             border: 1px solid var(--border);
             border-radius: 12px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             padding: 0 36px 0 12px;
             font-size: 0.86rem;
@@ -192,7 +192,7 @@ include __DIR__ . '/admin_sidebar.php';
             right: 0;
             top: calc(100% + 6px);
             z-index: 9999;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 14px 28px rgba(17,17,17,0.12);
@@ -238,12 +238,12 @@ include __DIR__ . '/admin_sidebar.php';
 
         .rep-btn-outline {
             border: 1.5px solid var(--border);
-            background: #fff;
+            background: var(--white);
             color: var(--black) !important;
             box-shadow: none;
         }
         .rep-btn-outline:hover {
-            background: #fffef8;
+            background: var(--light-yellow);
             border-color: #f7cf04;
             box-shadow: 0 0 0 3px rgba(247, 207, 4, 0.15);
             color: var(--black) !important;
@@ -299,7 +299,7 @@ include __DIR__ . '/admin_sidebar.php';
             vertical-align: middle;
         }
         .rep-table thead th {
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black);
             font-size: 0.78rem;
             letter-spacing: 0.04em;

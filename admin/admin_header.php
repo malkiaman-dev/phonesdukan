@@ -30,8 +30,20 @@ $adminPageCssMap = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>    
-    
+    <title>Admin Dashboard</title>
+    <script>
+    (function () {
+        try {
+            var storedTheme = localStorage.getItem('pd_admin_theme');
+            if (storedTheme !== 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    })();
+    </script>
+
     <!-- FontAwesome for Icons (non-blocking load) -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" media="print" onload="this.media='all'">
@@ -54,7 +66,7 @@ $adminPageCssMap = [
         /* style.css locks storefront scroll; admin must be able to scroll */
         html,
         body {
-            background: #f8fafc !important;
+            background: var(--ad-bg, #f8fafc) !important;
             margin: 0 !important;
             height: auto !important;
             min-height: 100% !important;
@@ -77,7 +89,7 @@ $adminPageCssMap = [
             padding-right: 0 !important;
             padding-bottom: 0 !important;
             padding-left: calc(248px + 32px) !important;
-            color: #111111;
+            color: var(--ad-text, #111111);
         }
         .navbar {
             position: fixed;
@@ -86,9 +98,9 @@ $adminPageCssMap = [
             right: 0;
             height: 56px;
             z-index: 1000;
-            background: #ffffff;
-            color: #111111;
-            border-bottom: 1px solid #e5e7eb;
+            background: var(--ad-navbar-bg, #ffffff);
+            color: var(--ad-text, #111111);
+            border-bottom: 1px solid var(--ad-navbar-border, #e5e7eb);
             box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
         }
         #sidebar {
@@ -98,8 +110,8 @@ $adminPageCssMap = [
             width: 248px;
             height: calc(100vh - 56px);
             z-index: 5000;
-            background: #ffffff;
-            border-right: 1px solid #e5e7eb;
+            background: var(--ad-sidebar-bg, #ffffff);
+            border-right: 1px solid var(--ad-border, #e5e7eb);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -121,9 +133,9 @@ $adminPageCssMap = [
         }
         #sidebar .sidebar-footer {
             flex: 0 0 auto;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid var(--ad-border, #e5e7eb);
             padding: 8px 10px 12px;
-            background: #ffffff;
+            background: var(--ad-sidebar-bg, #ffffff);
         }
         #sidebar .nav {
             position: relative;
@@ -152,37 +164,37 @@ $adminPageCssMap = [
             text-decoration: none !important;
         }
         #sidebar .nav-link {
-            color: #374151 !important;
+            color: var(--ad-sidebar-text, #374151) !important;
         }
         #sidebar .nav-link:hover,
         #sidebar .nav-link.active {
-            color: #111111 !important;
-            background: #fffbeb !important;
-            border-left: 3px solid #f7cf04 !important;
+            color: var(--ad-text, #111111) !important;
+            background: var(--ad-sidebar-active-bg, #fffbeb) !important;
+            border-left: 3px solid var(--ad-yellow, #f7cf04) !important;
         }
         #sidebar .nav-item.has-submenu > .nav-link:hover,
         #sidebar .nav-item.has-submenu > .nav-link.active {
-            color: #374151 !important;
+            color: var(--ad-sidebar-text, #374151) !important;
             background: transparent !important;
             border-left-color: transparent !important;
         }
         #sidebar .nav-link i {
-            color: #6b7280 !important;
+            color: var(--ad-muted, #6b7280) !important;
         }
         #sidebar .nav-link:hover i,
         #sidebar .nav-link.active i {
-            color: #111111 !important;
+            color: var(--ad-text, #111111) !important;
         }
         #sidebar .nav-item.has-submenu > .nav-link:hover i,
         #sidebar .nav-item.has-submenu > .nav-link.active i {
-            color: #6b7280 !important;
+            color: var(--ad-muted, #6b7280) !important;
         }
         #sidebar .nav-link.logout {
-            color: #ef4444 !important;
+            color: var(--ad-danger, #ef4444) !important;
         }
         #sidebar .nav-link.logout:hover {
-            color: #ef4444 !important;
-            background: #fef2f2 !important;
+            color: var(--ad-danger, #ef4444) !important;
+            background: rgba(239, 68, 68, 0.12) !important;
         }
         .content,
         .dashboard-content {
@@ -229,21 +241,47 @@ $adminPageCssMap = [
             </a>
         </div>
 
-        <!-- Admin Profile Dropdown (Right Side) -->
-        <div class="admin-dropdown">
-            <a class="admin-name" href="#">
-                <i class="fas fa-user-circle"></i> <?= htmlspecialchars($admin_name) ?>
-            </a>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="<?= url('admin/profile.php'); ?>"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a class="dropdown-item" href="<?= url('admin/settings.php'); ?>"><i class="fas fa-cog"></i> Settings</a></li>
-                <li><a class="dropdown-item logout" href="<?= url('admin/logout.php'); ?>"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
+        <!-- Theme Toggle + Admin Profile Dropdown (Right Side) -->
+        <div class="navbar-right">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="admin-dropdown">
+                <a class="admin-name" href="#">
+                    <i class="fas fa-user-circle"></i> <?= htmlspecialchars($admin_name) ?>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="<?= url('admin/profile.php'); ?>"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a class="dropdown-item" href="<?= url('admin/settings.php'); ?>"><i class="fas fa-cog"></i> Settings</a></li>
+                    <li><a class="dropdown-item logout" href="<?= url('admin/logout.php'); ?>"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </nav>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    var themeToggleBtn = document.getElementById('themeToggle');
+    if (themeToggleBtn) {
+        var applyThemeIcon = function () {
+            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            themeToggleBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            themeToggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        };
+        applyThemeIcon();
+        themeToggleBtn.addEventListener('click', function () {
+            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                try { localStorage.setItem('pd_admin_theme', 'light'); } catch (e) {}
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                try { localStorage.setItem('pd_admin_theme', 'dark'); } catch (e) {}
+            }
+            applyThemeIcon();
+        });
+    }
+
     var toggleBtn = document.getElementById('sidebarToggle');
     var sidebar = document.getElementById('sidebar');
     if (toggleBtn && sidebar) {

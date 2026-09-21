@@ -253,11 +253,14 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
             appearance: none;
             -webkit-appearance: none;
             background:
-                #fff
+                var(--white)
                 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
                 no-repeat right 16px center;
             padding-right: 44px;
             min-width: 170px;
+        }
+        [data-theme="dark"] .prd-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10'%3E%3Cpath d='M2 2l5 6 5-6' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
         }
         .native-filter-select {
             position: absolute;
@@ -302,7 +305,7 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
 
         .filter-display:hover,
         .filter-select-wrap.is-open .filter-display {
-            background-color: #fcfcfd;
+            background-color: var(--white);
             border-color: var(--yellow);
             box-shadow: 0 0 0 3px var(--yellow-glow);
         }
@@ -314,7 +317,7 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
             z-index: 70;
             list-style: none;
             margin-top: 6px;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 14px 28px rgba(17,17,17,0.12);
@@ -354,7 +357,7 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
 
         .prd-select:hover,
         .prd-search-input:hover {
-            background-color: #fcfcfd;
+            background-color: var(--white);
         }
 
         .prd-select:focus,
@@ -403,7 +406,7 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
         .btn-export:hover {
             color: var(--black);
             border-color: var(--yellow);
-            background: #fcfcfd;
+            background: var(--white);
             transform: translateY(-1px);
             box-shadow: 0 0 0 3px var(--yellow-glow);
         }
@@ -454,7 +457,7 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
             font-size: 0.92rem;
         }
 
-        .prd-table thead tr { background: #f9fafb; }
+        .prd-table thead tr { background: var(--bg); }
 
         .prd-table thead th {
             color: var(--black);
@@ -477,7 +480,7 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
             padding: 10px 14px;
             vertical-align: middle;
             color: var(--black);
-            border-bottom: 1px solid #f0f2f5;
+            border-bottom: 1px solid var(--border);
         }
         .prd-table tbody tr:last-child td { border-bottom: 0; }
 
@@ -1025,18 +1028,22 @@ $buildManageUrl = static function (array $overrides = []) use ($status_filter, $
         </div>
         <div class="prd-page-links">
             <?php if ($page > 1): ?>
-                <a class="prd-btn" href="<?= htmlspecialchars($buildManageUrl(['page' => $page - 1]), ENT_QUOTES, 'UTF-8') ?>">Previous</a>
+                <a class="prd-page-link" href="<?= htmlspecialchars($buildManageUrl(['page' => $page - 1]), ENT_QUOTES, 'UTF-8') ?>">Previous</a>
+            <?php else: ?>
+                <span class="prd-page-link is-disabled">Previous</span>
             <?php endif; ?>
             <?php
             $windowStart = max(1, $page - 2);
             $windowEnd = min($totalPages, $page + 2);
             for ($p = $windowStart; $p <= $windowEnd; $p++):
             ?>
-                <a class="prd-btn <?= $p === $page ? 'prd-btn-edit' : '' ?>"
+                <a class="prd-page-link <?= $p === $page ? 'is-active' : '' ?>"
                    href="<?= htmlspecialchars($buildManageUrl(['page' => $p]), ENT_QUOTES, 'UTF-8') ?>"><?= $p ?></a>
             <?php endfor; ?>
             <?php if ($page < $totalPages): ?>
-                <a class="prd-btn" href="<?= htmlspecialchars($buildManageUrl(['page' => $page + 1]), ENT_QUOTES, 'UTF-8') ?>">Next</a>
+                <a class="prd-page-link" href="<?= htmlspecialchars($buildManageUrl(['page' => $page + 1]), ENT_QUOTES, 'UTF-8') ?>">Next</a>
+            <?php else: ?>
+                <span class="prd-page-link is-disabled">Next</span>
             <?php endif; ?>
         </div>
     </div>

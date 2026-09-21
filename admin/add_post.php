@@ -166,8 +166,8 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
         -webkit-appearance: none;
         appearance: none;
         background-image:
-            linear-gradient(45deg, transparent 50%, #111 50%),
-            linear-gradient(135deg, #111 50%, transparent 50%);
+            linear-gradient(45deg, transparent 50%, var(--black) 50%),
+            linear-gradient(135deg, var(--black) 50%, transparent 50%);
         background-position:
             calc(100% - 18px) 20px,
             calc(100% - 12px) 20px;
@@ -275,7 +275,7 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
         gap: 8px;
         border: 1px solid var(--border);
         border-radius: 10px;
-        background: #f9fafb;
+        background: var(--bg);
         color: var(--black);
         padding: 10px 12px;
         cursor: pointer;
@@ -371,7 +371,7 @@ include dirname(__DIR__, 1) . '/admin/admin_sidebar.php';
     .image-item {
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         padding: 10px;
     }
 

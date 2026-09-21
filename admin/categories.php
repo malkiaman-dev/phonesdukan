@@ -160,7 +160,7 @@ include __DIR__ . '/admin_sidebar.php';
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 0 14px;
-            background: #fff;
+            background: var(--white);
             color: var(--black);
             outline: none;
             font-size: 0.92rem;
@@ -179,7 +179,7 @@ include __DIR__ . '/admin_sidebar.php';
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 10px 12px;
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black);
             font-size: 0.9rem;
             font-weight: 600;
@@ -201,7 +201,7 @@ include __DIR__ . '/admin_sidebar.php';
             border: 1px solid var(--black);
             border-radius: 10px;
             background: var(--black);
-            color: #fff !important;
+            color: var(--white) !important;
             font-size: 0.88rem;
             font-weight: 700;
             cursor: pointer;
@@ -239,7 +239,7 @@ include __DIR__ . '/admin_sidebar.php';
             border: 1px solid var(--border);
             border-radius: 14px;
             overflow: hidden;
-            background: #fff;
+            background: var(--white);
         }
 
         table {
@@ -258,7 +258,7 @@ include __DIR__ . '/admin_sidebar.php';
         }
 
         th {
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black);
             font-weight: 800;
         }
@@ -278,7 +278,7 @@ include __DIR__ . '/admin_sidebar.php';
             padding: 4px 10px;
             border-radius: 999px;
             border: 1px solid var(--border) !important;
-            background: #f9fafb !important;
+            background: var(--bg) !important;
             color: var(--black) !important;
             font-size: 0.78rem;
             font-weight: 700;
@@ -296,7 +296,7 @@ include __DIR__ . '/admin_sidebar.php';
 
         .edit-form {
             display: none;
-            background: #fcfcfd;
+            background: var(--white);
         }
 
         .edit-form td {
@@ -330,7 +330,7 @@ include __DIR__ . '/admin_sidebar.php';
         .confirm-modal {
             width: 100%;
             max-width: 420px;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(17, 17, 17, 0.18);

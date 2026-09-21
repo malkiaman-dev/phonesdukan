@@ -105,7 +105,7 @@ include __DIR__ . '/admin_sidebar.php';
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 0 14px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         outline: none;
     }
@@ -141,7 +141,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 44px;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         padding: 0 36px 0 12px;
         font-size: 0.88rem;
@@ -176,7 +176,7 @@ include __DIR__ . '/admin_sidebar.php';
         right: 0;
         top: calc(100% + 6px);
         z-index: 100;
-        background: #fff;
+        background: var(--white);
         border: 1px solid var(--border);
         border-radius: 12px;
         box-shadow: 0 14px 28px rgba(17, 17, 17, 0.12);
@@ -213,7 +213,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 44px;
         border: 1px solid var(--border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--white);
         color: var(--black) !important;
         font-size: 0.88rem;
         font-weight: 700;
@@ -231,7 +231,7 @@ include __DIR__ . '/admin_sidebar.php';
         border-radius: 12px;
         border: 1px solid var(--black);
         background: var(--black);
-        color: #fff !important;
+        color: var(--white) !important;
         transition: color .15s ease;
     }
 
@@ -245,7 +245,7 @@ include __DIR__ . '/admin_sidebar.php';
     .cus-btn:hover {
         border-color: var(--yellow);
         box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.18);
-        background: #fff;
+        background: var(--white);
         color: var(--black) !important;
     }
 
@@ -264,7 +264,7 @@ include __DIR__ . '/admin_sidebar.php';
     }
 
     .cus-table thead th {
-        background: #f9fafb;
+        background: var(--bg);
         color: var(--black);
         text-align: left;
         font-size: 0.78rem;
@@ -348,7 +348,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 38px;
         border: 1px solid var(--border);
         border-radius: 10px;
-        background: #fff;
+        background: var(--white);
         color: var(--black);
         font-size: 0.84rem;
         font-weight: 800;

@@ -139,7 +139,7 @@ include __DIR__ . '/admin_sidebar.php';
         border-radius: 12px;
         padding: 0 14px;
         outline: none;
-        background: #fff;
+        background: var(--mu-white);
         color: var(--mu-black);
     }
 
@@ -152,7 +152,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 44px;
         border: 1px solid var(--mu-border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--mu-white);
         color: var(--mu-black) !important;
         padding: 0 14px;
         font-size: 0.87rem;
@@ -173,7 +173,7 @@ include __DIR__ . '/admin_sidebar.php';
         border: 1px solid var(--mu-black);
         border-radius: 12px;
         background: var(--mu-black);
-        color: #fff !important;
+        color: var(--mu-white) !important;
         padding: 0 16px;
         font-size: 0.87rem;
         font-weight: 800;
@@ -204,7 +204,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 44px;
         border: 1px solid var(--mu-border);
         border-radius: 12px;
-        background: #fff;
+        background: var(--mu-white);
         color: var(--mu-black);
         font-size: 0.87rem;
         font-weight: 700;
@@ -237,7 +237,7 @@ include __DIR__ . '/admin_sidebar.php';
         left: 0;
         right: 0;
         top: calc(100% + 6px);
-        background: #fff;
+        background: var(--mu-white);
         border: 1px solid var(--mu-border);
         border-radius: 12px;
         box-shadow: 0 14px 28px rgba(17, 17, 17, 0.12);
@@ -290,7 +290,7 @@ include __DIR__ . '/admin_sidebar.php';
     }
 
     .mu-table thead th {
-        background: #f9fafb;
+        background: var(--mu-bg);
         color: var(--mu-black);
         text-align: left;
         font-size: 0.78rem;
@@ -347,7 +347,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 34px;
         border: 1px solid var(--mu-border);
         border-radius: 9px;
-        background: #fff;
+        background: var(--mu-white);
         color: var(--mu-black);
         font-size: 0.78rem;
         font-weight: 800;
@@ -363,7 +363,7 @@ include __DIR__ . '/admin_sidebar.php';
 
     .mu-action-btn-danger {
         border-color: #fcd34d;
-        background: #fffbeb;
+        background: var(--mu-soft-yellow);
     }
 
     .mu-empty {
@@ -393,7 +393,7 @@ include __DIR__ . '/admin_sidebar.php';
         height: 38px;
         border: 1px solid var(--mu-border);
         border-radius: 10px;
-        background: #fff;
+        background: var(--mu-white);
         color: var(--mu-black);
         font-size: 0.84rem;
         font-weight: 800;

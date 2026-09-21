@@ -258,8 +258,8 @@ include __DIR__ . '/admin_sidebar.php';
             appearance: none;
             padding-right: 38px;
             background-image:
-                linear-gradient(45deg, transparent 50%, #111 50%),
-                linear-gradient(135deg, #111 50%, transparent 50%);
+                linear-gradient(45deg, transparent 50%, var(--black) 50%),
+                linear-gradient(135deg, var(--black) 50%, transparent 50%);
             background-position:
                 calc(100% - 18px) 20px,
                 calc(100% - 12px) 20px;
@@ -319,7 +319,7 @@ include __DIR__ . '/admin_sidebar.php';
             z-index: 40;
             margin-top: 6px;
             list-style: none;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 10px;
             box-shadow: 0 12px 24px rgba(17, 17, 17, 0.12);
@@ -402,7 +402,7 @@ include __DIR__ . '/admin_sidebar.php';
             border-radius: 14px;
             overflow-x: auto;
             overflow-y: hidden;
-            background: #fff;
+            background: var(--white);
         }
 
         .attrs-table {
@@ -421,7 +421,7 @@ include __DIR__ . '/admin_sidebar.php';
         }
 
         .attrs-table th {
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--black);
             font-weight: 800;
         }
@@ -500,7 +500,7 @@ include __DIR__ . '/admin_sidebar.php';
             color: var(--muted);
             border: 1px dashed var(--border);
             border-radius: 12px;
-            background: #fcfcfd;
+            background: var(--white);
         }
 
         .confirm-overlay {
@@ -521,7 +521,7 @@ include __DIR__ . '/admin_sidebar.php';
         .confirm-modal {
             width: 100%;
             max-width: 420px;
-            background: #fff;
+            background: var(--white);
             border: 1px solid var(--border);
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(17, 17, 17, 0.18);

@@ -90,7 +90,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         background: none;
         border: none;
         font-size: 1.3rem;
-        color: #999;
+        color: var(--brand-muted);
         cursor: pointer;
         line-height: 1;
         transition: color 0.15s, background 0.15s;
@@ -151,8 +151,8 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         gap: 8px;
         padding: 6px 0;
         font-size: 0.9rem;
-        color: #444 !important;
-        border-bottom: 1px solid #f3f4f6 !important;
+        color: var(--brand-muted) !important;
+        border-bottom: 1px solid var(--brand-border) !important;
         background: transparent !important;
     }
     .custom-order-popup .pop-row:last-child { border-bottom: none !important; }
@@ -171,7 +171,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .custom-order-popup .pop-value {
-        color: #444 !important;
+        color: var(--brand-muted) !important;
         word-break: break-word;
         background: transparent !important;
         border: none !important;
@@ -209,7 +209,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
         margin-top: 4px;
     }
 
-    .pop-product-table thead tr { background: #f9fafb; }
+    .pop-product-table thead tr { background: var(--brand-white); }
 
     .pop-product-table thead th {
         color: var(--brand-black);
@@ -222,7 +222,7 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .pop-product-table tbody tr {
-        border-bottom: 1px solid #e8ecf0;
+        border-bottom: 1px solid var(--brand-border);
         transition: background 0.12s;
     }
     .pop-product-table tbody tr:last-child { border-bottom: none; }
@@ -230,22 +230,22 @@ $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     .pop-product-table tbody td {
         padding: 10px 14px;
-        color: #333;
+        color: var(--brand-black);
         vertical-align: middle;
     }
 
-    .pop-product-table tfoot tr { background: #f9fafb; }
+    .pop-product-table tfoot tr { background: var(--brand-white); }
     .pop-product-table tfoot td {
         padding: 10px 14px;
         font-weight: 700;
         color: var(--brand-black);
         font-size: 0.9rem;
-        border-top: 2px solid #e8ecf0;
+        border-top: 2px solid var(--brand-border);
     }
 
     .pop-empty {
         text-align: center;
-        color: #aaa;
+        color: var(--brand-muted);
         font-style: italic;
         padding: 16px 0;
         font-size: 0.88rem;

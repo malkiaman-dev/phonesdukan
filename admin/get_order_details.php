@@ -187,6 +187,50 @@ if ($deliveryCharges < 0) {
         .odm-section.odm-full { grid-column: auto; }
         .odm-row { grid-template-columns: 96px 1fr; }
     }
+
+    [data-theme="dark"] .odm-modal {
+        background: #1e293b;
+        border-color: #334155;
+        scrollbar-color: #facc15 #1e293b;
+    }
+    [data-theme="dark"] .odm-modal::-webkit-scrollbar-track { background: #1e293b; }
+    [data-theme="dark"] .odm-head { border-bottom-color: #334155; }
+    [data-theme="dark"] .odm-title { color: #e2e8f0; }
+    [data-theme="dark"] .odm-subtitle { color: #94a3b8; }
+    [data-theme="dark"] .custom-close-modal {
+        background: #1e293b;
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+    [data-theme="dark"] .odm-section {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    [data-theme="dark"] .odm-section-title { color: #e2e8f0; }
+    [data-theme="dark"] .odm-row { border-top-color: #334155; }
+    [data-theme="dark"] .odm-label { color: #94a3b8; }
+    [data-theme="dark"] .odm-value,
+    [data-theme="dark"] .odm-value a { color: #e2e8f0; }
+    [data-theme="dark"] .odm-table { border-color: #334155; }
+    [data-theme="dark"] .odm-table th {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-bottom-color: #334155;
+    }
+    [data-theme="dark"] .odm-table td {
+        color: #e2e8f0;
+        border-bottom-color: #334155;
+    }
+    [data-theme="dark"] .odm-summary { border-color: #334155; }
+    [data-theme="dark"] .odm-summary-row {
+        border-top-color: #334155;
+        color: #e2e8f0;
+    }
+    [data-theme="dark"] .odm-summary-row.odm-total { background: rgba(250, 204, 21, 0.14); }
+    [data-theme="dark"] .odm-empty {
+        color: #94a3b8;
+        border-color: #334155;
+    }
 </style>
 
 <div class="custom-order-popup-overlay">

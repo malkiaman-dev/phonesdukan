@@ -111,7 +111,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         /* ===== Page title card ===== */
         .orders-page-header {
-            background: #fff;
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 16px;
             box-shadow: 0 12px 30px rgba(17,17,17,0.06);
@@ -174,7 +174,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             font-size: 0.92rem;
             color: var(--text);
             border: 1px solid var(--border);
-            background: #fff;
+            background: var(--card);
             border-radius: 12px;
             padding: 10px 12px;
             outline: none;
@@ -208,7 +208,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 10px 34px 10px 12px;
-            background: #fff;
+            background: var(--card);
             color: var(--primary);
             font-size: 0.92rem;
             font-weight: 700;
@@ -225,8 +225,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             top: 50%;
             width: 8px;
             height: 8px;
-            border-right: 2px solid #111;
-            border-bottom: 2px solid #111;
+            border-right: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
             transform: translateY(-65%) rotate(45deg);
         }
         .filter-display:hover,
@@ -243,7 +243,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             right: 0;
             margin-top: 6px;
             list-style: none;
-            background: #fff;
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 14px 30px rgba(17,17,17,0.12);
@@ -337,7 +337,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             position: sticky;
             top: 0;
             z-index: 2;
-            background: #f9fafb;
+            background: var(--bg);
             color: var(--primary);
             font-weight: 800;
             font-size: 0.78rem;
@@ -353,7 +353,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: background .15s ease;
         }
         .ord-table tbody tr:nth-child(even){
-            background: #fcfcfd;
+            background: var(--card);
         }
         .ord-table tbody tr:hover{
             background: var(--lightYellow);
@@ -362,7 +362,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 10px 8px;
             border-bottom: 1px solid var(--divider);
             vertical-align: middle;
-            color: #111827;
+            color: var(--primary);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -420,7 +420,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             font-variant-numeric: tabular-nums;
         }
         .ord-phone{
-            color: #111827;
+            color: var(--primary);
             font-variant-numeric: tabular-nums;
             white-space: nowrap;
         }
@@ -431,7 +431,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             align-items:center;
             border-radius: 999px;
             border: 1px solid var(--border);
-            background: #fff;
+            background: var(--card);
             padding: 2px;
             transition: border-color .15s ease, box-shadow .15s ease;
         }
@@ -452,8 +452,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border: 0;
             outline: none;
             background:
-                linear-gradient(45deg, transparent 50%, #111 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
-                linear-gradient(135deg, #111 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
+                linear-gradient(45deg, transparent 50%, var(--primary) 50%) calc(100% - 18px) calc(50% - 3px) / 6px 6px no-repeat,
+                linear-gradient(135deg, var(--primary) 50%, transparent 50%) calc(100% - 12px) calc(50% - 3px) / 6px 6px no-repeat,
                 transparent;
             cursor: pointer;
             border-radius: 999px;
@@ -481,7 +481,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border: 1px solid var(--border);
             border-radius: 999px;
             padding: 8px 30px 8px 12px;
-            background: #fff;
+            background: var(--card);
             color: var(--primary);
             font-size: 0.86rem;
             font-weight: 700;
@@ -497,8 +497,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             top: 50%;
             width: 8px;
             height: 8px;
-            border-right: 2px solid #111;
-            border-bottom: 2px solid #111;
+            border-right: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
             transform: translateY(-65%) rotate(45deg);
         }
         .status-select-wrap.is-open .status-display,
@@ -513,7 +513,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             right: 0;
             margin-top: 6px;
             list-style: none;
-            background: #fff;
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 14px 30px rgba(17,17,17,0.12);
@@ -540,9 +540,10 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background: var(--accent);
         }
         .status-pill[data-status="pending"]{ background: var(--lightYellow); }
-        .status-pill[data-status="processing"]{ background: #f3f4f6; }
+        .status-pill[data-status="processing"]{ background: var(--bg); }
         .status-pill[data-status="completed"]{ background: #ecfdf5; } /* soft green */
-        .status-pill[data-status="cancelled"]{ background: #f8fafc; }
+        .status-pill[data-status="cancelled"]{ background: var(--bg); }
+        [data-theme="dark"] .status-pill[data-status="completed"]{ background: rgba(16, 185, 129, 0.16); }
 
         /* ===== Buttons (black/yellow) ===== */
         .ord-actions{
@@ -561,7 +562,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 9px;
             border: 1px solid transparent;
             background: var(--primary);
-            color: #fff;
+            color: var(--card);
             font-family: inherit;
             font-size: 0.82rem;
             font-weight: 800;
@@ -574,7 +575,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .ord-btn:link,
         .ord-btn:visited,
         .ord-btn:active {
-            color: #ffffff;
+            color: var(--card);
             text-decoration: none;
         }
         .ord-btn:hover{
@@ -637,7 +638,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 0 10px;
             border-radius: 10px;
             border: 1px solid var(--border);
-            background: #fff;
+            background: var(--card);
             color: var(--primary);
             font-weight: 800;
             text-decoration:none;
@@ -680,7 +681,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .confirm-modal {
             width: 100%;
             max-width: 420px;
-            background: #fff;
+            background: var(--card);
             border-radius: 16px;
             border: 1px solid var(--border);
             box-shadow: 0 20px 40px rgba(17,17,17,0.18);
@@ -694,13 +695,13 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 8px 12px;
             font-weight: 700;
             border: 1px solid var(--border);
-            background: #fff;
+            background: var(--card);
             color: var(--primary);
             cursor: pointer;
         }
         .confirm-btn.confirm-yes {
             background: var(--primary);
-            color: #fff;
+            color: var(--card);
             border-color: var(--primary);
         }
         .confirm-btn.confirm-yes:hover {
@@ -759,7 +760,7 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             padding: 18px;
         }
         .modal-content{
-            background: #fff;
+            background: var(--card);
             border-radius: 16px;
             padding: 22px;
             width: 100%;
@@ -792,14 +793,14 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             .ord-table tbody{ display:block; padding: 10px; }
             .ord-table tbody tr{
                 display:block;
-                background: #fff;
+                background: var(--card);
                 border: 1px solid var(--divider);
                 border-radius: 14px;
                 box-shadow: 0 8px 20px rgba(17,17,17,0.05);
                 margin-bottom: 10px;
                 overflow: hidden;
             }
-            .ord-table tbody tr:nth-child(even){ background: #fff; }
+            .ord-table tbody tr:nth-child(even){ background: var(--card); }
             .ord-table tbody td{
                 display:flex;
                 justify-content:space-between;
