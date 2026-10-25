@@ -4,8 +4,6 @@ $metaDescription = 'Shop top-rated mobiles, smartwatches, and accessories at Pho
 $metaRobots      = 'index, follow';
 $metaKeywords    = 'Online Shopping in Pakistan, Buy Mobile in Pakistan, Smartwatch Price in Pakistan, Mobile Accessories, Wireless Earbuds, Tablet Price in Pakistan, Mobiles in Pakistan, Best Mobile Price, Phones Dukan';
 
-// LCP preload — tells the browser to fetch the hero image as early as possible
-$lcpPreload = '/public/assets/images/hero/hero-slide-1.png';
 
 $breadcrumbs = [['name' => 'Home', 'url' => 'https://www.phonesdukan.com/']];
 
@@ -68,59 +66,70 @@ foreach ($latest_posts_raw as $post) {
 
 ?>
 
-<section class="pd-hero" aria-label="Featured offers">
-    <div class="pd-hero-slider" data-pd-hero-slider tabindex="0">
+<section class="pd-hero pd-hero-frames" data-pd-hero-frames aria-label="Featured products">
+    <div class="pd-hero-stage" data-pd-hero-stage data-pd-hero-slider data-scroll-length="0.6" tabindex="0">
         <article class="pd-hero-slide is-active" data-pd-slide aria-hidden="false">
-            <div class="pd-hero-media">
-                <img src="/public/assets/images/hero/hero-slide-1.png" alt="Latest smartphones and accessories at Mobile Island" loading="eager" fetchpriority="high" decoding="sync">
-            </div>
-            <div class="pd-hero-overlay">
-                <div class="pd-hero-content">
-                    <span class="pd-hero-eyebrow">⚡ Flash Deals Live</span>
-                    <h1>Premium <br><span>Gadgets & More</span></h1>
-                    <p>Shop PTA-approved mobiles, wireless earbuds, smart watches, and genuine accessories with fast nationwide delivery and trusted support.</p>
-                    <div class="pd-hero-cta-wrap">
-                        <a href="/shop" class="pd-hero-btn pd-hero-btn-primary">Shop Now</a>
-                        <a href="/mobiles" class="pd-hero-btn pd-hero-btn-secondary">View Mobiles</a>
-                    </div>
+            <canvas class="pd-hero-canvas"
+                data-frame-path="<?= htmlspecialchars(url('public/assets/images/hero/earbuds-frames/frame-'), ENT_QUOTES, 'UTF-8') ?>"
+                data-frame-ext=".webp"
+                data-frame-count="192"
+                data-frame-width="1280"
+                data-frame-height="720"
+                role="img"
+                aria-label="Wireless earbuds disassembling into their components"></canvas>
+            <div class="pd-hero-content" data-pd-hero-copy>
+                <h1>Premium <br><span>Gadgets & More</span></h1>
+                <p>Shop PTA-approved mobiles, wireless earbuds, smart watches, and genuine accessories with fast nationwide delivery and trusted support.</p>
+                <div class="pd-hero-cta-wrap">
+                    <a href="/shop" class="pd-hero-btn pd-hero-btn-primary">Shop Now</a>
+                    <a href="/mobiles" class="pd-hero-btn pd-hero-btn-secondary">View Mobiles</a>
                 </div>
             </div>
         </article>
 
         <article class="pd-hero-slide" data-pd-slide aria-hidden="true">
-            <div class="pd-hero-media">
-                <img src="/public/assets/images/hero/hero-slide-2.png" alt="Hot discounts on wireless earbuds and smart gadgets" loading="lazy">
-            </div>
-            <div class="pd-hero-overlay">
-                <div class="pd-hero-content">
-                    <span class="pd-hero-eyebrow">🚀 New Arrivals</span>
-                    <h2>Authentic Tech, <br>Fast Delivery,<br><span>Trusted Warranty</span></h2>
-                    <p>Get genuine mobile phones and accessories with secure ordering, replacement support, and reliable delivery across Pakistan.</p>
-                    <div class="pd-hero-cta-wrap">
-                        <a href="/smart-watches" class="pd-hero-btn pd-hero-btn-primary">Shop Watches</a>
-                        <a href="/wireless-earbuds" class="pd-hero-btn pd-hero-btn-secondary">Shop Earbuds</a>
-                    </div>
+            <canvas class="pd-hero-canvas"
+                data-frame-path="<?= htmlspecialchars(url('public/assets/images/hero/headphones-frames/frame-'), ENT_QUOTES, 'UTF-8') ?>"
+                data-frame-ext=".webp"
+                data-frame-count="240"
+                data-frame-width="1280"
+                data-frame-height="720"
+                role="img"
+                aria-label="Wireless headphones in an exploded view of their components"></canvas>
+            <div class="pd-hero-content" data-pd-hero-copy>
+                <h2>Authentic Tech, <br>Fast Delivery,<br><span>Trusted Warranty</span></h2>
+                <p>Get genuine mobile phones and accessories with secure ordering, replacement support, and reliable delivery across Pakistan.</p>
+                <div class="pd-hero-cta-wrap">
+                    <a href="/headphones" class="pd-hero-btn pd-hero-btn-primary">Shop Headphones</a>
+                    <a href="/wireless-earbuds" class="pd-hero-btn pd-hero-btn-secondary">Shop Earbuds</a>
                 </div>
             </div>
         </article>
 
         <article class="pd-hero-slide" data-pd-slide aria-hidden="true">
-            <div class="pd-hero-media">
-                <img src="/public/assets/images/hero/hero-slide-3.png" alt="Fast delivery and warranty by Mobile Island" loading="lazy">
-            </div>
-            <div class="pd-hero-overlay">
-                <div class="pd-hero-content">
-                    <span class="pd-hero-eyebrow">🛡️ Trusted Nationwide</span>
-                    <h2>Upgrade Your Everyday <br><span>Tech Experience</span></h2>
-                    <p>Discover premium earbuds, smart watches, chargers, power banks, and mobile accessories built for modern lifestyles.</p>
-                    <div class="pd-hero-cta-wrap">
-                        <a href="/contact-us/" class="pd-hero-btn pd-hero-btn-primary">Contact Us</a>
-                        <a href="/return-policy/" class="pd-hero-btn pd-hero-btn-secondary">Return Policy</a>
-                    </div>
+            <canvas class="pd-hero-canvas"
+                data-frame-path="<?= htmlspecialchars(url('public/assets/images/hero/smartphone-frames/frame-'), ENT_QUOTES, 'UTF-8') ?>"
+                data-frame-ext=".webp"
+                data-frame-count="192"
+                data-frame-width="1280"
+                data-frame-height="720"
+                role="img"
+                aria-label="Smartphones turning to show their camera and design"></canvas>
+            <div class="pd-hero-content" data-pd-hero-copy>
+                <h2>Upgrade Your Everyday <br><span>Tech Experience</span></h2>
+                <p>Discover premium earbuds, smart watches, chargers, power banks, and mobile accessories built for modern lifestyles.</p>
+                <div class="pd-hero-cta-wrap">
+                    <a href="/mobiles" class="pd-hero-btn pd-hero-btn-primary">Shop Mobiles</a>
+                    <a href="/contact-us/" class="pd-hero-btn pd-hero-btn-secondary">Contact Us</a>
                 </div>
             </div>
         </article>
 
+        <div class="pd-hero-dots" role="tablist" aria-label="Hero slides">
+            <button type="button" class="pd-hero-dot is-active" data-pd-hero-dot="0" role="tab" aria-selected="true" aria-label="Slide 1: Wireless earbuds"></button>
+            <button type="button" class="pd-hero-dot" data-pd-hero-dot="1" role="tab" aria-selected="false" aria-label="Slide 2: Headphones"></button>
+            <button type="button" class="pd-hero-dot" data-pd-hero-dot="2" role="tab" aria-selected="false" aria-label="Slide 3: Smartphones"></button>
+        </div>
     </div>
 </section>
 
@@ -992,4 +1001,7 @@ foreach ($latest_posts_raw as $post) {
     </div>
 </section>
 <script src="<?= htmlspecialchars(assetUrl('public/assets/js/pd-carousel.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="<?= htmlspecialchars(assetUrl('public/assets/js/frontend/hero-frames.js'), ENT_QUOTES, 'UTF-8') ?>" defer></script>
 <?php require_once dirname(__DIR__, 2) . '/includes/footer.php'; ?>

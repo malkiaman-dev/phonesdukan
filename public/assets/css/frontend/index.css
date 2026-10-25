@@ -8,6 +8,78 @@ img { vertical-align: middle; }
   line-height: 0;
 }
 
+/* Scroll-driven frame sequence hero (canvas).
+   The section is tall (one screen + scroll distance); the stage sticks to the
+   top of #pd-page-scroll while the frames play, so wheel / two-finger trackpad /
+   touch scrolling keep working over it. --pd-hero-h is set by hero-frames.js. */
+.pd-hero-frames {
+  position: relative;
+  width: 100%;
+  /* The stage + the scroll distance that plays the full sequence
+     (--pd-hero-scroll, in screen heights, from data-scroll-length on the canvas). */
+  height: calc(var(--pd-hero-h, 100vh) + var(--pd-hero-vh, 100vh) * var(--pd-hero-scroll, 0.6));
+  background: #0a0c0e;
+}
+
+.pd-hero-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: var(--pd-hero-h, 100vh);
+  overflow: hidden;
+  background: #0a0c0e;
+}
+
+.pd-hero-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Every slide fills the stage; the slider classes only move them sideways. */
+.pd-hero-frames .pd-hero-slide,
+.pd-hero-frames .pd-hero-slide.is-active {
+  position: absolute;
+  inset: 0;
+}
+
+.pd-hero-frames .pd-hero-content {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: min(38vw, 540px);
+  max-width: none;
+  min-width: 0;
+  padding: 0 0 0 clamp(20px, 4vw, 64px);
+  line-height: 1.4;
+  z-index: 1;
+}
+
+.pd-hero-frames .pd-hero-content h1,
+.pd-hero-frames .pd-hero-content h2 {
+  font-size: clamp(28px, 3vw, 52px);
+}
+
+/* Portrait: headline sits above the animation, full frame drawn below it. */
+@media (orientation: portrait) {
+  .pd-hero-frames .pd-hero-content {
+    bottom: auto;
+    width: 100%;
+    padding: 24px 20px 0;
+  }
+
+  .pd-hero-frames .pd-hero-content h1,
+  .pd-hero-frames .pd-hero-content h2 {
+    font-size: clamp(26px, 7vw, 40px);
+    line-height: 1.1;
+  }
+}
+
 .pd-hero-slider {
   position: relative;
   overflow: hidden;

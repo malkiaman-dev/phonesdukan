@@ -86,7 +86,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const queueNextAutoplay = () => {
             stopAutoplay();
             autoplayTimer = setTimeout(() => {
-                goNext();
+                // Hero frame animation in progress (set by hero-frames.js): don't switch slides mid-scroll.
+                if (!heroSlider.hasAttribute("data-pd-hero-hold")) goNext();
                 queueNextAutoplay();
             }, autoplayDelay);
         };
